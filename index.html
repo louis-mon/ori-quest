@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1a1714" />
+    <title>Ori-Quest</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="game"></div>
+      <!-- #stage est recalé en JS sur les dimensions exactes du canvas Phaser,
+           pour que la 3D et l'UI restent dans le cadre du jeu et non sur les
+           bandes noires du letterbox. -->
+      <div id="stage">
+        <canvas id="origami-canvas"></canvas>
+        <div id="ui"></div>
+      </div>
+      <!-- Le jeu est conçu en paysage. L'option « orientation » d'itch.io n'est
+           qu'une suggestion au navigateur : sur téléphone en portrait, c'est
+           cette invite qui fait le travail. Purement CSS, aucun JS impliqué. -->
+      <div id="rotate-hint" aria-hidden="true">
+        <div class="rotate-hint__icon"></div>
+        <p>Tourne ton téléphone</p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

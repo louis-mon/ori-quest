@@ -1,0 +1,954 @@
+:root {
+  --paper: #f2ece1;
+  --ink: #1a1714;
+  --accent: #c4553d;
+  --shadow: rgba(0, 0, 0, 0.45);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Convention ORIPA, dans la palette du jeu : montagne = accent, vallée = bleu. */
+  --fold-valley: #4a6fa5;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #100e0c;
+  color: var(--paper);
+  font-family: ui-rounded, 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  /* Empêche le pull-to-refresh et le zoom à deux doigts pendant le jeu. */
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+/*
+ * Rien ne se sélectionne dans le jeu. `user-select` sur `body` seul ne suffit
+ * pas partout : il s'hérite, mais plusieurs navigateurs le réinitialisent sur
+ * les champs et les zones éditables, et surtout iOS garde son appui long — la
+ * loupe et le menu « Copier » apparaissent alors par-dessus une scène, en plein
+ * point & click où l'appui long n'a aucun sens. D'où le sélecteur universel et
+ * `-webkit-touch-callout`.
+ */
+*,
+*::before,
+*::after {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+#game,
+#game canvas {
+  display: block;
+}
+
+/* Calé sur le canvas Phaser par syncStage() : sans ça, l'UI dériverait sur les
+   bandes du letterbox dès que le ratio de l'écran s'écarte du 16:9. */
+#stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  /* Renseigné par syncStage() ; sert d'unité à toute l'UI. */
+  --ui-scale: 1;
+  --ui-gap: calc(8px * var(--ui-scale));
+}
+
+/* La couche origami se superpose au canvas Phaser. Elle ne capte jamais le
+   pointeur : toute l'interaction passe par Phaser et l'overlay DOM. */
+#origami-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease;
+  /* Le voile. Le contexte WebGL est transparent : cette couleur de fond est ce
+     qu'on voit partout où le modèle n'est pas, et elle apparaît et disparaît
+     avec lui — un seul élément, aucune synchronisation à tenir.
+
+     Assez sombre pour que le pliage se détache du décor, assez clair pour qu'on
+     reconnaisse la scène derrière : ce n'est pas un écran de chargement, le
+     joueur doit garder le fil de l'endroit où il est. */
+  background: rgba(16, 14, 12, 0.5);
+}
+
+#origami-canvas.is-visible {
+  opacity: 1;
+}
+
+#ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#ui > * {
+  pointer-events: auto;
+}
+
+/* ---------- Menu de verbes ---------- */
+
+.verb-menu {
+  position: absolute;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(26, 23, 20, 0.92);
+  box-shadow: 0 8px 24px var(--shadow);
+  transform: translate(-50%, -100%);
+  animation: pop 140ms ease-out;
+}
+
+.verb-menu[hidden] {
+  display: none;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -95%) scale(0.92);
+  }
+}
+
+.verb-menu button {
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.verb-menu button:active {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* ---------- Boîte de dialogue ---------- */
+
+.dialogue {
+  position: absolute;
+  left: 50%;
+  bottom: calc(30px * var(--ui-scale) + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(680px, calc(100% - 32px));
+  padding: calc(18px * var(--ui-scale)) calc(20px * var(--ui-scale));
+  border-radius: 16px;
+  background: rgba(26, 23, 20, 0.94);
+  box-shadow: 0 10px 30px var(--shadow);
+  backdrop-filter: blur(6px);
+  /* Vignette à gauche, texte à droite : en paysage sur téléphone, la hauteur
+     est la ressource rare — un en-tête sur sa propre ligne coûterait une ligne
+     de texte. */
+  display: flex;
+  align-items: flex-start;
+  gap: calc(12px * var(--ui-scale));
+}
+
+.dialogue[hidden] {
+  display: none;
+}
+
+/* Le graphisme des personnages est détouré sur fond transparent : `contain` sur
+   un carré à peine teinté, plutôt qu'un `cover` qui rognerait les oreilles. */
+.dialogue__portrait {
+  flex: none;
+  width: calc(56px * var(--ui-scale));
+  height: calc(56px * var(--ui-scale));
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(242, 236, 225, 0.08);
+  object-fit: contain;
+}
+
+.dialogue__portrait[hidden] {
+  display: none;
+}
+
+.dialogue__bulle {
+  /* `min-width: 0` : sans lui, un mot long empêcherait l'élément flex de
+     rétrécir et déborderait de la boîte. */
+  flex: 1;
+  min-width: 0;
+}
+
+.dialogue__nom {
+  margin: 0 0 calc(4px * var(--ui-scale));
+  color: var(--accent);
+  font-size: calc(clamp(13px, 2vw, 15px) * var(--ui-scale));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dialogue__nom[hidden] {
+  display: none;
+}
+
+.dialogue__text {
+  margin: 0;
+  font-size: calc(clamp(16px, 2.6vw, 19px) * var(--ui-scale));
+  line-height: 1.5;
+}
+
+/* Narration : ni nom ni vignette. L'italique dit « le jeu décrit » plutôt que
+   « quelqu'un parle », et se voit avant d'être lu. */
+.dialogue--narration .dialogue__text {
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.dialogue__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.dialogue__choices:empty {
+  display: none;
+}
+
+.dialogue__choices button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgba(242, 236, 225, 0.25);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dialogue__choices button:active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Un élément de la rangée, et non un rond posé en absolu dans le coin : en
+   absolu il se superposait à la dernière ligne de texte dès qu'elle allait
+   jusqu'au bord, et le dernier mot passait sous la pastille. Dans le flux, le
+   texte s'arrête forcément avant lui. */
+.dialogue__next {
+  flex: none;
+  align-self: flex-end;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--paper);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+.dialogue__next[hidden] {
+  display: none;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ---------- Inventaire ---------- */
+
+/* Ancré à gauche plutôt qu'au centre : le haut-centre est occupé par le titre
+   de scène, et sur un écran étroit les deux se chevauchent. */
+.inventory {
+  /* En colonne, sur le bord gauche : en paysage la hauteur est la ressource
+     rare, une barre horizontale mangerait la ligne d'horizon du décor.
+
+     Ancrée en HAUT et non centrée : centrée, elle grandissait vers le milieu du
+     bord gauche, c'est-à-dire pile sur la flèche de sortie, qu'elle finissait
+     par recouvrir. En haut elle ne descend que si l'inventaire s'allonge, et le
+     coin haut-gauche est le seul des quatre qui ne serve à rien d'autre. */
+  position: absolute;
+  top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));
+  left: calc(var(--ui-gap) + env(safe-area-inset-left, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap);
+  padding: calc(6px * var(--ui-scale));
+  border-radius: 12px;
+  background: rgba(26, 23, 20, 0.7);
+}
+
+.inventory:empty {
+  display: none;
+}
+
+.inventory__item {
+  /* La cible tactile reste à 44px réels quelle que soit l'échelle : c'est un
+     seuil ergonomique en pixels physiques, pas une proportion du décor. */
+  min-width: 44px;
+  min-height: 44px;
+  width: calc(96px * var(--ui-scale));
+  display: grid;
+  place-items: center;
+  gap: calc(3px * var(--ui-scale));
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(242, 236, 225, 0.12);
+  color: var(--paper);
+  font-family: inherit;
+  font-size: calc(13px * var(--ui-scale));
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* La vignette : le modèle plié lui-même (voir ui/vignettes.ts). Elle porte
+   l'essentiel de la reconnaissance — on repère une forme bien plus vite qu'on
+   ne lit une étiquette — d'où sa taille par rapport au nom, qui ne fait que
+   confirmer. `object-fit: contain` parce que les rendus n'ont pas tous les
+   mêmes proportions : la hache est haute, le pont large. */
+.inventory__image {
+  display: block;
+  width: 100%;
+  /* Volontairement contenue : la colonne s'allonge d'une case par objet, et
+     elle partage le bord gauche avec la flèche de sortie. Une vignette plus
+     grande était plus belle et recouvrait le passage. */
+  max-height: calc(42px * var(--ui-scale));
+  object-fit: contain;
+  /* Le rendu est sur fond transparent et le décor derrière peut être clair :
+     une ombre portée détache la silhouette dans les deux cas. */
+  filter: drop-shadow(0 1px 2px rgba(16, 14, 12, 0.55));
+}
+
+.inventory__image[hidden] {
+  display: none;
+}
+
+.inventory__nom {
+  display: block;
+  /* Sous la vignette, le nom ne fait plus que confirmer : il peut rétrécir. */
+  font-size: calc(11px * var(--ui-scale));
+  font-weight: 500;
+}
+
+/* Une idée n'est pas un objet : elle se pense, elle ne se pose pas. D'où la
+   bulle — coins arrondis à fond et contour dessiné — là où un objet garde la
+   case rectangulaire. Voir src/game/systems/objets.ts. */
+.inventory__item--idee {
+  border-radius: 999px;
+  border-color: rgba(240, 201, 135, 0.55);
+  background: rgba(240, 201, 135, 0.1);
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* ---------- Menu ---------- */
+
+/* Fenêtre des points d'étape : même boîte que la confirmation de remise à zéro,
+   avec une liste qui défile si le chapitre est long. */
+.menu__etapes {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 14, 12, 0.72);
+}
+
+.menu__etapes[hidden] {
+  display: none;
+}
+
+.menu__etapes-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 60vh;
+  margin: calc(8px * var(--ui-scale)) 0;
+  overflow-y: auto;
+}
+
+/* Intertitre du sélecteur de points d'étape (développement seulement). */
+.menu__label {
+  margin: calc(6px * var(--ui-scale)) 0 calc(2px * var(--ui-scale));
+  padding: 0 calc(10px * var(--ui-scale));
+  opacity: 0.5;
+  font-size: calc(11px * var(--ui-scale));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* `.menu` reste non positionné exprès : ses enfants se placent alors par
+   rapport à #ui, ce qui permet à la confirmation de couvrir tout le cadre du
+   jeu plutôt que le seul coin du bouton. */
+.menu__button {
+  position: absolute;
+  top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));
+  right: calc(var(--ui-gap) + env(safe-area-inset-right, 0px));
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(26, 23, 20, 0.7);
+  cursor: pointer;
+}
+
+.menu__button span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--paper);
+}
+
+.menu__button[aria-expanded='true'] {
+  background: var(--accent);
+}
+
+.menu__panel {
+  position: absolute;
+  top: calc(var(--ui-gap) + 50px + env(safe-area-inset-top, 0px));
+  right: calc(var(--ui-gap) + env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(26, 23, 20, 0.94);
+  box-shadow: 0 8px 24px var(--shadow);
+  animation: pop-down 140ms ease-out;
+  /* Le sélecteur de points d'étape allonge le panneau en développement : il
+     doit défiler plutôt que de déborder sous le cadre du jeu. */
+  max-height: calc(100% - 80px);
+  overflow-y: auto;
+}
+
+.menu__panel[hidden] {
+  display: none;
+}
+
+@keyframes pop-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.menu__item {
+  min-height: 44px;
+  min-width: 160px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: calc(15px * var(--ui-scale));
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.menu__item:active {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.menu__item--danger {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.menu__item--danger:active {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* ---------- Confirmation de remise à zéro ---------- */
+
+.menu__confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(16, 14, 12, 0.82);
+}
+
+.menu__confirm[hidden] {
+  display: none;
+}
+
+.menu__confirm-box {
+  width: min(420px, 100%);
+  padding: calc(20px * var(--ui-scale));
+  border-radius: 16px;
+  background: rgba(26, 23, 20, 0.98);
+  box-shadow: 0 12px 32px var(--shadow);
+  text-align: center;
+}
+
+.menu__confirm-text {
+  margin: 0 0 16px;
+  font-size: calc(16px * var(--ui-scale));
+  line-height: 1.5;
+}
+
+.menu__confirm-text strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--accent);
+}
+
+.menu__confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.menu__confirm-actions .menu__item {
+  min-width: 130px;
+}
+
+/* ---------- Invite de rotation ---------- */
+
+#rotate-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: #100e0c;
+  color: var(--paper);
+  text-align: center;
+}
+
+/* Seulement sur les écrans réellement étroits : une fenêtre de bureau au ratio
+   portrait n'a pas besoin qu'on lui demande de pivoter. */
+@media (orientation: portrait) and (max-width: 900px) {
+  #rotate-hint {
+    display: flex;
+  }
+}
+
+/* Dessiné en CSS plutôt qu'avec un glyphe : les caractères de formes type ▭ ne
+   sont pas garantis dans les polices système et tombent en carré tofu. */
+.rotate-hint__icon {
+  width: 54px;
+  height: 92px;
+  border: 3px solid var(--accent);
+  border-radius: 10px;
+  animation: tip 2s ease-in-out infinite;
+}
+
+.rotate-hint p {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+/* Le geste va du **portrait vers le paysage**, dans ce sens-là : le joueur qui
+   voit cette invite tient déjà son téléphone debout, et ce qu'on lui demande est
+   de le coucher. L'animation partait de la position couchée et y revenait, donc
+   elle montrait exactement l'inverse de ce qu'il fallait faire. La pose
+   d'arrivée est tenue plus longtemps que celle de départ : c'est elle, la
+   consigne. */
+@keyframes tip {
+  0%,
+  15% {
+    transform: rotate(0deg);
+  }
+  45%,
+  85% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* ---------- Énigme : reconstitution de crease pattern ---------- */
+
+/* Sous .menu__confirm (z-index 5) : la remise à zéro doit rester atteignable
+   même énigme ouverte. */
+.puzzle {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  /* `stretch` et non `center` : le plateau se dimensionne en pourcentage de la
+     hauteur du panneau. Un panneau centré prend la hauteur de son contenu, et
+     le `height: 70%` du plateau se résout alors à zéro — plateau invisible. */
+  align-items: stretch;
+  gap: calc(16px * var(--ui-scale));
+  padding: calc(14px * var(--ui-scale));
+  padding-bottom: calc(14px * var(--ui-scale) + var(--safe-bottom));
+  background: rgba(16, 14, 12, 0.92);
+}
+
+.puzzle__panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10px * var(--ui-scale));
+}
+
+.puzzle__title {
+  margin: 0;
+  font-size: calc(17px * var(--ui-scale));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}
+
+/* La grille d'ancrage est dessinée en dégradés répétés plutôt qu'en cellules :
+   36 div inertes ne serviraient qu'à tracer des traits, et les pièces sont
+   positionnées en pourcentage, pas placées dans des cases. */
+.puzzle__board {
+  position: relative;
+  height: 70%;
+  max-width: 100%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background-color: rgba(242, 236, 225, 0.06);
+  background-image:
+    linear-gradient(to right, rgba(242, 236, 225, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(242, 236, 225, 0.16) 1px, transparent 1px);
+  background-size: calc(100% / var(--grid)) calc(100% / var(--grid));
+  box-shadow: inset 0 0 0 1px rgba(242, 236, 225, 0.16);
+}
+
+.puzzle__board > .puzzle__piece {
+  position: absolute;
+  width: calc(100% / var(--grid) * var(--w));
+  height: calc(100% / var(--grid) * var(--h));
+  border-radius: 2px;
+}
+
+/* Largeur dictée par la forme des pièces : `--tray-width` est calculé au
+   montage pour qu'une pièce large et plate reste attrapable au doigt. Le
+   plancher garde les boutons lisibles quand les pièces sont petites. */
+.puzzle__side {
+  width: max(var(--tray-width, 96px), calc(96px * var(--ui-scale)));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: calc(12px * var(--ui-scale));
+}
+
+/* Le bac ne défile pas : au-delà de ~6 pièces la colonne déborderait en
+   paysage sur téléphone. Il faudra alors la passer sur deux colonnes plutôt
+   qu'ajouter une barre de défilement, qui entrerait en conflit avec le
+   glisser. */
+/* Une ou plusieurs colonnes selon ce que la découpe impose : voir layoutTray(). */
+.puzzle__tray {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8px * var(--ui-scale));
+}
+
+.puzzle__tray-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8px * var(--ui-scale));
+}
+
+/* `--w` et `--h` portent le rectangle de la pièce, en cellules de la grille :
+   ils donnent sa forme dans le bac comme sa taille sur le plateau. */
+.puzzle__piece {
+  aspect-ratio: var(--w) / var(--h);
+  border-radius: 4px;
+  background: var(--paper);
+  box-shadow: 0 2px 6px var(--shadow);
+  cursor: grab;
+  /* Indispensable au tactile : sans ça le navigateur interprète le glisser
+     comme un défilement et ne délivre jamais les pointermove. */
+  touch-action: none;
+}
+
+/* Dans le bac, la taille est posée en pixels par layoutTray() : toutes les
+   pièces partagent une même échelle, donc leurs proportions relatives. */
+.puzzle__tray > .puzzle__piece {
+  flex: none;
+}
+
+/* Pendant le glisser, le positionnement est piloté par le script
+   (position: fixed, centré sous le doigt) — ici on ne fait que le signaler. */
+.puzzle__piece.is-dragging {
+  z-index: 20;
+  cursor: grabbing;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+}
+
+.puzzle__piece svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* `preserveAspectRatio="none"` côté SVG : la fenêtre découpée dans le motif a
+   exactement les proportions de la pièce, donc l'étirement est nul — mais sans
+   lui le SVG se recentrerait avec des marges. */
+
+/* Les plis reprennent la convention ORIPA (montagne / vallée / bord / facette)
+   mais dans la palette du jeu. `non-scaling-stroke` garde une épaisseur
+   constante à l'écran : sans lui, la même pièce aurait des traits deux fois
+   plus fins dans le bac que sur le plateau. */
+.puzzle__piece svg :is(.mo, .va, .bo, .fl) {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Les bords du carré ne sont PAS rendus : ils diraient au joueur quelle pièce
+   vient d'une rive, ce qui rendrait le placement trop évident. Seuls les plis
+   se voient. Conséquence à connaître : plus rien ne fixe l'abscisse d'une
+   pièce, donc l'unicité de la solution doit venir de la découpe et du motif —
+   voir la note dans puzzles.ts. */
+.puzzle__piece svg .bo {
+  display: none;
+}
+
+.puzzle__piece svg .mo {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.puzzle__piece svg .va {
+  stroke: var(--fold-valley);
+  stroke-width: 2;
+}
+
+.puzzle__piece svg .fl {
+  stroke: rgba(26, 23, 20, 0.3);
+  stroke-width: 1;
+}
+
+.puzzle__board.is-wrong {
+  animation: puzzle-wrong 900ms ease;
+}
+
+@keyframes puzzle-wrong {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(196, 85, 61, 0);
+  }
+  20%,
+  60% {
+    box-shadow: 0 0 0 4px var(--accent);
+  }
+  40%,
+  80% {
+    box-shadow: 0 0 0 0 rgba(196, 85, 61, 0.25);
+  }
+}
+
+.puzzle__board.is-solved {
+  box-shadow: 0 0 0 3px var(--paper);
+  transition: box-shadow 300ms ease;
+}
+
+/* ---- Le pliage terminé, et la légende des plis ---- */
+
+/* Fond papier : le rendu ORIPA de la forme pliée est fait de traits sombres et
+   d'aplats très peu opaques, pensés pour du blanc. Sur le fond sombre de
+   l'énigme, sans ce calque, il serait quasi invisible. */
+.puzzle__goal {
+  position: absolute;
+  top: calc(10px * var(--ui-scale));
+  left: calc(10px * var(--ui-scale));
+  z-index: 1;
+  width: max(56px, calc(86px * var(--ui-scale)));
+  aspect-ratio: 1;
+  padding: calc(4px * var(--ui-scale));
+  border: 1px solid rgba(242, 236, 225, 0.3);
+  border-radius: 8px;
+  background: var(--paper);
+  cursor: zoom-in;
+}
+
+.puzzle__goal:active {
+  border-color: var(--accent);
+}
+
+.puzzle__goal-image,
+.puzzle__zoom-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Centrage en flex plutôt qu'en grid : avec `place-items` et une hauteur en
+   pourcentage, l'image se retrouvait poussée hors du cadre. Ici les bornes
+   `max-*` suffisent, la taille reste dictée par le conteneur. */
+.puzzle__zoom {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(16px * var(--ui-scale));
+  background: rgba(16, 14, 12, 0.9);
+  cursor: zoom-out;
+}
+
+.puzzle__zoom[hidden] {
+  display: none;
+}
+
+.puzzle__zoom-image {
+  width: auto;
+  height: auto;
+  max-width: min(100%, 78vh);
+  max-height: 100%;
+  aspect-ratio: 1;
+  padding: calc(10px * var(--ui-scale));
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+/* Construite à partir des plis réellement présents dans le motif : le pont n'a
+   que des vallées, la ligne « montagne » n'est donc pas affichée. */
+.puzzle__legend {
+  display: flex;
+  gap: calc(14px * var(--ui-scale));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: calc(12px * var(--ui-scale));
+  opacity: 0.75;
+}
+
+.puzzle__legend li {
+  display: flex;
+  align-items: center;
+  gap: calc(6px * var(--ui-scale));
+}
+
+.puzzle__legend-line {
+  display: block;
+  width: calc(22px * var(--ui-scale));
+  height: 2px;
+  border-radius: 1px;
+}
+
+.puzzle__legend-line--va {
+  background: var(--fold-valley);
+}
+
+.puzzle__legend-line--mo {
+  background: var(--accent);
+}
+
+.puzzle__actions {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8px * var(--ui-scale));
+}
+
+.puzzle__check,
+.puzzle__quit {
+  min-height: 44px;
+  padding: 0 calc(10px * var(--ui-scale));
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  font-size: calc(14px * var(--ui-scale));
+  cursor: pointer;
+}
+
+.puzzle__check {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.puzzle__check:active:not(:disabled) {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.puzzle__check:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.puzzle__quit {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.puzzle__quit:active {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* ---------- Étiquette de survol / focus ---------- */
+
+.caption {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 180px);
+  transform: translateX(-50%);
+  /* Sert aussi aux descriptions d'inventaire, qui font une phrase et non deux
+     mots : sans largeur maximale, la pastille traverserait tout le cadre. */
+  max-width: min(70%, 560px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(26, 23, 20, 0.8);
+  font-size: 15px;
+  text-align: center;
+  text-wrap: balance;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.caption.is-visible {
+  opacity: 1;
+}

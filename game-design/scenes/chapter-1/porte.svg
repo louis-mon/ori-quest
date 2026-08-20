@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Plan de scene Ori-Quest. Se dessine dans Figma, Inkscape ou Penpot.
+
+  Trois calques : « reperes » (verrouille : grille, cadre, legende), « croquis »
+  (dessin libre, ignore a l'import) et « plan » (les boites nommees).
+
+  Un groupe par element ; le NOM du groupe porte son role (hs_, exit_, dec_).
+  Chaque boite est groupee avec son etiquette : deplacer l'une deplace l'autre.
+  Pour redimensionner le rectangle seul, double-clic pour entrer dans le groupe.
+
+  Tout ce qui n'est pas nomme hs_/exit_/dec_ est ignore a l'import.
+
+      npm run scenes
+-->
+
+<svg
+   width="1280"
+   height="720"
+   viewBox="0 0 1280 720"
+   version="1.1"
+   id="svg28"
+   sodipodi:docname="porte.svg"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs28" />
+  <sodipodi:namedview
+     id="namedview28"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.67946753"
+     inkscape:cx="493.03313"
+     inkscape:cy="406.9363"
+     inkscape:window-width="1792"
+     inkscape:window-height="982"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="plan" />
+  <g
+     id="reperes"
+     inkscape:label="reperes"
+     inkscape:groupmode="layer"
+     sodipodi:insensitive="true">
+    <rect
+       x="0"
+       y="0"
+       width="1280"
+       height="720"
+       fill="#100e0c"
+       id="rect1" />
+    <line
+       x1="80"
+       y1="0"
+       x2="80"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line1" />
+    <line
+       x1="160"
+       y1="0"
+       x2="160"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line2" />
+    <line
+       x1="240"
+       y1="0"
+       x2="240"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line3" />
+    <line
+       x1="320"
+       y1="0"
+       x2="320"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.14"
+       id="line4" />
+    <line
+       x1="400"
+       y1="0"
+       x2="400"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line5" />
+    <line
+       x1="480"
+       y1="0"
+       x2="480"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line6" />
+    <line
+       x1="560"
+       y1="0"
+       x2="560"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line7" />
+    <line
+       x1="640"
+       y1="0"
+       x2="640"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.14"
+       id="line8" />
+    <line
+       x1="720"
+       y1="0"
+       x2="720"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line9" />
+    <line
+       x1="800"
+       y1="0"
+       x2="800"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line10" />
+    <line
+       x1="880"
+       y1="0"
+       x2="880"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line11" />
+    <line
+       x1="960"
+       y1="0"
+       x2="960"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.14"
+       id="line12" />
+    <line
+       x1="1040"
+       y1="0"
+       x2="1040"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line13" />
+    <line
+       x1="1120"
+       y1="0"
+       x2="1120"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line14" />
+    <line
+       x1="1200"
+       y1="0"
+       x2="1200"
+       y2="720"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line15" />
+    <line
+       x1="0"
+       y1="80"
+       x2="1280"
+       y2="80"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line16" />
+    <line
+       x1="0"
+       y1="160"
+       x2="1280"
+       y2="160"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line17" />
+    <line
+       x1="0"
+       y1="240"
+       x2="1280"
+       y2="240"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line18" />
+    <line
+       x1="0"
+       y1="320"
+       x2="1280"
+       y2="320"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.14"
+       id="line19" />
+    <line
+       x1="0"
+       y1="400"
+       x2="1280"
+       y2="400"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line20" />
+    <line
+       x1="0"
+       y1="480"
+       x2="1280"
+       y2="480"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line21" />
+    <line
+       x1="0"
+       y1="560"
+       x2="1280"
+       y2="560"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.05"
+       id="line22" />
+    <line
+       x1="0"
+       y1="640"
+       x2="1280"
+       y2="640"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.14"
+       id="line23" />
+    <rect
+       x="0.5"
+       y="0.5"
+       width="1279"
+       height="719"
+       fill="none"
+       stroke="#f2ece1"
+       stroke-width="1"
+       opacity="0.3"
+       id="rect23" />
+    <rect
+       x="60"
+       y="24"
+       width="1160"
+       height="672"
+       fill="none"
+       stroke="#f2ece1"
+       stroke-width="1"
+       stroke-dasharray="6 8"
+       opacity="0.18"
+       id="rect24" />
+    <text
+       x="66"
+       y="46"
+       font-family="monospace"
+       font-size="13"
+       fill="#f2ece1"
+       opacity="0.55"
+       id="text24">chapitre 1 — la porte</text>
+    <text
+       x="66"
+       y="66"
+       font-family="monospace"
+       font-size="11"
+       fill="#f2ece1"
+       opacity="0.35"
+       id="text25">1280x720 · grille 80 px · pointille = zone sure (encoches)</text>
+    <text
+       x="66"
+       y="660"
+       font-family="monospace"
+       font-size="12"
+       fill="#c4553d"
+       opacity="0.8"
+       id="text26">hs_&lt;id&gt;   a examiner</text>
+    <text
+       x="66"
+       y="678"
+       font-family="monospace"
+       font-size="12"
+       fill="#f0c987"
+       opacity="0.8"
+       id="text27">exit_&lt;id&gt; passage vers une autre scene</text>
+    <text
+       x="66"
+       y="696"
+       font-family="monospace"
+       font-size="12"
+       fill="#f2ece1"
+       opacity="0.6"
+       id="text28">dec_&lt;id&gt;  repere de decor (non cliquable)</text>
+  </g>
+  <g
+     id="croquis"
+     inkscape:label="croquis"
+     inkscape:groupmode="layer">
+    <!-- Dessine ici l'allure de la scene : lignes, silhouettes, ce que tu veux.
+         Rien de ce calque n'entre dans le jeu. -->
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0000"
+       d="m 680.23108,37.155479 c 3.41403,16.676143 10.93034,21.180319 21.43586,35.726423 6.55568,9.077107 12.01636,19.16165 20.00679,27.152078 8.93917,8.93917 19.47819,16.05009 30.0102,22.86491 8.65183,5.59825 16.69355,12.18248 25.72302,17.14869 25.40813,13.97447 53.60248,18.20095 81.45624,24.29396 37.78719,8.26595 75.10515,18.80305 112.8955,27.15208 93.81571,20.72672 189.40721,40.0136 285.81141,40.0136 25.1722,0 39.9914,0.53867 67.1656,-2.85812 6.5684,-0.82104 27.4829,-6.15619 37.1555,-8.57434"
+       id="path31" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0000"
+       d="m 623.06881,337.25743 c 22.61191,26.94837 54.09997,43.03046 81.45624,64.30756 12.27659,9.54846 23.39895,20.52752 35.72642,30.01019 2.91087,2.23913 31.75353,21.93966 35.72642,24.29397 6.96664,4.12837 14.5138,7.22978 21.43586,11.43245 27.58398,16.74742 48.69775,35.97519 81.45624,42.87171 17.51866,3.68814 33.98496,4.46901 51.44605,5.71623 12.90777,0.92198 25.69702,3.11558 38.58453,4.28717 25.2145,2.29223 50.51513,3.54167 75.74003,5.71623 33.9589,2.92749 20.2615,3.25557 54.3042,4.28717 16.6303,0.50395 33.3744,0 50.0169,0 14.4564,0 29.8963,1.44045 44.3008,0 9.6206,-0.96206 18.9845,-4.51665 28.5811,-5.71623 14.6797,-1.83495 33.2892,0 48.588,0"
+       id="path32" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0000"
+       d="m 615.92352,310.10535 c -1.6734,-50.42057 2.19122,-101.08197 0,-151.48003 -1.02897,-23.6664 -2.82442,-47.73165 -1.42906,-71.452849 0.57999,-9.859793 4.60051,-17.821238 7.14529,-27.152081 1.4963,-5.486447 0.27417,-10.522642 1.42906,-15.719626 2.54246,-11.441099 5.70437,-16.221431 10.00339,-28.581138 2.12852,-6.1194815 3.66736,-12.4311337 5.71623,-18.5777398"
+       id="path33" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#ff0000"
+       d="m 11.666566,336.87209 c 77.777106,0 155.554214,0 233.331314,0 19.93039,0 39.86767,-0.5243 59.79115,0 40.07758,1.05467 79.70856,5.18977 119.5823,8.74992 24.28639,2.16843 48.62471,3.721 72.91604,5.83329 25.07527,2.18046 47.90901,2.91664 72.91604,2.91664 6.07467,0 15.32162,1.0922 21.87481,0 6.92133,-1.15356 8.74721,-2.10616 16.04153,-2.91664 1.4494,-0.16105 2.99147,0.46116 4.37496,0 0.46116,-0.15372 -0.34373,-1.11459 0,-1.45832 0.34373,-0.34373 1.11459,0.34373 1.45832,0 0.88067,-0.88067 0,-7.36697 0,-8.74993"
+       id="path35" />
+  </g>
+  <g
+     id="plan"
+     inkscape:label="plan"
+     inkscape:groupmode="layer">
+    <!-- rien encore : dessine tes boites ici -->
+    <g
+       id="hs_arbre"
+       inkscape:label="hs_porte"
+       transform="translate(439.06416,-59.012202)">
+      <rect
+         x="430.90668"
+         y="286.90668"
+         width="195.21872"
+         height="268.16223"
+         fill="#c4553d"
+         fill-opacity="0.12"
+         stroke="#c4553d"
+         stroke-width="3.81336"
+         id="rect33" />
+      <text
+         x="435"
+         y="301"
+         font-family="monospace"
+         font-size="12px"
+         fill="#c4553d"
+         opacity="0.85"
+         id="text34">hs_porte</text>
+    </g>
+    <g inkscape:label="exit_village">
+      <rect x="870" y="228" width="195" height="268" fill="#f0c987" fill-opacity="0.12" stroke="#f0c987" stroke-width="2" />
+      <text x="875" y="243" font-family="monospace" font-size="12" fill="#f0c987" opacity="0.85">exit_village</text>
+    </g>
+    <g inkscape:label="dec_sol">
+      <rect x="0" y="500" width="1280" height="220" fill="#f2ece1" fill-opacity="0.04" stroke="#f2ece1" stroke-width="2" stroke-dasharray="8 6" stroke-opacity="0.5" />
+      <text x="5" y="515" font-family="monospace" font-size="12" fill="#f2ece1" opacity="0.85">dec_sol</text>
+    </g>
+    <g inkscape:label="dec_mur">
+      <rect x="660" y="140" width="620" height="360" fill="#f2ece1" fill-opacity="0.04" stroke="#f2ece1" stroke-width="2" stroke-dasharray="8 6" stroke-opacity="0.5" />
+      <text x="665" y="155" font-family="monospace" font-size="12" fill="#f2ece1" opacity="0.85">dec_mur</text>
+    </g>
+    <g
+       id="hs_arbre-5"
+       inkscape:label="hs_renard"
+       transform="translate(148.61512,131.20985)">
+      <rect
+         x="421.27"
+         y="116.05"
+         width="276"
+         height="340"
+         fill="#c4553d"
+         fill-opacity="0.12"
+         stroke="#c4553d"
+         stroke-width="2.55106"
+         id="rect33-2" />
+      <text
+         x="435"
+         y="301"
+         font-family="monospace"
+         font-size="12px"
+         fill="#c4553d"
+         opacity="0.85"
+         id="text34-2">hs_renard</text>
+    </g>
+    <g inkscape:label="hs_heros">
+      <rect x="206.0"
+         y="408.0"
+         width="192"
+         height="224" fill="#c4553d" fill-opacity="0.12" stroke="#c4553d" stroke-width="2" />
+      <text x="259" y="535" font-family="monospace" font-size="12" fill="#c4553d" opacity="0.85">hs_heros</text>
+    </g>
+    <g
+       id="g35"
+       inkscape:label="hs_feuille_hache"
+       transform="translate(-40.02039,169.79439)">
+      <rect
+         x="430.27"
+         y="318.05"
+         width="138"
+         height="138"
+         fill="#c4553d"
+         fill-opacity="0.12"
+         stroke="#c4553d"
+         stroke-width="2.55106"
+         id="rect34" />
+      <text
+         x="435"
+         y="301"
+         font-family="monospace"
+         font-size="12px"
+         fill="#c4553d"
+         opacity="0.85"
+         id="text35">hs_feuille_hache</text>
+    </g>
+    <g
+       id="exit_porte"
+       inkscape:label="exit_pont"
+       transform="translate(-1101.3113,18.768498)">
+      <rect
+         x="1160"
+         y="330"
+         width="96"
+         height="190"
+         fill="#f0c987"
+         fill-opacity="0.12"
+         stroke="#f0c987"
+         stroke-width="2"
+         id="rect37" />
+      <text
+         x="1165"
+         y="345"
+         font-family="monospace"
+         font-size="12px"
+         fill="#f0c987"
+         opacity="0.85"
+         id="text38"><tspan
+           sodipodi:role="line"
+           id="tspan37"
+           x="1165"
+           y="345">exit_pont</tspan></text>
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="plan 1" />
+</svg>

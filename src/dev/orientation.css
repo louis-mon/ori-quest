@@ -1,0 +1,273 @@
+/* Outil de réglage de la pose des origamis (développement seulement). */
+
+:root {
+  color-scheme: dark;
+  --papier: #f2ece1;
+  --accent: #c4553d;
+  --fond: #1a1714;
+  --carte: #262019;
+  --trait: rgba(242, 236, 225, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+  /* Rien ne se sélectionne : tourner le modèle à la souris commence par un
+     glisser, et le navigateur y voyait une sélection de texte — le titre et
+     l'aide passaient en surbrillance à chaque essai. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Sauf le bloc de sortie, qui reste à recopier à la main le jour où le serveur
+   de dev ne répond pas. */
+pre,
+input {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+body {
+  display: grid;
+  /* Le sélecteur à gauche, tout le reste à droite : un modèle à la fois laisse
+     la place aux réglages, là où quatre aperçus côte à côte n'en laissaient
+     aucune. */
+  grid-template-columns: 168px 1fr;
+  gap: 20px;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  background: var(--fond);
+  color: var(--papier);
+  font: 15px/1.5 system-ui, sans-serif;
+}
+
+/* ---------- Sélecteur ---------- */
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+nav button {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+nav button:hover {
+  border-color: rgba(242, 236, 225, 0.4);
+}
+
+nav button.is-actif {
+  border-color: var(--accent);
+  background: rgba(196, 85, 61, 0.16);
+}
+
+.vignette {
+  display: grid;
+  place-items: center;
+  height: 56px;
+  border-radius: 5px;
+  background: #3a3a3c;
+}
+
+.vignette canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.nom {
+  font-family: Georgia, serif;
+}
+
+/* ---------- Colonne principale ---------- */
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-family: Georgia, serif;
+  font-size: 26px;
+}
+
+.aide {
+  max-width: 70ch;
+  margin: 0;
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(242, 236, 225, 0.1);
+  font-size: 0.92em;
+}
+
+.scene {
+  display: grid;
+  grid-template-columns: minmax(320px, 480px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Le damier dit où est le transparent, et le curseur « prise » annonce que la
+   zone se manipule — c'est la seule affordance qu'a un rendu sans poignée. */
+.apercu {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background-color: #3a3a3c;
+  background-image:
+    linear-gradient(45deg, #33333500 25%, #2e2e3055 25% 75%, #33333500 75%),
+    linear-gradient(45deg, #33333500 25%, #2e2e3055 25% 75%, #33333500 75%);
+  background-position: 0 0, 14px 14px;
+  background-size: 28px 28px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.apercu.is-tourne {
+  cursor: grabbing;
+  border-color: var(--accent);
+}
+
+.apercu canvas {
+  max-width: 100%;
+  max-height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Réglages ---------- */
+
+.reglages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 10px 14px 12px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+}
+
+legend {
+  padding: 0 6px;
+  font-family: Georgia, serif;
+  opacity: 0.85;
+}
+
+.curseur {
+  display: grid;
+  grid-template-columns: 1.4em 1fr 3.8em;
+  gap: 10px;
+  align-items: center;
+  padding: 3px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.curseur input {
+  width: 100%;
+}
+
+.curseur output {
+  text-align: right;
+  opacity: 0.85;
+}
+
+.note {
+  margin: 8px 0 0;
+  opacity: 0.55;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  padding: 7px 13px;
+  border: 1px solid rgba(242, 236, 225, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+/* ---------- Sortie ---------- */
+
+footer {
+  margin-top: auto;
+}
+
+.footer-tete {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+footer h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, serif;
+  font-size: 17px;
+}
+
+pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  font-size: 13px;
+}
+
+/* ---------- Enregistrement ---------- */
+
+.footer-tete .actions {
+  align-items: center;
+}
+
+.statut {
+  opacity: 0.75;
+  font-size: 13px;
+}
+
+.statut.is-erreur {
+  color: var(--accent);
+  opacity: 1;
+}
+
+button.principal {
+  border-color: var(--accent);
+  background: rgba(196, 85, 61, 0.18);
+}

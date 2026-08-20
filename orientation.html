@@ -1,0 +1,121 @@
+<!doctype html>
+<!--
+  Outil de réglage de la pose des origamis.
+
+  Rien dans un crease pattern ne dit où sera le manche une fois plié : ça se
+  regarde, et ça se tourne à la main. Cette page montre un modèle à la fois, le
+  fait tourner à la souris, et recopie le bloc `POSES` à coller dans
+  src/origami/vue.ts.
+
+  Uniquement en développement — `vite build` ne connaît que index.html, donc
+  cette page ne part pas sur itch.io.
+
+      npm run dev  puis  http://localhost:5173/orientation.html
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ori-Quest — pose des modèles</title>
+    <link rel="stylesheet" href="/src/dev/orientation.css" />
+  </head>
+  <body>
+    <nav id="liste" aria-label="Modèles"></nav>
+
+    <main>
+      <header>
+        <h1 id="titre">…</h1>
+        <p class="aide">
+          <strong>Glisse sur le modèle</strong> pour le tourner — horizontalement il
+          pivote sur sa verticale d'écran, verticalement il bascule. Les curseurs sont
+          là pour finir au degré près. Le modèle garde la même taille quoi qu'il
+          arrive&nbsp;: c'est le zoom qui la change, pas la rotation.
+        </p>
+      </header>
+
+      <div class="scene">
+        <div class="apercu" id="apercu" title="Glisse pour tourner"></div>
+
+        <div class="reglages">
+          <fieldset>
+            <legend>Rotation</legend>
+            <label class="curseur" data-axe="0">
+              <span>X</span><input type="range" min="-180" max="180" step="1" /><output></output>
+            </label>
+            <label class="curseur" data-axe="1">
+              <span>Y</span><input type="range" min="-180" max="180" step="1" /><output></output>
+            </label>
+            <label class="curseur" data-axe="2">
+              <span>Z</span><input type="range" min="-180" max="180" step="1" /><output></output>
+            </label>
+            <p class="note">
+              Tourner à la souris réécrit les trois angles sous forme normalisée. La pose
+              est la même&nbsp;; seuls les nombres changent.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Pliage final</legend>
+            <label class="curseur">
+              <span>%</span>
+              <input id="pliage" type="range" min="0" max="1" step="0.01" /><output
+                id="valeur-pliage"
+              ></output>
+            </label>
+            <p class="note">
+              Le taux auquel le jeu montre ce modèle&nbsp;: fin de l'animation, décor,
+              inventaire, but de l'énigme. Rarement 100&nbsp;%, où beaucoup de pliages
+              redeviennent parfaitement plats.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Taille dans le décor</legend>
+            <label class="curseur">
+              <span>×</span>
+              <input id="echelle" type="range" min="0.2" max="4" step="0.05" /><output
+                id="valeur-echelle"
+              ></output>
+            </label>
+            <p class="note">
+              Multiplie la taille du modèle dans la scène, par-dessus l'ajustement à sa
+              boîte de plan. Nécessaire parce qu'une silhouette longue et fine n'occupe
+              qu'une fraction de son emprise là où une silhouette carrée la remplit.
+              N'agit ni sur l'inventaire ni sur l'animation. <strong>Se voit dans le
+              jeu</strong>, pas dans cet aperçu.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Zoom de l'aperçu</legend>
+            <label class="curseur">
+              <span>×</span>
+              <input id="zoom" type="range" min="0.4" max="3" step="0.05" /><output
+                id="valeur-zoom"
+              ></output>
+            </label>
+            <p class="note">Confort d'affichage seulement — n'entre pas dans le jeu.</p>
+          </fieldset>
+
+          <div class="actions">
+            <button id="revenir" type="button">Revenir à l'enregistré</button>
+            <button id="face" type="button">Feuille en face</button>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-tete">
+          <h2><code>src/origami/poses.ts</code></h2>
+          <div class="actions">
+            <span id="statut" class="statut"></span>
+            <button id="enregistrer" type="button" class="principal">Enregistrer</button>
+          </div>
+        </div>
+        <pre id="sortie"></pre>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/dev/orientation.ts"></script>
+  </body>
+</html>

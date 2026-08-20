@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+*.zip
+
+# Origami Simulator est cloné à la demande par tools/bake-origami.mjs
+tools/vendor/
+
+# Sources brutes de l'artiste, tirées du dossier partagé par `npm run
+# assets:pull`. Zone de transit : seul le résultat de l'intégration entre
+# dans public/assets/ et donc dans le dépôt.
+assets-src/
+
+# Généré depuis content/story.ink par `npm run ink`, lancé automatiquement
+# par `npm run dev` et `npm run build`.
+src/generated/
+
+.DS_Store
+*.local

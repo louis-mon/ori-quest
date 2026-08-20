@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000px" height="1000px" viewBox="0 0 1000 1000">
+  <style type="text/css">.mo {stroke:red;stroke-width:2} .va {stroke:blue;stroke-width:2} .fl {stroke:aqua;stroke-width:1} .bo {stroke:black;stroke-width:4}</style>
+  <line class="mo" x1="618.7184335382257" y1="256.28156646177433" x2="724.8737341529122" y2="0.0" />
+  <line class="bo" x1="724.8737341529122" y1="0.0" x2="875.0" y2="5.551115123125783E-14" />
+  <line class="bo" x1="1000.0" y1="0.0" x2="1000.0" y2="125.0" />
+  <line class="bo" x1="875.0" y1="5.551115123125783E-14" x2="1000.0" y2="0.0" />
+  <line class="va" x1="743.7184335382257" y1="381.28156646177433" x2="1000.0" y2="125.0" />
+  <line class="bo" x1="0.0" y1="1000.0" x2="1000.0" y2="1000.0" />
+  <line class="mo" x1="743.7184335382257" y1="381.28156646177433" x2="1000.0" y2="275.1262658470878" />
+  <line class="mo" x1="0.0" y1="0.0" x2="1000.0" y2="1000.0" />
+  <line class="va" x1="743.7184335382257" y1="381.28156646177433" x2="1000.0" y2="1000.0" />
+  <line class="va" x1="618.7184335382257" y1="256.28156646177433" x2="875.0" y2="5.551115123125783E-14" />
+  <line class="bo" x1="0.0" y1="0.0" x2="0.0" y2="1000.0" />
+  <line class="va" x1="0.0" y1="0.0" x2="618.7184335382257" y2="256.28156646177433" />
+  <line class="va" x1="875.0" y1="5.551115123125783E-14" x2="1000.0" y2="125.0" />
+  <line class="bo" x1="1000.0" y1="275.1262658470878" x2="1000.0" y2="1000.0" />
+  <line class="bo" x1="0.0" y1="0.0" x2="724.8737341529122" y2="0.0" />
+  <line class="va" x1="618.7184335382257" y1="256.28156646177433" x2="743.7184335382257" y2="381.28156646177433" />
+  <line class="bo" x1="1000.0" y1="125.0" x2="1000.0" y2="275.1262658470878" />
+</svg>

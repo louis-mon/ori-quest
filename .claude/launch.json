@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ori-quest",
+      "//": "Le PATH de la machine est sur Node 14, or Vite exige >= 18 : sans ça le serveur meurt sur `Cannot find module 'node:path'`. On force le PATH via /usr/bin/env plutôt que par `bash -c 'nvm use'` — le lanceur démarre dans un répertoire dont bash n'arrive pas à remonter la hiérarchie (~/Documents est protégé par TCC) et .nvmrc y devient introuvable. Pointer le npm de Node 24 en absolu ne suffit pas non plus : le `vite` enfant reprend le `node` du PATH. À mettre à jour si la version de .nvmrc change.",
+      "runtimeExecutable": "/usr/bin/env",
+      "runtimeArgs": [
+        "PATH=/Users/louismonestier/.nvm/versions/node/v24.14.1/bin:/usr/bin:/bin",
+        "npm",
+        "run",
+        "dev"
+      ],
+      "port": 5173
+    }
+  ]
+}
