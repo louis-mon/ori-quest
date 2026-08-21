@@ -114,8 +114,8 @@ une autre place.
 Un tap sur une case **ouvre la boîte de dialogue** et y écrit la description, en
 narration. C'est la boîte que le joueur lit déjà partout ailleurs : elle laisse
 le temps de lire, se ferme d'un tap comme le reste, et le texte n'a pas à tenir
-dans une étiquette qui passe. La légende fugace reste pour ce qui l'est
-vraiment — le libellé d'une sortie.
+dans une étiquette qui passe. La légende fugace ne sert plus qu'à nommer l'objet
+dont on ouvre le menu de verbes (voir ci-dessous).
 
 **Et le modèle tourne au centre de l'écran** pendant ce temps, quand l'objet en a
 un. Une vignette de 42 px dit ce qu'on possède ; elle ne dit pas ce que c'est. Un
@@ -219,12 +219,40 @@ du nom) vit dans `src/game/systems/personnages.ts` ; voir l'en-tête de
 | Boîte de dialogue + choix | ✅ garder tel quel |
 | En-tête de locuteur (nom + vignette) | ✅ implémenté |
 | Marqueur cocotte sur les hotspots | ✅ garder |
-| Étiquette du nom de l'élément | ✅ garder, utile au doigt |
+| Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |
 | Menu (plein écran, recommencer) | ✅ implémenté |
 | Menu de verbes | ✅ retiré (verbe unique `analyser`) |
 | Inventaire (objets + idées) | ✅ colonne à gauche, tap = description |
 | Carnet d'idées | ✅ c'est l'inventaire — pas d'écran séparé |
 | Flèches de navigation | ✅ implémenté |
+
+**Une sortie ne s'annonce plus.** Taper une flèche affichait le nom de la
+destination dans la légende fugace. Deux raisons de l'avoir retiré. La légende
+tient 1,6 s quand le fondu de transition en dure 0,26 : elle finissait donc de
+passer **par-dessus la scène d'arrivée**, à nommer la pièce qu'on venait de
+quitter — l'information arrivait toujours après le voyage. Et sur un téléphone
+en paysage, elle tombe tout en bas du cadre, là où la boîte de dialogue et le
+pouce se disputent déjà la place.
+
+Ce qu'elle apportait est déjà dit ailleurs : la flèche pointe **hors du cadre**,
+donc vers le dehors, et le fondu marque le changement de pièce. Un jeu qui tient
+en quelques pièces voisines n'a pas besoin qu'on lui nomme la porte d'à côté.
+Le jour où un carrefour offrira trois directions, la question se reposera — mais
+il faudra alors une forme qui se lise **avant** de partir, pas pendant.
+
+**Ce qui est au premier plan est exclusif.** Tant qu'une réplique attend un tap
+ou qu'un menu est ouvert, le décor ne répond plus : ni hotspot, ni sortie. Seuls
+la boîte de dialogue et le menu du jeu restent atteignables.
+
+Le piège était la **description d'un objet d'inventaire** : elle écrit dans la
+boîte sans passer par le moteur de narration, si bien que le décor ne la voyait
+pas. On pouvait donc analyser un hotspot en lisant une description, ou pire
+changer de scène — la boîte suivait alors le joueur dans la pièce d'à côté, à
+décrire un objet au milieu d'un décor qui n'avait plus rien à voir. La question
+« l'interface tient-elle la parole ? » se posait en trois morceaux répartis dans
+deux fichiers, et il en manquait forcément un. C'est l'interface elle-même qui y
+répond maintenant, en un seul endroit (`occupeLeJoueur` dans
+[`overlay.ts`](../src/ui/overlay.ts)).
 
 ## Le menu
 

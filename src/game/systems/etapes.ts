@@ -35,7 +35,7 @@ export interface Chapitre {
  */
 export const CHAPITRES: Chapitre[] = [
   {
-    nom: 'Chapitre 1 — le pont et la porte',
+    nom: 'Chapitre 1 — le ravin et la porte',
     etapes: [
       {
         nom: 'Début du chapitre',

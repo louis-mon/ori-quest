@@ -9,7 +9,7 @@ import {
   type Verb,
 } from '../systems/hotspots';
 import { createHotspotMarker, preloadCocotte } from '../systems/hotspot-marker';
-import { createExitMarker } from '../systems/exit-marker';
+import { createExitMarker, preloadFleche } from '../systems/exit-marker';
 import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
@@ -50,7 +50,7 @@ export abstract class PointClickScene extends Phaser.Scene {
    */
   protected arrivee?: { knot: string; flag: string };
 
-  private markers = new Map<string, Phaser.GameObjects.Image>();
+  private markers = new Map<string, Phaser.GameObjects.Container>();
   private montees: { def: HotspotDef | ExitDef; zone: Phaser.GameObjects.Zone }[] = [];
 
   /**
@@ -72,6 +72,7 @@ export abstract class PointClickScene extends Phaser.Scene {
 
   preload() {
     preloadCocotte(this);
+    preloadFleche(this);
     this.preloadAssets();
   }
 
@@ -145,6 +146,20 @@ export abstract class PointClickScene extends Phaser.Scene {
     return this.emprises.get(def.id) ?? { x: def.x, y: def.y, w: def.w, h: def.h };
   }
 
+  /**
+   * Cadre de la zone d'écoute.
+   *
+   * Une zone rectangulaire est élargie à la taille du pouce ; une zone tracée au
+   * polygone ne l'est pas. L'élargir déplacerait son coin haut-gauche, donc le
+   * repère dans lequel son contour est exprimé — et la forme dessinée dans Tiled
+   * ne serait plus celle qu'on touche. Un polygone trop petit est signalé à
+   * l'import, c'est là qu'on le corrige.
+   */
+  private rectDe(def: HotspotDef | ExitDef): Box {
+    const box = this.boite(def);
+    return def.points ? box : touchRect(box);
+  }
+
   private monterZones() {
     // Phaser **réutilise l'instance de scène** d'un passage à l'autre : sans ce
     // nettoyage, on empilerait les zones du passage précédent, déjà détruites
@@ -156,11 +171,21 @@ export abstract class PointClickScene extends Phaser.Scene {
     this.montees = [];
 
     for (const def of [...this.hotspots(), ...this.exits()] as (HotspotDef | ExitDef)[]) {
-      const rect = touchRect(this.boite(def));
-      const zone = this.add
-        .zone(rect.x, rect.y, rect.w, rect.h)
-        .setOrigin(0)
-        .setInteractive({ useHandCursor: true });
+      const rect = this.rectDe(def);
+      const zone = this.add.zone(rect.x, rect.y, rect.w, rect.h).setOrigin(0);
+
+      if (def.points) {
+        // Le contour est en coordonnées du jeu, la zone d'écoute en coordonnées
+        // locales : d'où le décalage. Il reste juste tant que la zone ne bouge
+        // pas, ce que `rectDe()` garantit pour un polygone.
+        const contour = new Phaser.Geom.Polygon(
+          def.points.flatMap(([x, y]) => [x - rect.x, y - rect.y]),
+        );
+        zone.setInteractive(contour, Phaser.Geom.Polygon.Contains);
+        if (zone.input) zone.input.cursor = 'pointer';
+      } else {
+        zone.setInteractive({ useHandCursor: true });
+      }
 
       zone.on('pointerup', (pointer: Phaser.Input.Pointer) => this.onZone(def, pointer));
       this.montees.push({ def, zone });
@@ -186,9 +211,11 @@ export abstract class PointClickScene extends Phaser.Scene {
 
     parPriorite.forEach(({ def, zone }, index) => {
       const box = this.boite(def);
-      const rect = touchRect(box);
+      const rect = this.rectDe(def);
       zone.setPosition(rect.x, rect.y);
-      zone.setSize(rect.w, rect.h);
+      // `setSize` refait la zone d'écoute rectangulaire : sur un polygone, ça
+      // effacerait le contour posé au montage.
+      if (!def.points) zone.setSize(rect.w, rect.h);
       zone.setDepth(index);
       this.poserMarqueur(def, box);
     });
@@ -241,8 +268,12 @@ export abstract class PointClickScene extends Phaser.Scene {
     for (const { def, zone } of this.montees) {
       const visible = def.visibleIf ? def.visibleIf() : true;
       this.markers.get(def.id)?.setVisible(visible);
-      if (visible) zone.setInteractive();
-      else zone.disableInteractive();
+      // On bascule `enabled` plutôt que de repasser par `setInteractive()` :
+      // appelé sans argument, celui-ci **refabrique** une zone d'écoute
+      // rectangulaire, et effaçait donc le contour des zones polygonales à
+      // chaque changement d'état. C'était sans conséquence tant que tout était
+      // rectangulaire, mais ça reconstruisait la zone pour rien.
+      if (zone.input) zone.input.enabled = visible;
     }
   }
 
@@ -251,13 +282,20 @@ export abstract class PointClickScene extends Phaser.Scene {
 
   private onZone(def: HotspotDef | ExitDef, pointer: Phaser.Input.Pointer) {
     const { overlay, dialogue } = this.services;
-    if (dialogue.isRunning || overlay.verbsVisible) return;
+    // Tant que l'interface parle, le décor se tait — voir `occupeLeJoueur`.
+    // Les deux conditions ne font pas doublon : `isRunning` couvre aussi les
+    // instants où le moteur de narration travaille boîte fermée (une animation
+    // de pliage, un changement de scène), où aucune réplique n'attend de tap.
+    if (dialogue.isRunning || overlay.occupeLeJoueur) return;
     if (def.visibleIf && !def.visibleIf()) return;
 
     if (estSortie(def)) {
-      // La destination s'annonce : une flèche seule ne dit pas où elle mène, et
-      // c'est la seule action du jeu qui ne s'explique pas d'elle-même.
-      overlay.showCaption(def.label);
+      // Pas d'annonce de la destination. La légende tenait 1,6 s quand le fondu
+      // en dure 0,26 : elle finissait de passer par-dessus la scène d'arrivée,
+      // à nommer la pièce qu'on venait de quitter. Et sur un téléphone en
+      // paysage elle tombait tout en bas du cadre, là où la boîte de dialogue
+      // et le pouce se disputent déjà la place. La flèche pointe hors du cadre
+      // et le fondu dit le changement : le joueur sait qu'il part.
       if (def.knot) void dialogue.run(def.knot);
       else if (def.room) this.quitter(def.room);
       return;

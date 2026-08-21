@@ -2,13 +2,14 @@ import Phaser from 'phaser';
 import { COLORS, DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
-import plan from '../../generated/scenes/porte.json';
-import { boxOf, exitsFrom, hotspotsFrom, type SceneLayout } from './layout';
+import plan from '../../generated/scenes/porte';
+import { boxOf, exitsFrom, hotspotsFrom } from './layout';
 import { PointClickScene } from './point-click-scene';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerFeuille } from './feuille';
 import { placeHeros, preloadHeros } from './heros';
+import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 
 /**
  * La porte — seconde scène du chapitre 1.
@@ -20,14 +21,17 @@ import { placeHeros, preloadHeros } from './heros';
  * la porte est pliée et qu'on la franchit.
  *
  * ⚠ Le décor de cette scène est un pis-aller : `dec_sol` et `dec_mur` ont été
- * posés au jugé, faute de croquis dans le plan. À corriger dans porte.svg.
+ * posés au jugé, faute de croquis dans le plan. À corriger dans porte.tmj.
  * Le battant, lui, n'est plus dessiné : c'est le modèle `porte.origami` rendu
  * tel quel (voir origami-decor.ts).
  */
 
-const PLAN = plan as SceneLayout;
+const PLAN = plan;
 
 const RENARD = 'renard';
+
+/** Graine du semis de nuages — voir `semerNuages()`. Une valeur par scène. */
+const GRAINE_DU_CIEL = 4211;
 
 const SOL = boxOf(PLAN, 'dec_sol');
 const MUR = boxOf(PLAN, 'dec_mur');
@@ -48,6 +52,7 @@ export class PorteScene extends PointClickScene {
   protected preloadAssets() {
     preloadHeros(this);
     preloadSprite(this, RENARD, 'assets/decor/renard.png');
+    preloadCiel(this);
   }
 
   protected hotspots(): HotspotDef[] {
@@ -81,7 +86,7 @@ export class PorteScene extends PointClickScene {
   protected exits(): ExitDef[] {
     return exitsFrom(PLAN, {
       pont: {
-        label: 'Vers le pont',
+        label: 'Vers le ravin',
         room: 'pont',
       },
       village: {
@@ -109,17 +114,21 @@ export class PorteScene extends PointClickScene {
   // ------------------------------------------------------------------
 
   protected drawScenery() {
+    // Le même ciel d'après-midi qu'au pont, et les mêmes nuages pliés — semés
+    // sur une autre graine, sinon les deux scènes se partagent le même ciel et
+    // l'aller-retour le montre. Ils passent **derrière** le rempart.
+    dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
+    semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
+
     const g = this.add.graphics();
 
-    g.fillStyle(0x2c3138, 1).fillRect(0, 0, DESIGN_WIDTH, 220);
-    g.fillStyle(0x3a3a3c, 1).fillRect(0, 220, DESIGN_WIDTH, SOL.y - 220);
-    g.fillStyle(0x4a4038, 1).fillRect(SOL.x, SOL.y, SOL.w, SOL.h);
-    g.fillStyle(COLORS.woodDark, 1).fillRect(SOL.x, SOL.y, SOL.w, 10);
+    g.fillStyle(0x6f6250, 1).fillRect(SOL.x, SOL.y, SOL.w, SOL.h);
+    g.fillStyle(COLORS.wood, 1).fillRect(SOL.x, SOL.y, SOL.w, 10);
 
     // Le rempart. Des assises régulières suffisent à le lire comme maçonnerie ;
     // ce qui compte ici est le trou, pas la pierre.
-    g.fillStyle(0x574c45, 1).fillRect(MUR.x, MUR.y, MUR.w, MUR.h);
-    g.lineStyle(1, 0x453b35, 1);
+    g.fillStyle(0x8c8073, 1).fillRect(MUR.x, MUR.y, MUR.w, MUR.h);
+    g.lineStyle(1, 0x746a5f, 1);
     for (let y = MUR.y + 40; y < MUR.y + MUR.h; y += 40) {
       g.beginPath().moveTo(MUR.x, y).lineTo(MUR.x + MUR.w, y).strokePath();
     }
@@ -154,10 +163,9 @@ export class PorteScene extends PointClickScene {
       .text(DESIGN_WIDTH / 2, 40, 'La porte', {
         fontFamily: 'Georgia, serif',
         fontSize: '26px',
-        color: '#f2ece1',
+        color: '#3a3128',
       })
       .setOrigin(0.5)
       .setAlpha(0.6);
   }
-
 }

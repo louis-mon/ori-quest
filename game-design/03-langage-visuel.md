@@ -22,47 +22,44 @@ pièce.
 
 ## La cocotte
 
-⚠️ **Deux modèles portent ce nom.** Celui qu'on veut est la **poule en papier**,
-vue de profil — pas la salière à quatre volets qu'on manipule au bout des doigts.
-La poule a une silhouette bien plus caractéristique, donc plus lisible en petit.
+⚠️ **Deux modèles portent ce nom.** Celui qu'on veut est la **pajarita**,
+l'oiseau traditionnel vu de profil — pas la salière à quatre volets qu'on
+manipule au bout des doigts. La pajarita a une silhouette bien plus
+caractéristique, donc plus lisible en petit.
 
 C'est le pliage le plus reconnaissable de l'enfance, et il porte le bon
 sous-texte : *une feuille peut devenir autre chose*.
+
+**✅ C'est le pliage de l'artiste** (`public/assets/ui/parajita.png`, posé par
+`src/game/systems/hotspot-marker.ts`), photographié comme les personnages et les
+nuages. Il a remplacé une silhouette tracée en polygones dans le code, que
+plusieurs passes de réglage n'ont jamais réussi à faire lire comme un oiseau : à
+cette taille, une cocotte convaincante demande un vrai pliage, pas des
+coordonnées ajustées à la main.
 
 Le marqueur bat lentement — échelle, opacité et une légère bascule d'angle, sur
 1,4 s. **Le battement doit rester discret.** Une scène contient jusqu'à cinq
 hotspots ; si chacun clignote fort, la scène devient illisible et le joueur ne
 regarde plus le décor. Le marqueur signale, il ne réclame pas.
 
-### État : forme provisoire, en attente d'un dessin
-
-⚠️ La silhouette actuelle est **dessinée en polygones dans le code** et ne se lit
-pas franchement comme une poule. Plusieurs passes de réglage n'ont pas suffi :
-à ~20 px, une cocotte convaincante demande un vrai dessin, pas des coordonnées
-ajustées à la main.
-
-**Le remplacement ne demande aucun code** : déposer un PNG dans
-`src/assets/ui/cocotte.png` et il est utilisé partout. La détection se fait à la
-compilation (`import.meta.glob`), donc rien n'est tenté tant que le fichier
-n'existe pas.
-
-Format attendu : fond transparent, ~80×80, la poule **tournée vers la gauche**,
-en teinte claire.
-
 ## Les flèches de navigation
 
-**✅ Implémenté** (`src/game/systems/exit-marker.ts`), en forme provisoire : deux
-volets triangulaires, le bas plus sombre que le haut, comme une feuille repliée
-éclairée d'un seul côté. Elle dérive lentement de 6 px vers l'extérieur du
-cadre, sans jamais tourner.
+**✅ Implémenté** (`src/game/systems/exit-marker.ts`), et c'est là aussi un
+pliage de l'artiste (`public/assets/ui/fleche.png`) : un carré de papier dont le
+pli central retourne le verso sombre en pointe. Elle dérive lentement de 6 px
+vers l'extérieur du cadre, sans jamais tourner.
+
+Le pliage est photographié **pointant vers la gauche** ; c'est donc la sortie de
+droite que le code retourne.
 
 Trois écarts délibérés avec la cocotte, pour qu'aucune confusion ne soit
-possible : la **couleur** (papier clair contre jaune chaud), la **forme**
-(anguleuse contre silhouette) et le **mouvement** (dérive contre battement).
+possible : la **forme** (un carré net contre une silhouette d'oiseau), la
+**valeur** (une pointe sombre contre du papier clair) et le **mouvement**
+(dérive contre battement).
 
-Idée à explorer : la flèche pourrait être elle-même un petit origami baké par le
-pipeline, et se plier/déplier au survol du doigt. Cohérent avec le sujet, et on a
-déjà toute la chaîne technique pour le faire.
+Idée à explorer : la flèche pourrait être **animée** par le pipeline plutôt que
+photographiée, et se plier/déplier au tap. Cohérent avec le sujet, et on a déjà
+toute la chaîne technique pour le faire.
 
 ## Le héros est dans le décor
 
@@ -90,6 +87,47 @@ boîte du plan est exactement l'emprise du personnage. Le sprite est calé sur l
 **bas** de sa boîte — une boîte de plan marque un appui au sol, et c'est ce point
 qui doit rester fixe quand on la redimensionne dans l'éditeur.
 
+## Le ciel
+
+**On est l'après-midi**, dans toutes les scènes d'extérieur. Les premières
+étaient peintes en gris bleutés très sombres — un ciel de nuit, en contradiction
+avec le récit.
+
+Le ciel est un **dégradé peint au canvas**
+([`src/game/scenes/ciel.ts`](../src/game/scenes/ciel.ts)), pas une pile
+d'aplats : trois bandes unies donnaient deux lignes horizontales franches, qui
+se lisaient comme des horizons flottant au-dessus du vrai. Un fond vertical du
+zénith à une brume chaude d'horizon, et par-dessus un **halo elliptique qui part
+du soleil** — écrasé, parce qu'un halo circulaire se lit comme une bulle posée
+dans le ciel, quand une nappe étalée se lit comme de la lumière. La lumière a
+donc une source, et c'est le repère `dec_soleil` du plan qui la place.
+
+Le soleil et les nuages sont les **pliages de l'artiste** (`soleil`, et le même
+nuage sous plusieurs angles), pas des silhouettes tracées
+en polygones : même règle que partout ailleurs dans le jeu. Le soleil est le seul
+sprite **centré** dans sa boîte de plan et non calé sur le bas : il ne repose sur
+rien.
+
+Les nuages sont **semés au hasard**, mais d'un hasard à graine fixe : une valeur
+par scène, tirée une fois pour toutes. On obtient l'irrégularité qu'aucune table
+écrite à la main ne donne vraiment, sans que le ciel se rejoue à chaque passage —
+un joueur qui revient de la scène d'à côté doit retrouver la sienne, sinon le
+retour se lit comme un bug. Leur emprise est la bande `dec_nuages` du plan
+Tiled ; leur nombre et leur dispersion sont une décision de dessin et vivent dans
+le code. Un nuage ne remplit jamais sa bande : la marge qui reste sert à les
+décaler en hauteur, ce qui compte bien plus pour la lecture du ciel que leur
+taille.
+
+Ils **dérivent** vers la droite, très lentement — de 4 à 11 px par seconde, une
+traversée d'écran en deux à cinq minutes. Chacun a sa vitesse, et c'est ce
+décalage qui donne la profondeur : à vitesse commune, la rangée entière glisse
+comme un seul décor peint. Le mouvement doit rester sous le seuil où l'œil le
+suit, sinon il concurrence le battement des marqueurs, qui est le seul mouvement
+du jeu à demander l'attention.
+
+Le ciel, son soleil et ses nuages vivent **sous** le décor (profondeurs
+négatives), de sorte qu'un rempart passe devant les nuages.
+
 ## Palette
 
 Définie dans `src/game/config.ts`.
@@ -100,7 +138,7 @@ Définie dans `src/game/config.ts`.
 | `ink` | les fonds sombres, les contours |
 | `wood` / `woodDark` | le mobilier, les décors |
 | `accent` (terracotta) | les plis, les actions, ce qui répond au doigt |
-| `glow` (jaune chaud) | la cocotte, les sources de lumière |
+| `glow` (jaune chaud) | les sources de lumière |
 
 L'accent terracotta sert aux **traits de pli** dans les crease patterns comme aux
 **boutons pressés** : c'est la couleur de ce qui se plie et de ce qui réagit.
@@ -233,13 +271,11 @@ Contraintes non négociables, appliquées dans le code :
   feuille à plat, puis un arbre debout). `caler()` recale la zone sur ce qui est
   réellement à l'écran — sans quoi on « analysait » le renard en tapant 70 px
   au-dessus de sa tête.
-- **Les marqueurs sont détourés.** La cocotte et la flèche de sortie sont
-  redessinées en sombre juste en dessous d'elles-mêmes, un peu dilatées. Un
-  marqueur clair posé sur une feuille de papier ou sur une rive au soleil
-  disparaissait, alors qu'il est le seul signe qui dise « ici, on peut agir ».
-  La dilatation se fait autour d'un centre **commun** à toutes les parties de la
-  forme : chacune autour du sien, elles s'écartent les unes des autres et la
-  silhouette se casse.
+- **Les marqueurs portent leur ombre.** La cocotte et la flèche de sortie sont
+  redessinées en sombre juste en dessous d'elles-mêmes, un peu dilatées et
+  décalées vers le bas. Ces deux pliages sont en papier clair : posés sur une
+  feuille de papier ou sur une rive au soleil ils disparaissaient, alors qu'ils
+  sont le seul signe qui dise « ici, on peut agir ».
 - **Rien dans les coins hauts.** Sur un grand téléphone tenu à deux mains en
   paysage, le haut de l'écran est hors d'atteinte du pouce.
 - **L'UI ne rétrécit pas indéfiniment.** Le décor est mis à l'échelle, pas les

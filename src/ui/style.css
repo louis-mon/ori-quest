@@ -936,8 +936,8 @@ body {
   left: 50%;
   top: calc(50% + 180px);
   transform: translateX(-50%);
-  /* Sert aussi aux descriptions d'inventaire, qui font une phrase et non deux
-     mots : sans largeur maximale, la pastille traverserait tout le cadre. */
+  /* Deux ou trois mots en pratique — le nom de l'objet dont on ouvre le menu.
+     La largeur maximale reste : un libellé long traverserait tout le cadre. */
   max-width: min(70%, 560px);
   padding: 6px 14px;
   border-radius: 999px;

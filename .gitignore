@@ -15,5 +15,9 @@ assets-src/
 # par `npm run dev` et `npm run build`.
 src/generated/
 
+# État d'interface de Tiled (onglets ouverts, dernier outil) : propre à chaque
+# machine, sans intérêt pour le jeu.
+*.tiled-session
+
 .DS_Store
 *.local

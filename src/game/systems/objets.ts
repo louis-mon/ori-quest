@@ -37,22 +37,22 @@ export interface Objet {
 export const OBJETS: Record<string, Objet> = {
   idee_arbre: {
     nom: "Idée : l'arbre",
-    description: 'À ÉCRIRE — ce que le héros a retenu de la forme du jeune arbre.',
+    description: 'Une idée de comment plier l\'arbre.',
     modele: 'arbre',
   },
   idee_hache: {
     nom: 'Idée : la hache',
-    description: 'À ÉCRIRE — ce que le renard lui a mis en tête.',
+    description: 'Une idée de comment plier la hache.',
     modele: 'hache',
   },
   hache: {
     nom: 'La hache',
-    description: 'À ÉCRIRE — la hache de papier métallisé, et ce qu\'elle pèse.',
+    description: 'Une hache de papier bien tranchante, idéale pour couper du bois',
     modele: 'hache',
   },
   bois: {
     nom: 'Du bois',
-    description: 'À ÉCRIRE — ce qu\'il reste du vieil arbre.',
+    description: 'De belles planches de bois. Merci vieux chêne.',
     // Le seul objet du chapitre qui ne soit pas un pliage : le vieil arbre a
     // été découpé, il n'en reste que de la matière. D'où une vignette dessinée.
     dessin: 'bois',

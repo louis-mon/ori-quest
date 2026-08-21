@@ -2,31 +2,59 @@
  * Plans de scène — la géométrie vient du dessin, pas du code.
  *
  * Chaque scène a un plan dans `game-design/scenes/`, dessiné à l'échelle du jeu
- * (1280x720) dans n'importe quel éditeur vectoriel. `npm run scenes` le convertit
- * en JSON ici. Voir game-design/06-plans-de-scene.md.
+ * (1280x720) dans Tiled. `npm run scenes` le convertit en module TypeScript ici.
+ * Voir game-design/06-plans-de-scene.md.
  *
  * Le partage des responsabilités : le **plan** dit où et combien grand, la
  * **scène** dit ce que ça raconte (libellé, knot, condition d'apparition).
  * Déplacer une zone tactile ne demande donc plus de toucher au code, et écrire
- * un dialogue ne demande pas d'ouvrir un éditeur vectoriel.
+ * un dialogue ne demande pas d'ouvrir un éditeur de plan.
+ *
+ * Le plan généré est figé en `as const`, et les fonctions ci-dessous en tirent
+ * la **liste exacte des noms disponibles**. Écrire `boxOf(PLAN, 'dec_nuages')`
+ * quand la carte ne contient pas ce repère ne compile pas : c'est ce qui
+ * empêche le code d'inventer une zone que le plan ne connaît pas, et donc les
+ * deux de diverger. La carte Tiled est la source de vérité, `tsc` le vérifie.
  */
-import type { Box, ExitDef, HotspotDef } from '../systems/hotspots';
+import type { Box, Contour, ExitDef, HotspotDef } from '../systems/hotspots';
 
-export type { Box };
+export type { Box, Contour };
 
-export interface SceneLayout {
-  scene: string;
-  /** Le SVG d'origine, cité dans les messages d'erreur. */
-  source: string;
-  design: { width: number; height: number };
-  hotspots: (Box & { id: string })[];
-  exits: (Box & { id: string })[];
-  decor: Record<string, Box>;
+/**
+ * Une zone du plan. Elle a toujours une boîte — c'est elle qui sert à poser un
+ * dessin ou un marqueur — et, quand elle a été tracée au polygone, le contour
+ * qui sert au test tactile.
+ */
+export interface PlanZone extends Box {
+  id: string;
+  points?: Contour;
 }
 
+export interface SceneLayout {
+  readonly scene: string;
+  /** La carte Tiled d'origine, citée dans les messages d'erreur. */
+  readonly source: string;
+  readonly design: { readonly width: number; readonly height: number };
+  readonly hotspots: readonly PlanZone[];
+  readonly exits: readonly PlanZone[];
+  readonly decor: { readonly [id: string]: Box };
+}
+
+/** Les identifiants réellement présents dans une liste de zones du plan. */
+type Ids<Z extends readonly PlanZone[]> = Z[number]['id'];
+
+/**
+ * Tous les noms qu'un plan donné sait résoudre, préfixés de leur rôle. C'est ce
+ * type qui fait échouer `tsc` sur un repère inventé.
+ */
+export type PlanRef<L extends SceneLayout> =
+  | `hs_${Ids<L['hotspots']>}`
+  | `exit_${Ids<L['exits']>}`
+  | `dec_${keyof L['decor'] & string}`;
+
 /** Ce que la scène ajoute à la géométrie : le sens. */
-export type HotspotContent = Omit<HotspotDef, 'id' | 'x' | 'y' | 'w' | 'h'>;
-export type ExitContent = Omit<ExitDef, 'id' | 'x' | 'y' | 'w' | 'h'>;
+export type HotspotContent = Omit<HotspotDef, 'id' | 'x' | 'y' | 'w' | 'h' | 'points'>;
+export type ExitContent = Omit<ExitDef, 'id' | 'x' | 'y' | 'w' | 'h' | 'points'>;
 
 const EMPTY: Box = { x: 0, y: 0, w: 0, h: 0 };
 
@@ -38,16 +66,17 @@ const EMPTY: Box = { x: 0, y: 0, w: 0, h: 0 };
 const dejaListe = new Set<string>();
 
 /**
- * Boîte d'un élément du plan, désigné par son nom exact dans l'éditeur —
+ * Boîte d'un élément du plan, désigné par son rôle et son nom dans Tiled —
  * `dec_sol`, `hs_feuille`, `exit_porte`. Le code parle donc le même vocabulaire
- * que le dessin, ce qui rend la correspondance vérifiable à l'œil nu.
+ * que le plan, ce qui rend la correspondance vérifiable à l'œil nu.
  *
- * Un repère manquant ne fait pas planter : la scène se dessinera de travers,
- * mais la console dit exactement quel nom manque et dans quel fichier. Un jeu
- * qui refuse de démarrer parce qu'un rectangle a été renommé serait pire.
+ * Un nom absent du plan est une **erreur de compilation**, pas une surprise à
+ * l'exécution. Le repli reste là pour le cas où le plan généré serait en retard
+ * sur la carte : la scène se dessine de travers, mais la console dit quoi faire
+ * plutôt que de planter.
  */
-export function boxOf(layout: SceneLayout, ref: string): Box {
-  const [prefix, ...rest] = ref.split('_');
+export function boxOf<L extends SceneLayout>(layout: L, ref: PlanRef<L>): Box {
+  const [prefix, ...rest] = (ref as string).split('_');
   const id = rest.join('_');
   const found =
     prefix === 'dec'
@@ -63,38 +92,34 @@ export function boxOf(layout: SceneLayout, ref: string): Box {
  * Croise le plan avec la table de contenu de la scène.
  *
  * L'ordre du résultat suit celui de la table : c'est la scène qui décide de
- * l'ordre des zones, pas l'ordre des calques dans l'éditeur.
+ * l'ordre des zones, pas l'ordre des objets dans Tiled. Une clé qui ne
+ * correspond à aucun objet du plan ne compile pas.
  */
-export function hotspotsFrom(
-  layout: SceneLayout,
-  content: Record<string, HotspotContent>,
+export function hotspotsFrom<L extends SceneLayout>(
+  layout: L,
+  content: Partial<Record<Ids<L['hotspots']>, HotspotContent>>,
 ): HotspotDef[] {
-  return croiser(layout, layout.hotspots, content, 'hs');
+  return croiser(layout.hotspots, content);
 }
 
-export function exitsFrom(
-  layout: SceneLayout,
-  content: Record<string, ExitContent>,
+export function exitsFrom<L extends SceneLayout>(
+  layout: L,
+  content: Partial<Record<Ids<L['exits']>, ExitContent>>,
 ): ExitDef[] {
-  return croiser(layout, layout.exits, content, 'exit');
+  return croiser(layout.exits, content);
 }
 
 function croiser<T extends object>(
-  layout: SceneLayout,
-  boites: (Box & { id: string })[],
-  content: Record<string, T>,
-  prefixe: string,
-): (T & Box & { id: string })[] {
-  const defs: (T & Box & { id: string })[] = [];
+  zones: readonly PlanZone[],
+  content: Partial<Record<string, T>>,
+): (T & PlanZone)[] {
+  const defs: (T & PlanZone)[] = [];
   for (const [id, meaning] of Object.entries(content)) {
-    const box = boites.find((b) => b.id === id);
-    if (!box) {
-      console.error(
-        `[plan] « ${prefixe}_${id} » est câblé dans le code mais absent de ${layout.source}`,
-      );
-      continue;
-    }
-    defs.push({ id, x: box.x, y: box.y, w: box.w, h: box.h, ...meaning });
+    const zone = zones.find((z) => z.id === id);
+    // Injoignable en pratique — `tsc` refuse une clé absente du plan. Le garde
+    // reste pour le décalage transitoire d'un plan pas encore regénéré.
+    if (!zone || !meaning) continue;
+    defs.push({ ...zone, ...meaning });
   }
   return defs;
 }

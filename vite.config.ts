@@ -1,7 +1,10 @@
+import { execFile } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 const FICHIER_POSES = 'src/origami/poses.ts';
+const CARTES = 'game-design/scenes';
+const HISTOIRE = 'content';
 
 /** Bornes de sécurité. Au-delà, ce n'est plus un réglage, c'est une erreur. */
 const LIMITES = {
@@ -64,6 +67,98 @@ function enregistrerPoses(): Plugin {
   };
 }
 
+/**
+ * Relance un outil de build quand une source change, et laisse Vite recharger
+ * la page dans la foulée.
+ *
+ * Les deux guetteurs ci-dessous ne diffèrent que par le fichier surveillé, le
+ * script à relancer et la phrase à afficher quand ça casse.
+ */
+function relancerSurChangement(
+  server: ViteDevServer,
+  { extension, script, echec }: { extension: string; script: string; echec: string },
+) {
+  let enCours = false;
+
+  const regenerer = (fichier: string) => {
+    if (!fichier.endsWith(extension) || enCours) return;
+    enCours = true;
+    execFile('node', [script], (err, stdout, stderr) => {
+      enCours = false;
+      // La sortie porte les avertissements — cible tactile trop petite, zone
+      // hors cadre, numéro de ligne d'une erreur ink. Elle doit rester visible
+      // dans le terminal.
+      const sortie = `${stdout}${stderr}`.trim();
+      if (sortie) server.config.logger.info(sortie);
+      if (err) server.config.logger.error(echec);
+    });
+  };
+
+  server.watcher.on('change', regenerer);
+  server.watcher.on('add', regenerer);
+}
+
+/**
+ * Les plans de scène suivent Tiled sans qu'on y pense.
+ *
+ * `npm run scenes` ne tournait qu'au démarrage du serveur : une carte
+ * enregistrée dans Tiled pendant une session de travail ne changeait rien à
+ * l'écran, et il fallait savoir qu'il existait une commande à relancer. C'est
+ * exactement par là que le plan et le jeu se mettent à diverger — on finit par
+ * corriger dans le code ce qu'on vient de corriger dans la carte.
+ *
+ * Enregistrer dans Tiled regénère donc le module du plan, et Vite recharge la
+ * page dans la foulée.
+ */
+function suivreLesPlans(): Plugin {
+  return {
+    name: 'ori-quest:plans',
+    apply: 'serve',
+    configureServer(server) {
+      server.watcher.add(CARTES);
+      relancerSurChangement(server, {
+        extension: '.tmj',
+        script: 'tools/import-scene.mjs',
+        echec: '[scenes] plan refusé, rien réécrit',
+      });
+    },
+  };
+}
+
+/**
+ * La narration suit le fichier ink, pour la même raison que les plans.
+ *
+ * `npm run ink` ne tournait lui aussi qu'au démarrage : on éditait
+ * `content/story.ink`, la page ne bougeait pas, et rien ne disait qu'il fallait
+ * relancer une commande. Le texte à l'écran restait celui d'avant.
+ *
+ * `src/generated/story.json` est importé par `main.ts` : le réécrire suffit à
+ * déclencher le rechargement. Et comme le compilateur sort en erreur *sans
+ * écrire*, un ink cassé laisse en place la dernière version valide — le jeu
+ * continue de tourner pendant qu'on corrige, avec le numéro de ligne dans le
+ * terminal.
+ *
+ * On guette le dossier, pas le seul `story.ink` : le jour où la narration se
+ * découpe en `INCLUDE`, les morceaux sont suivis sans rien changer ici.
+ *
+ * À savoir : le rechargement restaure la sauvegarde. Un passage déjà franchi
+ * ne se rejoue pas sans « Recommencer ».
+ */
+function suivreLaNarration(): Plugin {
+  return {
+    name: 'ori-quest:ink',
+    apply: 'serve',
+    configureServer(server) {
+      server.watcher.add(HISTOIRE);
+      relancerSurChangement(server, {
+        extension: '.ink',
+        script: 'tools/compile-ink.mjs',
+        echec: '[ink] compilation refusée, story.json inchangé',
+      });
+    },
+  };
+}
+
 function nombre(valeur: unknown, min: number, max: number, quoi: string): number {
   const n = Number(valeur);
   if (!Number.isFinite(n) || n < min || n > max) {
@@ -110,7 +205,7 @@ function rendreFichier(source: string, recu: unknown): string {
 }
 
 export default defineConfig({
-  plugins: [enregistrerPoses()],
+  plugins: [enregistrerPoses(), suivreLesPlans(), suivreLaNarration()],
   // itch.io sert le jeu depuis un sous-dossier arbitraire : tous les chemins
   // doivent être relatifs, sinon rien ne charge une fois zippé.
   base: './',
@@ -130,6 +225,9 @@ export default defineConfig({
   },
   server: {
     host: true, // permet de tester depuis un vrai téléphone sur le réseau local
+    // Vite ne lit pas `PORT` de lui-même. Le respecter permet de lancer un
+    // second serveur pendant qu'un premier tourne, sans lui prendre le 5173.
+    port: Number(process.env.PORT) || 5173,
   },
   preview: {
     // Même exposition pour le build de production : c'est celui-là qu'il faut

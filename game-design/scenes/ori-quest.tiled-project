@@ -1,0 +1,43 @@
+{
+    "automappingRulesFile": "",
+    "commands": [],
+    "extensionsPath": "extensions",
+    "folders": [
+        "."
+    ],
+    "propertyTypes": [
+        {
+            "color": "#ffe0a44b",
+            "drawFill": true,
+            "id": 1,
+            "members": [],
+            "name": "hotspot",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ff4bd9a3",
+            "drawFill": true,
+            "id": 2,
+            "members": [],
+            "name": "exit",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
+            "color": "#ff8f96b0",
+            "drawFill": false,
+            "id": 3,
+            "members": [],
+            "name": "decor",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        }
+    ]
+}

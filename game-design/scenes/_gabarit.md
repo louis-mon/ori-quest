@@ -1,6 +1,6 @@
 # <Nom de la scène>
 
-Plan : [`<nom>.svg`](<nom>.svg) — c'est lui qui porte les positions.
+Plan : [`<nom>.tmj`](<nom>.tmj) — c'est lui qui porte les positions.
 Cette fiche porte le sens.
 
 # Synopsis
@@ -22,13 +22,13 @@ pas pouvoir estimer la profondeur.>
 
 ## Choses à examiner
 
-### <hs_id du plan>
+### <nom de l'objet `hotspot` dans Tiled>
 
 <Ce qu'on y voit. Condition d'apparition s'il y en a une.>
 
 ## Sortie
 
-### <exit_id du plan>
+### <nom de l'objet `exit` dans Tiled>
 
 <Vers quelle scène, et à quelle condition.>
 

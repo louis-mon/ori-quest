@@ -1,33 +1,35 @@
 #!/usr/bin/env node
 /**
- * import-scene — un plan de scène dessiné en SVG devient des données de jeu.
+ * import-scene — une carte Tiled devient des données de jeu.
  *
  *   npm run scenes                                    # tout game-design/scenes/
- *   npm run scenes -- game-design/scenes/chapter-1/pont.svg
+ *   npm run scenes -- game-design/scenes/chapter-1/pont.tmj
  *   npm run scenes -- --check                         # valide sans écrire
  *
  * Le problème résolu : décrire une scène en français ne donne jamais de
  * coordonnées. « La feuille est à gauche du pont » demande trois allers-retours
  * avant d'être jouable. Un plan dessiné à l'échelle, lui, EST la coordonnée.
  *
- * Le document se dessine dans n'importe quel éditeur (Figma, Inkscape, Penpot)
- * sur un cadre 1280x720 — la résolution logique du jeu, cf. src/game/config.ts.
- * Un rectangle par élément, et le NOM de l'objet porte son rôle :
+ * Le plan se dessine dans Tiled (gratuit, libre) sur un cadre 1280x720 — la
+ * résolution logique du jeu, cf. src/game/config.ts. Un objet par élément, et
+ * c'est sa **classe** qui porte son rôle :
  *
- *   hs_<id>     zone à examiner        -> hotspot
- *   exit_<id>   passage vers une scène -> hotspot de navigation
- *   dec_<id>    repère de décor        -> bord, surface, position
+ *   hotspot   zone à examiner        -> hotspot, avec sa cocotte
+ *   exit      passage vers une scène -> hotspot de navigation
+ *   decor     repère de décor        -> bord, surface, position
  *
- * Tout ce qui n'est pas nommé ainsi est ignoré : la grille, le cadre, les
- * croquis d'ambiance restent dans le fichier sans polluer la sortie.
+ * Le **nom** de l'objet est son identifiant côté code (`feuille`, `precipice`).
+ * Les calques image — le croquis posé dessous pour placer les zones — sont
+ * ignorés : ils n'entrent jamais dans le jeu.
  *
- * Les éditeurs empilent les groupes et les `transform="matrix(...)"` : c'est ici
- * qu'on les aplatit, pour que l'utilisateur n'ait jamais à garder son SVG
- * propre. Un objet tourné est ramené à sa boîte englobante — le jeu ne sait pas
- * gérer une zone tactile oblique.
+ * La sortie est du **TypeScript** et non du JSON, et c'est délibéré : figée en
+ * `as const`, elle donne au compilateur la liste exacte des noms du plan. Une
+ * zone inventée dans le code — `dec_nuages` qui n'existe dans aucune carte —
+ * devient une erreur de `tsc`, pas une découverte à l'exécution. Voir
+ * src/game/scenes/layout.ts.
  */
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { basename, dirname, extname, join, relative, resolve } from 'node:path';
+import { basename, extname, join, relative, resolve } from 'node:path';
 
 /**
  * Recopiés de src/game/config.ts : un outil Node ne peut pas importer du
@@ -40,192 +42,47 @@ const MIN_TOUCH_SIZE = 88;
 const SCENES_DIR = 'game-design/scenes';
 const OUT_DIR = 'src/generated/scenes';
 
-/** Rôles reconnus, dans l'ordre où ils apparaissent dans le JSON produit. */
-const ROLES = { hs: 'hotspots', exit: 'exits', dec: 'decor' };
+/** Classes reconnues -> clé du plan produit. */
+const ROLES = { hotspot: 'hotspots', exit: 'exits', decor: 'decor' };
 
-/** Éléments qui ne sont pas dessinés : leur géométrie ne veut rien dire. */
-const NOT_RENDERED = new Set([
-  'defs', 'clipPath', 'mask', 'symbol', 'marker', 'pattern', 'style', 'title', 'desc', 'metadata',
-]);
+/** Un identifiant doit rester écrivable tel quel dans le code généré. */
+const ID_VALIDE = /^[a-z][a-z0-9_]*$/;
 
 // ---------------------------------------------------------------------------
-// Lecture XML
+// Lecture de la carte
 // ---------------------------------------------------------------------------
-
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
-
-function decodeEntities(text) {
-  return text.replace(/&(#x?[0-9a-fA-F]+|\w+);/g, (whole, body) => {
-    if (body[0] === '#') {
-      const code = body[1] === 'x' ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
-      return Number.isFinite(code) ? String.fromCodePoint(code) : whole;
-    }
-    return ENTITIES[body] ?? whole;
-  });
-}
-
-function parseAttrs(text) {
-  const attrs = {};
-  const re = /([\w:.-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
-  let m;
-  while ((m = re.exec(text))) attrs[m[1]] = decodeEntities(m[2] ?? m[3] ?? '');
-  return attrs;
-}
 
 /**
- * Analyseur XML minimal, suffisant pour du SVG d'éditeur (toujours bien formé).
- * On garde la structure, les attributs, et le texte — ce dernier uniquement
- * pour vérifier que l'étiquette affichée dit bien la même chose que le nom.
+ * Les objets de tous les calques, les groupes aplatis.
+ *
+ * Tiled autorise des calques de groupe imbriqués, avec leur propre décalage
+ * (`offsetx`/`offsety`). On l'accumule en descendant plutôt que de l'ignorer :
+ * un plan rangé dans un groupe déplacé sortirait sinon décalé du même montant.
  */
-function parseXml(source) {
-  const root = { tag: '#root', attrs: {}, children: [] };
-  const stack = [root];
-  const re =
-    /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE[^>]*>|<\/([\w:.-]+)\s*>|<([\w:.-]+)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
-  let m;
-  let fin = 0;
-  while ((m = re.exec(source))) {
-    const [whole, closing, opening, attrText, selfClosing] = m;
-
-    const parent = stack[stack.length - 1];
-    if (m.index > fin) {
-      const texte = source.slice(fin, m.index);
-      if (texte.trim()) parent.text = (parent.text ?? '') + texte;
-    }
-    fin = re.lastIndex;
-
-    if (!closing && !opening) continue; // commentaire, prologue, doctype, CDATA
-
-    if (closing) {
-      // Fermeture : on remonte jusqu'à la balise ouvrante correspondante. Une
-      // fermeture orpheline est ignorée plutôt que de décaler tout l'arbre.
-      const depth = stack.map((n) => n.tag).lastIndexOf(closing);
-      if (depth > 0) stack.length = depth;
-      continue;
-    }
-
-    const node = { tag: opening, attrs: parseAttrs(attrText ?? ''), children: [] };
-    stack[stack.length - 1].children.push(node);
-    if (!selfClosing) stack.push(node);
-  }
-  return root.children.find((n) => n.tag === 'svg') ?? root;
-}
-
-// ---------------------------------------------------------------------------
-// Transformations affines, au format matrix(a b c d e f) du SVG
-// ---------------------------------------------------------------------------
-
-const IDENTITY = [1, 0, 0, 1, 0, 0];
-
-/** m ∘ n : applique n, puis m. */
-function multiply(m, n) {
-  return [
-    m[0] * n[0] + m[2] * n[1],
-    m[1] * n[0] + m[3] * n[1],
-    m[0] * n[2] + m[2] * n[3],
-    m[1] * n[2] + m[3] * n[3],
-    m[0] * n[4] + m[2] * n[5] + m[4],
-    m[1] * n[4] + m[3] * n[5] + m[5],
-  ];
-}
-
-function apply(m, x, y) {
-  return [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
-}
-
-function parseTransform(text) {
-  let result = IDENTITY;
-  const re = /(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)/g;
-  let m;
-  while ((m = re.exec(text))) {
-    const a = m[2].split(/[\s,]+/).filter(Boolean).map(Number);
-    const rad = (deg) => (deg * Math.PI) / 180;
-    let step = IDENTITY;
-    switch (m[1]) {
-      case 'matrix':
-        step = a.length === 6 ? a : IDENTITY;
-        break;
-      case 'translate':
-        step = [1, 0, 0, 1, a[0] || 0, a[1] || 0];
-        break;
-      case 'scale':
-        step = [a[0] ?? 1, 0, 0, a[1] ?? a[0] ?? 1, 0, 0];
-        break;
-      case 'rotate': {
-        const c = Math.cos(rad(a[0] || 0));
-        const s = Math.sin(rad(a[0] || 0));
-        step = [c, s, -s, c, 0, 0];
-        // rotate(angle, cx, cy) tourne autour d'un point : on encadre par la
-        // translation aller-retour.
-        if (a.length >= 3) {
-          step = multiply(multiply([1, 0, 0, 1, a[1], a[2]], step), [1, 0, 0, 1, -a[1], -a[2]]);
-        }
-        break;
+function collecterObjets(calques, dx = 0, dy = 0) {
+  const objets = [];
+  for (const calque of calques ?? []) {
+    const ox = dx + (calque.offsetx ?? 0);
+    const oy = dy + (calque.offsety ?? 0);
+    if (calque.type === 'group') objets.push(...collecterObjets(calque.layers, ox, oy));
+    else if (calque.type === 'objectgroup') {
+      for (const objet of calque.objects ?? []) {
+        objets.push({ ...objet, x: objet.x + ox, y: objet.y + oy });
       }
-      case 'skewX':
-        step = [1, 0, Math.tan(rad(a[0] || 0)), 1, 0, 0];
-        break;
-      case 'skewY':
-        step = [1, Math.tan(rad(a[0] || 0)), 0, 1, 0, 0];
-        break;
     }
-    result = multiply(result, step);
   }
-  return result;
+  return objets;
 }
 
-// ---------------------------------------------------------------------------
-// Géométrie
-// ---------------------------------------------------------------------------
+const arrondir = (b) => ({
+  x: Math.round(b.x),
+  y: Math.round(b.y),
+  w: Math.round(b.w),
+  h: Math.round(b.h),
+});
 
-const num = (value, fallback = 0) => {
-  const n = parseFloat(value);
-  return Number.isFinite(n) ? n : fallback;
-};
-
-/** Boîte englobante d'une forme, dans ses coordonnées locales. */
-function localBox(node) {
-  const a = node.attrs;
-  switch (node.tag) {
-    case 'rect':
-    case 'image':
-      return { x: num(a.x), y: num(a.y), w: num(a.width), h: num(a.height) };
-    case 'circle':
-      return { x: num(a.cx) - num(a.r), y: num(a.cy) - num(a.r), w: 2 * num(a.r), h: 2 * num(a.r) };
-    case 'ellipse':
-      return {
-        x: num(a.cx) - num(a.rx),
-        y: num(a.cy) - num(a.ry),
-        w: 2 * num(a.rx),
-        h: 2 * num(a.ry),
-      };
-    case 'line':
-      return boxOfPoints([
-        [num(a.x1), num(a.y1)],
-        [num(a.x2), num(a.y2)],
-      ]);
-    case 'polygon':
-    case 'polyline':
-      return boxOfPoints(pairs(a.points ?? ''));
-    case 'path':
-      // Approximation : on prend tous les nombres du chemin, points de contrôle
-      // compris. La boîte peut donc dépasser la courbe réelle — d'où
-      // l'avertissement plus bas. Un plan se dessine en rectangles.
-      return boxOfPoints(pairs(a.d ?? ''));
-    default:
-      return null;
-  }
-}
-
-function pairs(text) {
-  const nums = (text.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi) ?? []).map(Number);
-  const out = [];
-  for (let i = 0; i + 1 < nums.length; i += 2) out.push([nums[i], nums[i + 1]]);
-  return out;
-}
-
-function boxOfPoints(points) {
-  if (points.length === 0) return null;
+/** Boîte englobante d'une liste de points. */
+function boiteDe(points) {
   const xs = points.map((p) => p[0]);
   const ys = points.map((p) => p[1]);
   const x = Math.min(...xs);
@@ -233,220 +90,240 @@ function boxOfPoints(points) {
   return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
 }
 
-/** Boîte englobante de la boîte transformée — les quatre coins, puis min/max. */
-function transformBox(box, m) {
-  return boxOfPoints([
-    apply(m, box.x, box.y),
-    apply(m, box.x + box.w, box.y),
-    apply(m, box.x, box.y + box.h),
-    apply(m, box.x + box.w, box.y + box.h),
-  ]);
-}
-
-function union(a, b) {
-  if (!a) return b;
-  if (!b) return a;
-  const x = Math.min(a.x, b.x);
-  const y = Math.min(a.y, b.y);
-  return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y };
-}
-
-const round = (box) => ({
-  x: Math.round(box.x),
-  y: Math.round(box.y),
-  w: Math.round(box.w),
-  h: Math.round(box.h),
-});
-
-// ---------------------------------------------------------------------------
-// Étiquettes
-// ---------------------------------------------------------------------------
-
-/**
- * Le nom visible de l'objet dans l'éditeur. Inkscape l'écrit dans
- * `inkscape:label`, Illustrator dans `data-name`, Figma directement dans `id`
- * (case « Include id attribute » à l'export).
- */
-function nameOf(node) {
-  return node.attrs['inkscape:label'] ?? node.attrs['data-name'] ?? node.attrs.id ?? '';
-}
-
-function slug(text) {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-}
-
-/** Texte d'un nœud et de ses descendants — un <text> peut contenir des <tspan>. */
-function textOf(node) {
-  return (node.text ?? '') + node.children.map(textOf).join('');
+/** Applique la rotation Tiled (degrés, autour de l'origine de l'objet). */
+function tourner(points, ox, oy, degres) {
+  if (!degres) return points;
+  const a = (degres * Math.PI) / 180;
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  return points.map(([x, y]) => {
+    const px = x - ox;
+    const py = y - oy;
+    return [ox + px * cos - py * sin, oy + px * sin + py * cos];
+  });
 }
 
 /**
- * L'étiquette *dessinée* dans une boîte. Purement décorative : elle est là pour
- * qu'un humain lise le plan. On la relit quand même, pour vérifier qu'elle ne
- * ment pas — renommer le groupe sans retoucher le texte donnerait un plan qui
- * affiche une chose et en produit une autre.
+ * Géométrie d'un objet Tiled, ramenée au vocabulaire du jeu : une boîte, et un
+ * contour quand la zone est un polygone.
  */
-function labelOf(node) {
-  return node.children
-    .filter((c) => c.tag === 'text')
-    .map(textOf)
-    .join(' ')
-    .trim();
-}
+function geometrieDe(objet) {
+  const { x, y, width = 0, height = 0, rotation = 0 } = objet;
 
-function tagOf(node) {
-  const m = /^\s*(hs|exit|dec)[_-](.+)$/i.exec(nameOf(node));
-  if (!m) return null;
-  const id = slug(m[2]);
-  return id ? { role: m[1].toLowerCase(), id } : null;
-}
-
-// ---------------------------------------------------------------------------
-// Parcours du document
-// ---------------------------------------------------------------------------
-
-/**
- * Descend l'arbre en accumulant les transformations, et renvoie la boîte
- * englobante du sous-arbre — ce qui donne gratuitement la boîte d'un groupe
- * nommé : c'est l'union de ce qu'il contient.
- */
-function visit(node, matrix, found) {
-  if (NOT_RENDERED.has(node.tag)) return null;
-
-  const m = node.attrs.transform ? multiply(matrix, parseTransform(node.attrs.transform)) : matrix;
-  const own = localBox(node);
-  let box = own && own.w >= 0 && own.h >= 0 ? transformBox(own, m) : null;
-
-  for (const child of node.children) box = union(box, visit(child, m, found));
-
-  const tag = tagOf(node);
-  if (tag) found.push({ ...tag, box, shape: node.tag, etiquette: labelOf(node) });
-  return box;
-}
-
-/**
- * Matrice qui amène le repère du document dans l'espace logique du jeu.
- * Un plan dessiné en 2560x1440 ou en millimètres reste donc exploitable.
- */
-function rootMatrix(svg, warn) {
-  const vb = (svg.attrs.viewBox ?? '').split(/[\s,]+/).filter(Boolean).map(Number);
-  let minX = 0;
-  let minY = 0;
-  let width = num(svg.attrs.width, DESIGN_WIDTH);
-  let height = num(svg.attrs.height, DESIGN_HEIGHT);
-
-  if (vb.length === 4 && vb.every(Number.isFinite)) [minX, minY, width, height] = vb;
-  if (!width || !height) return IDENTITY;
-
-  const sx = DESIGN_WIDTH / width;
-  const sy = DESIGN_HEIGHT / height;
-  if (Math.abs(sx - sy) > 0.01 * Math.max(sx, sy)) {
-    warn(
-      `le document fait ${Math.round(width)}x${Math.round(height)}, pas du 16:9 — ` +
-        `les proportions du plan ne sont pas celles du jeu`,
+  if (objet.polygon) {
+    const points = tourner(
+      objet.polygon.map((p) => [x + p.x, y + p.y]),
+      x,
+      y,
+      rotation,
     );
+    return { box: boiteDe(points), points, forme: 'polygone' };
   }
-  if (Math.abs(sx - 1) > 0.001 || Math.abs(sy - 1) > 0.001) {
-    warn(`document ${Math.round(width)}x${Math.round(height)} ramené à ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
+  if (objet.point) {
+    return { box: { x, y, w: 0, h: 0 }, forme: 'point' };
   }
-  return multiply([sx, 0, 0, sy, 0, 0], [1, 0, 0, 1, -minX, -minY]);
+  if (objet.polyline) {
+    return { erreur: 'une polyligne est un trait, pas une zone — utiliser un polygone' };
+  }
+  if (objet.gid !== undefined) {
+    return { erreur: "un objet-tuile n'a pas de sens dans un plan — utiliser un rectangle" };
+  }
+
+  const coins = tourner(
+    [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height],
+    ],
+    x,
+    y,
+    rotation,
+  );
+  return { box: boiteDe(coins), forme: objet.ellipse ? 'ellipse' : 'rectangle', rotation };
 }
 
 // ---------------------------------------------------------------------------
-// Import d'un plan
+// Import
 // ---------------------------------------------------------------------------
 
-function importScene(file, name) {
+function importScene(fichier, nom) {
   const warnings = [];
   const errors = [];
-  const warn = (msg) => warnings.push(msg);
+  const warn = (m) => warnings.push(m);
 
-  const svg = parseXml(readFileSync(file, 'utf8'));
-  if (svg.tag !== 'svg') {
-    errors.push('ce fichier ne contient pas de balise <svg>');
-    return { warnings, errors };
+  const layout = { scene: nom, source: fichier, design: {}, hotspots: [], exits: [], decor: {} };
+
+  let carte;
+  try {
+    carte = JSON.parse(readFileSync(fichier, 'utf8'));
+  } catch (e) {
+    return { layout, warnings, errors: [`carte illisible : ${e.message}`] };
   }
 
-  const found = [];
-  visit(svg, rootMatrix(svg, warn), found);
+  if (carte.type !== 'map') {
+    return { layout, warnings, errors: ['ce fichier n\'est pas une carte Tiled (.tmj)'] };
+  }
+  if (carte.infinite) {
+    return { layout, warnings, errors: ['carte « infinie » : la passer en taille fixe 1280x720'] };
+  }
 
-  const layout = { scene: name, source: file.split('\\').join('/'), design: { width: DESIGN_WIDTH, height: DESIGN_HEIGHT }, hotspots: [], exits: [], decor: {} };
-  const seen = new Map();
+  const largeur = carte.width * carte.tilewidth;
+  const hauteur = carte.height * carte.tileheight;
+  layout.design = { width: largeur, height: hauteur };
+  if (largeur !== DESIGN_WIDTH || hauteur !== DESIGN_HEIGHT) {
+    errors.push(
+      `la carte fait ${largeur}x${hauteur}, le jeu attend ${DESIGN_WIDTH}x${DESIGN_HEIGHT} ` +
+        '(Map > Map Properties, ou tuiles de 80x80 sur 16x9)',
+    );
+    return { layout, warnings, errors };
+  }
 
-  for (const item of found) {
-    const key = `${item.role}_${item.id}`;
-    if (seen.has(key)) {
-      errors.push(`« ${key} » est présent deux fois — chaque élément doit avoir un nom unique`);
+  const vus = { hotspot: new Set(), exit: new Set(), decor: new Set() };
+
+  for (const objet of collecterObjets(carte.layers)) {
+    // Tiled a renommé `type` en `class` en 1.9, mais écrit encore `type` dans
+    // les formats de carte antérieurs à 1.10 : les deux sont acceptés.
+    const role = objet.class || objet.type || '';
+    const nomObjet = (objet.name || '').trim();
+    const ou = nomObjet ? `« ${nomObjet} »` : `l'objet #${objet.id}`;
+
+    if (!role) {
+      errors.push(`${ou} n'a pas de classe — la choisir dans Properties > Class`);
       continue;
     }
-    seen.set(key, item);
+    if (!ROLES[role]) {
+      errors.push(`${ou} a la classe « ${role} », inconnue (${Object.keys(ROLES).join(', ')})`);
+      continue;
+    }
+    if (!nomObjet) {
+      errors.push(`un objet « ${role} » n'a pas de nom — le code n'a aucun moyen de le désigner`);
+      continue;
+    }
+    if (!ID_VALIDE.test(nomObjet)) {
+      errors.push(
+        `« ${nomObjet} » n'est pas un identifiant valide — minuscules, chiffres et « _ » seulement`,
+      );
+      continue;
+    }
+    // L'unicité est **par classe** : `porte` peut être à la fois un hotspot et
+    // un repère de décor, ce sont deux choses différentes au même endroit.
+    if (vus[role].has(nomObjet)) {
+      errors.push(`« ${nomObjet} » apparaît deux fois en « ${role} »`);
+      continue;
+    }
+    vus[role].add(nomObjet);
 
-    // Le nom du groupe fait foi ; l'étiquette n'est qu'un rappel visuel. Si les
-    // deux divergent, c'est presque toujours un renommage à moitié fait.
-    if (item.etiquette && slug(item.etiquette) !== slug(key)) {
+    const geo = geometrieDe(objet);
+    if (geo.erreur) {
+      errors.push(`« ${nomObjet} » : ${geo.erreur}`);
+      continue;
+    }
+
+    const box = arrondir(geo.box);
+    if (geo.forme !== 'point' && (box.w <= 0 || box.h <= 0)) {
+      errors.push(`« ${nomObjet} » est plat (${box.w}x${box.h})`);
+      continue;
+    }
+    if (geo.forme === 'ellipse') {
+      warn(`« ${nomObjet} » est une ellipse : ramenée à sa boîte, préférer un rectangle`);
+    }
+    if (geo.rotation) {
       warn(
-        `« ${key} » porte l'étiquette « ${item.etiquette} » — c'est le nom du ` +
-          `groupe qui compte, l'étiquette est à corriger`,
+        `« ${nomObjet} » est tourné de ${geo.rotation}° : ramené à sa boîte englobante — ` +
+          'le jeu ne sait pas gérer une zone oblique',
       );
     }
-
-    if (!item.box) {
-      errors.push(`« ${key} » n'a aucune géométrie (groupe vide ?)`);
-      continue;
-    }
-    const box = round(item.box);
-    if (box.w <= 0 || box.h <= 0) {
-      errors.push(`« ${key} » est plat (${box.w}x${box.h})`);
-      continue;
-    }
-    if (item.shape === 'path') {
-      warn(`« ${key} » est un tracé : sa boîte est approximative, préférer un rectangle`);
-    }
-    if (box.x < 0 || box.y < 0 || box.x + box.w > DESIGN_WIDTH || box.y + box.h > DESIGN_HEIGHT) {
-      warn(`« ${key} » déborde du cadre ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
+    if (box.x < 0 || box.y < 0 || box.x + box.w > largeur || box.y + box.h > hauteur) {
+      warn(`« ${nomObjet} » déborde du cadre ${largeur}x${hauteur}`);
     }
 
-    if (item.role === 'dec') {
-      layout.decor[item.id] = box;
+    if (role === 'decor') {
+      layout.decor[nomObjet] = box;
       continue;
     }
     // Une zone tactile plus petite que le pouce est élargie par touchRect() ;
     // on le signale, parce que l'élargissement peut faire mordre sur un voisin.
-    if (box.w < MIN_TOUCH_SIZE || box.h < MIN_TOUCH_SIZE) {
+    // Un polygone, lui, n'est pas élargissable : sa forme est le propos.
+    if (geo.points) {
+      if (box.w < MIN_TOUCH_SIZE || box.h < MIN_TOUCH_SIZE) {
+        warn(
+          `« ${nomObjet} » est un polygone de ${box.w}x${box.h}, sous la cible tactile de ` +
+            `${MIN_TOUCH_SIZE} — un polygone n'est pas élargi, il sera dur à toucher`,
+        );
+      }
+    } else if (box.w < MIN_TOUCH_SIZE || box.h < MIN_TOUCH_SIZE) {
       warn(
-        `« ${key} » fait ${box.w}x${box.h}, sous la cible tactile de ${MIN_TOUCH_SIZE} — ` +
-          `la zone sera élargie automatiquement`,
+        `« ${nomObjet} » fait ${box.w}x${box.h}, sous la cible tactile de ${MIN_TOUCH_SIZE} — ` +
+          'la zone sera élargie automatiquement',
       );
     }
-    layout[ROLES[item.role]].push({ id: item.id, ...box });
+
+    const zone = { id: nomObjet, ...box };
+    if (geo.points) zone.points = geo.points.map(([x, y]) => [Math.round(x), Math.round(y)]);
+    layout[ROLES[role]].push(zone);
   }
 
   layout.hotspots.sort((a, b) => a.id.localeCompare(b.id));
   layout.exits.sort((a, b) => a.id.localeCompare(b.id));
-  layout.decor = Object.fromEntries(Object.entries(layout.decor).sort(([a], [b]) => a.localeCompare(b)));
+  layout.decor = Object.fromEntries(
+    Object.entries(layout.decor).sort(([a], [b]) => a.localeCompare(b)),
+  );
 
   if (layout.hotspots.length === 0 && layout.exits.length === 0) {
-    warn('aucun hs_ ni exit_ trouvé — les noms d\'objets sont-ils bien renseignés ?');
+    warn('aucun hotspot ni exit — les classes des objets sont-elles renseignées ?');
   }
   return { layout, warnings, errors };
+}
+
+// ---------------------------------------------------------------------------
+// Écriture
+// ---------------------------------------------------------------------------
+
+const boiteLitterale = (b) => `{ x: ${b.x}, y: ${b.y}, w: ${b.w}, h: ${b.h} }`;
+
+function zoneLitterale(z) {
+  const base = `{ id: '${z.id}', x: ${z.x}, y: ${z.y}, w: ${z.w}, h: ${z.h}`;
+  if (!z.points) return `${base} }`;
+  const points = z.points.map(([x, y]) => `[${x}, ${y}]`).join(', ');
+  return `${base}, points: [${points}] }`;
+}
+
+function rendre(layout) {
+  const liste = (zones) =>
+    zones.length === 0 ? '[]' : `[\n${zones.map((z) => `    ${zoneLitterale(z)},`).join('\n')}\n  ]`;
+  const reperes = Object.entries(layout.decor);
+  const decor =
+    reperes.length === 0
+      ? '{}'
+      : `{\n${reperes.map(([id, b]) => `    ${id}: ${boiteLitterale(b)},`).join('\n')}\n  }`;
+
+  return `/**
+ * Généré par « npm run scenes » — ne pas modifier à la main.
+ * Source : ${layout.source}
+ */
+export default {
+  scene: '${layout.scene}',
+  source: '${layout.source}',
+  design: { width: ${layout.design.width}, height: ${layout.design.height} },
+  hotspots: ${liste(layout.hotspots)},
+  exits: ${liste(layout.exits)},
+  decor: ${decor},
+} as const;
+`;
 }
 
 // ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
-function listSvg(dir) {
+function listerCartes(dir) {
   const out = [];
   for (const entry of readdirSync(dir)) {
     const path = join(dir, entry);
-    if (statSync(path).isDirectory()) out.push(...listSvg(path));
+    if (statSync(path).isDirectory()) out.push(...listerCartes(path));
     // Les fichiers commençant par « _ » sont des gabarits, pas des scènes.
-    else if (extname(entry) === '.svg' && !entry.startsWith('_')) out.push(path);
+    else if (extname(entry) === '.tmj' && !entry.startsWith('_')) out.push(path);
   }
   return out;
 }
@@ -461,7 +338,7 @@ function main() {
   let files = inputs.map((f) => resolve(f));
   if (files.length === 0) {
     try {
-      files = listSvg(SCENES_DIR).map((f) => resolve(f));
+      files = listerCartes(SCENES_DIR).map((f) => resolve(f));
     } catch {
       console.log(`[scenes] ${SCENES_DIR}/ absent, rien à importer`);
       return;
@@ -495,8 +372,8 @@ function main() {
 
     if (check) continue;
     mkdirSync(OUT_DIR, { recursive: true });
-    const out = join(OUT_DIR, `${name}.json`);
-    writeFileSync(out, `${JSON.stringify(layout, null, 2)}\n`);
+    const out = join(OUT_DIR, `${name}.ts`);
+    writeFileSync(out, rendre(layout));
     console.log(`  ✓ ${out}`);
   }
 

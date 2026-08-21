@@ -73,39 +73,45 @@ VAR has_bois = false
 
 // Joué automatiquement à la première arrivée dans la scène (PontScene.create).
 === pont_arrivee ===
-À ÉCRIRE — constatation à l'arrivée : le précipice, le pont qui n'est plus là, l'impasse. # flag: pont_vu
+# qui: heros
+Pfiou... ce voyage de retour dans mon pays natal a été épuisant. Crôa crôa
+J'ai hâte de retrouver tous mes amis !
+Tiens, je ne me rappelais pas que la route était bloquée ici, qu'est-ce qu'il s'est passé ?
+# flag: pont_vu
 -> DONE
 
 === pont_precipice ===
-À ÉCRIRE — ce que le héros voit en se penchant sur le vide.
-À ÉCRIRE — et ce qui le trouble : rien n'est tombé, rien n'est rompu. Le pont a simplement disparu, comme le père du jeune arbre.
+# qui: heros
+J'aurais juré qu'on pouvait traverser ici avant... Crôa crôa
+Il devait y avoir un pont, mais plus aucune trace.
 -> DONE
 
-// Seul le pont POSÉ s'examine : avant, il n'y a rien à cet endroit — pas des
-// moignons, pas une travée rompue, rien. C'est le précipice qu'on regarde.
 === pont_pont ===
-À ÉCRIRE — le pont de papier une fois posé : est-ce que ça tiendra vraiment ?
+# qui: heros
+Ok, heureusement que je ne suis pas trop lourd et que j'ai pas trop le vertige... On va y aller doucement, c'est pas rassurant.
 -> DONE
 
 // Examiner la feuille ouvre le choix du modèle. Choisir le pont lance l'énigme.
 === pont_feuille ===
-À ÉCRIRE — description de la feuille de papier trouvée au sol.
-À ÉCRIRE — la question que se pose le héros : qu'est-ce que je pourrais en faire ?
-
-// `+` et non `*` : la feuille doit rester ré-analysable tant qu'elle n'est pas
-// pliée, pour qu'écarter une mauvaise piste ne ferme pas l'accès au bon modèle.
-+ [À ÉCRIRE — choix : un pont]
+Une feuille de papier est posée devant le précipice.
+# qui: heros
+Je devrais bien pouvoir en faire quelque chose
++ [plier une catapulte]
+    Si je traverse en catapulte, je risque de finir en pâté de grenouille...
++ [plier un pont]
+    Je me disais bien qu'il y avait un pont ici avant.
     -> pont_enigme
-+ [À ÉCRIRE — choix : un autre modèle (mauvaise piste)]
-    À ÉCRIRE — pourquoi ce modèle ne résout rien ici.
-+ [À ÉCRIRE — choix : reposer la feuille]
-    À ÉCRIRE — le héros repose la feuille.
++ [plier un avion]
+    Ça a l'air rigolo, mais j'ai bien peur de ne pas savoir piloter un tel engin...
++ [se moucher avec]
+    J'ai attrapé froid avec ce voyage, mais cette feuille a l'air utile. Je trouverai bien des mouchoirs en rentrant.
 // Gather obligatoire : le `-> DONE` ci-dessous est au niveau du knot et ne
 // rattrape pas les branches, qui tomberaient dans le vide.
 - -> DONE
 
 === pont_enigme ===
-À ÉCRIRE — le héros s'accroupit et étale la feuille devant lui.
+# qui: heros
+Je vais pouvoir mettre en pratique mes talents d'origamiste ! Revoyons les bases.
 -> pont_enigme_lancement
 
 // Tag seul, sans texte : ink évalue en avance, donc une condition écrite à la
@@ -118,10 +124,10 @@ VAR has_bois = false
 
 === pont_enigme_issue ===
 { flag_pont_resolu:
-    À ÉCRIRE — réussite : le tracé est juste, le papier sait quoi faire. # origami: pont # flag: pont_plie
-    À ÉCRIRE — le pont est en place au-dessus du vide.
+    Je n'ai pas trop perdu de mes talents d'origamiste. Bon, ce n'était que deux plis. # origami: pont # flag: pont_plie
+    Le pont se positionne pile au-dessus du vide, je vais pouvoir rentrer chez moi !
   - else:
-    À ÉCRIRE — échec ou abandon : la feuille reste lisse, rien n'est décidé.
+    Hmm je crois avoir le syndrome de la page blanche...
 }
 -> DONE
 
@@ -131,39 +137,71 @@ VAR has_bois = false
 === pont_arbre ===
 { flag_arbre_parle: -> pont_arbre_revoir }
 # qui: narrateur
-À ÉCRIRE — le jeune arbre, ses plis encore nets.
+Un jeune chêne qui a l'air triste.
+# qui: heros
+Salut l'ami, tu as bien grandi depuis la dernière fois ! Tu n'étais qu'une jeune pousse.
 # qui: arbre
-À ÉCRIRE — il est triste : son vieux père, mort il y a peu, a disparu d'un coup.
+...
+# qui: heros
+Ça n'a pas l'air d'être la grande forme, tu fais une gueule d'enterrement, qu'est-ce qui t'arrive ? Crôa crôa
+# qui: arbre
+Snif... Mon père, le vieux chêne vénérable, n'est plus. Je ne peux même pas honorer sa dépouille comme il se doit, il a disparu.
+# qui: heros
+Oh quel gâchis, on aurait pu en faire de belles armoires...
+# qui: arbre
+Oui quelle tristesse... Snif
 # qui: narrateur
-À ÉCRIRE — le héros retient sa forme : il saurait la refaire. # flag: arbre_parle # give: idee_arbre
+La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: arbre_parle # give: idee_arbre
 -> DONE
 
-// Visites suivantes. La proposition n'apparaît qu'une fois la hache en main :
-// avant, le héros n'a rien à offrir.
+// Visites suivantes. La demande n'a de sens qu'une fois le père replié ET la
+// hache en main : avant, le héros n'a rien à montrer ni rien à offrir.
+//
+// ⚠ L'accord se teste EN PREMIER. Le drapeau que la demande lève ne ferme
+// aucune des conditions qui la déclenchent : testé en dernier, il ne serait
+// jamais atteint et la scène se rejouerait à chaque visite. Chaque branche d'un
+// bloc conditionnel commence par un tiret — sans lui, `flag_arbre_demande:`
+// n'est pas une condition mais une ligne de dialogue, affichée telle quelle.
 === pont_arbre_revoir ===
-{ has_hache && not flag_vieil_arbre_decoupe:
-    # qui: heros
-    À ÉCRIRE — proposer d'aller trouver le père, et d'user de la lame pour l'honorer.
+// Trois branches : chacune commence par un tiret, condition comprise. Sans
+// lui, ink refuse la deuxième condition — ou, si le tiret manque à la seule
+// deuxième, la lit comme une ligne de dialogue et l'affiche telle quelle.
+{
+  - flag_arbre_demande:
     # qui: arbre
-    À ÉCRIRE — le fils accepte : que la lame serve à l'honorer. # flag: arbre_demande
+    J'espère qu'il fera de beaux meubles !
+  - flag_arbre_plie && has_hache:
+    # qui: heros
+    J'ai replié ton père, le vieux chêne vénérable ! Tu vas pouvoir te recueillir. En plus le pont est à nouveau là.
+    # qui: arbre
+    Oh, je suis tellement content ! Peut-être qu'il pourra devenir une magnifique armoire maintenant.
+    # qui: heros
+    Justement... J'ai besoin de réparer une porte.
+    # qui: arbre
+    Bon, j'imagine que c'est déjà ça. Ça fera un bel hommage.
+    # qui: heros
+    Merci, s'il reste des planches on pourra peut-être faire de beaux meubles au château.
+    # flag: arbre_demande
   - else:
     # qui: arbre
-    À ÉCRIRE — quelques mots de plus, sans nouvelle piste.
+    Snif...
 }
 -> DONE
 
 // La grande feuille de la rive d'en face — le vieil arbre en puissance.
 === pont_feuille_vieil_arbre ===
+# qui: heros
 { flag_arbre_plie: -> pont_vieil_arbre_plie }
 { not has_idee_arbre:
-    À ÉCRIRE — une grande feuille, épaisse. Rien ne vient : il ne sait pas quoi en faire.
+    Une grande feuille aux teintes de... feuille. Je ne sais pas quoi en faire pour le moment.
     -> DONE
 }
-À ÉCRIRE — cette fois il reconnaît la forme. C'est un arbre qui dort là-dedans.
+Ca doit être là que se trouvait le vieil arbre. Je peux le faire revenir.
 -> pont_arbre_enigme
 
 === pont_arbre_enigme ===
-À ÉCRIRE — le héros étale la grande feuille sur la rive.
+# qui: heros
+Essayons de reproduire ce modèle d'arbre.
 -> pont_arbre_enigme_lancement
 
 === pont_arbre_enigme_lancement ===
@@ -172,10 +210,11 @@ VAR has_bois = false
 
 === pont_arbre_enigme_issue ===
 { flag_arbre_resolu:
-    À ÉCRIRE — réussite : le pliage tient. # origami: arbre # flag: arbre_plie # drop: idee_arbre
-    À ÉCRIRE — le vieil arbre se dresse sur la rive, mort et debout.
+    # origami: arbre # flag: arbre_plie # drop: idee_arbre
+    -> pont_vieil_arbre_plie
   - else:
-    À ÉCRIRE — échec ou abandon : la feuille reste lisse.
+    # qui: heros
+    Je n'arrive pas à en tirer quoi que ce soit.
 }
 -> DONE
 
@@ -186,18 +225,24 @@ VAR has_bois = false
 // donne le droit moral de découper son père — sans quoi le geste n'est qu'un
 // abattage (game-design/scenes/chapter-1/le-pont.md).
 { not has_hache:
-    À ÉCRIRE — le vieil arbre, debout. Rien à en tirer sans lame.
+    # qui: narrateur
+    Le majestueux vieux chêne se dresse au bord du vide.
     -> DONE
 }
 { not flag_arbre_demande:
-    À ÉCRIRE — la lame est là, mais ce n'est pas au héros d'en décider : il faudrait en parler au fils.
+    # qui: heros
+    Je pourrais couper l'arbre avec ma hache pour réparer la porte, mais je ne veux pas commettre un arbricide, même s'il paraît qu'il est déjà mort.
+    Je devrais demander l'autorisation à son fils d'abord.
     -> DONE
 }
-À ÉCRIRE — la lame pèse dans la main du héros, et le fils a dit oui. C'est maintenant, ou jamais.
-+ [À ÉCRIRE — choix : découper le vieil arbre]
-    À ÉCRIRE — le geste, le bruit du papier, ce que ça coûte. # give: bois # drop: hache # flag: vieil_arbre_decoupe
-+ [À ÉCRIRE — choix : le laisser debout]
-    À ÉCRIRE — il repose la lame.
+# qui: heros
+Je suis un peu ému à l'idée de transformer en planches ce respectable voisin que je connais depuis mon enfance...
++ [découper le vieil arbre]
+    # qui: narrateur
+    La hache travaille et notre vaillante grenouille est épuisée. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête !
+    # give: bois # drop: hache # flag: vieil_arbre_decoupe
++ [le laisser debout]
+    Je n'ai pas le coeur à faire ça pour l'instant...
 - -> DONE
 
 
@@ -208,7 +253,9 @@ VAR has_bois = false
 
 // Joué automatiquement à la première arrivée dans la scène (PorteScene.create).
 === porte_arrivee ===
-À ÉCRIRE — arrivée devant le village fortifié : le rempart, et le trou à la place de la porte. # flag: porte_vue
+# qui: heros
+Me voici arrivé devant le village fortifié du château. Mais je ne vois plus de porte... Encore un mystère à élucider.
+# flag: porte_vue
 -> DONE
 
 // Le renard est la seule source d'information du chapitre. Chaque révélation
@@ -220,36 +267,57 @@ VAR has_bois = false
 // avant que le drapeau ne soit levé.
 === porte_renard ===
 # qui: renard
-À ÉCRIRE — le renard, assis devant le trou, coincé dehors.
+Mais voici notre origamiste royal de retour !
+# qui: heros
+Content de te revoir, Monsieur le Renard Futé !
+Même si tu n'as pas l'air malin coincé ici.
+Dis-moi, tu n'as pas une idée de ce qu'il se passe ici ? D'abord le pont avait disparu et j'ai dû le replier, ensuite impossible de rentrer en ville, il y a juste une muraille.
+Beaucoup de choses ont changé depuis mon départ...
 -> porte_renard_choix
 
 === porte_renard_choix ===
-+ { not flag_porte_disparue } [À ÉCRIRE — choix : qu'est-ce que tu fais là ?]
++ { not flag_porte_disparue } [Pourquoi tu restes planté là ? Tu n'as pas un vilain tour à préparer pour embêter le Petit Chat ?]
     # qui: renard
-    À ÉCRIRE — il attend. La porte était là il y a peu, et elle n'y est plus. # flag: porte_disparue # then: porte_renard_choix
-+ { flag_porte_disparue && not flag_renard_bois_su } [À ÉCRIRE — choix : elle était comment, cette porte ?]
+    Ahah, très drôle. Moi aussi je voudrais bien rentrer. J'étais parti chercher des insectes effrayants pour faire peur au Petit Chat.
+    Mais quand je suis revenu, plus de porte. À la place, il y a ce papier.
+    # flag: porte_disparue # then: porte_renard_choix
++ { flag_porte_disparue && not flag_renard_bois_su } [Parle moi de la porte]
     # qui: renard
-    À ÉCRIRE — en bois. Il n'en a pas. Mais avec une lame, on en trouverait. # flag: renard_bois_su # give: idee_hache # then: porte_renard_choix
-+ [À ÉCRIRE — choix : prendre congé]
-    # qui: narrateur
-    À ÉCRIRE — le héros le laisse à son attente.
+    Bah, qu'est-ce que tu veux que je te dise...
+    # qui: heros
+    Je suis parti pendant longtemps, je me rappelle plus bien comment elle était, cette porte.
+    La réparer serait utile, mais aide moi à me souvenir.
+    # qui: renard
+    C'était une porte en bois rectangulaire, je sais pas quoi te dire de plus...
+    # qui: heros
+    Bon, ça ira, je vais voir ce que je peux faire.
+    # qui: renard
+    Dépêche-toi, les insectes effrayants me courent partout dessus, ça me chatouille.
+    # flag: renard_bois_su # then: porte_renard_choix
++ { flag_renard_bois_su && not has_idee_hache && not flag_hache_pliee } [Tu as du bois ?]
+    # qui: renard
+    Non, mais avec une hache tu pourrais couper des arbres pour en trouver.
+    # qui: heros
+    Je suis origamiste, pas bûcheron, mais merci pour l'idée.
+    # give: idee_hache # then: porte_renard_choix
++ [Partir]
 - -> DONE
 
 // La grande feuille tendue dans l'embrasure, à la place du battant.
 === porte_porte ===
+# qui: heros
 {
   - has_bois:
-    À ÉCRIRE — il a de quoi faire, maintenant.
+    Je vais pouvoir reconstruire la porte avec ces magnifiques planches de bois.
     -> porte_enigme
-  - flag_porte_disparue:
-    À ÉCRIRE — il faudrait du bois, et il n'en a pas.
+  - flag_renard_bois_su:
+    J'ai besoin de bois pour fabriquer la porte.
   - else:
-    À ÉCRIRE — une embrasure vide, une grande feuille posée en travers. Pour quoi faire ?
+    Je crois qu'il y avait une porte ici avant, mais je ne me rappelle plus trop comment elle était.
 }
 -> DONE
 
 === porte_enigme ===
-À ÉCRIRE — le héros déplie le bois contre l'embrasure.
 -> porte_enigme_lancement
 
 === porte_enigme_lancement ===
@@ -258,10 +326,13 @@ VAR has_bois = false
 
 === porte_enigme_issue ===
 { flag_porte_resolu:
-    À ÉCRIRE — réussite : la porte prend forme. # origami: porte # flag: porte_plie # drop: bois
-    À ÉCRIRE — elle tient dans l'embrasure, et le village s'ouvre.
+    # qui: narrateur
+    La feuille de papier se transforme en une imposante porte. # origami: porte # flag: porte_plie # drop: bois
+    # qui: heros
+    Je vais pouvoir retourner au village !
   - else:
-    À ÉCRIRE — échec ou abandon : le bois reste du bois.
+    # qui: heros
+    J'ai un trou de mémoire...
 }
 -> DONE
 
@@ -270,14 +341,14 @@ VAR has_bois = false
 // celle-ci se dépense plus tard, et la feuille reviendrait.
 === porte_feuille_hache ===
 { not has_idee_hache:
-    À ÉCRIRE — un papier métallisé, plus raide que les autres. Rien ne vient.
+    Une feuille de papier légèrement métallisée. Quoi faire avec ?
     -> DONE
 }
-À ÉCRIRE — une lame. C'est une lame qu'il faut, et il sait la plier.
+# qui: heros
+Voilà un papier parfait pour plier une hache. Le côté métallisé fera une belle lame bien tranchante.
 -> porte_hache_enigme
 
 === porte_hache_enigme ===
-À ÉCRIRE — le héros lisse le papier métallisé devant lui.
 -> porte_hache_enigme_lancement
 
 === porte_hache_enigme_lancement ===
@@ -285,11 +356,12 @@ VAR has_bois = false
 -> DONE
 
 === porte_hache_enigme_issue ===
+# qui: heros
 { flag_hache_resolu:
-    À ÉCRIRE — réussite : le tranchant apparaît. # origami: hache # flag: hache_pliee # give: hache # drop: idee_hache
-    À ÉCRIRE — le héros soupèse la hache de papier.
+    Celui là était plus complexe. # origami: hache # flag: hache_pliee # give: hache # drop: idee_hache
+    Je vais pouvoir faire de belles planches avec cette hache toute neuve !
   - else:
-    À ÉCRIRE — échec ou abandon : le papier refuse de tenir le pli.
+    Ça ne doit pas être ça...
 }
 -> DONE
 
@@ -298,8 +370,8 @@ VAR has_bois = false
 // ⚠ Pas de `# goto:` : le chapitre 2 n'existe pas. Le jour où il existera, ce
 // knot est le seul endroit à modifier.
 === porte_fin_chapitre ===
-À ÉCRIRE — le passage sous la porte de papier, et ce qu'on aperçoit du village.
-À ÉCRIRE — fin du chapitre 1.
+# qui: heros
+Hâte de retourner à la maison ! Je suis quand même un peu inquiet de ce qui m'attend là-bas, j'espère que je ne vais pas voir un tas de feuilles dépliées à la place.
 -> DONE
 
 
@@ -310,6 +382,7 @@ VAR has_bois = false
 // Partagé par toutes les scènes : ce que le héros pense de lui-même ne change
 // pas d'une pièce à l'autre. Il se découpera par scène le jour où ça comptera.
 === heros ===
-# qui: narrateur
-À ÉCRIRE — la grenouille de papier, vue par elle-même.
+# qui: heros
+Je reviens d'un long voyage à l'étranger et je suis épuisé. Hâte de retrouver le confort du château !
+Je suis l'origamiste royal de Sa Majesté Le Libou des Bois Jolis.
 -> DONE

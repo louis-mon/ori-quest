@@ -17,7 +17,7 @@ export const VERB_LABELS: Record<Verb, string> = {
   analyser: 'Analyser',
 };
 
-/** Rectangle en coordonnées logiques, tel que le plan SVG le donne. */
+/** Rectangle en coordonnées logiques, tel que le plan Tiled le donne. */
 export interface Box {
   x: number;
   y: number;
@@ -25,9 +25,20 @@ export interface Box {
   h: number;
 }
 
+/**
+ * Contour d'une zone tracée au polygone dans Tiled, en coordonnées du jeu.
+ *
+ * Une zone en a un quand sa forme est le propos — une berge en biais, une
+ * silhouette d'arbre. Le reste du temps la boîte suffit, et coûte moins cher au
+ * test tactile.
+ */
+export type Contour = readonly (readonly [number, number])[];
+
 export interface HotspotDef extends Box {
   id: string;
   label: string;
+  /** Contour tactile, quand la zone a été tracée au polygone. */
+  points?: Contour;
   /** Verbe -> nom du knot ink à jouer. L'ordre définit l'ordre des boutons. */
   knots: Partial<Record<Verb, string>>;
   /** Le hotspot n'existe que si ce prédicat est vrai (objet déjà pris, etc.). */
@@ -44,7 +55,15 @@ export interface HotspotDef extends Box {
  */
 export interface ExitDef extends Box {
   id: string;
+  /**
+   * Ce que la sortie veut dire, pour qui lit la scène. Il n'est **pas** montré
+   * au joueur : la flèche et le fondu suffisent à dire qu'on part, et une
+   * légende affichée pendant la transition se lisait sur la scène d'arrivée
+   * (voir `PointClickScene.onZone`). Il reste la seule phrase française d'une
+   * sortie qui passe par un knot, là où `room` ne dit rien.
+   */
   label: string;
+  points?: Contour;
   /** Scène de destination. */
   room?: string;
   /** Knot à jouer au lieu de partir directement. */

@@ -21,10 +21,10 @@ le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 
 | Commande | Effet |
 | --- | --- |
-| `npm run dev` | serveur de dev (compile ink et les plans de scène au passage) |
+| `npm run dev` | serveur de dev (compile ink et les plans de scène, puis les suit) |
 | `npm run build` | typecheck + build de production dans `dist/` |
 | `npm run ink` | compile `content/story.ink` -> `src/generated/story.json` |
-| `npm run scenes` | plans SVG `game-design/scenes/` -> `src/generated/scenes/` |
+| `npm run scenes` | cartes Tiled `game-design/scenes/` -> `src/generated/scenes/` |
 | `npm run bake -- <cp.svg>` | crease pattern -> animation `.origami` |
 
 Page de réglage, en développement uniquement (hors build) :
@@ -57,6 +57,40 @@ Les vignettes de dialogue, elles, restent carrées et passent par `sips` :
 
 ```bash
 sips -Z 160 assets-src/graphisme_origami/renard.png --out public/assets/personnages/renard.png
+```
+
+Même chemin pour les pliages qui ne sont pas des personnages — les deux
+marqueurs de l'interface et les nuages du ciel. Ils sont juste rangés ailleurs,
+et livrés en **double densité** : ce qui est petit à l'écran doit rester net sur
+un téléphone.
+
+```bash
+python3 tools/detourer-png.py assets-src/graphisme_origami/parajita.png \
+  public/assets/ui/parajita.png 112              # marqueur « on analyse »
+python3 tools/detourer-png.py assets-src/graphisme_origami/fleche.png \
+  public/assets/ui/fleche.png 112                # marqueur « on change de scène »
+python3 tools/detourer-png.py assets-src/graphisme_origami/soleil.png \
+  public/assets/decor/soleil.png 128
+
+for f in assets-src/graphisme_origami/nuage/*.png; do
+  python3 tools/detourer-png.py "$f" "public/assets/decor/$(basename "$f")" 360
+done
+```
+
+La boucle suit le dossier plutôt qu'une liste de numéros : l'artiste en retire
+et en ajoute, et un modèle qui disparaît en amont doit disparaître de
+`public/assets/decor/` **et** de la liste `MODELES` dans `ciel.ts`, sinon le jeu
+demande une texture qui n'existe plus. Le retrait n'arrive en local qu'avec
+`npm run assets:pull -- --mirror` ; en mode normal, le tirage est purement
+additif.
+
+Le jeune arbre est **renommé à l'intégration** : `arbre` est déjà le nom du
+modèle plié rendu en 3D (le vieil arbre du fond), et deux clés de texture
+identiques se marcheraient dessus.
+
+```bash
+python3 tools/detourer-png.py assets-src/graphisme_origami/arbre.png \
+  public/assets/decor/jeune-arbre.png 360
 ```
 
 ### Reprendre à un point précis du chapitre

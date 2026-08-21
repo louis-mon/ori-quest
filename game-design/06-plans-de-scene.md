@@ -8,99 +8,75 @@ ne dit pas non plus si la zone tombe sous la taille du pouce.
 
 Un plan dessiné à l'échelle, lui, **est** la coordonnée.
 
+## L'outil
+
+**[Tiled](https://www.mapeditor.org/)** — gratuit, libre, macOS/Windows/Linux.
+On ouvre le **projet**, pas les fichiers un par un :
+
+*File > Open File or Project…* → `game-design/scenes/ori-quest.tiled-project`
+
+Les scènes apparaissent alors dans le panneau *Project*, et les trois classes du
+jeu sont proposées dans une liste au lieu d'être à retaper.
+
+Tiled est un éditeur de tile map détourné : il impose une grille de 80 px qui n'a
+aucun sens ici. C'est le prix à payer, et il se débraye — *View > Snapping > No
+Snapping*. Le reste (undo, zoom, copier/coller, panneau des objets) est
+exactement ce qu'un éditeur vectoriel généraliste faisait mal.
+
 ## Le format
 
-Un SVG de **1280×720** — la résolution logique du jeu. Le document est donc à
-l'échelle 1:1 : ce qu'on dessine à 240 px du bord gauche arrive à 240 px du bord
-gauche dans le jeu, sans conversion.
+Une carte de **16 × 9 tuiles de 80 px**, soit **1280 × 720** — la résolution
+logique du jeu. Le document est donc à l'échelle 1:1 : ce qu'on place à 240 px du
+bord gauche arrive à 240 px du bord gauche dans le jeu.
 
-Dans le plan, chaque élément est un **groupe** qui contient deux choses :
+Chaque élément est un **objet**, et deux choses le décrivent :
 
-| | Rôle | Lu à l'import ? |
-| --- | --- | --- |
-| le **nom du groupe** | l'identité (`hs_feuille`) | **oui** |
-| le **rectangle** | la position et la taille | **oui** |
-| le **texte** dans la boîte | rappel visuel, pour lire le plan | non |
-
-Le texte est décoratif : l'effacer ou le remplacer par n'importe quoi ne change
-rien au jeu. Il est quand même relu à l'import pour vérifier qu'il ne **ment**
-pas — renommer un groupe sans retoucher son étiquette produirait un plan qui
-affiche une chose et en fabrique une autre :
-
-```
-⚠ « hs_buisson » porte l'étiquette « hs_arbre » — c'est le nom du groupe qui
-  compte, l'étiquette est à corriger
-```
-
-Le *nom du groupe* porte le rôle :
-
-| Nom | Rôle | Ce que ça devient |
-| --- | --- | --- |
-| `hs_<id>` | à examiner | un hotspot, avec sa cocotte |
-| `exit_<id>` | passage vers une autre scène | un hotspot de navigation |
-| `dec_<id>` | repère de décor | un bord, une surface, une emprise |
-
-Trois préfixes, c'est tout. `dec_` n'est pas cliquable : il sert à caler le
-dessin (où s'arrête le sol, où passe le vide, quelle place occupe le pont une
-fois posé). Si un simple point suffit — une position d'apparition, une ancre —
-un petit `dec_` fait l'affaire, le code en prendra le centre.
-
-Le reste du fichier est **ignoré** : la grille, le cadre, les étiquettes, les
-croquis d'ambiance. On peut donc dessiner par-dessus pour réfléchir sans polluer
-le jeu.
-
-## Les trois calques d'un plan
-
-| Calque | Contenu | Sort dans le jeu ? |
-| --- | --- | --- |
-| `repères` | grille, cadre, zone sûre, étiquettes | non — **verrouillé**, on ne peut pas le sélectionner par erreur |
-| `croquis` | l'allure de la scène : lignes, silhouettes, hachures | non — c'est la référence visuelle |
-| `plan` | les boîtes nommées, chacune groupée avec son étiquette | **oui** |
-
-Le calque `croquis` est là pour répondre à « à quoi ça ressemble ». On y dessine
-librement — une ligne d'horizon, le profil du sol, la silhouette d'un arbre — et
-rien de tout ça n'entre dans le jeu. Ça sert à cadrer les boîtes, à discuter la
-composition, et à briefer le dessin définitif.
-
-Seul le calque `plan` produit des données, et seulement par les **noms**.
-
-## Où mettre le nom, selon l'éditeur
-
-| Éditeur | Comment |
+| | Rôle |
 | --- | --- |
-| **Figma** (gratuit, web) | renommer le calque, puis à l'export SVG cocher *Include "id" attribute* |
-| **Inkscape** (libre) | panneau *Objet > Objets…*, colonne étiquette |
-| **Penpot** (libre, web) | renommer la couche |
+| la **classe** | ce que c'est — `hotspot`, `exit`, `decor` |
+| le **nom** | son identifiant côté code — `feuille`, `precipice` |
 
-N'importe lequel convient : l'import lit `inkscape:label`, `data-name` ou `id`,
-dans cet ordre.
+Trois classes, c'est tout :
 
-## Le minimum vital dans Inkscape
+| Classe | Rôle | Ce que ça devient |
+| --- | --- | --- |
+| `hotspot` | à examiner | une zone tactile, avec sa cocotte |
+| `exit` | passage vers une autre scène | une zone tactile de navigation |
+| `decor` | repère de décor | un bord, une surface, une emprise |
 
-Six raccourcis suffisent, l'interface peut rester ignorée :
+`decor` n'est pas cliquable : il sert à caler le dessin — où s'arrête le sol, où
+passe le vide, quelle place occupe le pont une fois posé. L'unicité des noms est
+**par classe** : `porte` peut être à la fois un `hotspot` et un `decor`, ce sont
+deux choses différentes au même endroit.
 
-| Geste | Raccourci |
-| --- | --- |
-| Outil de sélection | `s` (ou `F1`) |
-| Outil rectangle | `r`, puis glisser |
-| **Dupliquer** une boîte existante | `Ctrl+D`, puis glisser |
-| Renommer (le champ *Étiquette*) | `Ctrl+Shift+O` |
-| Entrer dans un groupe pour redimensionner | double-clic |
-| Tracer une ligne droite | `b`, clic, clic, `Entrée` |
-| Enregistrer | `Ctrl+S` |
+Les noms s'écrivent en minuscules, chiffres et `_`. C'est du code une fois
+généré, un accent ou une espace casserait le fichier.
 
-Le plus simple n'est pas de dessiner mais de **dupliquer** : `Ctrl+D` sur une
-boîte existante donne le bon style et le bon calque, il ne reste qu'à la déplacer
-et à la renommer.
+## Les formes
 
-Avec l'outil de sélection, la barre du haut affiche **X, Y, L, H en pixels** :
-on tape les valeurs plutôt que de viser à la souris. Vérifier que l'unité de
-cette barre est bien `px`. Un chiffre tapé là est exactement celui que le jeu
-recevra.
+| Forme | Quand | Ce que le jeu en fait |
+| --- | --- | --- |
+| **rectangle** | le cas normal | une boîte, élargie à 88 px si elle est plus petite |
+| **polygone** (`P`) | quand la forme *est* le propos — une berge en biais | le contour sert au test tactile, tel quel |
+| **point** (`I`) | une ancre, une position d'apparition | une boîte de taille nulle ; le code en prend le centre |
 
-Le calque `repères` est verrouillé : la grille et les étiquettes ne peuvent pas
-être attrapées par accident. Pour les déverrouiller, le cadenas dans le panneau
-*Calques* (`Ctrl+Shift+L`).
+Un polygone n'est **pas** élargi à la taille du pouce : l'élargir déplacerait
+son coin haut-gauche, donc le repère de son contour, et la forme touchée ne
+serait plus celle dessinée. Un polygone trop petit est signalé à l'import, c'est
+là qu'on le corrige.
+
+Les ellipses et les objets tournés sont ramenés à leur boîte englobante, avec un
+avertissement : le jeu ne sait pas gérer une zone oblique.
+
+## Le croquis
+
+Un calque image, **verrouillé**, posé sous le plan : *Layer > New > Image
+Layer*, puis la propriété *Image*.
+
+Le croquis se dessine ailleurs — papier photographié, n'importe quelle app de
+dessin — et s'exporte en **PNG 1280 × 720** dans `croquis/` à côté de la carte.
+Il ne part **jamais dans le build** : il sert à placer les zones, et à briefer le
+graphisme.
 
 ## La commande
 
@@ -109,8 +85,13 @@ npm run scenes                 # tout game-design/scenes/
 npm run scenes -- --check      # valide sans écrire
 ```
 
-Elle tourne automatiquement dans `npm run dev` et `npm run build`. La sortie va
-dans `src/generated/scenes/<nom>.json`, que la scène importe.
+Elle tourne au démarrage de `npm run dev` et dans `npm run build`. **Et pendant
+une session de travail, enregistrer dans Tiled suffit** : le serveur de dev
+surveille les cartes, regénère le plan et recharge la page. Il n'y a pas d'étape
+manuelle à ne pas oublier — c'est précisément par là que le plan et le jeu se
+mettaient à diverger.
+
+La sortie va dans `src/generated/scenes/<nom>.ts`, que la scène importe.
 
 ## Ce que le code en fait
 
@@ -122,32 +103,41 @@ return hotspotsFrom(PLAN, {
 });
 ```
 
-La clé est l'`<id>` du plan. Déplacer une zone ne demande donc plus de toucher au
-code, et écrire un dialogue ne demande pas d'ouvrir un éditeur vectoriel.
+La clé est le **nom** de l'objet dans Tiled. Déplacer une zone ne demande donc
+pas de toucher au code, et écrire un dialogue ne demande pas d'ouvrir Tiled.
 
 Une zone **dessinée mais pas encore câblée** n'est pas une erreur : c'est du
 contenu à écrire. La console de développement la liste au démarrage de la scène —
 c'est le reste à faire, visible plutôt que silencieux.
 
+## La carte est la source de vérité
+
+Le plan généré est figé en `as const`, et `boxOf` / `hotspotsFrom` en tirent la
+**liste exacte des noms disponibles**. Un nom que la carte ne contient pas ne
+compile pas :
+
+```
+error TS2345: Argument of type '"dec_nuages"' is not assignable to parameter of
+type 'PlanRef<...>'
+```
+
+C'est ce qui empêche le code d'inventer une zone dans son coin, et donc les deux
+de diverger. Ajouter un repère, c'est le dessiner dans Tiled — jamais l'écrire
+dans la scène.
+
+**Ce qui reste permis dans le code**, et doit le rester : les positions
+**dérivées** d'une zone nommée. Cinq nuages répartis sur la bande `dec_nuages`,
+le feuillage d'un arbre calculé sur `hs_arbre` — on ne va pas poser un repère de
+plan par nuage. La ligne est là : *où vit un élément* est une décision du plan,
+*comment il est dessiné à l'intérieur* est une décision de code.
+
 ## Les contrôles automatiques
 
-L'import refuse un nom en double ou une boîte plate, et signale :
+L'import refuse une carte qui n'est pas au bon format, un objet sans classe ou
+sans nom, un nom en double dans la même classe, un nom qui n'est pas un
+identifiant valide, et une boîte plate. Il signale :
 
 - une zone tactile **sous 88 unités** (la cible de 44 px réels) — elle sera
   élargie par `touchRect()`, ce qui peut la faire mordre sur une voisine ;
 - un élément qui **déborde du cadre** ;
-- un document qui n'est pas au format 16:9.
-
-## Limites connues
-
-**Les rectangles tournés** sont ramenés à leur boîte englobante : le jeu ne sait
-pas gérer une zone tactile oblique.
-
-**Les tracés** (`<path>`) donnent une boîte approximative — les points de
-contrôle des courbes sont comptés dedans. Un avertissement le rappelle. Pour un
-plan, dessiner des rectangles.
-
-**Redimensionner une boîte demande d'entrer dans son groupe** (double-clic).
-Chaque boîte est groupée avec son étiquette pour que les deux se déplacent
-ensemble ; c'est le nom du **groupe** qui est lu à l'import. Le texte, lui, est
-ignoré : il ne rentre pas dans le calcul de la boîte.
+- une ellipse ou un objet tourné, ramenés à leur boîte.

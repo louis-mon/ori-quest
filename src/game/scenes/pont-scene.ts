@@ -1,18 +1,24 @@
 import Phaser from 'phaser';
-import { COLORS, DESIGN_HEIGHT, DESIGN_WIDTH } from '../config';
+import { COLORS, DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
-import plan from '../../generated/scenes/pont.json';
-import { boxOf, exitsFrom, hotspotsFrom, type Box, type SceneLayout } from './layout';
+import plan from '../../generated/scenes/pont';
+import { boxOf, exitsFrom, hotspotsFrom, type Box } from './layout';
 import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
-import { empriseDe } from './decor-sprite';
+import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
+import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFeuille } from './feuille';
 
 /**
- * Le pont — première scène du chapitre 1.
+ * Le ravin — première scène du chapitre 1.
  * Voir game-design/scenes/chapter-1/le-pont.md.
+ *
+ * La **zone** s'appelle le ravin, et c'est ce que le joueur lit : ce qui l'y
+ * arrête est le vide, le pont n'existe pas encore. L'identifiant de la scène,
+ * lui, reste `pont` — il est gravé dans les knots d'ink, les drapeaux et les
+ * sauvegardes, où il désigne aussi bien l'objet que la pièce.
  *
  * Le héros arrive par la gauche, le vide s'ouvre devant lui. Le pont n'est pas
  * cassé : il a **disparu**, il ne reste que la coupure. Une feuille de papier
@@ -20,7 +26,7 @@ import { dessinerFeuille } from './feuille';
  * l'énigme. Le pont posé, la rive d'en face devient accessible — avec la feuille
  * du vieil arbre et la sortie vers la porte.
  *
- * Toute la géométrie est lue dans game-design/scenes/chapter-1/pont.svg. Ce
+ * Toute la géométrie est lue dans game-design/scenes/chapter-1/pont.tmj. Ce
  * fichier ne décide que du sens.
  *
  * Le décor est dessiné en primitives, comme le reste du prototype. Les PNG de
@@ -32,7 +38,21 @@ import { dessinerFeuille } from './feuille';
  * origami-decor.ts). Ce que le joueur vient de plier est ce qu'il retrouve.
  */
 
-const PLAN = plan as SceneLayout;
+const PLAN = plan;
+
+/**
+ * Le jeune arbre. Même pliage que le vieil arbre du fond — le père et le fils —
+ * mais celui-ci est une photo posée dans le décor, quand l'autre est le modèle
+ * `arbre.origami` rendu en 3D : lui, le joueur le plie.
+ */
+const JEUNE_ARBRE = 'jeune-arbre';
+
+/**
+ * Graine du semis de nuages. Une valeur par scène : deux ciels tirés de la même
+ * graine se ressembleraient trait pour trait, et le passage d'une scène à
+ * l'autre le montrerait.
+ */
+const GRAINE_DU_CIEL = 1907;
 
 const SOL = boxOf(PLAN, 'dec_sol');
 const RIVE = boxOf(PLAN, 'dec_rive');
@@ -66,6 +86,8 @@ export class PontScene extends PointClickScene {
    */
   protected preloadAssets() {
     preloadHeros(this);
+    preloadCiel(this);
+    preloadSprite(this, JEUNE_ARBRE, 'assets/decor/jeune-arbre.png');
   }
 
   protected hotspots(): HotspotDef[] {
@@ -73,6 +95,10 @@ export class PontScene extends PointClickScene {
       precipice: {
         label: 'Le précipice',
         knots: { analyser: 'pont_precipice' },
+        // Le vide ne s'examine que tant qu'il barre la route : une fois le pont
+        // posé, `pont_precipice` ferait dire au héros qu'il ne voit aucune
+        // trace de pont alors qu'il en a un sous les yeux.
+        visibleIf: () => !gameState.flag('pont_plie'),
       },
       // Rien à examiner avant le pliage : le pont n'est pas cassé, il a disparu.
       // Ce qu'on regarde à sa place, c'est le vide.
@@ -141,26 +167,31 @@ export class PontScene extends PointClickScene {
   // ------------------------------------------------------------------
 
   protected drawScenery() {
-    const g = this.add.graphics();
+    // Le ciel et ses nuages, sous tout le reste (voir ciel.ts). L'horizon est le
+    // haut du sol : le dégradé se cale dessus plutôt que sur des hauteurs
+    // recopiées à la main.
+    dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
+    semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 6);
 
-    // Ciel de fin d'après-midi, en bandes plutôt qu'en dégradé : Graphics ne
-    // sait pas interpoler un remplissage, et trois bandes suffisent de loin.
-    g.fillStyle(0x2c3138, 1).fillRect(0, 0, DESIGN_WIDTH, 200);
-    g.fillStyle(0x3a3a3c, 1).fillRect(0, 200, DESIGN_WIDTH, 140);
-    g.fillStyle(0x46403c, 1).fillRect(0, 340, DESIGN_WIDTH, DESIGN_HEIGHT - 340);
+    const g = this.add.graphics();
 
     // Le vide. Un noir franc plutôt qu'un fond de gorge dessiné : on ne doit pas
     // pouvoir estimer la profondeur, c'est ce qui rend la traversée inquiétante.
     const vide = boxOf(PLAN, 'dec_precipice');
     g.fillStyle(0x14110f, 1).fillRect(vide.x, vide.y, vide.w, vide.h);
 
-    // Sol du héros (gauche) et rive d'en face (droite).
-    g.fillStyle(0x6d5843, 1).fillRect(SOL.x, SOL.y, SOL.w, SOL.h);
-    g.fillStyle(COLORS.woodDark, 1).fillRect(SOL.x, SOL.y, SOL.w, 12);
-    g.fillStyle(0x5b4a3a, 1).fillRect(RIVE.x, RIVE.y, RIVE.w, RIVE.h);
-    g.fillStyle(COLORS.woodDark, 1).fillRect(RIVE.x, RIVE.y, RIVE.w, 12);
+    // Sol du héros (gauche) et rive d'en face (droite), en terre de plein jour :
+    // sous le ciel d'après-midi, les bruns sourds d'avant se lisaient comme une
+    // scène restée dans l'ombre.
+    g.fillStyle(0x8a6d4e, 1).fillRect(SOL.x, SOL.y, SOL.w, SOL.h);
+    g.fillStyle(COLORS.wood, 1).fillRect(SOL.x, SOL.y, SOL.w, 12);
+    g.fillStyle(0x7a6144, 1).fillRect(RIVE.x, RIVE.y, RIVE.w, RIVE.h);
+    g.fillStyle(COLORS.wood, 1).fillRect(RIVE.x, RIVE.y, RIVE.w, 12);
 
-    this.drawJeuneArbre(g);
+    // Le jeune arbre : le pliage de l'artiste, comme les personnages. La zone
+    // tactile suit l'emprise réelle du sprite, pas la boîte du plan — il y est
+    // ajusté sans déformation et n'en occupe donc qu'une partie.
+    this.caler('arbre', empriseDe(placeSprite(this, JEUNE_ARBRE, boxOf(PLAN, 'hs_arbre'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
     // Le pont plié, révélé après l'énigme : le modèle, pas un dessin de pont.
@@ -195,38 +226,12 @@ export class PontScene extends PointClickScene {
     });
 
     this.add
-      .text(DESIGN_WIDTH / 2, 40, 'Le pont', {
+      .text(DESIGN_WIDTH / 2, 40, 'Le ravin', {
         fontFamily: 'Georgia, serif',
         fontSize: '26px',
-        color: '#f2ece1',
+        color: '#3a3128',
       })
       .setOrigin(0.5)
       .setAlpha(0.6);
   }
-
-  /**
-   * Le jeune arbre : un tronc et deux étages de feuillage anguleux. Tout est en
-   * papier dans ce monde, y compris ce qui pousse — d'où les plis droits plutôt
-   * qu'une silhouette organique.
-   */
-  private drawJeuneArbre(g: Phaser.GameObjects.Graphics) {
-    const box = boxOf(PLAN, 'hs_arbre');
-    const cx = box.x + box.w / 2;
-    const base = box.y + box.h;
-
-    g.fillStyle(COLORS.woodDark, 1).fillRect(cx - 7, base - 54, 14, 54);
-
-    const etage = (sommet: number, demi: number, bas: number, couleur: number) => {
-      g.fillStyle(couleur, 1)
-        .beginPath()
-        .moveTo(cx, sommet)
-        .lineTo(cx + demi, bas)
-        .lineTo(cx - demi, bas)
-        .closePath()
-        .fillPath();
-    };
-    etage(box.y, box.w * 0.42, base - 62, COLORS.paperDark);
-    etage(box.y + 34, box.w * 0.5, base - 40, COLORS.paper);
-  }
-
 }

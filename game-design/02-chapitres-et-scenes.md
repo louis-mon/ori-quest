@@ -52,7 +52,7 @@ trois — et il se tranchera alors sur le contenu de ce chapitre-là.
 
 ## Ce que ça implique techniquement
 
-Le chapitre 1 a ses deux scènes, le pont et la porte, et la navigation
+Le chapitre 1 a ses deux scènes, le ravin et la porte, et la navigation
 fonctionne dans les deux sens.
 
 **Les liaisons sont dans les plans**, pas dans un registre : une boîte `exit_<id>`
@@ -63,7 +63,7 @@ chapitre au suivant. ⚠ Rien de tout ça n'existe encore : le jeu n'a qu'un
 chapitre.
 
 **L'état de scène** passe par les drapeaux de `gameState`, sérialisés avec la
-sauvegarde : le joueur qui revient au pont le retrouve posé.
+sauvegarde : le joueur qui revient au ravin retrouve le pont posé.
 
 **La transition** est un fondu de 260 ms. Le pli qui balaie l'écran serait plus
 juste et reste à faire — le fondu n'est là que pour que la scène suivante

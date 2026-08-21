@@ -40,9 +40,10 @@ export const PERSONNAGES: Record<string, Personnage> = {
   grenouille: { nom: 'La grenouille', portrait: 'assets/personnages/grenouille.png' },
   renard: { nom: 'Le renard', portrait: 'assets/personnages/renard.png' },
   hibou: { nom: 'Le hibou', portrait: 'assets/personnages/hibou.png' },
-  // Le jeune arbre du chapitre 1 parle, mais n'a pas encore de vignette : le
-  // registre accepte un personnage sans portrait, seul son nom s'affiche.
-  arbre: { nom: 'Le jeune arbre' },
+  // Le jeune arbre du chapitre 1. Sa vignette est le pliage que la scène du pont
+  // pose dans le décor : le personnage qui parle et celui qu'on voit debout au
+  // bord du ravin doivent être le même.
+  arbre: { nom: 'Le jeune arbre', portrait: 'assets/personnages/arbre.png' },
 };
 
 /**

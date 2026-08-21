@@ -182,6 +182,21 @@ export class Overlay {
     return this.lignesEnCours > 0;
   }
 
+  /**
+   * L'interface tient-elle la parole ?
+   *
+   * Vrai dès qu'une réplique attend un tap ou qu'un menu de verbes est ouvert —
+   * y compris pour la description d'un objet d'inventaire, qui passe par `say()`
+   * sans passer par le moteur de narration. C'est **la** question que le décor
+   * doit poser avant de réagir à un tap : la poser en trois morceaux, comme
+   * c'était le cas, laissait forcément un chemin en oublier un. Lire la
+   * description d'un objet n'empêchait ainsi ni d'analyser un hotspot ni de
+   * changer de scène — la boîte partait alors avec la pièce qu'on quittait.
+   */
+  get occupeLeJoueur() {
+    return this.dialogueOccupe || this.verbsVisible;
+  }
+
   /** Affiche des choix et attend une sélection. Résout l'index choisi. */
   choose(options: string[]): Promise<number> {
     return new Promise((resolve) => {
@@ -235,6 +250,11 @@ export class Overlay {
 
   // ---------- Divers ----------
 
+  /**
+   * La légende fugace : une pastille qui nomme l'objet dont on ouvre le menu de
+   * verbes. C'est son seul emploi — les descriptions d'inventaire passent par la
+   * boîte de dialogue, et les sorties ne s'annoncent plus.
+   */
   showCaption(text: string, ms = 1600) {
     this.caption.textContent = text;
     this.caption.classList.add('is-visible');

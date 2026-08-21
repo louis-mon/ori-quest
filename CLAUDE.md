@@ -22,9 +22,9 @@ serveur meurt au démarrage avec une erreur `Cannot find module 'node:path'`.
 
 ```bash
 nvm use && npm install
-npm run dev                      # serveur de dev (compile ink + plans de scène)
+npm run dev                      # serveur de dev (suit ink + plans de scène)
 npm run build                    # typecheck + build de production
-npm run scenes                   # plans SVG des scènes -> src/generated/scenes/
+npm run scenes                   # cartes Tiled des scènes -> src/generated/scenes/
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
 ```
@@ -58,6 +58,9 @@ Le papier frémit, puis se plie de lui-même. # origami: crane # flag: folded_cr
 
 Ajouter un effet = une entrée dans `handlers` (`src/game/systems/dialogue.ts`).
 Ne pas contourner ce mécanisme en appelant la logique de jeu depuis une scène.
+Le serveur de dev suit `content/story.ink` comme il suit les cartes :
+enregistrer recompile et recharge la page, et un ink cassé laisse en place la
+dernière version valide, l'erreur et son numéro de ligne allant au terminal.
 
 **Les scènes sont pilotées par des données.** Les hotspots sont une liste d'objets
 dans la scène, pas du code impératif. Garder ce style : c'est ce qui rend le
@@ -75,10 +78,13 @@ idée la fait rejouer dès l'idée dépensée. Voir `src/game/systems/objets.ts`
 **Le décor ne dessine pas les origamis.** Le pont posé, le vieil arbre, la porte
 en place sont les fichiers `.origami` eux-mêmes, rendus en 3D et posés dans la
 scène (`src/game/scenes/origami-decor.ts`). Idem pour le but affiché pendant
-l'énigme et les vignettes d'inventaire. Les dessins d'appoint qui tenaient la
-place finissaient toujours par diverger du pliage — le joueur regardait une
-animation et la scène montrait autre chose. **Ne pas réintroduire de graphisme
-« qui ressemble »** : si un modèle rend mal, c'est le crease pattern, l'angle
+l'énigme et les vignettes d'inventaire. Ce qui n'a pas besoin d'être animé — les
+deux marqueurs de l'interface, le soleil, les nuages, le jeune arbre — est
+**photographié chez l'artiste** et intégré en PNG (`tools/detourer-png.py`),
+jamais tracé en polygones. Les dessins d'appoint qui tenaient la place
+finissaient toujours par diverger du pliage — le joueur regardait une animation
+et la scène montrait autre chose. **Ne pas réintroduire de graphisme « qui
+ressemble »** : si un modèle rend mal, c'est le crease pattern, l'angle
 (`src/origami/vue.ts`) ou le papier (`src/origami/papier.ts`) qu'on corrige.
 
 **La zone tactile suit le dessin, pas la boîte du plan.** Une boîte de plan est
@@ -86,12 +92,27 @@ une emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une
 partie. `caler()` (dans `PointClickScene`) recale la zone sur ce qui est
 réellement à l'écran, y compris quand ça change avec l'état.
 
-**La géométrie ne s'écrit pas en code.** Chaque scène a un plan SVG dans
-`game-design/scenes/`, dessiné à l'échelle 1280×720 dans n'importe quel éditeur
-vectoriel ; `npm run scenes` en tire les rectangles. La scène ne déclare plus que
-le *sens* de chaque zone — libellé, verbes, condition d'apparition — et croise
-les deux avec `hotspotsFrom()`. Ne pas réintroduire de coordonnées en dur : elles
-redeviendraient invérifiables à l'œil. Voir `game-design/06-plans-de-scene.md`.
+**La carte Tiled est la source de vérité de la géométrie.** Chaque scène a un
+plan dans `game-design/scenes/`, dessiné à l'échelle 1280×720 dans
+[Tiled](https://www.mapeditor.org/) ; `npm run scenes` en tire les zones. La
+scène ne déclare plus que le *sens* de chacune — libellé, verbes, condition
+d'apparition — et croise les deux avec `hotspotsFrom()`. Le serveur de dev
+surveille les cartes : enregistrer dans Tiled suffit, il n'y a pas de commande à
+relancer. Voir `game-design/06-plans-de-scene.md`.
+
+**Déplacer ou redimensionner quoi que ce soit de visible se corrige dans la
+carte, jamais dans la scène.** Le plan généré est figé en `as const` et le
+compilateur en tire la liste exacte des noms : `boxOf(PLAN, 'dec_nuages')` ne
+compile pas tant que `nuages` n'existe pas dans la carte. C'est délibéré — le
+code ne doit pas pouvoir inventer une zone que le plan ne connaît pas, sinon les
+deux divergent et il faut les resynchroniser à la main.
+
+Ce qui reste permis, et doit le rester : les positions **dérivées** d'une zone
+nommée. Cinq nuages répartis sur `dec_nuages`, le feuillage calculé sur
+`hs_arbre` — on ne pose pas un repère de plan par nuage. La ligne : *où vit un
+élément* appartient au plan, *comment il est dessiné à l'intérieur* appartient au
+code. Un pixel absolu qui ne dérive d'aucune boîte est le signe qu'il manque un
+repère dans la carte.
 
 ## Pièges déjà rencontrés (ne pas les redécouvrir)
 

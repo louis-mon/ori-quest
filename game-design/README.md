@@ -10,7 +10,7 @@ documentent *pourquoi*.
 | [03-langage-visuel.md](03-langage-visuel.md) | la cocotte, les flèches, la lisibilité tactile |
 | [04-interface.md](04-interface.md) | verbes, inventaire, carnet d'idées |
 | [05-puzzle-crease-pattern.md](05-puzzle-crease-pattern.md) | le minijeu : reconstituer le crease pattern |
-| [06-plans-de-scene.md](06-plans-de-scene.md) | le plan SVG qui donne les positions d'une scène |
+| [06-plans-de-scene.md](06-plans-de-scene.md) | la carte Tiled qui donne les positions d'une scène |
 
 ## Le pitch en une phrase
 

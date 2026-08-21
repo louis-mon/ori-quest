@@ -25,9 +25,21 @@ export function preloadSprite(scene: Phaser.Scene, key: string, fichier: string)
  * emprise au sol, et c'est le point d'appui qui doit rester fixe quand on
  * redimensionne la zone dans l'éditeur. Centrer verticalement ferait flotter
  * les personnages dès que la boîte change de proportion.
+ *
+ * L'ancrage `'centre'` est l'exception, pour ce qui ne repose sur rien — le
+ * soleil dans son coin de ciel. Calé sur le bas, il glisserait vers le haut ou
+ * vers le bas de sa boîte selon les proportions qu'on lui donne dans Tiled.
  */
-export function placeSprite(scene: Phaser.Scene, key: string, box: Box): Phaser.GameObjects.Image {
-  const image = scene.add.image(box.x + box.w / 2, box.y + box.h, key).setOrigin(0.5, 1);
+export function placeSprite(
+  scene: Phaser.Scene,
+  key: string,
+  box: Box,
+  ancrage: 'bas' | 'centre' = 'bas',
+): Phaser.GameObjects.Image {
+  const centre = ancrage === 'centre';
+  const image = scene.add
+    .image(box.x + box.w / 2, box.y + (centre ? box.h / 2 : box.h), key)
+    .setOrigin(0.5, centre ? 0.5 : 1);
   const source = scene.textures.get(key).getSourceImage();
   const echelle = Math.min(box.w / source.width, box.h / source.height);
   image.setScale(echelle);
