@@ -27,6 +27,8 @@ nvm use && npm install
 npm run dev                      # serveur de dev (suit ink + plans de scène)
 npm run build                    # typecheck + build de production
 npm run scenes                   # cartes Tiled des scènes -> src/generated/scenes/
+npm run enigmes                  # découpages des énigmes -> src/generated/enigmes.ts
+npm run check-puzzle             # un découpage a-t-il une solution unique ?
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
 ```
@@ -109,6 +111,32 @@ compile pas tant que `nuages` n'existe pas dans la carte. C'est délibéré — 
 code ne doit pas pouvoir inventer une zone que le plan ne connaît pas, sinon les
 deux divergent et il faut les resynchroniser à la main.
 
+**Le découpage des énigmes se dessine aussi, et ailleurs que dans le code.** Il
+vit dans `game-design/enigmes/<nom>.json`, se trace dans
+`http://localhost:5173/decoupage.html` (page de développement, hors build) et
+arrive au jeu par `src/generated/enigmes.ts`. `puzzles.ts` ne dit plus que le
+motif, le modèle et le titre.
+
+L'éditeur ne dessine pas des pièces, il trace des **coupes** : le carré entier
+est la première pièce, chaque trait en fend une en deux. Le pavage est donc exact
+par construction et tous les sommets tombent sur la grille d'ancrage — les deux
+choses dont le minijeu a besoin, et qu'un éditeur de polygones aurait laissées à
+la main. Une pièce est un polygone quelconque, détouré au rendu (`clipPath` +
+`drop-shadow`) ; **ne pas revenir à des rectangles**, ni tester les
+recouvrements sur les boîtes : deux pièces voisines partagent une arête entière,
+d'où les masques de `src/game/puzzle/decoupage.ts`.
+
+**Une coupe ne longe jamais un pli** (`longeUnPli`, dans `src/dev/couper.ts`) :
+un pli posé sur une arête de découpe est fendu en deux dans la longueur, chaque
+pièce en montrant la moitié — et l'arête révèle alors où passe le pli. La règle
+est tenue par l'éditeur, là où l'on trace.
+
+L'unicité de la solution est calculée par `tools/lib/decoupage.mjs`, et par lui
+seul : l'éditeur l'affiche après chaque coupe en passant par un point d'entrée du
+serveur de dev, l'import la revérifie, `npm run check-puzzle` la détaille. Une
+seconde implémentation côté navigateur finirait par répondre autre chose que le
+jeu.
+
 Ce qui reste permis, et doit le rester : les positions **dérivées** d'une zone
 nommée. Cinq nuages répartis sur `dec_nuages`, le feuillage calculé sur
 `hs_arbre` — on ne pose pas un repère de plan par nuage. La ligne : *où vit un
@@ -175,6 +203,13 @@ coûte rien.
 dans des éléments frères et disparaîtrait. À noter, Safari sur iPhone
 n'implémente toujours pas l'API plein écran pour un élément quelconque —
 l'entrée de menu est masquée quand `document.fullscreenEnabled` est faux.
+
+**La CSS des pages de développement passe par un `import` du module**, pas par
+un `<link>` dans le HTML. Sur `<link href="/src/dev/*.css">`, le navigateur
+garde sa copie et une règle ajoutée n'arrive jamais à la page : l'éditeur de
+découpage s'est retrouvé tout noir, ses nouveaux tracés n'ayant plus de règle et
+retombant sur le `fill` noir par défaut de SVG. Importée depuis le TypeScript,
+la feuille entre dans le graphe de modules et suit le HMR comme le reste.
 
 **itch.io** : `index.html` à la racine du zip, chemins relatifs (`base: './'`),
 et laisser **SharedArrayBuffer décoché** — son implémentation itch.io casse le

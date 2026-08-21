@@ -660,7 +660,6 @@ body {
   position: absolute;
   width: calc(100% / var(--grid) * var(--w));
   height: calc(100% / var(--grid) * var(--h));
-  border-radius: 2px;
 }
 
 /* Largeur dictée par la forme des pièces : `--tray-width` est calculé au
@@ -675,45 +674,39 @@ body {
   gap: calc(12px * var(--ui-scale));
 }
 
-/* Le bac ne défile pas : au-delà de ~6 pièces la colonne déborderait en
-   paysage sur téléphone. Il faudra alors la passer sur deux colonnes plutôt
-   qu'ajouter une barre de défilement, qui entrerait en conflit avec le
-   glisser. */
-/* Une ou plusieurs colonnes selon ce que la découpe impose : voir layoutTray(). */
+/* Le bac est un tas, pas une liste : les pièces y sont posées en vrac, à des
+   positions calculées une fois pour toutes par eparpiller() et écrites en
+   pixels. D'où le positionnement absolu — et d'où l'absence de défilement, le
+   vrac se resserre au lieu de déborder. */
 .puzzle__tray {
+  position: relative;
   flex: 1;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: calc(8px * var(--ui-scale));
 }
 
-.puzzle__tray-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(8px * var(--ui-scale));
-}
-
-/* `--w` et `--h` portent le rectangle de la pièce, en cellules de la grille :
-   ils donnent sa forme dans le bac comme sa taille sur le plateau. */
+/* `--w` et `--h` portent la BOÎTE de la pièce, en cellules de la grille : elle
+   donne sa taille sur le plateau. La pièce, elle, n'occupe qu'une partie de
+   cette boîte — le papier est un polygone, tracé dans le SVG.
+   L'ombre est un `drop-shadow` et non un `box-shadow` : le filtre suit l'alpha
+   du rendu, donc la découpe, là où l'ombre de boîte trahirait le rectangle dès
+   que deux pièces se chevauchent dans le bac. */
 .puzzle__piece {
-  aspect-ratio: var(--w) / var(--h);
-  border-radius: 4px;
-  background: var(--paper);
-  box-shadow: 0 2px 6px var(--shadow);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)) drop-shadow(0 4px 7px rgba(0, 0, 0, 0.3));
   cursor: grab;
   /* Indispensable au tactile : sans ça le navigateur interprète le glisser
      comme un défilement et ne délivre jamais les pointermove. */
   touch-action: none;
+  /* La boîte est traversante, seul le papier reçoit le doigt : voir la règle
+     sur .puzzle__paper. Sans ça, le coin vide d'une pièce en biais volerait le
+     tap destiné à la pièce posée dessous. */
+  pointer-events: none;
 }
 
-/* Dans le bac, la taille est posée en pixels par layoutTray() : toutes les
-   pièces partagent une même échelle, donc leurs proportions relatives. */
+/* Dans le bac, position et taille sont posées en pixels par eparpiller() :
+   toutes les pièces partagent une même échelle, donc leurs proportions
+   relatives, et la dernière touchée passe au-dessus des autres. */
 .puzzle__tray > .puzzle__piece {
-  flex: none;
+  position: absolute;
 }
 
 /* Pendant le glisser, le positionnement est piloté par le script
@@ -721,13 +714,23 @@ body {
 .puzzle__piece.is-dragging {
   z-index: 20;
   cursor: grabbing;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55));
 }
 
 .puzzle__piece svg {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Le papier lui-même : la silhouette découpée, qui porte la couleur, le bord de
+   coupe, et le seul point de contact du doigt avec la pièce. */
+.puzzle__paper {
+  fill: var(--paper);
+  stroke: rgba(26, 23, 20, 0.35);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: auto;
 }
 
 /* `preserveAspectRatio="none"` côté SVG : la fenêtre découpée dans le motif a

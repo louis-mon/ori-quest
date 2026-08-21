@@ -1,0 +1,362 @@
+/* Éditeur de découpage des énigmes (développement seulement). */
+
+:root {
+  color-scheme: dark;
+  --papier: #f2ece1;
+  --accent: #c4553d;
+  --fond: #1a1714;
+  --carte: #262019;
+  --trait: rgba(242, 236, 225, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+  /* Rien ne se sélectionne : tracer une coupe est une suite de clics, et le
+     navigateur y voyait le début d'une sélection de texte. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+body {
+  display: grid;
+  grid-template-columns: 168px 1fr;
+  gap: 20px;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  background: var(--fond);
+  color: var(--papier);
+  font: 15px/1.5 system-ui, sans-serif;
+}
+
+/* ---------- Sélecteur ---------- */
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+nav button {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+nav button:hover {
+  border-color: rgba(242, 236, 225, 0.4);
+}
+
+nav button.actif {
+  border-color: var(--accent);
+  background: #33261f;
+}
+
+nav small {
+  opacity: 0.55;
+}
+
+/* ---------- En-tête ---------- */
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.aide {
+  margin: 4px 0 0;
+  max-width: 70ch;
+  opacity: 0.7;
+}
+
+/* ---------- Plan ---------- */
+
+.scene {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+#plan {
+  flex: none;
+  width: min(640px, 60vw, 70vh);
+  aspect-ratio: 1;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.papier {
+  fill: var(--papier);
+  opacity: 0.9;
+}
+
+/* Le crease pattern est en dessous de tout : c'est le sujet, pas un repère. */
+#plan image {
+  opacity: 0.85;
+}
+
+.grille {
+  fill: none;
+  stroke: rgba(26, 23, 20, 0.16);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.piece {
+  fill: hsl(var(--teinte) 65% 50% / 0.16);
+  stroke: none;
+}
+
+.piece--survol {
+  fill: hsl(var(--teinte) 65% 50% / 0.34);
+}
+
+/* La pièce en cours de coupe reste lisible même quand le pointeur en sort. */
+.piece--coupee {
+  fill: hsl(var(--teinte) 65% 50% / 0.34);
+}
+
+/* Un liseré de papier sous chaque découpe : sans lui, un trait sombre posé sur
+   un pli rouge ou bleu ne se distingue plus de lui. */
+.bord-halo {
+  fill: none;
+  stroke: var(--papier);
+  stroke-width: 7;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Les pointillés défilent : c'est ce qui sépare au premier coup d'œil une
+   coupe — qui sépare le papier — d'un pli, qui ne fait que le marquer. */
+.bord {
+  fill: none;
+  stroke: #141110;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-dasharray: 8 5;
+  vector-effect: non-scaling-stroke;
+  animation: defiler 900ms linear infinite;
+}
+
+.bord--coupee {
+  stroke: var(--accent);
+}
+
+@keyframes defiler {
+  to {
+    /* Une période entière : la boucle est invisible. */
+    stroke-dashoffset: -13;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bord,
+  .coupe {
+    animation: none;
+  }
+}
+
+/* Les intersections de la grille : les seuls points cliquables. Discrètes tant
+   qu'aucune coupe n'est en cours, marquées dès qu'elles peuvent la recevoir. */
+.ancre {
+  fill: rgba(26, 23, 20, 0.35);
+}
+
+.ancre--ouverte {
+  fill: rgba(26, 23, 20, 0.55);
+}
+
+.coupe {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 8 5;
+  vector-effect: non-scaling-stroke;
+  animation: defiler 900ms linear infinite;
+}
+
+.coupe-point {
+  fill: var(--accent);
+}
+
+.curseur {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---------- Réglages ---------- */
+
+.reglages {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+fieldset {
+  margin: 0;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--carte);
+}
+
+legend {
+  padding: 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.6;
+}
+
+.champ {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.champ input {
+  width: 70px;
+  padding: 4px 6px;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--fond);
+  color: inherit;
+  font: inherit;
+}
+
+.verdict {
+  margin: 0;
+  font-size: 14px;
+}
+
+.verdict--ok {
+  color: #8fbf7f;
+}
+
+.verdict--attention {
+  color: var(--accent);
+}
+
+.verdict--attente {
+  opacity: 0.5;
+}
+
+.inventaire {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.inventaire li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.inventaire .petite {
+  color: var(--accent);
+}
+
+.pastille {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: hsl(var(--teinte) 65% 55%);
+}
+
+/* ---------- Actions ---------- */
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+button {
+  padding: 7px 12px;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: rgba(242, 236, 225, 0.4);
+}
+
+button.principal {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.statut {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.statut.is-erreur {
+  color: var(--accent);
+  opacity: 1;
+}
+
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--trait);
+  padding-top: 12px;
+}
+
+.footer-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}

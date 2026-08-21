@@ -3,19 +3,26 @@
  * pattern à partir de morceaux découpés.
  *
  * Voir game-design/05-puzzle-crease-pattern.md. Le plateau est à gauche, les
- * pièces en colonne à droite, un bouton vérifie la solution. Échec = clignotement
- * rouge et attente ; réussite = on rend la main à la scène, qui joue le pliage.
+ * pièces en vrac dans un bac à droite, un bouton vérifie la solution. Échec =
+ * clignotement rouge et attente ; réussite = on rend la main à la scène, qui
+ * joue le pliage.
  *
- * **Le découpage est décrit en cellules**, pas en parts égales : chaque pièce est
- * un rectangle `(x, y, w, h)` sur une grille de `grid` × `grid` cellules, origine
- * en haut à gauche. C'est ce qui rend la solution unique — un découpage en
- * quadrants égaux laissait plusieurs dispositions correctes sur un motif
- * symétrique, alors qu'une seule était validée.
+ * **Le découpage est un pavage de polygones**, décrit en cellules de la grille
+ * d'ancrage et dessiné dans `decoupage.html` (voir `decoupage.ts`). Chaque pièce
+ * porte sa position solution : c'est le coin haut-gauche de sa boîte
+ * englobante. Le découpage n'est pas régulier, et c'est ce qui rend la solution
+ * unique — des parts égales sur un motif symétrique laissent plusieurs
+ * dispositions correctes alors qu'une seule est validée.
  *
  * **La grille d'ancrage** est plus fine que les pièces : une pièce lâchée
  * n'importe où se cale sur la cellule la plus proche, ce qui évite au joueur de
  * viser au pixel. Une pièce posée à cheval sur une voisine renvoie celle-ci au
  * bac plutôt que de la recouvrir.
+ *
+ * **Les pièces sont détourées, pas rognées à leur boîte.** Le polygone sert de
+ * `clipPath` au motif et de silhouette au papier ; l'ombre portée est un
+ * `drop-shadow` CSS, qui suit l'alpha du rendu, donc la découpe elle-même. Sans
+ * ça, deux pièces qui se chevauchent dans le bac montreraient leurs rectangles.
  *
  * **Pourquoi en DOM et pas dans le canvas Phaser.** D'abord la règle
  * d'architecture du projet : toute l'interface est en DOM. Ensuite et surtout,
@@ -30,6 +37,15 @@
  */
 
 import { urlApercuOrigami } from '../../origami/apercu';
+import {
+  boite,
+  chemin,
+  chevauchent,
+  masque,
+  type Boite,
+  type Decoupage,
+  type Masque,
+} from './decoupage';
 
 /** Durée du clignotement rouge, calée sur l'animation CSS `puzzle-wrong`. */
 const FLASH_MS = 900;
@@ -44,14 +60,6 @@ const MIN_TOUCH_PX = 44;
 /** Part du cadre que le bac ne doit pas dépasser, même pour élargir les pièces. */
 const MAX_TRAY_RATIO = 0.42;
 
-/** Un morceau du crease pattern, en cellules de la grille d'ancrage. */
-export interface CreasePuzzlePiece {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
 export interface CreasePuzzleDef {
   /** Crease pattern solution, servi depuis public/ (chemin relatif). */
   svg: string;
@@ -64,10 +72,8 @@ export interface CreasePuzzleDef {
    * qu'il va voir se plier, puis retrouver dans le décor et dans son inventaire.
    */
   modele: string;
-  /** Côté de la grille d'ancrage, en cellules. Le motif est carré. */
-  grid: number;
-  /** Découpe. L'ordre n'a pas d'importance : chaque pièce porte sa position. */
-  pieces: CreasePuzzlePiece[];
+  /** Grille d'ancrage et pièces, tirées de `game-design/enigmes/<nom>.json`. */
+  decoupage: Decoupage;
   /** Titre affiché au-dessus du plateau. */
   title: string;
 }
@@ -80,6 +86,17 @@ interface Anchor {
   r: number;
 }
 
+/** Une pièce montée : son élément, sa forme, et de quoi tester les collisions. */
+interface Piece {
+  el: HTMLElement;
+  /** Boîte englobante en cellules. Son coin est la position solution. */
+  boite: Boite;
+  masque: Masque;
+}
+
+/** Les `clipPath` vivent dans le document : leurs identifiants doivent l'être aussi. */
+let numeroPuzzle = 0;
+
 /**
  * Ouvre l'énigme et résout quand le joueur a gagné ou abandonné.
  * Nettoie son DOM et ses minuteurs dans tous les cas.
@@ -89,10 +106,11 @@ export async function runCreasePuzzle(
   def: CreasePuzzleDef,
 ): Promise<PuzzleOutcome> {
   const { viewBox, inner, folds } = await loadPattern(def.svg);
+  const grille = def.decoupage.grille;
 
   const el = document.createElement('div');
   el.className = 'puzzle';
-  el.style.setProperty('--grid', String(def.grid));
+  el.style.setProperty('--grid', String(grille));
   const legend = [
     folds.valley ? { cls: 'va', label: 'pli vallée' } : null,
     folds.mountain ? { cls: 'mo', label: 'pli montagne' } : null,
@@ -155,32 +173,47 @@ export async function runCreasePuzzle(
     zoom.hidden = true;
   });
 
-  // La pièce garde son rectangle d'origine : c'est à la fois sa taille et sa
-  // solution. L'index sert seulement à relier l'élément à sa définition.
-  const pieces = def.pieces.map((spec, i) => {
+  const suffixe = `p${++numeroPuzzle}`;
+
+  const pieces: Piece[] = def.decoupage.pieces.map(({ points }, i) => {
+    const b = boite(points);
     const piece = document.createElement('div');
     piece.className = 'puzzle__piece';
     piece.dataset.piece = String(i);
-    piece.style.setProperty('--w', String(spec.w));
-    piece.style.setProperty('--h', String(spec.h));
+    piece.style.setProperty('--w', String(b.w));
+    piece.style.setProperty('--h', String(b.h));
 
-    const vx = viewBox.x + (spec.x / def.grid) * viewBox.w;
-    const vy = viewBox.y + (spec.y / def.grid) * viewBox.h;
-    const vw = (spec.w / def.grid) * viewBox.w;
-    const vh = (spec.h / def.grid) * viewBox.h;
+    // La fenêtre découpée dans le motif, en unités du crease pattern : la
+    // boîte de la pièce, pas la pièce elle-même. Le polygone, lui, sert de
+    // `clipPath` — d'où le détourage.
+    const vx = viewBox.x + (b.x / grille) * viewBox.w;
+    const vy = viewBox.y + (b.y / grille) * viewBox.h;
+    const vw = (b.w / grille) * viewBox.w;
+    const vh = (b.h / grille) * viewBox.h;
+    const d = chemin(points, ([x, y]) => [
+      viewBox.x + (x / grille) * viewBox.w,
+      viewBox.y + (y / grille) * viewBox.h,
+    ]);
+    const coupe = `coupe-${suffixe}-${i}`;
+
     piece.innerHTML =
       `<svg viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="none"` +
-      ` xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+      ` xmlns="http://www.w3.org/2000/svg">` +
+      `<defs><clipPath id="${coupe}" clipPathUnits="userSpaceOnUse">` +
+      `<path d="${d}" /></clipPath></defs>` +
+      `<path class="puzzle__paper" d="${d}" />` +
+      `<g clip-path="url(#${coupe})">${inner}</g>` +
+      `</svg>`;
 
-    return { el: piece, spec };
+    return { el: piece, boite: b, masque: masque(points) };
   });
 
-  const specOf = (el: HTMLElement) => pieces[Number(el.dataset.piece)].spec;
+  const pieceOf = (el: HTMLElement) => pieces[Number(el.dataset.piece)];
 
-  for (const { el: piece } of shuffled(pieces)) tray.appendChild(piece);
+  for (const { el: piece } of pieces) tray.appendChild(piece);
   root.appendChild(el);
 
-  const trayLayout = layoutTray(el, tray, board, def);
+  const trayLayout = eparpiller(el, tray, board, pieces, grille, graine(def.svg));
 
   return new Promise<PuzzleOutcome>((resolve) => {
     const placed = new Map<HTMLElement, Anchor>();
@@ -194,46 +227,33 @@ export async function runCreasePuzzle(
     };
 
     /**
-     * Remet une pièce dans sa colonne d'origine, à sa taille de bac.
+     * Remet une pièce dans le bac, là où le vrac l'avait posée et à sa taille
+     * de bac.
      *
-     * Deux détails qui ne se voient qu'à l'usage : la replacer à la racine du
-     * bac en ferait un frère des colonnes, donc une pièce posée par-dessus les
-     * autres ; et le glisser lui a donné sa taille de plateau, qu'il faut
-     * défaire, sinon elle revient trop grande et déborde.
+     * Deux détails qui ne se voient qu'à l'usage : le glisser lui a donné sa
+     * taille de plateau, qu'il faut défaire, sinon elle revient trop grande et
+     * déborde ; et elle est réinsérée en fin de bac, donc au-dessus des autres,
+     * ce qui la rend attrapable même si elle en recouvre une.
      */
     function toTray(piece: HTMLElement) {
       placed.delete(piece);
-      piece.style.left = '';
-      piece.style.top = '';
 
-      const px = trayLayout.size.get(piece);
-      if (px) {
-        piece.style.width = `${px.w}px`;
-        piece.style.height = `${px.h}px`;
+      const pose = trayLayout.pose.get(piece);
+      if (pose) {
+        piece.style.width = `${pose.w}px`;
+        piece.style.height = `${pose.h}px`;
+        piece.style.left = `${pose.x}px`;
+        piece.style.top = `${pose.y}px`;
       }
-
-      const column = trayLayout.home.get(piece) ?? tray;
-      // Réinsertion dans l'ordre : une pièce qui revient ne doit pas sauter en
-      // fin de colonne, on la remet entre ses voisines d'origine.
-      const index = Number(piece.dataset.piece);
-      const after = [...column.children].find(
-        (sibling) => Number((sibling as HTMLElement).dataset.piece) > index,
-      );
-      column.insertBefore(piece, after ?? null);
+      tray.appendChild(piece);
     }
 
     /** Pose une pièce sur la grille, en dégageant ce qu'elle recouvrirait. */
     function place(piece: HTMLElement, anchor: Anchor) {
-      const spec = specOf(piece);
+      const { masque: m } = pieceOf(piece);
       for (const [other, at] of placed) {
         if (other === piece) continue;
-        const os = specOf(other);
-        const disjoint =
-          anchor.c + spec.w <= at.c ||
-          at.c + os.w <= anchor.c ||
-          anchor.r + spec.h <= at.r ||
-          at.r + os.h <= anchor.r;
-        if (!disjoint) toTray(other);
+        if (chevauchent(m, anchor, pieceOf(other).masque, at)) toTray(other);
       }
 
       placed.set(piece, anchor);
@@ -241,8 +261,8 @@ export async function runCreasePuzzle(
       // retire celle du bac, qui est en dur et l'emporterait.
       piece.style.removeProperty('width');
       piece.style.removeProperty('height');
-      piece.style.left = `${(anchor.c / def.grid) * 100}%`;
-      piece.style.top = `${(anchor.r / def.grid) * 100}%`;
+      piece.style.left = `${(anchor.c / grille) * 100}%`;
+      piece.style.top = `${(anchor.r / grille) * 100}%`;
       board.appendChild(piece);
     }
 
@@ -265,15 +285,15 @@ export async function runCreasePuzzle(
         return;
       }
 
-      const spec = specOf(piece);
+      const forme = pieceOf(piece).boite;
       place(piece, {
-        c: clamp(Math.round((rect.left - b.left) / (b.width / def.grid)), 0, def.grid - spec.w),
-        r: clamp(Math.round((rect.top - b.top) / (b.height / def.grid)), 0, def.grid - spec.h),
+        c: clamp(Math.round((rect.left - b.left) / (b.width / grille)), 0, grille - forme.w),
+        r: clamp(Math.round((rect.top - b.top) / (b.height / grille)), 0, grille - forme.h),
       });
     }
 
-    for (const { el: piece, spec } of pieces) {
-      makeDraggable(piece, board, def, spec, (rect, x, y) => drop(piece, rect, x, y));
+    for (const piece of pieces) {
+      makeDraggable(piece, board, grille, (rect, x, y) => drop(piece.el, rect, x, y));
     }
 
     check.addEventListener('pointerup', (e) => {
@@ -282,9 +302,9 @@ export async function runCreasePuzzle(
 
       const solved =
         placed.size === pieces.length &&
-        pieces.every(({ el: piece, spec }) => {
+        pieces.every(({ el: piece, boite: b }) => {
           const at = placed.get(piece);
-          return at?.c === spec.x && at?.r === spec.y;
+          return at?.c === b.x && at?.r === b.y;
         });
 
       if (solved) {
@@ -307,151 +327,193 @@ export async function runCreasePuzzle(
   });
 }
 
+/** Où et à quelle taille une pièce repose dans le bac, en pixels. */
+interface PoseBac {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+interface TrayLayout {
+  pose: Map<HTMLElement, PoseBac>;
+  /** Pixels par cellule dans le bac. */
+  scale: number;
+}
+
 /**
- * Dispose les pièces dans le bac, à l'échelle et sur autant de colonnes qu'il
- * faut.
+ * Jette les pièces en vrac dans le bac.
+ *
+ * **En vrac, mais sans jamais sortir du bac** : le bac est la seule surface où
+ * l'on est sûr qu'une pièce ne recouvre ni le plateau ni les boutons. Les
+ * positions sont tirées d'un générateur **à graine fixe** (`graine()`), donc le
+ * désordre est le même à chaque ouverture de la même énigme : deux parties se
+ * comparent, un bug se reproduit, et rien ne dépend du hasard de la session.
+ *
+ * Le chevauchement est toléré — c'est ce qui fait le tas — mais mesuré et
+ * plafonné : au-delà, une pièce disparaît sous une autre et devient
+ * inattrapable. Il se mesure sur les **boîtes** des pièces, donc on en tolère
+ * moins qu'il n'en paraît : deux boîtes qui mordent l'une sur l'autre de 15 %
+ * ne montrent souvent aucun recouvrement de papier.
  *
  * Toutes les pièces partagent un même facteur `k` (pixels par cellule) : elles
  * gardent donc entre elles les proportions qu'elles auront sur le plateau, ce
- * qui aide à reconnaître laquelle va où. Leur donner à toutes la même largeur
- * paraissait plus simple, mais une pièce étroite et haute devenait démesurée et
- * la colonne débordait du cadre.
- *
- * `k` est plafonné à la taille réelle : une pièce n'est jamais **plus grande**
- * dans le bac que sur le plateau. En dessous, elle rétrécit seulement si la
- * place manque — et le glisser la ramène de toute façon à sa taille réelle dès
- * qu'on la saisit, ce qui rend inutile un survol pour la « rendre lisible ».
- *
- * Le nombre de colonnes n'est pas fixé d'avance : on cherche celui qui autorise
- * le plus grand `k`. Sur un téléphone en paysage, une colonne unique écrasait
- * les pièces à 30 px de côté — sous le seuil tactile — parce que leur hauteur
- * cumulée ne tient pas dans 375 px.
- *
- * Rend de quoi remettre une pièce à sa place : sa colonne d'origine et sa taille
- * de bac. Sans ça, une pièce relâchée hors du plateau atterrissait à la racine
- * du bac, en frère des colonnes, et se superposait aux autres.
+ * qui aide à reconnaître laquelle va où. `k` est plafonné à la taille réelle —
+ * une pièce n'est jamais **plus grande** dans le bac que sur le plateau — et
+ * rétrécit tant que le vrac ne tient pas.
  */
-function layoutTray(
+function eparpiller(
   root: HTMLElement,
   tray: HTMLElement,
   board: HTMLElement,
-  def: CreasePuzzleDef,
+  pieces: Piece[],
+  grille: number,
+  seed: number,
 ): TrayLayout {
-  const gap = parseFloat(getComputedStyle(tray).rowGap) || 0;
-  const box = tray.getBoundingClientRect();
-  const maxWidth = root.getBoundingClientRect().width * MAX_TRAY_RATIO;
-  const trueCell = board.getBoundingClientRect().width / def.grid;
+  const cadre = tray.getBoundingClientRect();
+  const largeur = root.getBoundingClientRect().width * MAX_TRAY_RATIO;
+  const hauteur = cadre.height;
+  const trueCell = board.getBoundingClientRect().width / grille;
 
-  const best = bestTrayLayout(def.pieces, maxWidth, box.height, gap);
-  const k = Math.min(best.k, trueCell);
+  // Point de départ : le facteur qui ferait occuper aux boîtes des pièces un
+  // peu plus de la moitié du bac. Le reste est du vide, et c'est lui qui rend
+  // le vrac possible.
+  const cellules = pieces.reduce((somme, p) => somme + p.boite.w * p.boite.h, 0);
+  const depart = Math.min(trueCell, Math.sqrt((largeur * hauteur * 0.55) / cellules));
 
-  const byIndex = new Map<number, HTMLElement>();
-  for (const el of tray.querySelectorAll<HTMLElement>('.puzzle__piece')) {
-    byIndex.set(Number(el.dataset.piece), el);
+  let k = depart;
+  let poses: PoseBac[] | null = null;
+  for (let essai = 0; essai < 14 && !poses; essai++) {
+    poses = tenterVrac(pieces, largeur, hauteur, k, seed);
+    if (!poses) k *= 0.9;
   }
+  // Dernier recours : à cette taille-là toutes les pièces tiennent côte à côte
+  // dans le bac, le vrac n'a plus le choix.
+  if (!poses) poses = tenterVrac(pieces, largeur, hauteur, k, seed, 1) ?? [];
 
-  const home = new Map<HTMLElement, HTMLElement>();
-  const size = new Map<HTMLElement, { w: number; h: number }>();
-
-  tray.replaceChildren();
-  for (let c = 0; c < best.columns; c++) {
-    const column = document.createElement('div');
-    column.className = 'puzzle__tray-column';
-    for (const [i, assigned] of best.assign.entries()) {
-      const el = assigned === c ? byIndex.get(i) : undefined;
-      if (!el) continue;
-      const spec = def.pieces[i];
-      size.set(el, { w: Math.round(k * spec.w), h: Math.round(k * spec.h) });
-      home.set(el, column);
-      column.appendChild(el);
-    }
-    tray.appendChild(column);
-  }
-
-  for (const [el, px] of size) {
-    el.style.width = `${px.w}px`;
-    el.style.height = `${px.h}px`;
+  const pose = new Map<HTMLElement, PoseBac>();
+  for (const [i, p] of pieces.entries()) {
+    const ou = poses[i] ?? { x: 0, y: 0, w: p.boite.w * k, h: p.boite.h * k };
+    pose.set(p.el, ou);
+    p.el.style.width = `${ou.w}px`;
+    p.el.style.height = `${ou.h}px`;
+    p.el.style.left = `${ou.x}px`;
+    p.el.style.top = `${ou.y}px`;
   }
 
   // Le bac se resserre sur ce qu'il occupe vraiment : le reste va au plateau.
-  root.style.setProperty('--tray-width', `${Math.ceil(k * best.cellsWide)}px`);
+  const utilisee = Math.max(...poses.map((p) => p.x + p.w), 0);
+  root.style.setProperty('--tray-width', `${Math.ceil(utilisee)}px`);
 
-  const smallest = k * Math.min(...def.pieces.flatMap((p) => [p.w, p.h]));
-  if (import.meta.env.DEV && smallest < MIN_TOUCH_PX) {
+  const plusPetite = Math.min(...pieces.flatMap((p) => [p.boite.w, p.boite.h])) * k;
+  if (import.meta.env.DEV && plusPetite < MIN_TOUCH_PX) {
     console.warn(
-      `[puzzle] pièces à ${Math.round(smallest)}px de côté, sous le seuil tactile ` +
+      `[puzzle] pièces à ${Math.round(plusPetite)}px de côté, sous le seuil tactile ` +
         `de ${MIN_TOUCH_PX}px : le découpage est trop fin pour ce cadre.`,
     );
   }
 
-  return { home, size, scale: k, trueCell };
+  return { pose, scale: k };
 }
 
-interface TrayLayout {
-  /** Colonne d'origine de chaque pièce, où la remettre si elle revient. */
-  home: Map<HTMLElement, HTMLElement>;
-  /** Taille en pixels dans le bac — à réappliquer au retour. */
-  size: Map<HTMLElement, { w: number; h: number }>;
-  /** Pixels par cellule dans le bac. */
-  scale: number;
-  /** Pixels par cellule sur le plateau, soit la taille réelle. */
-  trueCell: number;
+/** Recouvrement toléré entre deux boîtes, en part de la plus petite des deux. */
+const CHEVAUCHEMENT = 0.18;
+/** Ce qu'on accepte faute de mieux, plutôt que de tout rétrécir encore. */
+const CHEVAUCHEMENT_MAX = 0.4;
+/** Positions tirées par pièce avant d'abandonner cette taille. */
+const ESSAIS = 400;
+
+/**
+ * Un jet de pièces à la taille `k`, ou `null` si le bac est trop petit pour ça.
+ * Les grandes pièces d'abord : posées en dernier, elles ne trouvent plus de
+ * place et font échouer des tailles pourtant tenables.
+ */
+function tenterVrac(
+  pieces: Piece[],
+  largeur: number,
+  hauteur: number,
+  k: number,
+  seed: number,
+  tolerance = CHEVAUCHEMENT,
+): PoseBac[] | null {
+  const hasard = melangeur(seed);
+  const ordre = [...pieces.keys()].sort(
+    (a, b) => pieces[b].boite.w * pieces[b].boite.h - pieces[a].boite.w * pieces[a].boite.h,
+  );
+
+  const poses: PoseBac[] = new Array(pieces.length);
+  // Les pièces déjà posées, dans l'ordre où elles l'ont été. Une liste à part,
+  // et non `poses` : celle-ci se remplit dans le désordre des tailles, et ses
+  // trous se compareraient à `undefined`.
+  const deja: PoseBac[] = [];
+
+  for (const i of ordre) {
+    const w = pieces[i].boite.w * k;
+    const h = pieces[i].boite.h * k;
+    if (w > largeur || h > hauteur) return null;
+
+    let meilleur: PoseBac | null = null;
+    let meilleurScore = Infinity;
+    for (let essai = 0; essai < ESSAIS; essai++) {
+      const candidat = {
+        x: hasard() * (largeur - w),
+        y: hasard() * (hauteur - h),
+        w,
+        h,
+      };
+      const score = Math.max(0, ...deja.map((autre) => recouvrement(candidat, autre)));
+      if (score < meilleurScore) {
+        meilleurScore = score;
+        meilleur = candidat;
+      }
+      if (score <= tolerance) break;
+    }
+
+    if (!meilleur || meilleurScore > Math.max(tolerance, CHEVAUCHEMENT_MAX)) return null;
+    poses[i] = meilleur;
+    deja.push(meilleur);
+  }
+  return poses;
+}
+
+/** Part de la plus petite des deux boîtes que l'autre recouvre. */
+function recouvrement(a: PoseBac, b: PoseBac): number {
+  const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+  const h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+  if (w <= 0 || h <= 0) return 0;
+  return (w * h) / Math.min(a.w * a.h, b.w * b.h);
 }
 
 /**
- * Cherche la répartition en colonnes qui laisse les pièces les plus grandes.
- *
- * Les pièces sont placées de la plus haute à la plus courte, chacune dans la
- * colonne la moins remplie — une heuristique suffisante pour la poignée de
- * pièces d'une énigme, là où un vrai calcul d'agencement serait hors de propos.
+ * Générateur pseudo-aléatoire à graine (mulberry32) : même graine, même vrac.
+ * `Math.random()` donnerait un tas différent à chaque ouverture, donc un bug
+ * de placement impossible à revoir.
  */
-function bestTrayLayout(
-  pieces: CreasePuzzlePiece[],
-  maxWidth: number,
-  maxHeight: number,
-  gap: number,
-) {
-  let best = { k: 0, columns: 1, assign: pieces.map(() => 0), cellsWide: 0 };
-  const byHeight = [...pieces.keys()].sort((a, b) => pieces[b].h - pieces[a].h);
+function melangeur(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
-  for (let columns = 1; columns <= pieces.length; columns++) {
-    const cellsPerColumn = new Array(columns).fill(0);
-    const countPerColumn = new Array(columns).fill(0);
-    const widthPerColumn = new Array(columns).fill(0);
-    const assign = pieces.map(() => 0);
-
-    for (const i of byHeight) {
-      const c = cellsPerColumn.indexOf(Math.min(...cellsPerColumn));
-      assign[i] = c;
-      cellsPerColumn[c] += pieces[i].h;
-      countPerColumn[c] += 1;
-      widthPerColumn[c] = Math.max(widthPerColumn[c], pieces[i].w);
-    }
-
-    const cellsTall = Math.max(...cellsPerColumn);
-    const cellsWide = widthPerColumn.reduce((sum, w) => sum + w, 0);
-    const k = Math.min(
-      (maxHeight - gap * (Math.max(...countPerColumn) - 1)) / cellsTall,
-      (maxWidth - gap * (columns - 1)) / cellsWide,
-    );
-
-    if (k > best.k) best = { k, columns, assign, cellsWide };
+/**
+ * La graine vient de l'énigme elle-même (son chemin de motif), pas d'un nombre
+ * écrit à la main : chaque énigme a son vrac, et il ne bouge pas.
+ */
+function graine(texte: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < texte.length; i++) {
+    h ^= texte.charCodeAt(i);
+    h = Math.imul(h, 16777619);
   }
-
-  return best;
+  return h >>> 0;
 }
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
-}
-
-function shuffled<T>(items: T[]): T[] {
-  const out = [...items];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
 }
 
 /**
@@ -495,12 +557,16 @@ async function loadPattern(url: string) {
  * Pendant le glisser la pièce passe en `position: fixed`, centrée sous le doigt
  * et déjà à sa taille de plateau. Elle échappe ainsi à tout rognage par un
  * conteneur, et ce qu'on voit sous le doigt est exactement ce qui sera posé.
+ *
+ * L'écouteur est posé sur la pièce, mais le tap n'est reçu que par le papier :
+ * le détourage laisse du vide dans la boîte, et c'est le CSS
+ * (`pointer-events`) qui le rend traversant, sans quoi une pièce en recouvrirait
+ * une autre par un coin transparent.
  */
 function makeDraggable(
-  piece: HTMLElement,
+  { el: piece, boite: forme }: Piece,
   board: HTMLElement,
-  def: CreasePuzzleDef,
-  spec: CreasePuzzlePiece,
+  grille: number,
   onDrop: (rect: DOMRect, x: number, y: number) => void,
 ) {
   let dragging = false;
@@ -517,8 +583,8 @@ function makeDraggable(
     dragging = true;
 
     const b = board.getBoundingClientRect();
-    width = (spec.w / def.grid) * b.width;
-    height = (spec.h / def.grid) * b.height;
+    width = (forme.w / grille) * b.width;
+    height = (forme.h / grille) * b.height;
     piece.style.position = 'fixed';
     piece.style.width = `${width}px`;
     piece.style.height = `${height}px`;

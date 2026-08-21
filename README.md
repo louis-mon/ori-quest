@@ -25,13 +25,22 @@ le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 | `npm run build` | typecheck + build de production dans `dist/` |
 | `npm run ink` | compile `content/story.ink` -> `src/generated/story.json` |
 | `npm run scenes` | cartes Tiled `game-design/scenes/` -> `src/generated/scenes/` |
+| `npm run enigmes` | découpages `game-design/enigmes/` -> `src/generated/enigmes.ts` |
+| `npm run check-puzzle [-- <nom>]` | un découpage a-t-il bien une solution unique ? |
 | `npm run bake -- <cp.svg>` | crease pattern -> animation `.origami` |
 
-Page de réglage, en développement uniquement (hors build) :
-`http://localhost:5173/orientation.html` — la pose de chaque modèle plié
-(orientation à la souris, pliage final, taille dans le décor). « Enregistrer »
-écrit `src/origami/poses.ts` directement, par un point d'entrée du serveur de
-dev défini dans `vite.config.ts`.
+Pages de réglage, en développement uniquement (hors build) :
+
+- `http://localhost:5173/orientation.html` — la pose de chaque modèle plié
+  (orientation à la souris, pliage final, taille dans le décor).
+- `http://localhost:5173/decoupage.html` — le découpage des énigmes : on trace
+  des coupes sur le crease pattern, d'un bord à l'autre d'une pièce, et l'outil
+  dit après chaque coupe si la solution reste unique.
+
+Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
+`game-design/enigmes/<nom>.json`) par un point d'entrée du serveur de dev défini
+dans `vite.config.ts` — qui n'existe qu'en développement et ne garde que des
+nombres bornés.
 | `npm run zip` | prépare `ori-quest-itch.zip` pour itch.io |
 
 ### Intégrer un origami de l'artiste
@@ -227,6 +236,8 @@ targets glTF) — le format runtime est le même.
 ```
 content/story.ink            narration (éditable sans toucher au code)
 content/origami/*.svg        crease patterns sources
+game-design/scenes/*.tmj     géométrie des scènes (Tiled) — fait foi
+game-design/enigmes/*.json   découpage des énigmes (decoupage.html) — fait foi
 public/assets/origami/*.origami  animations bakées
 src/
   main.ts                    bootstrap, syncStage, déblocage audio, sauvegarde
@@ -234,6 +245,7 @@ src/
     config.ts                résolution logique, seuil tactile, palette
     scenes/pont-scene.ts     décor + hotspots
     puzzle/crease-puzzle.ts  minijeu de reconstitution (DOM)
+    puzzle/decoupage.ts      pièces polygonales : boîtes, masques, détourage
     puzzle/puzzles.ts        registre des énigmes, en données
     systems/state.ts         état sérialisable (drapeaux, inventaire)
     systems/hotspots.ts      définition des zones et des verbes
@@ -249,9 +261,15 @@ src/
     overlay.ts               dialogues, inventaire, menu de verbes (DOM)
     vignettes.ts             image d'un objet d'inventaire
     style.css
+  dev/
+    orientation.ts           page de réglage des poses (hors build)
+    decoupage.ts             éditeur de découpage des énigmes (hors build)
+    couper.ts                fendre une pièce le long d'un trait
 tools/
   bake-origami.mjs           CP -> .origami
   compile-ink.mjs            .ink -> .json
+  import-decoupage.mjs       découpages -> src/generated/enigmes.ts
+  lib/decoupage.mjs          pavage, unicité de la solution (partagé)
   pack-itch.mjs              dist/ -> zip vérifié pour itch.io
   pull-assets.mjs            dossier partagé de l'artiste -> assets-src/
 ```

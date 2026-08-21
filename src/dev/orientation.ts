@@ -1,3 +1,4 @@
+import './orientation.css';
 import { rendreOrigami } from '../origami/apercu';
 import { POSES, quaternionDegres, repereVue, type Pose } from '../origami/vue';
 

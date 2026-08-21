@@ -1,9 +1,12 @@
 import { execFile } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 const FICHIER_POSES = 'src/origami/poses.ts';
 const CARTES = 'game-design/scenes';
+const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
 
 /** Bornes de sécurité. Au-delà, ce n'est plus un réglage, c'est une erreur. */
@@ -76,12 +79,19 @@ function enregistrerPoses(): Plugin {
  */
 function relancerSurChangement(
   server: ViteDevServer,
-  { extension, script, echec }: { extension: string; script: string; echec: string },
+  {
+    dossier,
+    extension,
+    script,
+    echec,
+  }: { dossier: string; extension: string; script: string; echec: string },
 ) {
   let enCours = false;
 
   const regenerer = (fichier: string) => {
-    if (!fichier.endsWith(extension) || enCours) return;
+    // Le guetteur est global : il voit passer tout le projet. Le dossier compte
+    // donc autant que l'extension — `.json` ne dit rien à lui seul.
+    if (!fichier.includes(dossier) || !fichier.endsWith(extension) || enCours) return;
     enCours = true;
     execFile('node', [script], (err, stdout, stderr) => {
       enCours = false;
@@ -117,6 +127,7 @@ function suivreLesPlans(): Plugin {
     configureServer(server) {
       server.watcher.add(CARTES);
       relancerSurChangement(server, {
+        dossier: CARTES,
         extension: '.tmj',
         script: 'tools/import-scene.mjs',
         echec: '[scenes] plan refusé, rien réécrit',
@@ -151,12 +162,222 @@ function suivreLaNarration(): Plugin {
     configureServer(server) {
       server.watcher.add(HISTOIRE);
       relancerSurChangement(server, {
+        dossier: HISTOIRE,
         extension: '.ink',
         script: 'tools/compile-ink.mjs',
         echec: '[ink] compilation refusée, story.json inchangé',
       });
     },
   };
+}
+
+/**
+ * Enregistrement du découpage d'une énigme depuis `decoupage.html`.
+ *
+ * Même dispositif que pour les poses, et pour la même raison : l'outil qui
+ * dessine tourne dans le navigateur, et le résultat doit atterrir dans un
+ * fichier du dépôt — ici `game-design/enigmes/<nom>.json`, qui fait foi.
+ *
+ * Mêmes garde-fous : `apply: 'serve'` (rien de ceci n'existe dans le build),
+ * **rien n'est écrit tel quel** — on ne garde que des entiers bornés, et le
+ * fichier est regénéré par nos soins — et l'énigme doit déjà exister, soit par
+ * son découpage, soit par son crease pattern dans `public/assets/enigmes/`. Le
+ * nom est validé avant tout usage, donc aucun chemin ne peut sortir du dossier.
+ */
+function enregistrerDecoupage(): Plugin {
+  return {
+    name: 'ori-quest:decoupage',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__decoupage', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        let corps = '';
+        req.on('data', (bout) => {
+          corps += bout;
+          // Une vingtaine de polygones de quelques sommets : au-delà, ce n'est
+          // pas l'éditeur qui parle.
+          if (corps.length > 64_000) req.destroy();
+        });
+        req.on('end', () => {
+          try {
+            const decoupage = lireCorpsDecoupage(JSON.parse(corps));
+            writeFileSync(decoupage.fichier, rendreDecoupage(decoupage));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
+          }
+        });
+      });
+
+      /**
+       * Le même découpage, mais seulement examiné : l'éditeur y envoie le
+       * travail en cours après chaque coupe pour savoir s'il tient encore la
+       * promesse d'une solution unique. Rien n'est écrit.
+       */
+      server.middlewares.use('/__unicite', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        let corps = '';
+        req.on('data', (bout) => {
+          corps += bout;
+          if (corps.length > 64_000) req.destroy();
+        });
+        req.on('end', async () => {
+          try {
+            const rapport = await analyserDecoupage(lireCorpsDecoupage(JSON.parse(corps)));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, ...(rapport as object) }));
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
+          }
+        });
+      });
+    },
+  };
+}
+
+/**
+ * Les découpages suivent l'éditeur, comme les plans suivent Tiled.
+ *
+ * On guette le dossier plutôt que le seul fichier qu'on vient d'écrire : une
+ * énigme ajoutée à la main, ou un découpage corrigé dans l'éditeur de texte,
+ * doit se voir à l'écran sans qu'on ait à savoir qu'une commande existe. Un
+ * découpage invalide laisse en place le dernier module valide, l'erreur allant
+ * au terminal.
+ */
+function suivreLesDecoupages(): Plugin {
+  return {
+    name: 'ori-quest:enigmes',
+    apply: 'serve',
+    configureServer(server) {
+      server.watcher.add(DECOUPAGES);
+      relancerSurChangement(server, {
+        dossier: DECOUPAGES,
+        extension: '.json',
+        script: 'tools/import-decoupage.mjs',
+        echec: '[enigmes] découpage refusé, rien réécrit',
+      });
+    },
+  };
+}
+
+/** Un nom d'énigme est un identifiant, et rien d'autre : il sert de chemin. */
+const NOM_ENIGME = /^[a-z][a-z0-9_]{0,39}$/;
+
+/** Bornes du découpage, alignées sur celles de `tools/lib/decoupage.mjs`. */
+const LIMITES_DECOUPAGE = {
+  grille: [2, 24],
+  pieces: [1, 24],
+  sommets: [3, 64],
+} as const;
+
+/** Un découpage relu : que des entiers, et une énigme qui existe. */
+interface CorpsDecoupage {
+  enigme: string;
+  fichier: string;
+  grille: number;
+  pieces: number[][][];
+}
+
+/**
+ * Relit ce qu'envoie l'éditeur. **Rien de ce qui arrive n'est conservé tel
+ * quel** : chaque coordonnée est relue en entier borné, et le nom d'énigme est
+ * validé avant de servir de chemin. Ce que renvoie cette fonction est la seule
+ * chose que voient l'écriture et la vérification.
+ */
+function lireCorpsDecoupage(recu: unknown): CorpsDecoupage {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const { enigme, grille, pieces } = recu as Record<string, unknown>;
+
+  if (typeof enigme !== 'string' || !NOM_ENIGME.test(enigme)) {
+    throw new Error(`nom d'énigme invalide : ${String(enigme)}`);
+  }
+  const fichier = `${DECOUPAGES}/${enigme}.json`;
+  if (!existsSync(fichier) && !existsSync(`public/assets/enigmes/${enigme}/solution.svg`)) {
+    throw new Error(`énigme inconnue : ${enigme}`);
+  }
+
+  const n = entierBorne(grille, LIMITES_DECOUPAGE.grille, 'grille');
+  if (!Array.isArray(pieces) || !borne(pieces.length, LIMITES_DECOUPAGE.pieces)) {
+    throw new Error(`nombre de pièces invalide : ${(pieces as unknown[])?.length}`);
+  }
+
+  const relues = pieces.map((piece, i) => {
+    const points = (piece as { points?: unknown })?.points;
+    if (!Array.isArray(points) || !borne(points.length, LIMITES_DECOUPAGE.sommets)) {
+      throw new Error(`pièce ${i} : ${(points as unknown[])?.length} sommet(s)`);
+    }
+    return points.map((p) => {
+      const [x, y] = Array.isArray(p) ? p : [];
+      return [entierBorne(x, [0, n], `pièce ${i}`), entierBorne(y, [0, n], `pièce ${i}`)];
+    });
+  });
+
+  return { enigme, fichier, grille: n, pieces: relues };
+}
+
+/** Refabrique le fichier à partir des seuls entiers relus. */
+function rendreDecoupage(corps: CorpsDecoupage): string {
+  const lignes = corps.pieces.map(
+    (points) => `    { "points": [${points.map(([x, y]) => `[${x}, ${y}]`).join(', ')}] }`,
+  );
+
+  return [
+    '{',
+    '  "//": "Découpage de l’énigme — écrit par decoupage.html (npm run dev), pas à la main.",',
+    `  "grille": ${corps.grille},`,
+    '  "pieces": [',
+    lignes.join(',\n'),
+    '  ]',
+    '}',
+    '',
+  ].join('\n');
+}
+
+/**
+ * Le verdict sur un découpage **pas encore enregistré** : pave-t-il le carré, et
+ * une seule disposition donne-t-elle son image ?
+ *
+ * Le calcul est celui de `tools/lib/decoupage.mjs`, et c'est tout l'intérêt :
+ * l'éditeur affiche exactement ce que vérifiera l'import, puis
+ * `npm run check-puzzle`. Une seconde implémentation côté navigateur aurait fini
+ * par dire autre chose que le jeu.
+ *
+ * L'import est fait par URL calculée : un chemin littéral serait embarqué dans
+ * la configuration au moment où Vite la compile, alors qu'on veut le module
+ * Node tel qu'il est sur le disque.
+ */
+async function analyserDecoupage(corps: CorpsDecoupage): Promise<unknown> {
+  const url = pathToFileURL(resolve('tools/lib/decoupage.mjs')).href;
+  const { analyser } = (await import(/* @vite-ignore */ url)) as {
+    analyser: (
+      decoupage: { grille: number; pieces: number[][][] },
+      motif: string,
+    ) => { etat: string; solutions?: unknown[]; traits?: number };
+  };
+
+  const rapport = analyser(
+    { grille: corps.grille, pieces: corps.pieces },
+    `public/assets/enigmes/${corps.enigme}/solution.svg`,
+  );
+  return {
+    etat: rapport.etat,
+    dispositions: rapport.solutions?.length ?? 0,
+    traits: rapport.traits ?? 0,
+  };
+}
+
+const borne = (n: number, [min, max]: readonly [number, number]) => n >= min && n <= max;
+
+function entierBorne(valeur: unknown, bornes: readonly [number, number], quoi: string): number {
+  if (!Number.isInteger(valeur) || !borne(valeur as number, bornes)) {
+    throw new Error(`${quoi} : entier hors bornes (${String(valeur)})`);
+  }
+  return valeur as number;
 }
 
 function nombre(valeur: unknown, min: number, max: number, quoi: string): number {
@@ -205,7 +426,13 @@ function rendreFichier(source: string, recu: unknown): string {
 }
 
 export default defineConfig({
-  plugins: [enregistrerPoses(), suivreLesPlans(), suivreLaNarration()],
+  plugins: [
+    enregistrerPoses(),
+    enregistrerDecoupage(),
+    suivreLesPlans(),
+    suivreLesDecoupages(),
+    suivreLaNarration(),
+  ],
   // itch.io sert le jeu depuis un sous-dossier arbitraire : tous les chemins
   // doivent être relatifs, sinon rien ne charge une fois zippé.
   base: './',

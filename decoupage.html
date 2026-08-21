@@ -1,0 +1,89 @@
+<!doctype html>
+<!--
+  Éditeur de découpage des énigmes.
+
+  On trace des coupes sur le crease pattern, d'un bord à l'autre d'une pièce, et
+  chaque trait la fend en deux. Le pavage est donc exact par construction, et
+  tous les sommets tombent sur la grille d'ancrage — les deux propriétés dont le
+  minijeu a besoin.
+
+  Uniquement en développement — `vite build` ne connaît que index.html, donc
+  cette page ne part pas sur itch.io.
+
+      npm run dev  puis  http://localhost:5173/decoupage.html
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ori-Quest — découpage des énigmes</title>
+  </head>
+  <body>
+    <nav id="liste" aria-label="Énigmes"></nav>
+
+    <main>
+      <header>
+        <h1>Découpage</h1>
+        <p class="aide" id="aide">…</p>
+      </header>
+
+      <div class="scene">
+        <svg id="plan" xmlns="http://www.w3.org/2000/svg" aria-label="Plan de découpe"></svg>
+
+        <div class="reglages">
+          <fieldset>
+            <legend>Grille d'ancrage</legend>
+            <label class="champ">
+              <input id="grille" type="number" min="2" max="24" step="1" />
+              <span>cellules de côté</span>
+            </label>
+            <p class="note">
+              C'est la grille sur laquelle les pièces se calent dans le jeu, et la
+              seule chose qu'on puisse viser ici. La changer garde les coupes si
+              elles y retombent&nbsp;: 4&nbsp;→&nbsp;8 double les coordonnées,
+              4&nbsp;→&nbsp;6 ne conserve pas forcément tout.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Vérification</legend>
+            <p id="verdict" class="verdict">…</p>
+            <p class="note">
+              Le joueur ne valide qu'une disposition&nbsp;: la vôtre. Si une autre
+              donne exactement la même image, il croit avoir résolu l'énigme et se
+              voit refusé. Des pièces de tailles et de formes différentes lèvent
+              l'ambiguïté.
+            </p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Pièces</legend>
+            <ul id="inventaire" class="inventaire"></ul>
+            <p class="note">
+              Une pièce de moins d'une cellule est presque toujours trop petite
+              pour être attrapée au doigt une fois le bac à l'échelle du
+              téléphone.
+            </p>
+          </fieldset>
+
+          <div class="actions">
+            <button id="annuler" type="button">Annuler la coupe (⌘Z)</button>
+            <button id="recommencer" type="button">Repartir du carré</button>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-tete">
+          <h2><code id="fichier">game-design/enigmes/…</code></h2>
+          <div class="actions">
+            <span id="statut" class="statut"></span>
+            <button id="enregistrer" type="button" class="principal">Enregistrer</button>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/dev/decoupage.ts"></script>
+  </body>
+</html>
