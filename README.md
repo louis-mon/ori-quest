@@ -9,7 +9,7 @@ itch.io, avec des animations d'origami générées à partir de crease patterns.
 
 ## Démarrer
 
-Node ≥ 18 requis (le projet est testé sur 24.14.1 ; un `.nvmrc` est fourni).
+Node ≥ 18 requis (le projet est testé sur 24.19.0 ; un `.nvmrc` est fourni).
 
 ```bash
 nvm use && npm install && npm run dev

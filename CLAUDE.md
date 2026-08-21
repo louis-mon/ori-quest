@@ -12,11 +12,13 @@ Le jeu est en **français**. Code, commentaires et documentation aussi.
   visuel. **Toute décision de game design va là**, pas dans les commentaires.
 - `README.md` — installation, pipeline origami, publication itch.io.
 
-## Environnement — le piège numéro un
+## Environnement
 
-Le shell de la machine est sur **Node 14 par défaut**, et Vite exige ≥ 18.
-Toujours `nvm use` (un `.nvmrc` épingle 24.14.1) avant `npm run dev`, sinon le
-serveur meurt au démarrage avec une erreur `Cannot find module 'node:path'`.
+Vite exige Node ≥ 18. Le défaut de la machine est désormais la **LTS courante**
+(alias nvm `default -> lts/*`, aujourd'hui 24.19.0) et `.nvmrc` épingle la même
+version : `nvm use` avant `npm run dev` reste le réflexe, mais ce n'est plus un
+piège. Un `Cannot find module 'node:path'` au démarrage signifie qu'un shell
+tourne encore sur un node antérieur — `nvm use` suffit.
 
 ## Commandes
 
