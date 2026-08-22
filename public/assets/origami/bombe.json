@@ -1,0 +1,8 @@
+{
+  "name": "bombe",
+  "source": "bombe.svg",
+  "vertexCount": 9,
+  "faceCount": 8,
+  "frameCount": 24,
+  "bakedAt": "2026-08-22T18:27:39.520Z"
+}

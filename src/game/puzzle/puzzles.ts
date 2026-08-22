@@ -29,9 +29,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     decoupage: DECOUPAGES.pont,
     title: 'Le pont',
     // La première énigme du jeu : c'est elle qui apprend le pli vallée, et son
-    // motif n'a justement que des vallées. Le pli montagne s'apprendra à la
-    // première énigme qui en porte un — l'arbre ou la hache, selon l'ordre où le
-    // joueur les rencontre — le jour où ce tutoriel-là sera écrit.
+    // motif n'a justement que des vallées.
     tutoriel: 'vallee',
   },
 
@@ -41,6 +39,13 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     modele: 'arbre',
     decoupage: DECOUPAGES.arbre,
     title: 'Le vieil arbre',
+    // Le pli montagne est porté par **les trois énigmes qui en contiennent**,
+    // pas par une seule choisie d'avance : le drapeau `tuto_montagne_vu` fait
+    // que c'est la première ouverte qui le propose, quel que soit l'ordre où le
+    // joueur les rencontre. Désigner l'arbre seul laisserait un joueur passé
+    // directement à la porte devant des traits rouges que personne ne lui a
+    // expliqués.
+    tutoriel: 'montagne',
   },
 
   // game-design/scenes/chapter-1/la-porte.md — la hache.
@@ -49,6 +54,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     modele: 'hache',
     decoupage: DECOUPAGES.hache,
     title: 'La hache',
+    tutoriel: 'montagne',
   },
 
   // game-design/scenes/chapter-1/la-porte.md — la porte.
@@ -57,5 +63,6 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     modele: 'porte',
     decoupage: DECOUPAGES.porte,
     title: 'La porte',
+    tutoriel: 'montagne',
   },
 };

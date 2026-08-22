@@ -9,7 +9,9 @@ Il peut se lancer de deux façon:
 - avec le bouton "?"
 - automatiquement dans les cas suivants, si il n'a jamais été lancé:
     - le puzzle du pont lance le tutoriel pli vallée.
-    - le puzzle suivant (arbre ou hache) lance le tutoriel pli montagne.
+    - le tutoriel pli montagne est porté par les trois puzzles qui contiennent
+      un pli montagne — l'arbre, la porte et la hache — et c'est donc le premier
+      ouvert qui le lance, quel que soit l'ordre où le joueur les rencontre.
 
 
 En cas de lancement automatique, une question est posée pour éventuelement le skip
@@ -66,6 +68,14 @@ La flèche disparaît, le tutoriel et son overlay disparaissent.
 
 # Pli montagne
 
+
+## lancement auto
+
+"Celui là semble plus compliqué, il n'y a pas que des plis vallées."
+Choix "lancer le tutoriel" ou "passer le tutoriel"
+
+## déroulement
+
 "Un autre type de pli est nécessaire pour plier ce modèle. C'est le pli "montagne"".
 
 "Comme son nom l'indique, c'est comme une montagne, l'inverse du pli vallée."
@@ -76,7 +86,7 @@ L'overlay s'assombrit pour que l'on voie moins la scène du puzzle (mais on voit
 Au milieu de l'écran, une feuille carée blanche apparaît (comme le tuto du pli vallée).
 Après 3 secondes, une diagonale est dessinée en rouge.
 
-"En rouge, le pli montagne est dessiné. Je vais le plier."
+"En rouge, le pli montagne est dessiné (comme dans le tuto pli vallée). Je vais le plier."
 
 Lancer l'animation de pli lentement.
 

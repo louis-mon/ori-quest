@@ -155,9 +155,29 @@ export class DialogueRunner {
         this.readSpeaker(tags);
         // Les tags s'appliquent avant l'affichage : un `# origami:` doit
         // pouvoir jouer *pendant* que la ligne est lue.
-        const pending = this.applyTags(tags);
-        if (line) await this.overlay.say(line, this.speaker);
+        let effetFini = false;
+        const pending = this.applyTags(tags).then(() => {
+          effetFini = true;
+        });
+
+        if (!line) {
+          await pending;
+          continue;
+        }
+
+        await this.overlay.say(line, this.speaker);
+        // Le joueur a-t-il tapé **avant** la fin de l'effet ? Alors son tap a
+        // payé la lecture de la ligne, pas le passage à la suivante : sans
+        // cette question, la réplique d'après prendrait la place de celle-ci à
+        // la seconde exacte où le pliage se termine, sans que personne ne l'ait
+        // demandé. Un dialogue n'avance jamais tout seul.
+        //
+        // Tapé après, il n'y a rien à redemander — `depense` est faux et le
+        // récit enchaîne comme sur n'importe quelle ligne. C'est le cas courant :
+        // une réplique se lit plus longtemps qu'un pliage ne dure.
+        const depense = !effetFini;
         await pending;
+        if (depense) await this.overlay.attendreUnTap();
       }
 
       const choices = this.story.currentChoices;

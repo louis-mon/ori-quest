@@ -163,14 +163,34 @@ export class Overlay {
    * vient du tag ink `# qui:` — voir `DialogueRunner`.
    */
   say(text: string, qui: Personnage | null = null): Promise<void> {
+    // Écrit dans le DOM **avant** de rendre la promesse, et non dans son
+    // exécuteur : `DialogueRunner` compte là-dessus pour que le locuteur soit
+    // posé au moment de l'appel, pas un tick plus tard.
+    this.dialogue.hidden = false;
+    this.showSpeaker(qui);
+    this.dialogueText.textContent = text;
+    this.dialogueChoices.innerHTML = '';
+    this.dialogueNext.hidden = false;
+    return this.attendreUnTap();
+  }
+
+  /**
+   * Attend un tap **sans rien afficher de neuf** : la réplique déjà à l'écran y
+   * reste, et c'est le joueur qui dit quand on passe à la suite.
+   *
+   * Pour ce qui se joue *pendant* qu'une réplique est affichée — une animation
+   * de tutoriel, un pli qui se trace. Sans ça, la ligne suivante remplace celle
+   * qu'on est en train de lire à la seconde exacte où l'animation se termine :
+   * le joueur a tapé une fois et le dialogue a avancé deux fois. Un dialogue
+   * n'avance jamais tout seul.
+   *
+   * Boîte fermée, il n'y a rien à taper : attendre bloquerait la partie faute
+   * de cible où poser le doigt, donc on rend la main tout de suite.
+   */
+  attendreUnTap(): Promise<void> {
+    if (this.dialogue.hidden) return Promise.resolve();
     return new Promise((resolve) => {
       this.lignesEnCours++;
-      this.dialogue.hidden = false;
-      this.showSpeaker(qui);
-      this.dialogueText.textContent = text;
-      this.dialogueChoices.innerHTML = '';
-      this.dialogueNext.hidden = false;
-
       let fait = false;
       const finir = () => {
         if (fait) return;

@@ -163,14 +163,18 @@ baké comme les autres, et le trait bleu est **peint dans la texture du papier**
 (`papierTrace`, dans `papier.ts`). Les UV étant lues sur la feuille à plat, le
 trait est imprimé sur le papier et se plie avec lui : le joueur voit la ligne
 qu'il a regardé se tracer devenir l'arête du pli. Un trait posé en surimpression
-resterait droit pendant que le papier se plie. Il est peint **sur les deux
-faces** — une fois le papier replié, l'arête ne montre plus qu'une moitié du
-trait, et laquelle dépend du côté qu'elle présente.
+resterait droit pendant que le papier se plie. Il n'est peint que **sur la face
+de devant** : on trace un pli *sur* une feuille, on n'imprime pas un schéma à
+travers. Peint des deux côtés, il ressortait sur les rabats que le pliage
+retourne, et le joueur voyait des lignes de couleur là où il n'avait jamais rien
+vu dessiner.
 
-**La feuille de démonstration a un verso** (`PAPIERS.vallee`), comme n'importe
-quel modèle du jeu, et pour la même raison : sans lui, le papier replié n'est
-qu'un aplat clair où le pli ne se lit qu'à l'ombre. C'est le bois du pont qui se
-retourne, et c'est lui qui rend le pliage lisible.
+**Les feuilles de démonstration ont un verso** (`PAPIERS.vallee`, `montagne`,
+`bombe`), comme n'importe quel modèle du jeu, et pour la même raison : sans lui,
+le papier replié n'est qu'un aplat clair où le pli ne se lit qu'à l'ombre. C'est
+le bois du pont qui se retourne, et c'est lui qui rend le pliage lisible — et
+elles le partagent toutes les trois, pour qu'on reconnaisse *la feuille sur
+laquelle on explique* d'un tutoriel à l'autre.
 
 **Elle est posée, pas présentée** (`posee`, dans `OrigamiLayer.load`) : bien à
 plat devant le joueur, **d'aplomb** et **sans balancement**. Un carré s'y voit
@@ -186,6 +190,21 @@ donc comme un carré. Deux façons de rater ça, toutes deux essayées :
 Le balancement, lui, dit « c'est un volume » d'un objet qu'on présente ; sur une
 feuille qu'on regarde longuement, qu'on décrit et sur laquelle on trace un pli,
 il dit « elle tangue ».
+
+**Un dialogue n'avance jamais tout seul.** Une réplique ne remplace la
+précédente que sur un **tap du joueur** — jamais parce qu'une animation vient de
+se terminer. Le piège se pose de lui-même dès qu'un effet se joue entre deux
+répliques : le joueur tape pour lancer ce qu'il va regarder, ce tap-là est
+dépensé, et sans rien de plus la ligne suivante prend la place à la seconde où
+l'effet finit. Un tap, deux avancées, et le texte change sous les yeux de
+quelqu'un qui regardait ailleurs.
+
+`Overlay.attendreUnTap()` attend **sans rien changer à l'écran** : la réplique
+en place sert de légende à ce qu'on montre, et le chevron dit quoi faire pour la
+suite. `jouer()` (`puzzle/tutoriel.ts`) l'appelle après tout effet ; `pump()`
+(`systems/dialogue.ts`) l'appelle quand le tap a été dépensé avant la fin d'un
+`# origami:`, et seulement dans ce cas — une réplique se lit plus longtemps
+qu'un pliage ne dure, donc le cas courant n'a pas de tap en plus.
 
 **Trois couches à ne pas intervertir** : l'énigme est à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la fenêtre de
@@ -272,6 +291,22 @@ parfaitement plate — le pont y perd toute épaisseur, et l'image d'un objet pl
 n'a plus rien d'un origami. On s'arrête au `pliage` de `POSES`
 (`src/origami/poses.ts`),
 pour l'animation comme pour les images fixes.
+
+**Et à 100 % ça ne rend même plus correctement** : un trait en travers du pliage
+et des hachures qui bougent avec la caméra. C'est du **z-fighting**, pas un bug
+du solveur. Sur un pli unique, les deux moitiés tournent chacune de 90° (voir
+« Le solveur plie symétriquement » plus haut) : à 100 % elles sont **exactement
+coplanaires** — l'écart des sommets d'une moitié au plan de l'autre vaut 0,0000
+sur `vallee` comme sur `montagne` — et le tampon de profondeur n'a plus de quoi
+décider laquelle est devant, donc il tranche pixel par pixel. Les hachures sont
+cette indécision, le trait est le bord de la zone où les deux moitiés se
+recouvrent.
+
+Ça ne se corrige pas par le rendu — les deux moitiés sont le même mesh et le
+même matériau, `polygonOffset` ne les séparerait pas. La correction est
+géométrique : s'arrêter un cheveu avant. Quelques pourcents suffisent — 3 %
+donnent déjà 6 % du côté de la feuille d'écart entre les moitiés, largement de
+quoi trancher, et invisible à l'œil.
 
 **`renderer.dispose()` ne rend pas le contexte WebGL.** Le tutoriel créait puis
 jetait une couche 3D à chaque lecture ; les contextes s'accumulaient, et

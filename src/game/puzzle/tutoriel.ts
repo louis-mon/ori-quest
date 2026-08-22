@@ -9,10 +9,16 @@
  * ce qu'on lui montre, il l'a sous les yeux.
  *
  * **La démonstration du pli est un vrai pliage.** Une feuille `.origami` bakée
- * depuis un crease pattern d'un seul trait, sur laquelle le trait de pli est
- * **peint dans la texture du papier** — il se plie donc avec elle. Le projet
- * s'interdit de dessiner ce qui se plie (CLAUDE.md) et un tutoriel du pliage
- * était le dernier endroit où on aurait pu être tenté de faire l'exception.
+ * depuis un crease pattern, sur laquelle les traits de pli sont **peints dans la
+ * texture du papier** — ils se plient donc avec elle. Le projet s'interdit de
+ * dessiner ce qui se plie (CLAUDE.md) et un tutoriel du pliage était le dernier
+ * endroit où on aurait pu être tenté de faire l'exception.
+ *
+ * **Un tutoriel peut montrer plusieurs feuilles**, et c'est l'étape qui dit
+ * laquelle (`montrer-feuille`) : celui du pli montagne enchaîne le pli seul puis
+ * la base de la bombe à eau, où les deux plis se combinent. Une feuille déjà à
+ * l'écran s'efface avant que la suivante n'arrive, sans rendre l'énigme au
+ * joueur — on change de papier, on ne sort pas de la démonstration.
  *
  * **Trois pièges de superposition** valent d'être connus avant de toucher au
  * CSS de cette couche :
@@ -29,14 +35,26 @@
 
 import type { Overlay } from '../../ui/overlay';
 import { OrigamiLayer } from '../../origami/origami-layer';
-import { papierTrace, type PapierTrace } from '../../origami/papier';
+import { papierTrace, type PapierTrace, type TracePli } from '../../origami/papier';
 import { pliageDe } from '../../origami/vue';
 import { personnage } from '../systems/personnages';
 import { gameState } from '../systems/state';
 import type { ControlePuzzle, CreasePuzzleDef, LanceurTutoriel } from './crease-puzzle';
-import { TUTORIELS, type Effet, type NomTutoriel, type Tutoriel } from './tutoriels';
+import {
+  TUTORIELS,
+  type Effet,
+  type EtapeEffet,
+  type NomTutoriel,
+  type Tutoriel,
+} from './tutoriels';
 
-/** Durée du tracé du pli sur la feuille. */
+/**
+ * Durée du tracé d'**un** pli sur la feuille.
+ *
+ * Par trait, pas par feuille : la base de la bombe à eau en a quatre, et les
+ * dessiner tous dans le temps d'un seul les réduirait à un clignotement. Chacun
+ * est une chose à regarder, chacun prend le même temps.
+ */
 const TRACE_MS = 1100;
 
 /** Durée du pliage de démonstration. Lent : c'est le sujet de la leçon. */
@@ -50,6 +68,15 @@ const PLIAGE_MS = 4200;
  * qu'elle montre. Un clignotement bref ne se voit que si on regardait déjà.
  */
 const DESIGNATION_MS = 3000;
+
+/**
+ * Un temps : ce qu'on laisse au joueur pour regarder ce qui vient d'arriver.
+ *
+ * Une feuille nue qui apparaît, un pliage qui vient de se terminer — sans ce
+ * silence, l'étape suivante démarre pendant que l'œil cherche encore ce qui a
+ * changé, et le tutoriel montre sans jamais laisser voir.
+ */
+const UN_TEMPS_MS = 3000;
 
 /** Espace entre la pointe de la flèche et ce qu'elle désigne, en pixels. */
 const ECART_FLECHE = 14;
@@ -214,21 +241,46 @@ async function proposer(overlay: Overlay, tuto: Tutoriel): Promise<boolean> {
   return choix === 0;
 }
 
-/** `sonEnigme` : l'énigme ouverte est bien celle à qui ce tutoriel appartient. */
+/**
+ * `sonEnigme` : l'énigme ouverte est bien celle à qui ce tutoriel appartient.
+ *
+ * **Une réplique qui suit un effet attend un tap avant de s'afficher.** Le
+ * joueur a tapé pour lancer ce qu'il vient de regarder ; ce tap-là est dépensé.
+ * Sans l'attente, la ligne suivante prend sa place à la seconde où l'animation
+ * se termine — un tap, deux avancées, et le texte change sous les yeux de
+ * quelqu'un qui regardait ailleurs. La réplique restée à l'écran pendant
+ * l'effet sert de légende à ce qu'on montre, et le chevron dit quoi faire pour
+ * la suite : c'est le geste habituel du jeu, pas une exception à apprendre.
+ */
 async function jouer(scene: Scene, tuto: Tutoriel, sonEnigme: boolean) {
+  /** Un effet vient de se jouer : la prochaine réplique doit être demandée. */
+  let aRegarder = false;
+
+  const dire = async (ligne: string) => {
+    if (aRegarder) await scene.jusqua(scene.overlay.attendreUnTap());
+    aRegarder = false;
+    await scene.jusqua(scene.overlay.say(ligne, HEROS));
+  };
+
   for (const etape of tuto.etapes) {
     if (scene.abandonne) throw new Passe();
     if (typeof etape === 'string') {
-      await scene.jusqua(scene.overlay.say(etape, HEROS));
+      await dire(etape);
       continue;
     }
     if (!sonEnigme && TOUCHE_A_LENIGME.has(etape.faire)) continue;
 
     // `false` = l'effet n'a rien eu à faire. Sa réplique de commentaire tombe
     // avec lui : « cette pièce semble bien placée » ne veut rien dire quand
-    // aucune pièce n'a bougé.
-    const fait = (await scene.jusqua(EFFETS[etape.faire](scene, tuto))) !== false;
-    if (fait && etape.puis) await scene.jusqua(scene.overlay.say(etape.puis, HEROS));
+    // aucune pièce n'a bougé. Et rien n'a été montré, donc rien à demander.
+    const fait = (await scene.jusqua(jouerEffet(scene, etape))) !== false;
+    if (!fait) continue;
+
+    // Deux effets qui s'enchaînent ne s'interrompent pas — la feuille qui
+    // arrive et les plis qui s'y tracent sont un seul geste. C'est le passage à
+    // la **parole** qui se demande.
+    aRegarder = true;
+    if (etape.puis) await dire(etape.puis);
   }
 }
 
@@ -250,11 +302,17 @@ interface Scene {
   fleche: SVGElement;
   passer: HTMLButtonElement;
   /**
-   * La démonstration en cours. La couche et sa toile appartiennent au module,
-   * pas au tutoriel : elles survivent d'une lecture à l'autre (voir
-   * `demonstration`). Ce champ ne dit que « il y a une feuille à l'écran ».
+   * La feuille à l'écran : la couche qui la rend, le papier qu'on trace dessus,
+   * et ce qu'elle montre — `tracer-pli` et `plier` n'ont pas d'autre source pour
+   * savoir combien de traits dessiner et jusqu'où plier.
+   *
+   * La couche et sa toile appartiennent au module, pas au tutoriel : elles
+   * survivent d'une lecture à l'autre (voir `coucheDemo`). Ce champ, lui, ne vit
+   * que le temps d'une feuille.
    */
-  feuille: { couche: OrigamiLayer; papier: PapierTrace } | null;
+  feuille:
+    | { couche: OrigamiLayer; papier: PapierTrace; modele: string; traits: readonly TracePli[] }
+    | null;
   /**
    * Le joueur a-t-il renoncé ? À relire **avant de démarrer une étape** : un
    * effet est appelé pour produire la promesse qu'on attend, donc ses effets de
@@ -359,10 +417,29 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
 // ------------------------------------------------------------------
 
 /**
+ * Joue l'effet d'une étape.
+ *
+ * Le transtypage est là parce que le compilateur ne rapproche pas `etape.faire`
+ * de la signature qu'il sert à indexer, alors que les deux sortent du même
+ * objet. La table, elle, est bien vérifiée à l'écriture : chaque effet y reçoit
+ * exactement l'étape qui le déclenche, `montrer-feuille` avec sa feuille et les
+ * autres sans.
+ */
+function jouerEffet(scene: Scene, etape: EtapeEffet) {
+  const effet = EFFETS[etape.faire] as (s: Scene, e: EtapeEffet) => Promise<void | false>;
+  return effet(scene, etape);
+}
+
+/** L'étape qui déclenche un effet donné — sa feuille, s'il en porte une. */
+type Declencheur<E extends Effet> = Extract<EtapeEffet, { faire: E }>;
+
+/**
  * Ce que fait chaque effet. Un effet qui répond **`false`** annonce qu'il n'a
  * rien fait, et sa réplique de commentaire (`puis`) est sautée avec lui.
  */
-const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void | false>> = {
+const EFFETS: {
+  [E in Effet]: (scene: Scene, etape: Declencheur<E>) => Promise<void | false>;
+} = {
   /**
    * La démonstration du geste : on désigne une pièce, puis on la pose.
    *
@@ -386,8 +463,18 @@ const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void | fal
     await scene.jusqua(scene.controle.poserEnSolution(piece));
   },
 
-  async 'montrer-feuille'(scene, tuto) {
+  async 'montrer-feuille'(scene, { feuille }) {
     scene.voile.classList.add('is-sombre');
+
+    // Une feuille déjà à l'écran s'en va d'abord, sans que le voile s'éclaircisse
+    // ni que l'énigme revienne : on change de papier au milieu d'une
+    // démonstration, on n'en sort pas. La toile, elle, reste en place — c'est la
+    // même couche et le même contexte WebGL qui rendront la suivante.
+    if (scene.feuille) {
+      scene.feuille.couche.hide();
+      scene.feuille = null;
+      await scene.pause(FONDU_MS);
+    }
 
     // three.js arrive à la demande, comme partout ailleurs dans le jeu — seul
     // lui mérite son propre chunk, le reste est déjà dans celui de
@@ -401,12 +488,12 @@ const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void | fal
       // à zéro, et le rendu serait resté à la taille d'avant.
       couche.ajuster();
 
-      const papier = papierTrace(THREE, tuto.modele, tuto.pli, tuto.trace.de, tuto.trace.a);
+      const papier = papierTrace(THREE, feuille.modele, feuille.traits);
       // Posée : on va la regarder un moment avant de la plier, et une feuille
       // qui se présente face à la caméra en se balançant n'a l'air posée sur
       // rien.
       await scene.jusqua(
-        couche.load(tuto.modele, { textures: papier.textures, posee: true }),
+        couche.load(feuille.modele, { textures: papier.textures, posee: true }),
       );
       // Le papier précédent n'est lâché qu'ici : jusqu'à ce `load`, c'est encore
       // lui qui est monté sur le mesh.
@@ -415,28 +502,32 @@ const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void | fal
 
       couche.setFold(0);
       couche.show();
-      scene.feuille = { couche, papier };
+      scene.feuille = { couche, papier, ...feuille };
     } catch (err) {
       toileDemo?.remove();
       if (err instanceof Passe) throw err;
-      console.error(`[tutoriel] démonstration de "${tuto.modele}" indisponible`, err);
+      console.error(`[tutoriel] démonstration de "${feuille.modele}" indisponible`, err);
     }
 
     await scene.pause(FONDU_MS);
   },
 
   async 'tracer-pli'(scene) {
-    const papier = scene.feuille?.papier;
-    if (!papier) return;
+    if (!scene.feuille) return;
+    const { papier, traits } = scene.feuille;
     await scene.jusqua(
-      animer(TRACE_MS, (t) => papier.tracer(t)),
+      animer(TRACE_MS * traits.length, (t) => papier.tracer(t)),
     );
   },
 
-  async plier(scene, tuto) {
-    const couche = scene.feuille?.couche;
-    if (!couche) return;
-    await scene.jusqua(couche.playTo(pliageDe(tuto.modele), PLIAGE_MS));
+  async plier(scene) {
+    if (!scene.feuille) return;
+    const { couche, modele } = scene.feuille;
+    await scene.jusqua(couche.playTo(pliageDe(modele), PLIAGE_MS));
+  },
+
+  async 'un-temps'(scene) {
+    await scene.pause(UN_TEMPS_MS);
   },
 
   async 'cacher-feuille'(scene) {
@@ -453,7 +544,7 @@ const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void | fal
 /**
  * Range la feuille : elle s'arrête et sort de l'écran, mais **rien n'est
  * détruit**. La couche et son contexte WebGL resservent à la prochaine
- * démonstration (voir `demonstration`), et son papier reste monté sur le mesh
+ * démonstration (voir `coucheDemo`), et son papier reste monté sur le mesh
  * jusqu'à ce qu'un autre le remplace.
  */
 function rangerFeuille(scene: Scene) {
