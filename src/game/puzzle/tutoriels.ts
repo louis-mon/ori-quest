@@ -61,9 +61,21 @@ export interface Tutoriel {
   pli: 'va' | 'mo';
   /**
    * Les deux bouts du trait dans la texture du papier, en fraction, origine en
-   * **haut à gauche**. Ils ne se déduisent pas du crease pattern — le solveur
-   * pose le modèle dans son propre repère — ils se constatent en regardant le
-   * rendu, comme les angles de `POSES`.
+   * **haut à gauche**.
+   *
+   * Ils ne se lisent pas dans le crease pattern — le solveur pose le modèle
+   * dans son propre repère — mais ils se **calculent**, et il vaut mieux les
+   * calculer que les deviner : sur un pli diagonal, deux repères faux donnent
+   * la même image, et l'erreur ne se voit qu'au moment du pliage.
+   *
+   * Les UV sont lues sur la pose à plat (`uvDuPlat`) et la texture est
+   * retournée verticalement (`flipY`, par défaut sur trois.js). Un sommet du
+   * modèle à plat tombe donc en
+   *
+   *     canvas = [ (x - minX) / (maxX - minX), 1 - (z - minZ) / (maxZ - minZ) ]
+   *
+   * Il suffit de sortir les sommets de la première pose du `.origami` : ceux
+   * qui ne sont pas des coins de la feuille sont les bouts du pli.
    */
   trace: { de: readonly [number, number]; a: readonly [number, number] };
   etapes: readonly Etape[];
@@ -76,7 +88,7 @@ export const TUTORIELS = {
       "Ça fait longtemps que je n'ai pas exercé mon art d'origamiste. Un rappel des bases ne ferait pas de mal.",
     modele: 'vallee',
     pli: 'va',
-    trace: { de: [1, 0], a: [0, 1] },
+    trace: { de: [1, 0.25], a: [0, 0.75] },
     etapes: [
       'Je vais devoir retrouver les plis nécessaires pour remettre ce pont en place.',
       "Pour l'instant je n'ai besoin que d'un type de pli : le pli vallée.",

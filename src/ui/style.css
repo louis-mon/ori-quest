@@ -1013,14 +1013,20 @@ body {
 
 /* La feuille de démonstration : un vrai pliage rendu en 3D (voir tutoriel.ts).
    Posée au-dessus du centre plutôt qu'en plein milieu — le bas de l'écran est
-   à la boîte de dialogue, et une feuille centrée passe dessous. */
+   à la boîte de dialogue, et une feuille centrée passe dessous.
+
+   La toile est plus grande que la feuille n'en a l'air : le cadrage de
+   `frameModel` tient compte de **toutes** les poses, et le pli du tutoriel ne
+   suit pas un axe de symétrie du carré — des coins sortent de son emprise en se
+   repliant. La feuille à plat n'occupe donc que les trois quarts du cadre, et
+   c'est la toile qu'on agrandit pour lui rendre sa taille à l'écran. */
 .tuto__feuille {
   position: absolute;
   left: 50%;
   top: 38%;
   z-index: 5;
-  width: 62%;
-  height: 62%;
+  width: 72%;
+  height: 72%;
   transform: translate(-50%, -50%);
   pointer-events: none;
   opacity: 0;

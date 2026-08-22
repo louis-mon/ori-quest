@@ -1,8 +1,8 @@
 {
   "name": "vallee",
   "source": "vallee.svg",
-  "vertexCount": 4,
-  "faceCount": 2,
+  "vertexCount": 6,
+  "faceCount": 4,
   "frameCount": 16,
-  "bakedAt": "2026-08-21T13:08:11.093Z"
+  "bakedAt": "2026-08-22T07:03:10.732Z"
 }
