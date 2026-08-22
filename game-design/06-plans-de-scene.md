@@ -44,6 +44,9 @@ Trois classes, c'est tout :
 | `exit` | passage vers une autre scène | une zone tactile de navigation |
 | `decor` | repère de décor | un bord, une surface, une emprise |
 
+Trois classes d'**objet**, s'entend : un *calque* porte lui aussi une classe, et
+`fond` y désigne le terrain peint (plus bas).
+
 `decor` n'est pas cliquable : il sert à caler le dessin — où s'arrête le sol, où
 passe le vide, quelle place occupe le pont une fois posé. L'unicité des noms est
 **par classe** : `porte` peut être à la fois un `hotspot` et un `decor`, ce sont
@@ -68,15 +71,47 @@ là qu'on le corrige.
 Les ellipses et les objets tournés sont ramenés à leur boîte englobante, avec un
 avertissement : le jeu ne sait pas gérer une zone oblique.
 
-## Le croquis
+## Les calques image : le fond, et le croquis
 
-Un calque image, **verrouillé**, posé sous le plan : *Layer > New > Image
-Layer*, puis la propriété *Image*.
+Deux calques image peuvent vivre sous le plan. Ce sont deux choses opposées, et
+c'est la **classe** du calque qui les départage — comme pour les objets.
 
-Le croquis se dessine ailleurs — papier photographié, n'importe quelle app de
-dessin — et s'exporte en **PNG 1280 × 720** dans `croquis/` à côté de la carte.
-Il ne part **jamais dans le build** : il sert à placer les zones, et à briefer le
-graphisme.
+### Le fond — classe `fond`
+
+Le terrain peint par l'artiste. Il **entre dans le jeu** : `npm run scenes` le
+reporte dans le plan généré, et la scène le pose sous le décor (voir
+`src/game/scenes/fond.ts`).
+
+*Layer > New > Image Layer*, propriété *Image*, puis *Class* → `fond`. Le mettre
+en **verrouillé** évite de le déplacer en ajustant les zones par-dessus.
+
+Le calque pointe **directement le fichier que le jeu charge**, dans `public/` —
+donc un chemin relatif du genre `../../../public/assets/decor/fond-pont.webp`.
+C'est le nœud de l'affaire : on place les zones tactiles sur les pixels exacts
+que le joueur aura sous les yeux. Une copie de travail rangée à côté de la carte
+finirait par diverger de celle du build, et on ajusterait des zones sur une image
+que plus personne ne voit. L'import refuse d'ailleurs un fond hors de `public/`.
+
+Il ne couvre pas tout le cadre, et c'est voulu : **le ciel reste peint par le
+code** (`ciel.ts`), dégradé, soleil et nuages compris. Le fond est livré
+transparent au-dessus de l'horizon, et les nuages dérivent donc derrière le
+rempart sans qu'il faille découper l'image.
+
+Tiled n'étire jamais un calque image : ce qu'il affiche est la taille du
+fichier, et c'est cette taille-là que le jeu reprend. L'import relit les
+dimensions réelles et **refuse la carte** si elles ont divergé de ce qu'elle a
+retenu — signe que le fichier a changé depuis, et qu'il faut rouvrir la carte
+pour qu'elle le relise. La visibilité du calque, elle, ne regarde que
+l'éditeur : masquer le fond pour voir dessous ne l'enlève pas du jeu.
+
+### Le croquis — sans classe
+
+Un calque image **sans classe** est ignoré, comme avant. C'est le croquis à la
+main posé sous le plan : il se dessine ailleurs — papier photographié, n'importe
+quelle app de dessin — et s'exporte en **PNG 1280 × 720** dans `croquis/` à côté
+de la carte. Il sert à placer les zones et à briefer le graphisme, et ne part
+**jamais dans le build**. Une fois le fond livré, c'est lui qui devient le
+repère : le croquis peut passer en invisible.
 
 ## La commande
 

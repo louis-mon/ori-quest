@@ -91,6 +91,17 @@ et la scène montrait autre chose. **Ne pas réintroduire de graphisme « qui
 ressemble »** : si un modèle rend mal, c'est le crease pattern, l'angle
 (`src/origami/vue.ts`) ou le papier (`src/origami/papier.ts`) qu'on corrige.
 
+**Le terrain non plus n'est pas dessiné.** Le sol, le ravin, le rempart sont
+l'image de l'artiste, désignée par un **calque image de classe `fond`** dans la
+carte Tiled et posée par `src/game/scenes/fond.ts`. Le calque pointe directement
+le fichier de `public/` : on ajuste donc les zones tactiles, dans l'éditeur, sur
+les pixels que le joueur aura sous les yeux. Les aplats de couleur qui tenaient
+la place ont été retirés, et ne doivent pas revenir — même raison que pour les
+pliages. **Seul le ciel reste peint** (`ciel.ts`), parce qu'il l'est vraiment :
+un dégradé calé sur l'horizon du plan, avec son soleil et ses nuages, et le fond
+est livré transparent au-dessus de l'horizon pour les laisser passer derrière le
+rempart.
+
 **La zone tactile suit le dessin, pas la boîte du plan.** Une boîte de plan est
 une emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une
 partie. `caler()` (dans `PointClickScene`) recale la zone sur ce qui est
@@ -126,6 +137,76 @@ la main. Une pièce est un polygone quelconque, détouré au rendu (`clipPath` +
 recouvrements sur les boîtes : deux pièces voisines partagent une arête entière,
 d'où les masques de `src/game/puzzle/decoupage.ts`.
 
+**Le tutoriel se joue par-dessus l'énigme, pas à côté.** Ce que la grenouille
+explique — le pli vallée, à la première énigme — se montre sur le plateau que le
+joueur a sous les yeux : une flèche désigne une pièce, la pièce va se poser, et
+la feuille de démonstration apparaît au centre. Le moteur est
+`src/game/puzzle/tutoriel.ts`, le texte et l'enchaînement sont des données dans
+`tutoriels.ts`, qui se relit comme un storyboard.
+
+**La démonstration ne pose une pièce que sur un plateau vide**, et jamais dans
+une énigme dont ce tutoriel n'est pas celui d'origine. Les deux conditions
+disent la même chose : un tutoriel explique, il ne résout pas. Plateau vide, le
+vrac étant tiré d'une graine fixe, c'est toujours **la même** pièce qui part —
+rejouer ne donne donc rien de plus que la première fois. Sans cette règle,
+quatre lectures du tutoriel suffisaient à résoudre le pont.
+
+**Ce texte-là n'est pas dans ink, et c'est le seul du jeu.** Un tutoriel se joue
+pendant que le récit *attend* le verdict de l'énigme (`# puzzle:`) :
+`DialogueRunner` n'a qu'une instance de `Story` et refuse d'être relancé pendant
+qu'il tourne. Le tutoriel écrit donc directement dans la boîte de dialogue, qui,
+elle, est libre. Ne pas « corriger » ça en déplaçant les répliques dans
+`story.ink` : elles ne s'afficheraient jamais.
+
+**Le pli de démonstration est un vrai pliage**, `content/origami/vallee.svg`
+baké comme les autres, et le trait bleu est **peint dans la texture du papier**
+(`papierTrace`, dans `papier.ts`). Les UV étant lues sur la feuille à plat, le
+trait est imprimé sur le papier et se plie avec lui : le joueur voit la ligne
+qu'il a regardé se tracer devenir l'arête du pli. Un trait posé en surimpression
+resterait droit pendant que le papier se plie. Il est peint **sur les deux
+faces** — une fois le papier replié, l'arête ne montre plus qu'une moitié du
+trait, et laquelle dépend du côté qu'elle présente.
+
+**La feuille de démonstration a un verso** (`PAPIERS.vallee`), comme n'importe
+quel modèle du jeu, et pour la même raison : sans lui, le papier replié n'est
+qu'un aplat clair où le pli ne se lit qu'à l'ombre. C'est le bois du pont qui se
+retourne, et c'est lui qui rend le pliage lisible.
+
+**Elle est posée, pas présentée** (`posee`, dans `OrigamiLayer.load`) : bien à
+plat devant le joueur, **d'aplomb** et **sans balancement**. Un carré s'y voit
+donc comme un carré. Deux façons de rater ça, toutes deux essayées :
+
+- la laisser dans le plan du solveur — elle y est plate *pour de vrai*, mais la
+  caméra du jeu la regarde de 70° au-dessus et la projette en **trapèze** ;
+- la tourner avec `quaternionFeuille`, qui pointe sa normale vers l'œil mais
+  laisse le **roulis au hasard** : elle arrive de travers de quelques degrés.
+  D'où `quaternionFeuilleDeFace`, qui construit la rotation sur le repère de
+  l'image.
+
+Le balancement, lui, dit « c'est un volume » d'un objet qu'on présente ; sur une
+feuille qu'on regarde longuement, qu'on décrit et sur laquelle on trace un pli,
+il dit « elle tangue ».
+
+**Trois couches à ne pas intervertir** : l'énigme est à `z-index: 4`, le voile du
+tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la fenêtre de
+confirmation à 7. D'où le fait que `.tuto` ne soit **pas positionné** : positionné,
+il ferait contexte d'empilement et ses enfants ne pourraient plus encadrer la
+boîte de dialogue. Et le voile est là dès la première réplique, transparent :
+c'est lui qui absorbe les taps destinés à l'énigme, il ne s'assombrit que pour la
+démonstration.
+
+**La flèche du tutoriel est un SVG, pas le pliage de l'artiste.** Le marqueur de
+sortie (`assets/ui/fleche.png`) fait partie du décor et attend qu'on le
+remarque ; celle du tutoriel interrompt une explication pour dire « regarde ça,
+maintenant ». Deux fonctions, deux signes — et c'est aussi pour ça qu'elle est
+grande et qu'elle désigne pendant trois secondes.
+
+**Une réplique coupée doit être résolue, pas abandonnée.** Le bouton « Passer »
+interrompt le tutoriel au milieu d'un `overlay.say()` qui attend un tap : sans
+`Overlay.interrompre()`, le compteur de lignes reste levé, `occupeLeJoueur` reste
+vrai pour toujours, et le décor cesse de répondre aux taps sans qu'on comprenne
+pourquoi.
+
 **Une coupe ne longe jamais un pli** (`longeUnPli`, dans `src/dev/couper.ts`) :
 un pli posé sur une arête de découpe est fendu en deux dans la longueur, chaque
 pièce en montrant la moitié — et l'arête révèle alors où passe le pli. La règle
@@ -150,6 +231,20 @@ repère dans la carte.
 `globals.shouldChangeCreasePercent = true`, sinon le solveur tourne indéfiniment
 sur la valeur figée à l'initialisation des shaders et toutes les poses sortent
 identiques.
+
+**Un crease pattern ne supporte pas de commentaire XML.** Le même carré à une
+diagonale sortait à **440 sommets et 798 faces** avec un `<!-- … -->` glissé
+avant `<svg>`, et le solveur le froissait au lieu de le plier ; sans le
+commentaire, 4 sommets, 2 faces, un pli net et un fichier 100 fois plus léger.
+Les CP du projet sont des exports ORIPA : garder cette forme exacte, et
+documenter le fichier ailleurs — dans `tutoriels.ts` ou ici.
+
+**Le solveur plie symétriquement.** Rien n'ancre une moitié du papier : sur un
+pli unique, les **deux** faces tournent autour de l'arête, et le résultat à 100 %
+est un plan perpendiculaire à la feuille de départ, pas la feuille repliée sur
+elle-même. Conséquence pratique : la pose d'un tel modèle ne se devine pas plus
+que les autres, et vue dans l'axe du pli elle donne un fuseau illisible. Se
+régler dans `orientation.html`, comme le reste.
 
 **Chaque modèle a son orientation, et elle se règle à l'œil.** Rien dans un
 crease pattern ne dit comment le pliage se présentera — où tombe le manche, de
@@ -177,6 +272,37 @@ parfaitement plate — le pont y perd toute épaisseur, et l'image d'un objet pl
 n'a plus rien d'un origami. On s'arrête au `pliage` de `POSES`
 (`src/origami/poses.ts`),
 pour l'animation comme pour les images fixes.
+
+**`renderer.dispose()` ne rend pas le contexte WebGL.** Le tutoriel créait puis
+jetait une couche 3D à chaque lecture ; les contextes s'accumulaient, et
+au-delà d'une quinzaine le navigateur tue le **plus ancien** — celui de Phaser.
+L'écran clignotait, puis plus rien ne se rendait. Deux réponses, les deux en
+place : `forceContextLoss()` avant `dispose()`, et surtout **une seule couche
+gardée** pour toute la partie (`demonstration`, dans `tutoriel.ts`), comme
+`main.ts` le fait déjà pour celle du récit. Une couche qui doit resservir se
+recharge avec `load()` ; `dispose()` est une fin de vie.
+
+**Un contexte WebGL perdu ne lève aucune erreur.** Le rendu continue de
+« marcher » et ne produit plus que des images vides : le but de l'énigme, les
+vignettes et la feuille du tutoriel disparaissaient sans un mot dans la console.
+Les trois couches écoutent donc `webglcontextlost` — l'atelier de `apercu.ts`
+se jette lui-même **avec son cache d'images**, `OrigamiLayer` arrête sa boucle,
+et `tutoriel.ts` oublie sa couche pour en refabriquer une. Un contexte ne se
+répare pas ; ce qui compte est de s'en apercevoir.
+
+**Un singleton asynchrone se mémorise en promesse, pas en objet.** `if (!x) x =
+await créer()` laisse passer deux appels rapprochés — l'`await` rend la main
+avant l'affectation — et chacun fabrique son contexte WebGL, dont l'un reste
+orphelin pour toujours. C'est comme ça que le tutoriel finissait par faire tuer
+celui de Phaser. Mémoriser la **promesse**, posée avant le premier `await`,
+règle le cas ; `fold-file.ts` fait déjà ça pour les `.origami`.
+
+**`hidden` est une propriété de `HTMLElement`, pas de `SVGElement`.**
+`svg.hidden = false` pose une propriété JavaScript sur l'objet sans rien retirer
+du DOM : la règle `[hidden]` continue de s'appliquer et l'élément reste
+invisible, sans erreur nulle part. La flèche du tutoriel ne s'est jamais montrée
+le jour où elle est passée d'un `<img>` à un `<svg>`. `toggleAttribute('hidden',
+…)` marche sur n'importe quel élément.
 
 **Le solveur ne gère pas les collisions entre couches.** Les pliages à peu de
 couches (bases, tessellations, Miura-ori) convergent bien ; la grue
@@ -222,7 +348,7 @@ chargement hors Chrome.
 - Le jeu est **verrouillé en paysage** (1280×720) ; une invite CSS couvre le
   portrait.
 - Audio débloqué au premier `pointerdown` (obligatoire sur iOS).
-- Viser < 30 Mo au total. Build actuel : ~420 Ko gzip avant le premier écran.
+- Viser < 30 Mo au total. `npm run build` donne le détail par chunk, en gzip.
 
 ## Vérifier son travail
 

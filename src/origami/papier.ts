@@ -59,6 +59,11 @@ export const PAPIERS: Record<string, PapierModele> = {
   // vient. Le noir n'est pas un fond : c'est du papier, et il le dit par son
   // reflet.
   porte: { recto: 'noir', verso: 'boisFonce' },
+  // La feuille de démonstration du tutoriel. Un verso, et pas du papier des
+  // deux côtés : sans lui, la feuille pliée n'est qu'un aplat clair où le pli
+  // ne se lit qu'à l'ombre. Le même que le pont — c'est la première énigme, et
+  // le joueur retrouvera ce bois-là sur ce qu'il va plier.
+  vallee: { recto: 'papier', verso: 'bois' },
 };
 
 /** Papier d'un modèle inconnu : du papier ordinaire, des deux côtés. */
@@ -440,4 +445,138 @@ export function teintesDe(nom: string): { recto: number; verso: number } {
 export function libererMateriaux(mesh: THREE_NS.Mesh) {
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   for (const m of materials) m.dispose();
+}
+
+// ------------------------------------------------------------------
+// Le papier du tutoriel : une feuille sur laquelle un pli se trace
+// ------------------------------------------------------------------
+
+/**
+ * Couleur des plis, à l'identique de `--fold-valley` et `--accent` dans
+ * style.css.
+ *
+ * Le trait tracé sur la feuille du tutoriel doit être **exactement** celui des
+ * pièces de l'énigme : c'est ce qui fait comprendre au joueur que le bleu qu'il
+ * voit sur le motif est le pli qu'on vient de lui montrer en action. Deux bleus
+ * voisins mais différents cassent le lien plus sûrement qu'une couleur franche.
+ */
+export const COULEUR_PLI: Record<'va' | 'mo', string> = {
+  va: '#4a6fa5',
+  mo: '#c4553d',
+};
+
+/**
+ * Épaisseur du trait dans la texture, en pixels de `TAILLE`.
+ *
+ * Franche, et plus que sur un crease pattern : le trait est posé **sur le pli**,
+ * donc une fois le papier replié il ne se voit plus que par la tranche. Trop
+ * fin, il disparaît exactement au moment où il devient intéressant.
+ */
+const TRAIT_PLI = 14;
+
+export interface PapierTrace {
+  /**
+   * Les textures des deux faces, **dans l'ordre des matériaux du mesh** —
+   * devant, puis derrière (voir `creerMeshOrigami`, et le drapeau `retourne`).
+   */
+  textures: THREE_NS.Texture[];
+  /** Trace le pli sur `part` de sa longueur (0 = feuille nue, 1 = trait entier). */
+  tracer(part: number): void;
+  dispose(): void;
+}
+
+/**
+ * Le papier d'un modèle, sur lequel **on dessine un pli**, progressivement.
+ *
+ * Pourquoi peindre le trait dans la texture plutôt que le poser en surimpression
+ * à l'écran : les UV sont lues sur la feuille à plat (voir `uvDuPlat`), donc le
+ * trait est imprimé sur le papier et **se plie avec lui**. Quand l'animation
+ * démarre, le joueur voit la ligne bleue qu'il vient de regarder se tracer
+ * devenir l'arête du pli — c'est tout ce que le tutoriel a à démontrer. Un trait
+ * dessiné par-dessus l'image resterait droit pendant que le papier se plie, ou
+ * devrait disparaître au moment précis où il devient intéressant.
+ *
+ * Le pli est tracé **sur les deux faces**, chacune gardant son papier de
+ * `PAPIERS` : une fois le papier replié, l'arête ne montre plus qu'une moitié du
+ * trait, et laquelle dépend du côté qu'elle présente. C'est un schéma — le pli
+ * est dessiné à travers la feuille.
+ *
+ * `de` et `a` sont en fraction de la texture, **origine en haut à gauche**. Elles
+ * ne se déduisent pas du crease pattern : le solveur pose le modèle dans son
+ * propre repère et l'orientation se constate en regardant le rendu — comme pour
+ * `POSES` et le drapeau `retourne`.
+ *
+ * Ces textures ne sont **pas partagées**, contrairement à celles des papiers du
+ * jeu : on les repeint à chaque image du tracé, et elles ne servent qu'à la
+ * démonstration en cours. D'où le `dispose()`, à appeler quand elle disparaît.
+ */
+export function papierTrace(
+  THREE: typeof THREE_NS,
+  nom: string,
+  pli: 'va' | 'mo',
+  de: readonly [number, number],
+  a: readonly [number, number],
+): PapierTrace {
+  const { recto, verso, retourne } = PAPIERS[nom] ?? DEFAUT;
+  const faces = [retourne ? verso : recto, retourne ? recto : verso].map((papier) =>
+    faceTracee(THREE, papier, pli, de, a),
+  );
+
+  return {
+    textures: faces.map((f) => f.texture),
+    tracer: (part) => {
+      for (const face of faces) face.tracer(part);
+    },
+    dispose: () => {
+      for (const face of faces) face.texture.dispose();
+    },
+  };
+}
+
+/** Une face : son papier habituel, et le pli qu'on trace dessus. */
+function faceTracee(
+  THREE: typeof THREE_NS,
+  papier: Papier,
+  pli: 'va' | 'mo',
+  de: readonly [number, number],
+  a: readonly [number, number],
+) {
+  const nu = document.createElement('canvas');
+  nu.width = nu.height = TAILLE;
+  ASPECTS[papier].peindre(nu.getContext('2d')!);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = TAILLE;
+  const ctx = canvas.getContext('2d')!;
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.anisotropy = 4;
+
+  const tracer = (part: number) => {
+    // On repart de la feuille nue à chaque appel : dessiner par-dessus le tracé
+    // précédent empilerait les extrémités arrondies et épaissirait le départ du
+    // trait à chaque image.
+    ctx.clearRect(0, 0, TAILLE, TAILLE);
+    ctx.drawImage(nu, 0, 0);
+
+    const t = Math.min(Math.max(part, 0), 1);
+    if (t > 0) {
+      ctx.strokeStyle = COULEUR_PLI[pli];
+      ctx.lineWidth = TRAIT_PLI;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(de[0] * TAILLE, de[1] * TAILLE);
+      ctx.lineTo(
+        (de[0] + (a[0] - de[0]) * t) * TAILLE,
+        (de[1] + (a[1] - de[1]) * t) * TAILLE,
+      );
+      ctx.stroke();
+    }
+    texture.needsUpdate = true;
+  };
+
+  tracer(0);
+  return { texture, tracer };
 }

@@ -1,7 +1,14 @@
 import type * as THREE_NS from 'three';
 import { animationOrigami, sampleFold, type FoldAnimation } from './fold-file';
 import { creerMeshOrigami, libererMateriaux } from './papier';
-import { DIRECTION_VUE, HAUT_VUE, eclairer, quaternionFeuille, quaternionModele } from './vue';
+import {
+  DIRECTION_VUE,
+  HAUT_VUE,
+  eclairer,
+  quaternionFeuille,
+  quaternionFeuilleDeFace,
+  quaternionModele,
+} from './vue';
 
 /**
  * Distance de la caméra, pour un modèle recadré sur 1,1 unité (voir
@@ -84,8 +91,12 @@ export class OrigamiLayer {
    * l'a demandé, et où on lui doit d'en faire le tour.
    */
   private mode: 'pliage' | 'presentation' = 'pliage';
+  /** Le modèle se balance-t-il pendant qu'il est à l'écran ? Voir `load`. */
+  private balancement = true;
   private lastTime = 0;
   private visible = false;
+  /** Le contexte a été perdu : cette couche ne rendra plus rien. */
+  private perdu = false;
 
   private constructor(private readonly canvas: HTMLCanvasElement) {}
 
@@ -125,12 +136,44 @@ export class OrigamiLayer {
 
     eclairer(THREE, this.scene);
 
+    // Un contexte perdu ne lève aucune erreur : la boucle continuerait de
+    // tourner en ne dessinant plus rien. On l'arrête et on le dit — c'est à
+    // l'appelant de refabriquer une couche (voir `coucheDemo`, dans
+    // `tutoriel.ts`), une couche perdue ne se répare pas.
+    this.canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.perdu = true;
+      this.stop();
+      console.warn('[origami] contexte WebGL perdu');
+    });
+
     this.resize();
     window.addEventListener('resize', this.resize);
   }
 
-  /** Charge un modèle par son nom (`pont`, `arbre`…). */
-  async load(nom: string) {
+  /**
+   * Charge un modèle par son nom (`pont`, `arbre`…).
+   *
+   * `textures` remplace celles des faces, dans l'ordre des matériaux du mesh.
+   * Le tutoriel s'en sert pour tracer un pli sur la feuille pendant qu'on la
+   * regarde (voir `papierTrace`) : elles changent à chaque image, ce qu'un
+   * papier partagé ne peut pas faire.
+   *
+   * `posee` : la feuille est **posée bien à plat devant le joueur**, et pas
+   * présentée. Deux conséquences qui vont ensemble — elle part dans
+   * l'orientation de `quaternionFeuilleDeFace`, donc un carré se voit comme un
+   * carré, d'aplomb et sans perspective ; et elle ne se balance pas. C'est ce
+   * qu'il faut d'un schéma qu'on regarde longuement avant de le plier : on le
+   * décrit, on trace un pli dessus. Le balancement dit « c'est un volume » d'un
+   * objet qu'on présente ; sur une feuille qu'on examine, il dit « elle
+   * tangue ». Et une feuille laissée dans le plan du solveur, vue par la caméra
+   * du jeu à 70° au-dessus d'elle, se projette en trapèze : à plat pour de vrai,
+   * mais pas à l'écran.
+   */
+  async load(
+    nom: string,
+    { textures, posee }: { textures?: THREE_NS.Texture[]; posee?: boolean } = {},
+  ) {
     const anim = await animationOrigami(nom);
 
     this.disposeMesh();
@@ -138,6 +181,17 @@ export class OrigamiLayer {
     this.anim = anim;
 
     const { mesh, geometry, positions } = creerMeshOrigami(this.THREE, anim, nom);
+    if (textures) {
+      // Les matériaux sont créés pour ce mesh-ci — seules les textures sont
+      // partagées — donc en écraser une n'atteint aucun autre modèle.
+      const faces = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]) as
+        THREE_NS.MeshPhongMaterial[];
+      faces.forEach((face, i) => {
+        if (!textures[i]) return;
+        face.map = textures[i];
+        face.needsUpdate = true;
+      });
+    }
     this.scratch = positions;
     this.mesh = mesh;
     this.geometry = geometry;
@@ -145,7 +199,10 @@ export class OrigamiLayer {
     this.pivot.add(mesh);
     this.scene.add(this.pivot);
 
-    this.poseDepart = quaternionFeuille(this.THREE);
+    this.balancement = !posee;
+    this.poseDepart = posee
+      ? quaternionFeuilleDeFace(this.THREE)
+      : quaternionFeuille(this.THREE);
     this.poseFin = quaternionModele(this.THREE, nom);
     this.pose = this.poseDepart.clone();
     this.axeBalancement ??= new this.THREE.Vector3(
@@ -250,6 +307,18 @@ export class OrigamiLayer {
     this.show();
   }
 
+  /**
+   * Recale le rendu sur la taille actuelle de la toile.
+   *
+   * À appeler quand la toile revient dans le document : `resize` ne suit que les
+   * redimensionnements de la fenêtre, et une toile détachée s'y mesure à zéro.
+   * Sans ça, une couche gardée d'une fois sur l'autre — celle du tutoriel — se
+   * réveillait en 1×1 pixel après un simple changement de taille de fenêtre.
+   */
+  ajuster() {
+    this.resize();
+  }
+
   show() {
     this.visible = true;
     this.canvas.classList.add('is-visible');
@@ -263,7 +332,7 @@ export class OrigamiLayer {
   }
 
   private start() {
-    if (this.rafId) return;
+    if (this.rafId || this.perdu) return;
     this.lastTime = performance.now();
     const tick = (now: number) => {
       this.rafId = requestAnimationFrame(tick);
@@ -299,12 +368,17 @@ export class OrigamiLayer {
     // L'ancienne oscillation à ±34° rendait la pose finale illisible.
     if (this.pivot && this.pose && this.axeBalancement && this.rotBalancement) {
       const presente = this.mode === 'presentation';
-      this.spin += dt * (presente ? VITESSE_TOUR : 0.00035);
-      this.rotBalancement.setFromAxisAngle(
-        this.axeBalancement,
-        presente ? this.spin : Math.sin(this.spin) * BALANCEMENT,
-      );
-      this.pivot.quaternion.copy(this.rotBalancement).multiply(this.pose);
+      if (!presente && !this.balancement) {
+        // Posé : le modèle ne fait rien d'autre que se plier. Voir `load`.
+        this.pivot.quaternion.copy(this.pose);
+      } else {
+        this.spin += dt * (presente ? VITESSE_TOUR : 0.00035);
+        this.rotBalancement.setFromAxisAngle(
+          this.axeBalancement,
+          presente ? this.spin : Math.sin(this.spin) * BALANCEMENT,
+        );
+        this.pivot.quaternion.copy(this.rotBalancement).multiply(this.pose);
+      }
     }
     this.renderer.render(this.scene, this.camera);
   }
@@ -333,10 +407,31 @@ export class OrigamiLayer {
     this.geometry = undefined;
   }
 
+  /**
+   * Rend le contexte WebGL, et pas seulement les ressources three.js.
+   *
+   * `renderer.dispose()` seul **ne libère pas le contexte** : il reste vivant
+   * jusqu'à ce que le navigateur récupère la mémoire, quand il veut. Les
+   * contextes s'accumulent alors, et au-delà d'une quinzaine le navigateur tue
+   * le **plus ancien** — celui de Phaser. L'écran du jeu clignotait, puis plus
+   * rien ne se rendait. `forceContextLoss()` est la façon documentée de le
+   * rendre tout de suite.
+   *
+   * La couche n'est **pas réutilisable** après : `dispose()` est une fin de vie,
+   * pas une mise en veille. Ce qui doit resservir se garde et se recharge avec
+   * `load()`.
+   *
+   * ⚠ À n'appeler que pour une vraie fin de vie, jamais en boucle : le
+   * navigateur compte les pertes provoquées et finit par **interdire à la page**
+   * de créer le moindre contexte (« Web page caused context loss and was
+   * blocked »). L'onglet est alors bon à fermer, et le jeu paraît cassé sans
+   * qu'aucune ligne de code ne soit en cause.
+   */
   dispose() {
     this.stop();
     window.removeEventListener('resize', this.resize);
     this.disposeMesh();
+    this.renderer.forceContextLoss();
     this.renderer.dispose();
   }
 }

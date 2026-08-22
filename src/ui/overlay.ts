@@ -47,6 +47,9 @@ export class Overlay {
    */
   private lignesEnCours = 0;
 
+  /** De quoi résoudre la réplique en attente sans tap. Voir `interrompre()`. */
+  private terminerLigne: (() => void) | null = null;
+
   /**
    * De quoi montrer un modèle plié en grand, tournant sur lui-même.
    *
@@ -167,14 +170,52 @@ export class Overlay {
       this.dialogueText.textContent = text;
       this.dialogueChoices.innerHTML = '';
       this.dialogueNext.hidden = false;
-      const advance = (e: Event) => {
-        e.stopPropagation();
+
+      let fait = false;
+      const finir = () => {
+        if (fait) return;
+        fait = true;
         this.dialogue.removeEventListener('pointerup', advance);
+        if (this.terminerLigne === finir) this.terminerLigne = null;
         this.lignesEnCours--;
         resolve();
       };
+      const advance = (e: Event) => {
+        e.stopPropagation();
+        finir();
+      };
       this.dialogue.addEventListener('pointerup', advance);
+      this.terminerLigne = finir;
     });
+  }
+
+  /**
+   * Met fin à la réplique en attente **sans tap**, et referme la boîte.
+   *
+   * Pour ce qui coupe court à une séquence de répliques : le bouton « Passer »
+   * du tutoriel. Sans ça, la ligne interrompue garde son écouteur et son
+   * compteur levé — `occupeLeJoueur` reste vrai pour toujours, et le décor
+   * cesse de répondre aux taps sans qu'on comprenne pourquoi.
+   *
+   * N'interrompt **pas** un choix en cours : ceux-là résolvent un index, et
+   * en inventer un ferait prendre au récit une branche que personne n'a
+   * choisie. Un appelant qui peut couper court ne doit donc pas laisser de
+   * choix ouvert au même moment.
+   */
+  interrompre() {
+    this.terminerLigne?.();
+    this.hideDialogue();
+  }
+
+  /**
+   * Fait passer la boîte de dialogue **au-dessus** des couches plein écran.
+   *
+   * L'énigme est à `z-index: 4` et la boîte n'en a pas : une séquence de
+   * répliques jouée par-dessus une énigme — c'est-à-dire un tutoriel — se
+   * déroulerait invisible, derrière le panneau.
+   */
+  mettreDevant(devant: boolean) {
+    this.dialogue.classList.toggle('dialogue--devant', devant);
   }
 
   /** La boîte de dialogue est-elle occupée par une réplique en attente ? */

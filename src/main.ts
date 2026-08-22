@@ -8,6 +8,7 @@ import { PontScene } from './game/scenes/pont-scene';
 import { PorteScene } from './game/scenes/porte-scene';
 import { runCreasePuzzle } from './game/puzzle/crease-puzzle';
 import { PUZZLES } from './game/puzzle/puzzles';
+import { lanceurTutoriel } from './game/puzzle/tutoriel';
 import { DialogueRunner } from './game/systems/dialogue';
 import { gameState } from './game/systems/state';
 import { OrigamiLayer } from './origami/origami-layer';
@@ -169,7 +170,9 @@ async function playPuzzle(name: string) {
   }
   try {
     overlay.hideDialogue();
-    const outcome = await runCreasePuzzle(uiRoot, def);
+    const outcome = await runCreasePuzzle(uiRoot, def, {
+      tutoriel: lanceurTutoriel(uiRoot, overlay, def),
+    });
     gameState.setFlag(`${name}_resolu`, outcome === 'solved');
   } catch (err) {
     // Un crease pattern manquant ne doit pas bloquer la partie : on repart

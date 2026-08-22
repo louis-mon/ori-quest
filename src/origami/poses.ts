@@ -20,4 +20,5 @@ export const POSES: Record<string, Pose> = {
   arbre: { angles: [0, 225, 17], pliage: 0.86, echelle: 2.8 },
   hache: { angles: [33, -18, -67], pliage: 0.88, echelle: 1 },
   porte: { angles: [0, 0, -9], pliage: 0.86, echelle: 1 },
+  vallee: { angles: [-70, 15, -41], pliage: 0.94, echelle: 1 },
 };

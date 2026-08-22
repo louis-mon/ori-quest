@@ -11,6 +11,20 @@
          "name":"croquis",
          "opacity":1,
          "type":"imagelayer",
+         "visible":false,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "class":"fond",
+         "id":3,
+         "image":"..\/..\/..\/public\/assets\/decor\/fond-pont.webp",
+         "imageheight":720,
+         "imagewidth":1280,
+         "locked":true,
+         "name":"fond",
+         "opacity":1,
+         "type":"imagelayer",
          "visible":true,
          "x":0,
          "y":0
@@ -118,30 +132,6 @@
                 }, 
                 {
                  "height":290,
-                 "id":9,
-                 "name":"precipice",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":280,
-                 "x":500,
-                 "y":430
-                }, 
-                {
-                 "height":290,
-                 "id":10,
-                 "name":"rive",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":500,
-                 "x":780,
-                 "y":430
-                }, 
-                {
-                 "height":290,
                  "id":11,
                  "name":"sol",
                  "opacity":1,
@@ -182,7 +172,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
+ "nextlayerid":4,
  "nextobjectid":16,
  "orientation":"orthogonal",
  "renderorder":"right-down",

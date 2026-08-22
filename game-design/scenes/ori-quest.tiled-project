@@ -38,6 +38,17 @@
             "useAs": [
                 "object"
             ]
+        },
+        {
+            "color": "#ff6b8fbf",
+            "drawFill": true,
+            "id": 4,
+            "members": [],
+            "name": "fond",
+            "type": "class",
+            "useAs": [
+                "layer"
+            ]
         }
     ]
 }

@@ -37,6 +37,7 @@
  */
 
 import { urlApercuOrigami } from '../../origami/apercu';
+import type { NomTutoriel } from './tutoriels';
 import {
   boite,
   chemin,
@@ -76,9 +77,76 @@ export interface CreasePuzzleDef {
   decoupage: Decoupage;
   /** Titre affiché au-dessus du plateau. */
   title: string;
+  /**
+   * Le tutoriel que cette énigme lance d'elle-même, la première fois qu'on
+   * l'ouvre. Voir `src/game/puzzle/tutoriels.ts`.
+   *
+   * Une énigme sans tutoriel n'en propose pas moins le bouton « ? » : c'est de
+   * là qu'on rejoue n'importe lequel des tutoriels, à tout moment.
+   */
+  tutoriel?: NomTutoriel;
 }
 
 export type PuzzleOutcome = 'solved' | 'abandoned';
+
+/**
+ * Ce qu'un tutoriel peut faire de l'énigme qu'il recouvre.
+ *
+ * Le tutoriel vit **au-dessus** de l'énigme et lui interdit tout tap ; c'est
+ * donc lui qui doit pouvoir bouger une pièce pour en faire la démonstration. On
+ * lui donne le strict nécessaire plutôt que l'énigme entière — une poignée de
+ * gestes nommés, pas le DOM à manipuler à l'aveugle.
+ */
+export interface ControlePuzzle {
+  /** Le bouton « ? », que le tutoriel désigne du doigt avant de rendre la main. */
+  readonly boutonAide: HTMLElement;
+  /**
+   * La pièce que la démonstration ira poser, ou `null` s'il n'y a rien à
+   * démontrer.
+   *
+   * La plus grande du bac : elle se suit du regard le plus facilement pendant
+   * qu'elle glisse, et sa place est la plus évidente une fois posée — le
+   * tutoriel montre le geste, il ne résout pas l'énigme à la place du joueur.
+   *
+   * **Seulement sur un plateau vide**, et c'est ce qui empêche d'en tirer une
+   * solution : le vrac du bac est tiré d'une graine fixe, donc plateau vide
+   * c'est toujours *la même* pièce qui part. Rejouer le tutoriel ne donne jamais
+   * rien de plus que la première fois. Sans cette condition, chaque lecture en
+   * posait une de plus et quatre suffisaient à résoudre le pont.
+   */
+  pieceADemontrer(): HTMLElement | null;
+  /**
+   * Fait passer une pièce **au-dessus des autres** dans le bac.
+   *
+   * Le vrac les fait se chevaucher : une pièce désignée du doigt mais à moitié
+   * enfouie sous deux voisines ne se distingue pas, et la flèche semble montrer
+   * le tas plutôt qu'un morceau. À appeler avant de la désigner, pas au moment
+   * de la déplacer — c'est pendant qu'on la regarde qu'il faut la voir.
+   */
+  mettreEnAvant(piece: HTMLElement): void;
+  /** Fait glisser une pièce jusqu'à sa position solution, à vitesse lisible. */
+  poserEnSolution(piece: HTMLElement): Promise<void>;
+}
+
+/** Ouvre un tutoriel par-dessus l'énigme, et résout quand il se termine. */
+export type LanceurTutoriel = (
+  controle: ControlePuzzle,
+  /** Le tutoriel de l'énigme, à l'ouverture — sinon le tap sur « ? ». */
+  auto: boolean,
+) => Promise<void>;
+
+export interface OptionsPuzzle {
+  tutoriel?: LanceurTutoriel;
+}
+
+/**
+ * Durée du glissement démonstratif d'une pièce, en millisecondes.
+ *
+ * Lent pour un déplacement — c'est une démonstration, pas un geste : le joueur
+ * doit avoir le temps de suivre la pièce du regard depuis le bac jusqu'à sa
+ * place, et de comprendre que c'est *ça* qu'on lui demande de faire.
+ */
+const DEMO_MS = 3000;
 
 /** Position d'une pièce sur la grille d'ancrage, en cellules. */
 interface Anchor {
@@ -104,6 +172,7 @@ let numeroPuzzle = 0;
 export async function runCreasePuzzle(
   root: HTMLElement,
   def: CreasePuzzleDef,
+  options: OptionsPuzzle = {},
 ): Promise<PuzzleOutcome> {
   const { viewBox, inner, folds } = await loadPattern(def.svg);
   const grille = def.decoupage.grille;
@@ -121,6 +190,7 @@ export async function runCreasePuzzle(
       <img class="puzzle__goal-image" alt="Le pliage une fois terminé" />
     </button>
     <div class="puzzle__panel">
+      <button class="puzzle__help" type="button" aria-label="Revoir un tutoriel">?</button>
       <h2 class="puzzle__title"></h2>
       <div class="puzzle__board"></div>
       <ul class="puzzle__legend">
@@ -161,6 +231,11 @@ export async function runCreasePuzzle(
   const quit = el.querySelector<HTMLButtonElement>('.puzzle__quit')!;
   const goal = el.querySelector<HTMLButtonElement>('.puzzle__goal')!;
   const zoom = el.querySelector<HTMLElement>('.puzzle__zoom')!;
+  const help = el.querySelector<HTMLButtonElement>('.puzzle__help')!;
+
+  // Sans lanceur — un appel qui ne passe pas par le jeu, un test — le bouton
+  // n'aurait rien à ouvrir : mieux vaut qu'il ne soit pas là.
+  help.hidden = !options.tutoriel;
 
   // La vignette est petite par nécessité — elle ne doit pas manger le plateau —
   // donc on donne un moyen de la regarder vraiment.
@@ -294,6 +369,81 @@ export async function runCreasePuzzle(
 
     for (const piece of pieces) {
       makeDraggable(piece, board, grille, (rect, x, y) => drop(piece.el, rect, x, y));
+    }
+
+    // ---------- Le tutoriel ----------
+
+    /**
+     * Fait glisser une pièce du bac jusqu'à sa place, comme le ferait un doigt.
+     *
+     * Même mécanique que le glisser : `position: fixed` le temps du trajet, donc
+     * la pièce échappe au rognage du bac et passe au-dessus du reste. La taille
+     * est animée elle aussi — une pièce qui prend d'un coup sa taille de plateau
+     * au départ du mouvement fait un saut que l'œil lit comme un défaut.
+     */
+    function poserEnSolution(piece: HTMLElement): Promise<void> {
+      const forme = pieceOf(piece).boite;
+      const b = board.getBoundingClientRect();
+      const depart = piece.getBoundingClientRect();
+
+      piece.classList.add('is-dragging');
+      piece.style.position = 'fixed';
+      piece.style.width = `${depart.width}px`;
+      piece.style.height = `${depart.height}px`;
+      piece.style.left = `${depart.left}px`;
+      piece.style.top = `${depart.top}px`;
+
+      // Force le calcul de la mise en page avant d'armer la transition : sans
+      // ça le navigateur regroupe les deux écritures et la pièce se téléporte.
+      void piece.offsetWidth;
+
+      piece.style.transition = `left ${DEMO_MS}ms ease-in-out, top ${DEMO_MS}ms ease-in-out,` +
+        ` width ${DEMO_MS}ms ease-in-out, height ${DEMO_MS}ms ease-in-out`;
+      piece.style.width = `${(forme.w / grille) * b.width}px`;
+      piece.style.height = `${(forme.h / grille) * b.height}px`;
+      piece.style.left = `${b.left + (forme.x / grille) * b.width}px`;
+      piece.style.top = `${b.top + (forme.y / grille) * b.height}px`;
+
+      return new Promise((fini) => {
+        window.setTimeout(() => {
+          piece.classList.remove('is-dragging');
+          for (const prop of ['transition', 'position', 'width', 'height', 'left', 'top'] as const) {
+            piece.style.removeProperty(prop);
+          }
+          place(piece, { c: forme.x, r: forme.y });
+          fini();
+        }, DEMO_MS);
+      });
+    }
+
+    const controle: ControlePuzzle = {
+      boutonAide: help,
+      pieceADemontrer: () => {
+        // Plateau entamé : plus rien à démontrer. Voir `ControlePuzzle`.
+        if (placed.size > 0) return null;
+        const restantes = pieces.filter((p) => p.el.parentElement === tray);
+        if (restantes.length === 0) return null;
+        return restantes.reduce((a, b) =>
+          a.boite.w * a.boite.h >= b.boite.w * b.boite.h ? a : b,
+        ).el;
+      },
+      // Les pièces du bac se rangent dans l'ordre du DOM, sans `z-index` : la
+      // dernière insérée passe devant. C'est déjà ce dont `toTray` se sert pour
+      // rendre attrapable une pièce qui revient sur une autre.
+      mettreEnAvant: (piece) => tray.appendChild(piece),
+      poserEnSolution,
+    };
+
+    if (options.tutoriel) {
+      const lanceur = options.tutoriel;
+      help.addEventListener('pointerup', (e) => {
+        e.stopPropagation();
+        void lanceur(controle, false);
+      });
+      // Le tutoriel d'ouverture ne bloque pas la promesse de l'énigme : il se
+      // pose par-dessus et lui rendra la main tout seul. C'est son voile qui
+      // interdit les taps entre-temps, pas une garde ici.
+      void lanceur(controle, true);
     }
 
     check.addEventListener('pointerup', (e) => {

@@ -200,3 +200,28 @@ export function quaternionFeuille(THREE: typeof THREE_NS): THREE_NS.Quaternion {
     repereVue(THREE).oeil,
   );
 }
+
+/**
+ * Orientation d'une feuille **bien à plat devant soi**, ses bords alignés sur
+ * ceux de l'écran : un carré s'y projette en carré.
+ *
+ * `quaternionFeuille` pointe la normale du papier vers la caméra, ce qui suffit
+ * à démarrer une animation, mais laisse le **roulis au hasard** — la feuille
+ * arrive de travers de quelques degrés, et ça se voit dès qu'on la regarde plus
+ * d'une seconde. Ici la rotation est construite sur le repère de l'image : le X
+ * du papier part vers la droite de l'écran, son Z vers le bas, sa normale vers
+ * l'œil.
+ *
+ * La base est prise dans cet ordre (`droite`, `oeil`, `-haut`) parce que c'est
+ * la seule des combinaisons qui soit **directe** : avec `+haut` le déterminant
+ * vaut -1, et la matrice décrit une symétrie, pas une rotation.
+ *
+ * Le modèle doit être centré sur l'origine pour que la projection reste un
+ * carré : hors de l'axe optique, la perspective en referait un trapèze. C'est ce
+ * que garantit `frameModel`.
+ */
+export function quaternionFeuilleDeFace(THREE: typeof THREE_NS): THREE_NS.Quaternion {
+  const { oeil, droite, haut } = repereVue(THREE);
+  const base = new THREE.Matrix4().makeBasis(droite, oeil, haut.clone().negate());
+  return new THREE.Quaternion().setFromRotationMatrix(base);
+}

@@ -79,6 +79,19 @@ function renderer(THREE: typeof THREE_NS): THREE_NS.WebGLRenderer {
     });
     atelier.setPixelRatio(1);
     atelier.setClearAlpha(0);
+
+    // Un contexte perdu — mise en veille de l'onglet, réinitialisation du
+    // pilote, trop de contextes ailleurs dans la page — ne lève aucune erreur :
+    // le rendu continue de « marcher » et ne produit plus que des images vides.
+    // C'est ainsi que le but de l'énigme et les vignettes disparaissaient sans
+    // que rien ne le dise. On jette l'atelier **et** le cache : la prochaine
+    // demande refabrique l'un et refait l'autre.
+    atelier.domElement.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      console.warn('[origami] contexte perdu : les images seront refaites');
+      atelier = null;
+      images.clear();
+    });
   }
   return atelier;
 }

@@ -19,8 +19,11 @@
  *   decor     repère de décor        -> bord, surface, position
  *
  * Le **nom** de l'objet est son identifiant côté code (`feuille`, `precipice`).
- * Les calques image — le croquis posé dessous pour placer les zones — sont
- * ignorés : ils n'entrent jamais dans le jeu.
+ *
+ * Un **calque image** de classe `fond` porte le terrain peint par l'artiste, et
+ * il entre dans le jeu. Les autres — le croquis posé dessous pour placer les
+ * zones — restent ignorés : c'est la classe qui départage, comme pour les
+ * objets.
  *
  * La sortie est du **TypeScript** et non du JSON, et c'est délibéré : figée en
  * `as const`, elle donne au compilateur la liste exacte des noms du plan. Une
@@ -28,8 +31,15 @@
  * devient une erreur de `tsc`, pas une découverte à l'exécution. Voir
  * src/game/scenes/layout.ts.
  */
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { basename, extname, join, relative, resolve } from 'node:path';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 
 /**
  * Recopiés de src/game/config.ts : un outil Node ne peut pas importer du
@@ -44,6 +54,12 @@ const OUT_DIR = 'src/generated/scenes';
 
 /** Classes reconnues -> clé du plan produit. */
 const ROLES = { hotspot: 'hotspots', exit: 'exits', decor: 'decor' };
+
+/** Classe du calque image qui porte le fond de la scène. */
+const CLASSE_FOND = 'fond';
+
+/** Le dossier que Vite sert tel quel : un fond doit y vivre pour arriver au jeu. */
+const PUBLIC_DIR = 'public';
 
 /** Un identifiant doit rester écrivable tel quel dans le code généré. */
 const ID_VALIDE = /^[a-z][a-z0-9_]*$/;
@@ -72,6 +88,24 @@ function collecterObjets(calques, dx = 0, dy = 0) {
     }
   }
   return objets;
+}
+
+/**
+ * Les calques image, les groupes aplatis. Même accumulation du décalage que
+ * ci-dessus — à ceci près qu'un calque image n'a pas de coordonnées propres :
+ * sa position **est** son décalage.
+ */
+function collecterCalquesImage(calques, dx = 0, dy = 0) {
+  const images = [];
+  for (const calque of calques ?? []) {
+    const ox = dx + (calque.offsetx ?? 0);
+    const oy = dy + (calque.offsety ?? 0);
+    if (calque.type === 'group') images.push(...collecterCalquesImage(calque.layers, ox, oy));
+    else if (calque.type === 'imagelayer') {
+      images.push({ ...calque, x: (calque.x ?? 0) + ox, y: (calque.y ?? 0) + oy });
+    }
+  }
+  return images;
 }
 
 const arrondir = (b) => ({
@@ -143,6 +177,92 @@ function geometrieDe(objet) {
   return { box: boiteDe(coins), forme: objet.ellipse ? 'ellipse' : 'rectangle', rotation };
 }
 
+/**
+ * Dimensions réelles d'une image, en pixels.
+ *
+ * PNG et WebP seulement — les deux formats que l'artiste livre. Tout le reste
+ * rend `null` : on préfère ne pas vérifier ce qu'on ne sait pas lire plutôt que
+ * de refuser une carte par ailleurs valide.
+ */
+function dimensionsImage(chemin) {
+  const o = readFileSync(chemin);
+
+  // PNG : 8 octets de signature, puis le chunk IHDR — largeur et hauteur en
+  // gros-boutiste aux offsets 16 et 20.
+  if (o.length > 24 && o.toString('latin1', 1, 4) === 'PNG') {
+    return { w: o.readUInt32BE(16), h: o.readUInt32BE(20) };
+  }
+
+  if (o.length > 30 && o.toString('latin1', 0, 4) === 'RIFF' && o.toString('latin1', 8, 12) === 'WEBP') {
+    switch (o.toString('latin1', 12, 16)) {
+      // VP8X, le WebP « étendu » — celui qui porte une couche alpha. Les
+      // dimensions du canevas y sont stockées sur 24 bits, moins un.
+      case 'VP8X':
+        return { w: o.readUIntLE(24, 3) + 1, h: o.readUIntLE(27, 3) + 1 };
+      // VP8, avec perte : en-tête de trame clé, 14 bits par dimension.
+      case 'VP8 ':
+        return { w: o.readUInt16LE(26) & 0x3fff, h: o.readUInt16LE(28) & 0x3fff };
+      // VP8L, sans perte : 14 bits chacune, moins un, empaquetées à la suite.
+      case 'VP8L': {
+        const bits = o.readUInt32LE(21);
+        return { w: (bits & 0x3fff) + 1, h: ((bits >> 14) & 0x3fff) + 1 };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Le fond de la scène : le terrain peint par l'artiste, posé sous le décor et
+ * au-dessus du ciel.
+ *
+ * Le calque pointe **directement** le fichier que le jeu charge, dans
+ * `public/`. C'est ce qui garantit qu'on place les zones, dans Tiled, sur les
+ * pixels exacts que le joueur aura sous les yeux ; une copie de travail rangée
+ * à côté de la carte finirait par diverger de celle du build.
+ *
+ * Rend `null` si tout va bien, le message d'erreur sinon.
+ */
+function lireFond(calque, fichierCarte, layout, warn) {
+  const ou = `« ${calque.name || CLASSE_FOND} »`;
+  if (!calque.image) return `${ou} est de classe « ${CLASSE_FOND} » mais n'a pas d'image`;
+
+  const absolu = resolve(dirname(fichierCarte), calque.image);
+  const racine = resolve(PUBLIC_DIR);
+  if (!absolu.startsWith(racine + sep)) {
+    return (
+      `le fond ${ou} est hors de ${PUBLIC_DIR}/ — le jeu ne saurait pas le servir.\n` +
+      `    L'intégrer dans ${PUBLIC_DIR}/assets/decor/ et repointer le calque dessus (cf. README).`
+    );
+  }
+  if (!existsSync(absolu)) return `le fond ${ou} pointe « ${calque.image} », introuvable`;
+
+  const w = Math.round(calque.imagewidth ?? 0);
+  const h = Math.round(calque.imageheight ?? 0);
+  if (w <= 0 || h <= 0) return `le fond ${ou} n'a pas de dimensions`;
+
+  // Tiled ne redimensionne jamais un calque image : ce qu'il affiche est la
+  // taille du fichier, et c'est cette taille-là que le jeu doit reprendre. Si
+  // les deux ont divergé, c'est que le fichier a changé depuis que la carte l'a
+  // lu — le jeu dessinerait alors autre chose que l'éditeur.
+  const reel = dimensionsImage(absolu);
+  if (reel && (reel.w !== w || reel.h !== h)) {
+    return (
+      `le fond ${ou} fait ${reel.w}x${reel.h}, la carte en a retenu ${w}x${h} — ` +
+      'rouvrir la carte dans Tiled, qui relira le fichier'
+    );
+  }
+
+  const x = Math.round(calque.x ?? 0);
+  const y = Math.round(calque.y ?? 0);
+  if (x < 0 || y < 0 || x + w > layout.design.width || y + h > layout.design.height) {
+    warn(`le fond ${ou} déborde du cadre ${layout.design.width}x${layout.design.height}`);
+  }
+
+  layout.fond = { image: relative(racine, absolu).split(sep).join('/'), x, y, w, h };
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Import
 // ---------------------------------------------------------------------------
@@ -152,7 +272,15 @@ function importScene(fichier, nom) {
   const errors = [];
   const warn = (m) => warnings.push(m);
 
-  const layout = { scene: nom, source: fichier, design: {}, hotspots: [], exits: [], decor: {} };
+  const layout = {
+    scene: nom,
+    source: fichier,
+    design: {},
+    fond: null,
+    hotspots: [],
+    exits: [],
+    decor: {},
+  };
 
   let carte;
   try {
@@ -177,6 +305,18 @@ function importScene(fichier, nom) {
         '(Map > Map Properties, ou tuiles de 80x80 sur 16x9)',
     );
     return { layout, warnings, errors };
+  }
+
+  // Les calques image sans classe sont ignorés : le croquis posé sous le plan
+  // pour placer les zones est un outil de travail, il n'entre pas dans le jeu.
+  const fonds = collecterCalquesImage(carte.layers).filter((c) => c.class === CLASSE_FOND);
+  if (fonds.length > 1) {
+    errors.push(
+      `${fonds.length} calques de classe « ${CLASSE_FOND} » — une scène n'a qu'un fond`,
+    );
+  } else if (fonds.length === 1) {
+    const erreur = lireFond(fonds[0], fichier, layout, warn);
+    if (erreur) errors.push(erreur);
   }
 
   const vus = { hotspot: new Set(), exit: new Set(), decor: new Set() };
@@ -290,6 +430,10 @@ function zoneLitterale(z) {
 }
 
 function rendre(layout) {
+  const f = layout.fond;
+  const fond = f
+    ? `\n  fond: { image: '${f.image}', x: ${f.x}, y: ${f.y}, w: ${f.w}, h: ${f.h} },`
+    : '';
   const liste = (zones) =>
     zones.length === 0 ? '[]' : `[\n${zones.map((z) => `    ${zoneLitterale(z)},`).join('\n')}\n  ]`;
   const reperes = Object.entries(layout.decor);
@@ -305,7 +449,7 @@ function rendre(layout) {
 export default {
   scene: '${layout.scene}',
   source: '${layout.source}',
-  design: { width: ${layout.design.width}, height: ${layout.design.height} },
+  design: { width: ${layout.design.width}, height: ${layout.design.height} },${fond}
   hotspots: ${liste(layout.hotspots)},
   exits: ${liste(layout.exits)},
   decor: ${decor},
@@ -364,6 +508,7 @@ function main() {
     }
 
     const counts = [
+      layout.fond ? `fond ${layout.fond.image}` : 'pas de fond',
       `${layout.hotspots.length} hotspot(s)`,
       `${layout.exits.length} sortie(s)`,
       `${Object.keys(layout.decor).length} repère(s)`,

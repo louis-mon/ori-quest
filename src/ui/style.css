@@ -171,6 +171,14 @@ body {
   display: none;
 }
 
+/* Au-dessus de l'énigme (z-index 4) et du voile du tutoriel (5), sous la
+   fenêtre de confirmation (7). Posé par `Overlay.mettreDevant()` le temps d'un
+   tutoriel : sans lui, tout ce que celui-ci raconte se joue derrière le panneau
+   de l'énigme, donc invisible. */
+.dialogue--devant {
+  z-index: 6;
+}
+
 /* Le graphisme des personnages est détouré sur fond transparent : `contain` sur
    un carré à peine teinté, plutôt qu'un `cover` qui rognerait les oreilles. */
 .dialogue__portrait {
@@ -621,7 +629,12 @@ body {
   background: rgba(16, 14, 12, 0.92);
 }
 
+/* `position: relative` pour le bouton « ? » : posé dans le panneau, il est
+   forcément à gauche du bac, quelle que soit la largeur que les pièces lui ont
+   donnée. Calé sur le cadre de l'énigme, il aurait fallu refaire à la main le
+   calcul de `--tray-width`, et il finirait par recouvrir les pièces. */
 .puzzle__panel {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -755,14 +768,19 @@ body {
   display: none;
 }
 
+/* Épaisseur en pixels d'écran, `non-scaling-stroke` oblige : c'est donc une
+   valeur ergonomique, pas une proportion du motif. À 2, les plis se perdaient
+   sur une pièce claire au milieu d'un panneau sombre — et ce sont eux, le
+   contenu de l'énigme. La légende plus bas porte la même épaisseur : les deux
+   doivent se reconnaître d'un coup d'œil. */
 .puzzle__piece svg .mo {
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: 4;
 }
 
 .puzzle__piece svg .va {
   stroke: var(--fold-valley);
-  stroke-width: 2;
+  stroke-width: 4;
 }
 
 .puzzle__piece svg .fl {
@@ -792,6 +810,38 @@ body {
 .puzzle__board.is-solved {
   box-shadow: 0 0 0 3px var(--paper);
   transition: box-shadow 300ms ease;
+}
+
+/* ---- Le bouton « ? » : rejouer un tutoriel ---- */
+
+/* Dans le panneau, pas dans le cadre : voir la note sur `.puzzle__panel`. Le
+   bac est à droite du panneau, donc le bouton ne peut pas le recouvrir. */
+.puzzle__help {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(242, 236, 225, 0.3);
+  border-radius: 50%;
+  background: rgba(26, 23, 20, 0.7);
+  color: var(--paper);
+  font: inherit;
+  font-weight: 700;
+  font-size: calc(20px * var(--ui-scale));
+  line-height: 1;
+  cursor: pointer;
+}
+
+.puzzle__help[hidden] {
+  display: none;
+}
+
+.puzzle__help:active {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 /* ---- Le pliage terminé, et la légende des plis ---- */
@@ -876,8 +926,8 @@ body {
 .puzzle__legend-line {
   display: block;
   width: calc(22px * var(--ui-scale));
-  height: 2px;
-  border-radius: 1px;
+  height: 4px;
+  border-radius: 2px;
 }
 
 .puzzle__legend-line--va {
@@ -930,6 +980,128 @@ body {
 .puzzle__quit:active {
   background: var(--accent);
   color: var(--paper);
+}
+
+/* ---------- Tutoriel d'énigme ---------- */
+
+/*
+ * `.tuto` n'est **pas positionné**, et c'est délibéré : positionné, il ferait
+ * contexte d'empilement et enfermerait ses enfants entre 0 et son propre
+ * z-index. Or ils doivent encadrer la boîte de dialogue — le voile dessous
+ * (5), la boîte au milieu (6), la confirmation dessus (7). Sans box propre,
+ * ils se placent par rapport à `#ui` et se rangent dans la même pile que
+ * l'énigme.
+ */
+.tuto {
+  position: static;
+}
+
+/* Transparent, mais présent dès le premier instant : c'est lui qui absorbe les
+   taps destinés à l'énigme pendant qu'on explique. Il ne s'assombrit que pour
+   la démonstration du pli, où l'énigme n'est plus le sujet. */
+.tuto__voile {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(16, 14, 12, 0);
+  transition: background 400ms ease;
+}
+
+.tuto__voile.is-sombre {
+  background: rgba(16, 14, 12, 0.82);
+}
+
+/* La feuille de démonstration : un vrai pliage rendu en 3D (voir tutoriel.ts).
+   Posée au-dessus du centre plutôt qu'en plein milieu — le bas de l'écran est
+   à la boîte de dialogue, et une feuille centrée passe dessous. */
+.tuto__feuille {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 5;
+  width: 62%;
+  height: 62%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.tuto__feuille.is-visible {
+  opacity: 1;
+}
+
+/* Un simple chevron plein, tracé en SVG — pas le pliage de l'artiste, qui sert
+   déjà à signaler les sorties de scène. Les deux ne disent pas la même chose :
+   le marqueur de sortie fait partie du décor et attend qu'on le remarque, celle
+   d'ici interrompt une explication pour dire « regarde ça, maintenant ». Elle
+   pointe vers la droite dans son viewBox, et se pose donc à gauche de ce qu'elle
+   désigne (voir `designer()`).
+
+   L'accent du jeu et un liseré sombre : elle passe aussi bien sur le fond noir
+   de l'énigme que sur une pièce de papier clair. */
+.tuto__fleche {
+  position: absolute;
+  z-index: 5;
+  width: calc(96px * var(--ui-scale));
+  height: auto;
+  transform: translateY(-50%);
+  pointer-events: none;
+  fill: var(--accent);
+  stroke: rgba(16, 14, 12, 0.55);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.55));
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+.tuto__fleche[hidden] {
+  display: none;
+}
+
+/* En haut à droite du cadre : le coin que l'énigme laisse libre — sa vignette
+   de but est en haut à gauche, son bouton « ? » contre le bac. */
+.tuto__passer {
+  position: absolute;
+  top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));
+  right: calc(var(--ui-gap) + env(safe-area-inset-right, 0px));
+  z-index: 5;
+  min-height: 44px;
+  padding: 0 calc(16px * var(--ui-scale));
+  border: 1px solid rgba(242, 236, 225, 0.3);
+  border-radius: 10px;
+  background: rgba(26, 23, 20, 0.7);
+  color: var(--paper);
+  font: inherit;
+  font-weight: 600;
+  font-size: calc(14px * var(--ui-scale));
+  cursor: pointer;
+}
+
+.tuto__passer[hidden] {
+  display: none;
+}
+
+.tuto__passer:active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Même fenêtre que la remise à zéro — d'où les classes `.menu__confirm-*`
+   réutilisées telles quelles. Deux fenêtres de confirmation qui ne se
+   ressembleraient pas donneraient l'impression de deux jeux. */
+.tuto__confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(16, 14, 12, 0.82);
+}
+
+.tuto__confirm[hidden] {
+  display: none;
 }
 
 /* ---------- Étiquette de survol / focus ---------- */

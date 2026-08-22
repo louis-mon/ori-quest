@@ -102,6 +102,34 @@ python3 tools/detourer-png.py assets-src/graphisme_origami/arbre.png \
   public/assets/decor/jeune-arbre.png 360
 ```
 
+### Intégrer un fond de scène
+
+Les fonds sont livrés dans `background/`, en **WebP 1280 × 720** — la résolution
+logique du jeu, donc aucun rognage ni réduction à faire : c'est une simple copie.
+Le canvas fait 1280 × 720 quelle que soit la densité de l'écran (`Scale.FIT`), une
+livraison en double densité n'apporterait donc rien et pèserait quatre fois plus.
+
+```bash
+cp assets-src/graphisme_origami/background/bg_ravin.webp \
+  public/assets/decor/fond-pont.webp
+cp assets-src/graphisme_origami/background/bg_la_porte.webp \
+  public/assets/decor/fond-porte.webp
+```
+
+Ils sont **renommés à l'intégration**, sur l'identifiant de la scène et non sur
+le nom de la zone : `pont` et `porte` sont ce que disent les knots d'ink, les
+sauvegardes et les plans. Le joueur, lui, lit « Le ravin ».
+
+Le WebP est gardé tel quel — 33 Ko contre 550 Ko pour le même dessin en PNG, et
+il porte sa couche alpha : le fond est **transparent au-dessus de l'horizon**,
+c'est ce qui laisse passer le ciel, son soleil et ses nuages, peints par le code
+(`src/game/scenes/ciel.ts`).
+
+Reste à le **brancher dans la carte Tiled** de la scène : un calque image de
+classe `fond`, qui pointe le fichier de `public/`. C'est la carte qui dit au jeu
+quel fond charger et où le poser — voir
+[game-design/06-plans-de-scene.md](game-design/06-plans-de-scene.md).
+
 ### Reprendre à un point précis du chapitre
 
 Le menu du jeu porte, **en développement seulement**, une liste « Reprendre à… »
@@ -136,18 +164,18 @@ et son module disparaissent entièrement du build publié.
 Tout est permissif. **Rabbit Ear a été volontairement écarté : il est en GPLv3**,
 et le lier dans le bundle obligerait à publier le jeu entier sous GPLv3.
 
-### Poids réel (build actuel, gzip)
+### Ce qui se charge, et quand
 
-| Chunk | Taille | Quand |
-| --- | --- | --- |
-| Phaser | 381 Ko | au démarrage |
-| app + CSS | 41 Ko | au démarrage |
-| three.js | 190 Ko | **à la demande**, au premier pliage |
-| `pont.origami` | 2 Ko | à la demande |
+Au démarrage : Phaser, l'application et sa CSS. **Le reste est différé.** `three`
+est derrière un `await import()` dans `OrigamiLayer` et dans `apercu.ts`, et
+Vite lui donne son propre chunk : un joueur qui n'atteint jamais une scène avec
+origami ne le télécharge pas. Les `.origami` suivent le même chemin, un par
+modèle, au moment où on le plie.
 
-Soit ~435 Ko avant le premier écran. `three` est derrière un `await import()`
-dans `OrigamiLayer` et dans `apercu.ts` : un joueur qui n'atteint jamais une
-scène avec origami ne le télécharge pas.
+Les tailles se lisent dans la sortie de `npm run build`, qui les donne en gzip
+chunk par chunk. Elles ne sont pas recopiées ici : elles seraient fausses au
+prochain commit, et ce qui compte dans ce fichier est **ce qui est différé**, pas
+combien il pèse aujourd'hui.
 
 ⚠ Le décor affiche les modèles pliés (voir plus bas), et ces images passent par
 three.js elles aussi. Le rendu n'est donc demandé **qu'à la première apparition**
@@ -202,6 +230,10 @@ Simulator :
 
 Inkscape ou Illustrator suffisent. Les `.fold` sont acceptés aussi.
 
+⚠ **Pas de commentaire XML dans le fichier.** Un `<!-- … -->` avant `<svg>` fait
+sortir le même carré à 440 sommets au lieu de 4, et le solveur froisse le papier
+au lieu de le plier. Les CP du dépôt sont des exports ORIPA : garder cette forme.
+
 ### Ce que le pipeline sait et ne sait pas faire
 
 Origami Simulator **relaxe une feuille physique** ; ce n'est pas un solveur de
@@ -247,10 +279,14 @@ src/
     puzzle/crease-puzzle.ts  minijeu de reconstitution (DOM)
     puzzle/decoupage.ts      pièces polygonales : boîtes, masques, détourage
     puzzle/puzzles.ts        registre des énigmes, en données
+    puzzle/tutoriel.ts       le tutoriel, posé sur l'énigme ouverte
+    puzzle/tutoriels.ts      son texte et son enchaînement, en données
     systems/state.ts         état sérialisable (drapeaux, inventaire)
     systems/hotspots.ts      définition des zones et des verbes
     systems/dialogue.ts      pont ink <-> UI, gestion des tags
     scenes/origami-decor.ts  les modèles pliés, posés dans le décor
+    scenes/fond.ts           le terrain peint, posé par le plan de scène
+    scenes/ciel.ts           le ciel, son soleil et ses nuages (peints)
   origami/
     fold-file.ts             parseur du format .origami + interpolation
     origami-layer.ts         animation de pliage, three.js (import dynamique)
@@ -294,6 +330,16 @@ Le tracé est juste, le papier sait quoi faire. # origami: pont # flag: pont_pli
 Tags disponibles : `give`, `drop`, `flag`, `unflag`, `origami`, `goto`, `puzzle`,
 `then`, `qui`. En ajouter
 un = une entrée dans `handlers` (`src/game/systems/dialogue.ts`).
+
+**Une exception, et une seule** : le texte des tutoriels d'énigme vit dans
+[`src/game/puzzle/tutoriels.ts`](src/game/puzzle/tutoriels.ts), pas dans ink. Un
+tutoriel se joue pendant que le récit attend le verdict de l'énigme, et
+`DialogueRunner` refuse d'être relancé pendant qu'il tourne — les répliques ne
+s'afficheraient jamais. Sa feuille de démonstration est un vrai pliage :
+
+```bash
+npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 2000
+```
 
 ## Contraintes mobile prises en compte
 

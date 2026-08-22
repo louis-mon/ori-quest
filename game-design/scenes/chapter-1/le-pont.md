@@ -7,7 +7,7 @@ a disparu d'un coup.
 <dialogue de constatation>
 
 Une feuille de papier déplié peut être examinée.
-Si examinée et que la réponse du pont est selectionée, l'énigme du pont est lancée.
+Si examinée et que la réponse du pont est selectionée, l'énigme du pont est lancée (assets-src/enigmes/pont).
 En cas de réussite, le pont est plié (animation) et placé sur le précipice.
 
 
@@ -40,12 +40,3 @@ Si plié et on a la hache, et que le jeune arbre nous l'a demandé, on peut le d
 ## Sortie
 
 A droite de l'écran, accessible si le pont est réparé, mène à la porte
-
-## Enigme pont
-
-enigmes/pont dans les assets.
-grille d'ancrage: 4x4.
-Pièces:
-(0, 0, 4, 1)
-(0, 1, 4, 2)
-(0, 3, 4, 1)

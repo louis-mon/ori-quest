@@ -17,6 +17,7 @@
  * deux de diverger. La carte Tiled est la source de vérité, `tsc` le vérifie.
  */
 import type { Box, Contour, ExitDef, HotspotDef } from '../systems/hotspots';
+import type { PlanFond } from './fond';
 
 export type { Box, Contour };
 
@@ -35,6 +36,13 @@ export interface SceneLayout {
   /** La carte Tiled d'origine, citée dans les messages d'erreur. */
   readonly source: string;
   readonly design: { readonly width: number; readonly height: number };
+  /**
+   * Le terrain peint, quand la carte en porte un (calque image de classe
+   * `fond`). Optionnel : une scène d'intérieur n'en aura pas, et le code qui
+   * l'utilise doit donc être écrit sur un plan qui en déclare un — `tsc` s'en
+   * charge, comme pour les repères de `boxOf`.
+   */
+  readonly fond?: PlanFond;
   readonly hotspots: readonly PlanZone[];
   readonly exits: readonly PlanZone[];
   readonly decor: { readonly [id: string]: Box };

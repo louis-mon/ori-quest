@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, DESIGN_WIDTH } from '../config';
+import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/porte';
@@ -10,6 +10,7 @@ import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerFeuille } from './feuille';
 import { placeHeros, preloadHeros } from './heros';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
+import { dessinerFond, preloadFond } from './fond';
 
 /**
  * La porte — seconde scène du chapitre 1.
@@ -20,10 +21,11 @@ import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
  * porte était en bois — et qu'une hache en ferait. Le chapitre se referme quand
  * la porte est pliée et qu'on la franchit.
  *
- * ⚠ Le décor de cette scène est un pis-aller : `dec_sol` et `dec_mur` ont été
- * posés au jugé, faute de croquis dans le plan. À corriger dans porte.tmj.
- * Le battant, lui, n'est plus dessiné : c'est le modèle `porte.origami` rendu
- * tel quel (voir origami-decor.ts).
+ * Le terrain et le rempart sont l'image de l'artiste, posée par le plan (voir
+ * fond.ts) ; seul le **ciel** reste peint par le code, et ses nuages dérivent
+ * derrière la muraille par la transparence du fond. Le battant, lui, n'est
+ * dessiné d'aucune des deux façons : c'est le modèle `porte.origami` rendu tel
+ * quel (voir origami-decor.ts).
  */
 
 const PLAN = plan;
@@ -34,7 +36,6 @@ const RENARD = 'renard';
 const GRAINE_DU_CIEL = 4211;
 
 const SOL = boxOf(PLAN, 'dec_sol');
-const MUR = boxOf(PLAN, 'dec_mur');
 
 export class PorteScene extends PointClickScene {
   protected readonly plan = PLAN;
@@ -53,6 +54,7 @@ export class PorteScene extends PointClickScene {
     preloadHeros(this);
     preloadSprite(this, RENARD, 'assets/decor/renard.png');
     preloadCiel(this);
+    preloadFond(this, PLAN.fond);
   }
 
   protected hotspots(): HotspotDef[] {
@@ -120,24 +122,14 @@ export class PorteScene extends PointClickScene {
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
 
-    const g = this.add.graphics();
-
-    g.fillStyle(0x6f6250, 1).fillRect(SOL.x, SOL.y, SOL.w, SOL.h);
-    g.fillStyle(COLORS.wood, 1).fillRect(SOL.x, SOL.y, SOL.w, 10);
-
-    // Le rempart. Des assises régulières suffisent à le lire comme maçonnerie ;
-    // ce qui compte ici est le trou, pas la pierre.
-    g.fillStyle(0x8c8073, 1).fillRect(MUR.x, MUR.y, MUR.w, MUR.h);
-    g.lineStyle(1, 0x746a5f, 1);
-    for (let y = MUR.y + 40; y < MUR.y + MUR.h; y += 40) {
-      g.beginPath().moveTo(MUR.x, y).lineTo(MUR.x + MUR.w, y).strokePath();
-    }
+    // Le terrain et le rempart, d'un seul tenant.
+    dessinerFond(this, PLAN.fond);
 
     // Pas de trou dans le mur. Tant que la porte n'est pas pliée, on voit le
     // rempart et, devant lui, la grande feuille — une feuille carrée comme
     // partout ailleurs, dans le papier de son modèle. Une embrasure béante
-    // dessinée en sombre se lisait comme un décor de fond, et le joueur n'avait
-    // aucune raison de taper dedans.
+    // se lisait comme un décor de fond, et le joueur n'avait aucune raison de
+    // taper dedans.
     const ouverture = boxOf(PLAN, 'hs_porte');
     this.feuillePorte = this.add.graphics();
     this.caler('porte', dessinerFeuille(this.feuillePorte, ouverture, 'porte'));

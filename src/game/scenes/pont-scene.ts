@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, DESIGN_WIDTH } from '../config';
+import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/pont';
@@ -9,6 +9,7 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
+import { dessinerFond, preloadFond } from './fond';
 import { dessinerFeuille } from './feuille';
 
 /**
@@ -29,13 +30,15 @@ import { dessinerFeuille } from './feuille';
  * Toute la géométrie est lue dans game-design/scenes/chapter-1/pont.tmj. Ce
  * fichier ne décide que du sens.
  *
- * Le décor est dessiné en primitives, comme le reste du prototype. Les PNG de
- * l'artiste ne sont pas encore intégrés : ils sont détourés sur fond
- * transparent et destinés aux origamis, pas aux fonds.
+ * Le terrain — le sol, le ravin, la rive d'en face — est l'image de l'artiste
+ * posée par le plan (voir fond.ts). Seul le **ciel** reste peint par le code :
+ * le fond est transparent au-dessus de l'horizon, et le soleil et les nuages
+ * passent dessous.
  *
- * Deux exceptions : le pont posé et le vieil arbre ne sont pas dessinés du tout,
- * ce sont les modèles `pont.origami` et `arbre.origami` rendus tels quels (voir
- * origami-decor.ts). Ce que le joueur vient de plier est ce qu'il retrouve.
+ * Le pont posé et le vieil arbre, eux, ne sont dessinés d'aucune des deux
+ * façons : ce sont les modèles `pont.origami` et `arbre.origami` rendus tels
+ * quels (voir origami-decor.ts). Ce que le joueur vient de plier est ce qu'il
+ * retrouve.
  */
 
 const PLAN = plan;
@@ -55,7 +58,6 @@ const JEUNE_ARBRE = 'jeune-arbre';
 const GRAINE_DU_CIEL = 1907;
 
 const SOL = boxOf(PLAN, 'dec_sol');
-const RIVE = boxOf(PLAN, 'dec_rive');
 
 export class PontScene extends PointClickScene {
   protected readonly plan = PLAN;
@@ -87,6 +89,7 @@ export class PontScene extends PointClickScene {
   protected preloadAssets() {
     preloadHeros(this);
     preloadCiel(this);
+    preloadFond(this, PLAN.fond);
     preloadSprite(this, JEUNE_ARBRE, 'assets/decor/jeune-arbre.png');
   }
 
@@ -173,20 +176,11 @@ export class PontScene extends PointClickScene {
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 6);
 
-    const g = this.add.graphics();
-
-    // Le vide. Un noir franc plutôt qu'un fond de gorge dessiné : on ne doit pas
-    // pouvoir estimer la profondeur, c'est ce qui rend la traversée inquiétante.
-    const vide = boxOf(PLAN, 'dec_precipice');
-    g.fillStyle(0x14110f, 1).fillRect(vide.x, vide.y, vide.w, vide.h);
-
-    // Sol du héros (gauche) et rive d'en face (droite), en terre de plein jour :
-    // sous le ciel d'après-midi, les bruns sourds d'avant se lisaient comme une
-    // scène restée dans l'ombre.
-    g.fillStyle(0x8a6d4e, 1).fillRect(SOL.x, SOL.y, SOL.w, SOL.h);
-    g.fillStyle(COLORS.wood, 1).fillRect(SOL.x, SOL.y, SOL.w, 12);
-    g.fillStyle(0x7a6144, 1).fillRect(RIVE.x, RIVE.y, RIVE.w, RIVE.h);
-    g.fillStyle(COLORS.wood, 1).fillRect(RIVE.x, RIVE.y, RIVE.w, 12);
+    // Le terrain : les deux rives et le noir du ravin entre elles. Le vide n'est
+    // pas un fond de gorge qu'on pourrait mesurer des yeux — c'est ce qui rend
+    // la traversée inquiétante, et l'image de l'artiste le tient comme le
+    // faisait l'aplat.
+    dessinerFond(this, PLAN.fond);
 
     // Le jeune arbre : le pliage de l'artiste, comme les personnages. La zone
     // tactile suit l'emprise réelle du sprite, pas la boîte du plan — il y est

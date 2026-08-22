@@ -292,7 +292,7 @@ Beaucoup de choses ont changé depuis mon départ...
     # qui: heros
     Bon, ça ira, je vais voir ce que je peux faire.
     # qui: renard
-    Dépêche-toi, les insectes effrayants me courent partout dessus, ça me chatouille.
+    Dépêche-toi, je m'inquète quand même un peu pour le petit chat, je ne pourrais plus l'embêter s'il est transformé en feuille de papier.
     # flag: renard_bois_su # then: porte_renard_choix
 + { flag_renard_bois_su && not has_idee_hache && not flag_hache_pliee } [Tu as du bois ?]
     # qui: renard

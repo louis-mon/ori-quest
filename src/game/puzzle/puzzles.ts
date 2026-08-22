@@ -28,6 +28,11 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     modele: 'pont',
     decoupage: DECOUPAGES.pont,
     title: 'Le pont',
+    // La première énigme du jeu : c'est elle qui apprend le pli vallée, et son
+    // motif n'a justement que des vallées. Le pli montagne s'apprendra à la
+    // première énigme qui en porte un — l'arbre ou la hache, selon l'ordre où le
+    // joueur les rencontre — le jour où ce tutoriel-là sera écrit.
+    tutoriel: 'vallee',
   },
 
   // game-design/scenes/chapter-1/le-pont.md — le vieil arbre.
