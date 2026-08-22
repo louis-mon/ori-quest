@@ -220,9 +220,15 @@ async function jouer(scene: Scene, tuto: Tutoriel, sonEnigme: boolean) {
     if (scene.abandonne) throw new Passe();
     if (typeof etape === 'string') {
       await scene.jusqua(scene.overlay.say(etape, HEROS));
-    } else if (sonEnigme || !TOUCHE_A_LENIGME.has(etape.faire)) {
-      await scene.jusqua(EFFETS[etape.faire](scene, tuto));
+      continue;
     }
+    if (!sonEnigme && TOUCHE_A_LENIGME.has(etape.faire)) continue;
+
+    // `false` = l'effet n'a rien eu à faire. Sa réplique de commentaire tombe
+    // avec lui : « cette pièce semble bien placée » ne veut rien dire quand
+    // aucune pièce n'a bougé.
+    const fait = (await scene.jusqua(EFFETS[etape.faire](scene, tuto))) !== false;
+    if (fait && etape.puis) await scene.jusqua(scene.overlay.say(etape.puis, HEROS));
   }
 }
 
@@ -352,7 +358,11 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
 // Les effets
 // ------------------------------------------------------------------
 
-const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void>> = {
+/**
+ * Ce que fait chaque effet. Un effet qui répond **`false`** annonce qu'il n'a
+ * rien fait, et sa réplique de commentaire (`puis`) est sautée avec lui.
+ */
+const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void | false>> = {
   /**
    * La démonstration du geste : on désigne une pièce, puis on la pose.
    *
@@ -365,7 +375,7 @@ const EFFETS: Record<Effet, (scene: Scene, tuto: Tutoriel) => Promise<void>> = {
     // lui explique un geste que le joueur est en train de faire. Ce n'est pas
     // une erreur : le tutoriel se rejoue à tout moment. Voir `pieceADemontrer`.
     const piece = scene.controle.pieceADemontrer();
-    if (!piece) return;
+    if (!piece) return false;
 
     // Au-dessus du tas d'abord : c'est pendant les trois secondes où la flèche
     // la désigne qu'il faut pouvoir la distinguer de ses voisines.

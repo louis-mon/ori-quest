@@ -16,6 +16,10 @@
  * attend un tap comme n'importe quelle ligne du jeu — soit un **effet**, joué
  * entre deux répliques. Les effets sont nommés ici et exécutés dans
  * `tutoriel.ts` : ce fichier se relit comme un storyboard.
+ *
+ * Un effet peut porter un `puis` : la réplique qui **commente ce qu'on vient de
+ * voir**. Elle n'est dite que si l'effet a bien eu lieu — tous ne se jouent pas
+ * toujours, et le tutoriel ne doit pas commenter un geste qu'il n'a pas fait.
  */
 
 /** Ce qui se passe à l'écran entre deux répliques. */
@@ -33,7 +37,7 @@ export type Effet =
   /** Une flèche clignote sur le bouton « ? ». */
   | 'designer-aide';
 
-export type Etape = string | { faire: Effet };
+export type Etape = string | { faire: Effet; puis?: string };
 
 export interface Tutoriel {
   /** Libellé dans la liste du bouton « ? ». */
@@ -77,8 +81,12 @@ export const TUTORIELS = {
       'Je vais devoir retrouver les plis nécessaires pour remettre ce pont en place.',
       "Pour l'instant je n'ai besoin que d'un type de pli : le pli vallée.",
       "Il apparaît en bleu sur le schéma : tout ce que j'ai à faire, c'est remettre les pièces en place dans le carré.",
-      { faire: 'poser-une-piece' },
-      'Cette pièce semble bien placée, il faut maintenant mettre les autres.',
+      {
+        faire: 'poser-une-piece',
+        // Sautée avec l'effet : sur un plateau déjà entamé, aucune pièce ne
+        // bouge, et « cette pièce » ne désignerait rien.
+        puis: 'Cette pièce semble bien placée, il faut maintenant mettre les autres.',
+      },
       "Mais tu te demandes peut-être ce que signifie « pli vallée » ? Laisse-moi t'expliquer.",
       { faire: 'montrer-feuille' },
       "Voici une feuille de papier d'origami. Je vais faire un pli vallée dessus.",
