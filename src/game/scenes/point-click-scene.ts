@@ -222,7 +222,14 @@ export abstract class PointClickScene extends Phaser.Scene {
   }
 
   /**
-   * Pose (ou repose) le marqueur au centre de l'emprise.
+   * Pose (ou repose) le marqueur au centre de l'emprise — ou sur le point que la
+   * carte lui donne, quand elle en porte un.
+   *
+   * Le centre va bien tant que le sujet remplit son rectangle, ce qu'un pliage
+   * ne fait pas toujours : celui du renard tombe dans le creux entre son dos et
+   * sa queue. La carte tranche alors, avec un objet de classe `marqueur` posé au
+   * point sur le dessin (voir game-design/06-plans-de-scene.md). Rien à câbler
+   * ici ni dans la scène : il arrive avec la zone.
    *
    * Il est **refait** plutôt que déplacé : son battement est un tween qui pilote
    * sa position, et qui ramènerait le marqueur à son ancien point au cycle
@@ -230,8 +237,7 @@ export abstract class PointClickScene extends Phaser.Scene {
    * changement d'état pour rien.
    */
   private poserMarqueur(def: HotspotDef | ExitDef, box: Box) {
-    const cx = box.x + box.w / 2;
-    const cy = box.y + box.h / 2;
+    const [cx, cy] = def.marqueur ?? [box.x + box.w / 2, box.y + box.h / 2];
     const centre = `${Math.round(cx)}:${Math.round(cy)}`;
     if (this.centres.get(def.id) === centre) return;
     this.centres.set(def.id, centre);

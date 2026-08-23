@@ -107,6 +107,19 @@ une emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une
 partie. `caler()` (dans `PointClickScene`) recale la zone sur ce qui est
 réellement à l'écran, y compris quand ça change avec l'état.
 
+**Et la cocotte suit le sujet, pas le centre.** Une emprise est un rectangle, un
+pliage n'en est pas un : au centre de la sienne, le marqueur du renard tombait
+dans le creux entre son dos et sa queue — sur le rempart, où il se perdait — et
+celui du jeune arbre à mi-tronc plutôt que dans le feuillage. Où il se pose est
+alors un objet de classe **`marqueur`** dans la carte, **tracé au point** et
+portant le **nom de la zone** qu'il désigne. C'est ce nom qui les relie : la
+scène n'écrit rien, le point voyage avec la zone. Pas non plus de décalage en
+pixels dans le code — c'est de la géométrie, elle vit dans le plan, sur les
+pixels du dessin. L'import refuse un marqueur qui ne désigne aucune zone, qui
+tombe hors de la sienne, dont le nom est ambigu ou qui n'est pas un point : un
+lien tenu par une convention de nommage doit être vérifié, sinon il se défait en
+silence le jour où l'on renomme une zone.
+
 **La carte Tiled est la source de vérité de la géométrie.** Chaque scène a un
 plan dans `game-design/scenes/`, dessiné à l'échelle 1280×720 dans
 [Tiled](https://www.mapeditor.org/) ; `npm run scenes` en tire les zones. La

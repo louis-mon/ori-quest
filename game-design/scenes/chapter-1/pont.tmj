@@ -165,6 +165,19 @@
                  "width":141.046067562228,
                  "x":93.1986972727323,
                  "y":88.7910702757086
+                }, 
+                {
+                 "height":0,
+                 "id":16,
+                 "name":"arbre",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"marqueur",
+                 "visible":true,
+                 "width":0,
+                 "x":349,
+                 "y":331
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -173,7 +186,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":16,
+ "nextobjectid":17,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

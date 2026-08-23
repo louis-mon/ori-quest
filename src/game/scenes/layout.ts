@@ -16,10 +16,10 @@
  * empêche le code d'inventer une zone que le plan ne connaît pas, et donc les
  * deux de diverger. La carte Tiled est la source de vérité, `tsc` le vérifie.
  */
-import type { Box, Contour, ExitDef, HotspotDef } from '../systems/hotspots';
+import type { Box, Contour, ExitDef, HotspotDef, Marqueur } from '../systems/hotspots';
 import type { PlanFond } from './fond';
 
-export type { Box, Contour };
+export type { Box, Contour, Marqueur };
 
 /**
  * Une zone du plan. Elle a toujours une boîte — c'est elle qui sert à poser un
@@ -29,6 +29,12 @@ export type { Box, Contour };
 export interface PlanZone extends Box {
   id: string;
   points?: Contour;
+  /**
+   * Le point de l'objet `marqueur` qui porte le nom de cette zone, quand la
+   * carte en contient un. L'import l'y rattache et vérifie qu'il tombe bien
+   * dedans ; la scène n'a rien à en dire.
+   */
+  marqueur?: Marqueur;
 }
 
 export interface SceneLayout {
@@ -61,8 +67,9 @@ export type PlanRef<L extends SceneLayout> =
   | `dec_${keyof L['decor'] & string}`;
 
 /** Ce que la scène ajoute à la géométrie : le sens. */
-export type HotspotContent = Omit<HotspotDef, 'id' | 'x' | 'y' | 'w' | 'h' | 'points'>;
-export type ExitContent = Omit<ExitDef, 'id' | 'x' | 'y' | 'w' | 'h' | 'points'>;
+type DuPlan = 'id' | 'x' | 'y' | 'w' | 'h' | 'points' | 'marqueur';
+export type HotspotContent = Omit<HotspotDef, DuPlan>;
+export type ExitContent = Omit<ExitDef, DuPlan>;
 
 const EMPTY: Box = { x: 0, y: 0, w: 0, h: 0 };
 

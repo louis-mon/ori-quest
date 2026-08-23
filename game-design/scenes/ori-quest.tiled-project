@@ -40,6 +40,17 @@
             ]
         },
         {
+            "color": "#ffe05252",
+            "drawFill": false,
+            "id": 5,
+            "members": [],
+            "name": "marqueur",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ff6b8fbf",
             "drawFill": true,
             "id": 4,

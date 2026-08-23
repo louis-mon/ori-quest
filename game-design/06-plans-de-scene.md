@@ -43,14 +43,18 @@ Trois classes, c'est tout :
 | `hotspot` | à examiner | une zone tactile, avec sa cocotte |
 | `exit` | passage vers une autre scène | une zone tactile de navigation |
 | `decor` | repère de décor | un bord, une surface, une emprise |
+| `marqueur` | où se pose la cocotte | un point rattaché à la zone du même nom |
 
-Trois classes d'**objet**, s'entend : un *calque* porte lui aussi une classe, et
+Quatre classes d'**objet**, s'entend : un *calque* porte lui aussi une classe, et
 `fond` y désigne le terrain peint (plus bas).
 
 `decor` n'est pas cliquable : il sert à caler le dessin — où s'arrête le sol, où
 passe le vide, quelle place occupe le pont une fois posé. L'unicité des noms est
 **par classe** : `porte` peut être à la fois un `hotspot` et un `decor`, ce sont
 deux choses différentes au même endroit.
+
+`marqueur` est la seule classe qui ne s'invente pas de nom : il **porte celui de
+la zone qu'il désigne**, et c'est ce nom qui les relie (plus bas).
 
 Les noms s'écrivent en minuscules, chiffres et `_`. C'est du code une fois
 généré, un accent ou une espace casserait le fichier.
@@ -145,6 +149,39 @@ Une zone **dessinée mais pas encore câblée** n'est pas une erreur : c'est du
 contenu à écrire. La console de développement la liste au démarrage de la scène —
 c'est le reste à faire, visible plutôt que silencieux.
 
+### Où se pose la cocotte — la classe `marqueur`
+
+Par défaut, **au centre de ce qui est dessiné** — ce qui va bien tant que le
+sujet remplit son rectangle. Un pliage ne le remplit pas toujours : le centre de
+l'emprise du renard, couché et plus large que haut, tombe dans le creux entre son
+dos et sa queue — donc sur le rempart, où la cocotte se perd — et celui du jeune
+arbre à mi-tronc plutôt que dans le feuillage.
+
+Ça se corrige **entièrement dans la carte**. On trace un objet **au point**
+(`I`), classe `marqueur`, portant le **nom de la zone** qu'il désigne, et posé
+sur les pixels du dessin où la cocotte doit tomber :
+
+```
+hotspot   « renard »   rectangle, l'emprise du sujet
+marqueur  « renard »   point, sur son flanc
+```
+
+C'est le nom qui les relie. Rien à écrire dans la scène — le point voyage avec
+la zone jusqu'à `PointClickScene`, qui pose la cocotte dessus au lieu du centre.
+La zone tactile, elle, ne bouge pas : elle reste l'emprise entière du dessin.
+
+L'import refuse un marqueur qui ne tient pas la promesse de son nom :
+
+- **un nom qui ne désigne rien** — il n'existe ni hotspot ni sortie ainsi nommé,
+  et le message liste ceux de la carte (une faute de frappe se voit tout de
+  suite) ;
+- **un point hors de sa zone** — la cocotte se poserait à côté de son sujet. Sur
+  un polygone, c'est le contour qui compte, pas la boîte englobante ;
+- **un nom ambigu** — la même chaîne est à la fois un `hotspot` et un `exit`, et
+  le marqueur ne saurait pas lequel il vise ;
+- **une forme qui n'est pas un point** — un marqueur est une position, et un
+  rectangle laisserait croire qu'on dimensionne la cocotte ici.
+
 ## La carte est la source de vérité
 
 Le plan généré est figé en `as const`, et `boxOf` / `hotspotsFrom` en tirent la
@@ -168,9 +205,12 @@ plan par nuage. La ligne est là : *où vit un élément* est une décision du p
 
 ## Les contrôles automatiques
 
-L'import refuse une carte qui n'est pas au bon format, un objet sans classe ou
-sans nom, un nom en double dans la même classe, un nom qui n'est pas un
-identifiant valide, et une boîte plate. Il signale :
+L'import **refuse** une carte qui n'est pas au bon format, un objet sans classe
+ou sans nom, un nom en double dans la même classe, un nom qui n'est pas un
+identifiant valide, une boîte plate, et un marqueur qui ne désigne aucune zone,
+tombe hors de la sienne, est ambigu ou n'est pas tracé au point (voir plus haut).
+
+Il **signale**, sans refuser :
 
 - une zone tactile **sous 88 unités** (la cible de 44 px réels) — elle sera
   élargie par `touchRect()`, ce qui peut la faire mordre sur une voisine ;

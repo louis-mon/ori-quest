@@ -128,6 +128,19 @@
                  "width":131.984395574329,
                  "x":93.8569434883634,
                  "y":57.0233441521072
+                }, 
+                {
+                 "height":0,
+                 "id":13,
+                 "name":"renard",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"marqueur",
+                 "visible":true,
+                 "width":0,
+                 "x":694,
+                 "y":538
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -136,7 +149,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":13,
+ "nextobjectid":14,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

@@ -17,8 +17,11 @@
  *   hotspot   zone à examiner        -> hotspot, avec sa cocotte
  *   exit      passage vers une scène -> hotspot de navigation
  *   decor     repère de décor        -> bord, surface, position
+ *   marqueur  où se pose la cocotte  -> point rattaché à la zone du même nom
  *
  * Le **nom** de l'objet est son identifiant côté code (`feuille`, `precipice`).
+ * Un `marqueur` ne s'en invente donc pas un : il porte le nom de la zone qu'il
+ * désigne, et c'est ce nom qui les relie — le code n'a rien à câbler.
  *
  * Un **calque image** de classe `fond` porte le terrain peint par l'artiste, et
  * il entre dans le jeu. Les autres — le croquis posé dessous pour placer les
@@ -54,6 +57,13 @@ const OUT_DIR = 'src/generated/scenes';
 
 /** Classes reconnues -> clé du plan produit. */
 const ROLES = { hotspot: 'hotspots', exit: 'exits', decor: 'decor' };
+
+/**
+ * La quatrième classe, à part : un marqueur n'est pas une zone du plan, c'est un
+ * point posé **sur** une zone. Il ne sort donc pas dans une liste à lui — il
+ * vient s'accrocher au hotspot ou à la sortie qui porte le même nom.
+ */
+const CLASSE_MARQUEUR = 'marqueur';
 
 /** Classe du calque image qui porte le fond de la scène. */
 const CLASSE_FOND = 'fond';
@@ -122,6 +132,23 @@ function boiteDe(points) {
   const x = Math.min(...xs);
   const y = Math.min(...ys);
   return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+}
+
+/**
+ * Un point est-il dans un polygone ? Lancer de rayon, la recette habituelle.
+ *
+ * Sert au seul contrôle des marqueurs : sur une zone tracée au polygone, la
+ * boîte englobante ne dit rien — c'est le contour qui est le sujet, et un
+ * marqueur posé dans un coin vide de la boîte tomberait à côté du dessin.
+ */
+function dansLePolygone(px, py, points) {
+  let dedans = false;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const [xi, yi] = points[i];
+    const [xj, yj] = points[j];
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) dedans = !dedans;
+  }
+  return dedans;
 }
 
 /** Applique la rotation Tiled (degrés, autour de l'origine de l'objet). */
@@ -319,7 +346,9 @@ function importScene(fichier, nom) {
     if (erreur) errors.push(erreur);
   }
 
-  const vus = { hotspot: new Set(), exit: new Set(), decor: new Set() };
+  const vus = { hotspot: new Set(), exit: new Set(), decor: new Set(), marqueur: new Set() };
+  /** Marqueurs lus, rattachés à leur zone une fois toutes les zones connues. */
+  const marqueurs = [];
 
   for (const objet of collecterObjets(carte.layers)) {
     // Tiled a renommé `type` en `class` en 1.9, mais écrit encore `type` dans
@@ -332,8 +361,9 @@ function importScene(fichier, nom) {
       errors.push(`${ou} n'a pas de classe — la choisir dans Properties > Class`);
       continue;
     }
-    if (!ROLES[role]) {
-      errors.push(`${ou} a la classe « ${role} », inconnue (${Object.keys(ROLES).join(', ')})`);
+    if (!ROLES[role] && role !== CLASSE_MARQUEUR) {
+      const connues = [...Object.keys(ROLES), CLASSE_MARQUEUR].join(', ');
+      errors.push(`${ou} a la classe « ${role} », inconnue (${connues})`);
       continue;
     }
     if (!nomObjet) {
@@ -378,6 +408,20 @@ function importScene(fichier, nom) {
       warn(`« ${nomObjet} » déborde du cadre ${largeur}x${hauteur}`);
     }
 
+    if (role === CLASSE_MARQUEUR) {
+      // Un marqueur est une position, pas une emprise : la cocotte a sa taille
+      // à elle, et un rectangle laisserait croire qu'on la dimensionne ici.
+      if (geo.forme !== 'point') {
+        errors.push(
+          `« ${nomObjet} » est un marqueur ${geo.forme} — un marqueur est un ` +
+            'point, à tracer avec l\'outil Point (raccourci I)',
+        );
+        continue;
+      }
+      marqueurs.push({ nom: nomObjet, x: box.x, y: box.y, ou });
+      continue;
+    }
+
     if (role === 'decor') {
       layout.decor[nomObjet] = box;
       continue;
@@ -404,6 +448,48 @@ function importScene(fichier, nom) {
     layout[ROLES[role]].push(zone);
   }
 
+  // Les marqueurs se rattachent une fois toutes les zones lues : l'ordre des
+  // objets dans Tiled ne doit rien décider.
+  for (const m of marqueurs) {
+    const zones = [...layout.hotspots, ...layout.exits].filter((z) => z.id === m.nom);
+    if (zones.length === 0) {
+      const noms = [...layout.hotspots, ...layout.exits].map((z) => z.id).sort();
+      errors.push(
+        `le marqueur ${m.ou} ne désigne aucune zone — un marqueur porte le nom du ` +
+          `hotspot ou de la sortie sur lequel il se pose` +
+          (noms.length > 0 ? ` (${noms.join(', ')})` : ''),
+      );
+      continue;
+    }
+    // Un même nom peut être un hotspot ET une sortie — c'est permis, l'unicité
+    // est par classe. Le marqueur, lui, ne saurait pas lequel des deux il vise.
+    if (zones.length > 1) {
+      errors.push(
+        `le marqueur ${m.ou} est ambigu : « ${m.nom} » est à la fois un hotspot et ` +
+          'une sortie — les renommer, ou poser un marqueur sur chacun',
+      );
+      continue;
+    }
+
+    const zone = zones[0];
+    const dedans = zone.points
+      ? dansLePolygone(m.x, m.y, zone.points)
+      : m.x >= zone.x && m.x <= zone.x + zone.w && m.y >= zone.y && m.y <= zone.y + zone.h;
+    if (!dedans) {
+      // Sur un polygone, citer la boîte englobante induirait en erreur : le
+      // point peut y être et rester hors du contour, qui est le vrai sujet.
+      const dehors = zone.points
+        ? 'hors de son contour'
+        : `hors de sa boîte (${zone.x}, ${zone.y} → ${zone.x + zone.w}, ${zone.y + zone.h})`;
+      errors.push(
+        `le marqueur ${m.ou} est en (${m.x}, ${m.y}), ${dehors} — la cocotte se poserait ` +
+          'à côté de son sujet',
+      );
+      continue;
+    }
+    zone.marqueur = [m.x, m.y];
+  }
+
   layout.hotspots.sort((a, b) => a.id.localeCompare(b.id));
   layout.exits.sort((a, b) => a.id.localeCompare(b.id));
   layout.decor = Object.fromEntries(
@@ -423,10 +509,10 @@ function importScene(fichier, nom) {
 const boiteLitterale = (b) => `{ x: ${b.x}, y: ${b.y}, w: ${b.w}, h: ${b.h} }`;
 
 function zoneLitterale(z) {
-  const base = `{ id: '${z.id}', x: ${z.x}, y: ${z.y}, w: ${z.w}, h: ${z.h}`;
-  if (!z.points) return `${base} }`;
-  const points = z.points.map(([x, y]) => `[${x}, ${y}]`).join(', ');
-  return `${base}, points: [${points}] }`;
+  let out = `{ id: '${z.id}', x: ${z.x}, y: ${z.y}, w: ${z.w}, h: ${z.h}`;
+  if (z.points) out += `, points: [${z.points.map(([x, y]) => `[${x}, ${y}]`).join(', ')}]`;
+  if (z.marqueur) out += `, marqueur: [${z.marqueur[0]}, ${z.marqueur[1]}]`;
+  return `${out} }`;
 }
 
 function rendre(layout) {
@@ -512,6 +598,7 @@ function main() {
       `${layout.hotspots.length} hotspot(s)`,
       `${layout.exits.length} sortie(s)`,
       `${Object.keys(layout.decor).length} repère(s)`,
+      `${[...layout.hotspots, ...layout.exits].filter((z) => z.marqueur).length} marqueur(s)`,
     ].join(', ');
     console.log(`  ${counts}`);
 

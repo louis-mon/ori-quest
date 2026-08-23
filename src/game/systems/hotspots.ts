@@ -34,11 +34,22 @@ export interface Box {
  */
 export type Contour = readonly (readonly [number, number])[];
 
+/**
+ * Où se pose le marqueur, quand le centre de la zone tombe à côté du sujet.
+ *
+ * Une emprise est un rectangle, un pliage n'en est pas un : au centre de la
+ * sienne, la cocotte du renard tombait dans le creux entre son dos et sa queue.
+ * Le point vient du **plan** — un objet de classe `marqueur` portant le nom de
+ * la zone —, et rien ne le câble côté code : il arrive avec elle.
+ */
+export type Marqueur = readonly [number, number];
+
 export interface HotspotDef extends Box {
   id: string;
   label: string;
   /** Contour tactile, quand la zone a été tracée au polygone. */
   points?: Contour;
+  marqueur?: Marqueur;
   /** Verbe -> nom du knot ink à jouer. L'ordre définit l'ordre des boutons. */
   knots: Partial<Record<Verb, string>>;
   /** Le hotspot n'existe que si ce prédicat est vrai (objet déjà pris, etc.). */
@@ -64,6 +75,7 @@ export interface ExitDef extends Box {
    */
   label: string;
   points?: Contour;
+  marqueur?: Marqueur;
   /** Scène de destination. */
   room?: string;
   /** Knot à jouer au lieu de partir directement. */
