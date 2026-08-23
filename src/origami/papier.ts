@@ -598,10 +598,7 @@ function faceTracee(THREE: typeof THREE_NS, papier: Papier, traces: readonly Tra
       ctx.strokeStyle = COULEUR_PLI[pli];
       ctx.beginPath();
       ctx.moveTo(de[0] * TAILLE, de[1] * TAILLE);
-      ctx.lineTo(
-        (de[0] + (a[0] - de[0]) * t) * TAILLE,
-        (de[1] + (a[1] - de[1]) * t) * TAILLE,
-      );
+      ctx.lineTo((de[0] + (a[0] - de[0]) * t) * TAILLE, (de[1] + (a[1] - de[1]) * t) * TAILLE);
       ctx.stroke();
     });
     texture.needsUpdate = true;

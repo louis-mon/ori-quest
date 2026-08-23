@@ -1,13 +1,7 @@
 import type * as THREE_NS from 'three';
 import { animationOrigami, sampleFold } from './fold-file';
 import { creerMeshOrigami, libererMateriaux } from './papier';
-import {
-  eclairer,
-  pliageDe,
-  quaternionDegres,
-  quaternionModele,
-  repereVue,
-} from './vue';
+import { eclairer, pliageDe, quaternionDegres, quaternionModele, repereVue } from './vue';
 
 /**
  * L'image d'un origami plié — la même partout où le jeu doit *montrer* un
@@ -127,10 +121,7 @@ export function apercuOrigami(
 }
 
 /** Même chose, en `data:` — pour un `<img>` de l'interface DOM. */
-export async function urlApercuOrigami(
-  nom: string,
-  options: OptionsApercu = {},
-): Promise<string> {
+export async function urlApercuOrigami(nom: string, options: OptionsApercu = {}): Promise<string> {
   return (await apercuOrigami(nom, options)).toDataURL('image/png');
 }
 
@@ -159,9 +150,14 @@ export async function rendreOrigami(
   // L'orientation est **cuite dans les positions** plutôt que posée sur le
   // mesh : le cadrage plus bas mesure l'encombrement à même le tampon, et il
   // doit mesurer le modèle tel qu'on le verra, pas tel qu'il sort du solveur.
-  tourner(THREE, positions, anim.vertexCount, options.orientation
-    ? quaternionDegres(THREE, options.orientation)
-    : quaternionModele(THREE, nom));
+  tourner(
+    THREE,
+    positions,
+    anim.vertexCount,
+    options.orientation
+      ? quaternionDegres(THREE, options.orientation)
+      : quaternionModele(THREE, nom),
+  );
 
   geometry.getAttribute('position').needsUpdate = true;
   geometry.computeVertexNormals();

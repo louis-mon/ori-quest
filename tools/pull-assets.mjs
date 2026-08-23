@@ -46,10 +46,7 @@ function rclone(argv, options = {}) {
 try {
   rclone(['version'], { stdio: 'ignore' });
 } catch {
-  console.error(
-    '✗ rclone introuvable.\n' +
-      '  brew install rclone',
-  );
+  console.error('✗ rclone introuvable.\n' + '  brew install rclone');
   process.exit(1);
 }
 
@@ -87,9 +84,12 @@ mkdirSync(DEST, { recursive: true });
 const mode = mirror ? 'sync' : 'copy';
 
 const flags = [
-  '--exclude', '.DS_Store',
-  '--exclude', 'Thumbs.db',
-  '--exclude', '*.tmp',
+  '--exclude',
+  '.DS_Store',
+  '--exclude',
+  'Thumbs.db',
+  '--exclude',
+  '*.tmp',
   // Spécifique à Drive : les Docs/Sheets natifs n'ont pas de contenu
   // téléchargeable brut et feraient échouer le transfert. Sans effet sur
   // les autres backends.
@@ -99,7 +99,9 @@ const flags = [
 if (dryRun) flags.push('--dry-run');
 if (process.stdout.isTTY) flags.push('--progress');
 
-console.log(`→ ${mode} ${REMOTE} vers ${DEST.replace(ROOT + '/', '')}${dryRun ? ' (à blanc)' : ''}`);
+console.log(
+  `→ ${mode} ${REMOTE} vers ${DEST.replace(ROOT + '/', '')}${dryRun ? ' (à blanc)' : ''}`,
+);
 
 try {
   rclone([mode, REMOTE, DEST, ...flags], { stdio: 'inherit', encoding: undefined });
@@ -134,9 +136,7 @@ function reportCaseDrift() {
 
   if (drifted.length === 0) return;
 
-  console.warn(
-    `\n⚠ ${drifted.length} fichier(s) au nom périmé — seule la casse diffère :`,
-  );
+  console.warn(`\n⚠ ${drifted.length} fichier(s) au nom périmé — seule la casse diffère :`);
   for (const [remotePath, localPath] of drifted.slice(0, 10)) {
     console.warn(`    ${localPath}\n  → ${remotePath}`);
   }
@@ -191,7 +191,7 @@ if (bytes > WARN_BYTES) {
 
 if (files === 0) {
   console.log(
-    '\nRien à récupérer pour l\'instant. Si le dossier partagé n\'est pas vide,\n' +
+    "\nRien à récupérer pour l'instant. Si le dossier partagé n'est pas vide,\n" +
       'vérifie que root_folder_id pointe bien dessus : rclone config show',
   );
 }

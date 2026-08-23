@@ -20,7 +20,7 @@ const WARN_BYTES = 30 * 1024 * 1024;
 const FAIL_BYTES = 1024 * 1024 * 1024;
 
 if (!existsSync(join(DIST, 'index.html'))) {
-  console.error('✗ dist/index.html absent. Lance `npm run build` d\'abord.');
+  console.error("✗ dist/index.html absent. Lance `npm run build` d'abord.");
   process.exit(1);
 }
 

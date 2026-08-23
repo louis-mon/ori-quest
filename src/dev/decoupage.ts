@@ -98,9 +98,7 @@ function charger(nom: string) {
   enigme = nom;
   const source = DECOUPES[nom];
   grille = source?.grille ?? 4;
-  pieces = source
-    ? source.pieces.map((p) => p.points.map(([x, y]) => [x, y] as Point))
-    : [carre()];
+  pieces = source ? source.pieces.map((p) => p.points.map(([x, y]) => [x, y] as Point)) : [carre()];
   historique.length = 0;
   annulerCoupe();
   modifie = false;
@@ -223,7 +221,11 @@ function rendre() {
   // voisine.
   const fonds = pieces
     .map((p, i) => {
-      const classes = ['piece', i === survol ? 'piece--survol' : '', i === pieceCoupee ? 'piece--coupee' : '']
+      const classes = [
+        'piece',
+        i === survol ? 'piece--survol' : '',
+        i === pieceCoupee ? 'piece--coupee' : '',
+      ]
         .filter(Boolean)
         .join(' ');
       return `<path class="${classes}" style="--teinte: ${(i * 137.5) % 360}" d="${chemin(p)}" />`;
@@ -244,7 +246,9 @@ function rendre() {
   const coupe = trait.length
     ? `<polyline class="bord-halo" points="${trace}" />` +
       `<polyline class="coupe" points="${trace}" />` +
-      trait.map((p) => `<circle class="coupe-point" cx="${p[0]}" cy="${p[1]}" r="${px(4)}" />`).join('')
+      trait
+        .map((p) => `<circle class="coupe-point" cx="${p[0]}" cy="${p[1]}" r="${px(4)}" />`)
+        .join('')
     : '';
 
   const curseur = vise
@@ -456,7 +460,10 @@ plan.addEventListener('pointerdown', (e) => {
   // Refusé au clic, et non à la fin du tracé : on ne laisse pas dessiner trois
   // segments pour annoncer ensuite que le premier ne convenait pas.
   if (longeUnPli(plis, dernier, cale)) {
-    return dire('Ce segment suivrait un pli : il serait fendu en deux et se verrait sur les deux pièces.', true);
+    return dire(
+      'Ce segment suivrait un pli : il serait fendu en deux et se verrait sur les deux pièces.',
+      true,
+    );
   }
 
   if (surLeBord(forme, ...cale)) return terminer([...trait, cale]);

@@ -62,9 +62,7 @@ type Ids<Z extends readonly PlanZone[]> = Z[number]['id'];
  * type qui fait échouer `tsc` sur un repère inventé.
  */
 export type PlanRef<L extends SceneLayout> =
-  | `hs_${Ids<L['hotspots']>}`
-  | `exit_${Ids<L['exits']>}`
-  | `dec_${keyof L['decor'] & string}`;
+  `hs_${Ids<L['hotspots']>}` | `exit_${Ids<L['exits']>}` | `dec_${keyof L['decor'] & string}`;
 
 /** Ce que la scène ajoute à la géométrie : le sens. */
 type DuPlan = 'id' | 'x' | 'y' | 'w' | 'h' | 'points' | 'marqueur';

@@ -397,7 +397,8 @@ export async function runCreasePuzzle(
       // ça le navigateur regroupe les deux écritures et la pièce se téléporte.
       void piece.offsetWidth;
 
-      piece.style.transition = `left ${DEMO_MS}ms ease-in-out, top ${DEMO_MS}ms ease-in-out,` +
+      piece.style.transition =
+        `left ${DEMO_MS}ms ease-in-out, top ${DEMO_MS}ms ease-in-out,` +
         ` width ${DEMO_MS}ms ease-in-out, height ${DEMO_MS}ms ease-in-out`;
       piece.style.width = `${(forme.w / grille) * b.width}px`;
       piece.style.height = `${(forme.h / grille) * b.height}px`;
@@ -407,7 +408,14 @@ export async function runCreasePuzzle(
       return new Promise((fini) => {
         window.setTimeout(() => {
           piece.classList.remove('is-dragging');
-          for (const prop of ['transition', 'position', 'width', 'height', 'left', 'top'] as const) {
+          for (const prop of [
+            'transition',
+            'position',
+            'width',
+            'height',
+            'left',
+            'top',
+          ] as const) {
             piece.style.removeProperty(prop);
           }
           place(piece, { c: forme.x, r: forme.y });
@@ -423,9 +431,8 @@ export async function runCreasePuzzle(
         if (placed.size > 0) return null;
         const restantes = pieces.filter((p) => p.el.parentElement === tray);
         if (restantes.length === 0) return null;
-        return restantes.reduce((a, b) =>
-          a.boite.w * a.boite.h >= b.boite.w * b.boite.h ? a : b,
-        ).el;
+        return restantes.reduce((a, b) => (a.boite.w * a.boite.h >= b.boite.w * b.boite.h ? a : b))
+          .el;
       },
       // Les pièces du bac se rangent dans l'ordre du DOM, sans `z-index` : la
       // dernière insérée passe devant. C'est déjà ce dont `toTray` se sert pour
@@ -683,9 +690,7 @@ async function loadPattern(url: string) {
   const svg = doc.documentElement;
   for (const style of Array.from(svg.getElementsByTagName('style'))) style.remove();
 
-  const [x, y, w, h] = (svg.getAttribute('viewBox') ?? '0 0 1000 1000')
-    .split(/[\s,]+/)
-    .map(Number);
+  const [x, y, w, h] = (svg.getAttribute('viewBox') ?? '0 0 1000 1000').split(/[\s,]+/).map(Number);
 
   // La légende se construit à partir du motif, pas d'une liste écrite à la main :
   // le pont n'a que des plis vallée, et annoncer un pli montagne inexistant

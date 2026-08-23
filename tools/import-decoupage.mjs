@@ -32,7 +32,9 @@ const MOTIF = (nom) => `public/assets/enigmes/${nom}/solution.svg`;
 const check = process.argv.includes('--check');
 
 const fichiers = existsSync(DOSSIER)
-  ? readdirSync(DOSSIER).filter((f) => f.endsWith('.json')).sort()
+  ? readdirSync(DOSSIER)
+      .filter((f) => f.endsWith('.json'))
+      .sort()
   : [];
 
 const decoupages = [];

@@ -1,0 +1,13 @@
+# Écrit par « npm run bake » et livré par l'artiste : le .json qui accompagne
+# chaque .origami est un artefact, pas du code. Le reformater créerait un diff
+# que le bake suivant défait.
+public/assets/
+
+# Même raison : ces découpages sont écrits par decoupage.html, qui pose une
+# pièce par ligne (voir rendreDecoupage, dans vite.config.ts). Prettier les
+# éclate en un sommet par ligne, et le premier trait retracé les remet comme
+# avant — on formaterait un fichier pour rien, à chaque aller-retour.
+game-design/enigmes/
+
+# Le reste — dist/, src/generated/ — est déjà couvert par .gitignore, que
+# Prettier lit de lui-même.

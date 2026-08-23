@@ -150,8 +150,7 @@ function traverse(a: Point, b: Point, c: Point, d: Point): boolean {
 /** Colinéaires et recouvrement de longueur non nulle. */
 function longe(a: Point, b: Point, c: Point, d: Point): boolean {
   if (croix(a, b, c) !== 0 || croix(a, b, d) !== 0) return false;
-  const proj = (p: Point) =>
-    Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) ? p[0] : p[1];
+  const proj = (p: Point) => (Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) ? p[0] : p[1]);
   const [u0, u1] = [proj(a), proj(b)].sort((x, y) => x - y);
   const [v0, v1] = [proj(c), proj(d)].sort((x, y) => x - y);
   return Math.min(u1, v1) - Math.max(u0, v0) > 0;

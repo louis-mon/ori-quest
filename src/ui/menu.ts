@@ -86,7 +86,10 @@ export class Menu {
   private confirm: HTMLElement;
   private etapes: HTMLElement;
 
-  constructor(root: HTMLElement, private options: MenuOptions) {
+  constructor(
+    root: HTMLElement,
+    private options: MenuOptions,
+  ) {
     const el = document.createElement('div');
     el.className = 'menu';
     el.innerHTML = `
@@ -251,9 +254,7 @@ export class Menu {
   }
 
   private syncFullscreenLabel = () => {
-    this.fullscreenItem.textContent = isFullscreen()
-      ? 'Quitter le plein écran'
-      : 'Plein écran';
+    this.fullscreenItem.textContent = isFullscreen() ? 'Quitter le plein écran' : 'Plein écran';
     // Le passage en plein écran change les dimensions du canvas : la couche DOM
     // doit être recalée dessus, sinon elle reste à l'ancienne taille.
     this.options.onLayoutChange();

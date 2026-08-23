@@ -34,14 +34,7 @@
  * devient une erreur de `tsc`, pas une découverte à l'exécution. Voir
  * src/game/scenes/layout.ts.
  */
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 
 /**
@@ -220,7 +213,11 @@ function dimensionsImage(chemin) {
     return { w: o.readUInt32BE(16), h: o.readUInt32BE(20) };
   }
 
-  if (o.length > 30 && o.toString('latin1', 0, 4) === 'RIFF' && o.toString('latin1', 8, 12) === 'WEBP') {
+  if (
+    o.length > 30 &&
+    o.toString('latin1', 0, 4) === 'RIFF' &&
+    o.toString('latin1', 8, 12) === 'WEBP'
+  ) {
     switch (o.toString('latin1', 12, 16)) {
       // VP8X, le WebP « étendu » — celui qui porte une couche alpha. Les
       // dimensions du canevas y sont stockées sur 24 bits, moins un.
@@ -317,7 +314,7 @@ function importScene(fichier, nom) {
   }
 
   if (carte.type !== 'map') {
-    return { layout, warnings, errors: ['ce fichier n\'est pas une carte Tiled (.tmj)'] };
+    return { layout, warnings, errors: ["ce fichier n'est pas une carte Tiled (.tmj)"] };
   }
   if (carte.infinite) {
     return { layout, warnings, errors: ['carte « infinie » : la passer en taille fixe 1280x720'] };
@@ -338,9 +335,7 @@ function importScene(fichier, nom) {
   // pour placer les zones est un outil de travail, il n'entre pas dans le jeu.
   const fonds = collecterCalquesImage(carte.layers).filter((c) => c.class === CLASSE_FOND);
   if (fonds.length > 1) {
-    errors.push(
-      `${fonds.length} calques de classe « ${CLASSE_FOND} » — une scène n'a qu'un fond`,
-    );
+    errors.push(`${fonds.length} calques de classe « ${CLASSE_FOND} » — une scène n'a qu'un fond`);
   } else if (fonds.length === 1) {
     const erreur = lireFond(fonds[0], fichier, layout, warn);
     if (erreur) errors.push(erreur);
@@ -414,7 +409,7 @@ function importScene(fichier, nom) {
       if (geo.forme !== 'point') {
         errors.push(
           `« ${nomObjet} » est un marqueur ${geo.forme} — un marqueur est un ` +
-            'point, à tracer avec l\'outil Point (raccourci I)',
+            "point, à tracer avec l'outil Point (raccourci I)",
         );
         continue;
       }
@@ -521,7 +516,9 @@ function rendre(layout) {
     ? `\n  fond: { image: '${f.image}', x: ${f.x}, y: ${f.y}, w: ${f.w}, h: ${f.h} },`
     : '';
   const liste = (zones) =>
-    zones.length === 0 ? '[]' : `[\n${zones.map((z) => `    ${zoneLitterale(z)},`).join('\n')}\n  ]`;
+    zones.length === 0
+      ? '[]'
+      : `[\n${zones.map((z) => `    ${zoneLitterale(z)},`).join('\n')}\n  ]`;
   const reperes = Object.entries(layout.decor);
   const decor =
     reperes.length === 0

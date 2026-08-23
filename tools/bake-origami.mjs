@@ -58,7 +58,7 @@ function parseArgs(argv) {
 
 function ensureVendor() {
   if (existsSync(join(VENDOR, 'index.html'))) return;
-  console.log('→ Clonage d\'Origami Simulator (une seule fois)…');
+  console.log("→ Clonage d'Origami Simulator (une seule fois)…");
   mkdirSync(dirname(VENDOR), { recursive: true });
   execFileSync('git', ['clone', '--depth', '1', OSIM_REPO, VENDOR], { stdio: 'inherit' });
 }
@@ -268,7 +268,7 @@ async function main() {
       extent = Math.max(extent, max - min);
     }
     if (extent < 1e-3) {
-      await fail('La géométrie s\'est effondrée sur un point');
+      await fail("La géométrie s'est effondrée sur un point");
     }
 
     frames.push(frame);

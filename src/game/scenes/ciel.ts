@@ -178,12 +178,7 @@ function peindreCiel(scene: Phaser.Scene, cle: string, horizon: number, soleil: 
  * dispersion, eux, sont une décision de dessin et vivent ici — on ne va pas
  * poser un repère de plan par nuage.
  */
-export function semerNuages(
-  scene: Phaser.Scene,
-  bande: Box,
-  graine: number,
-  nombre = 5,
-): void {
+export function semerNuages(scene: Phaser.Scene, bande: Box, graine: number, nombre = 5): void {
   const hasard = alea(graine);
   // Un modèle de départ tiré au sort, puis on avance dans la liste : deux
   // nuages voisins ne sont donc jamais le même pliage.
@@ -204,10 +199,7 @@ export function semerNuages(
     const hauteur = bande.h * (TAILLE_MIN + proche * TAILLE_ETENDUE);
     const largeur = (source.width / source.height) * hauteur;
     image.setScale(hauteur / source.height);
-    image.setPosition(
-      bande.x + bande.w * t,
-      bande.y + (bande.h - hauteur) * montee + hauteur / 2,
-    );
+    image.setPosition(bande.x + bande.w * t, bande.y + (bande.h - hauteur) * montee + hauteur / 2);
     // Les petits sont les plus lointains : un peu de brume les mange…
     image.setAlpha(0.76 + proche * 0.18);
     // …et ils dérivent d'autant plus lentement. C'est ce décalage de vitesses

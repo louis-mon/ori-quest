@@ -20,11 +20,7 @@ import type { Box } from './layout';
  * un carré de papier condamnerait le premier écran du jeu, où la feuille du
  * pont est déjà là et où rien n'est encore plié.
  */
-export function dessinerFeuille(
-  g: Phaser.GameObjects.Graphics,
-  box: Box,
-  modele: string,
-): Box {
+export function dessinerFeuille(g: Phaser.GameObjects.Graphics, box: Box, modele: string): Box {
   const { recto, verso } = teintesDe(modele);
   const cote = Math.min(box.w, box.h);
   const x = box.x + (box.w - cote) / 2;
@@ -80,21 +76,38 @@ export function dessinerFeuille(
   // est en (2, 4, 3), voir `eclairer`), pour que la feuille dépliée et le modèle
   // plié soient éclairés du même côté.
   g.fillStyle(0xffffff, 0.14);
-  polygone([[x, y], [ax, ay], [bx, by], [x + cote, y + cote]]);
+  polygone([
+    [x, y],
+    [ax, ay],
+    [bx, by],
+    [x + cote, y + cote],
+  ]);
   g.fillPath();
   g.fillStyle(0x000000, 0.1);
-  polygone([[x, y], [x + cote, y + cote], [x, y + cote]]);
+  polygone([
+    [x, y],
+    [x + cote, y + cote],
+    [x, y + cote],
+  ]);
   g.fillPath();
 
   // Le rabat, par-dessus : le dos du papier, forcément, puisqu'on le voit à
   // l'envers.
   g.fillStyle(verso, 1);
-  polygone([[ax, ay], [bx, by], [cx, cy]]);
+  polygone([
+    [ax, ay],
+    [bx, by],
+    [cx, cy],
+  ]);
   g.fillPath();
   // Il porte sa propre ombre du côté de la pliure : c'est ce qui le décolle de
   // la feuille et donne son épaisseur au papier.
   g.fillStyle(0x000000, 0.18);
-  polygone([[ax, ay], [cx, cy], [ax + pli * 0.28, cy]]);
+  polygone([
+    [ax, ay],
+    [cx, cy],
+    [ax + pli * 0.28, cy],
+  ]);
   g.fillPath();
 
   // Contours : la feuille entière, puis les deux bords libres du rabat. La

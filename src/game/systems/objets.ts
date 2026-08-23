@@ -37,7 +37,7 @@ export interface Objet {
 export const OBJETS: Record<string, Objet> = {
   idee_arbre: {
     nom: "Idée : l'arbre",
-    description: 'Une idée de comment plier l\'arbre.',
+    description: "Une idée de comment plier l'arbre.",
     modele: 'arbre',
   },
   idee_hache: {

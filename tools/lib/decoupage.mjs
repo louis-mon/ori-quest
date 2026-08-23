@@ -169,7 +169,10 @@ export function lireMotif(fichier, grille, gardeBords = false) {
   const svg = readFileSync(fichier, 'utf8');
   const box = svg.match(/viewBox="([^"]+)"/);
   const [vx, vy, vw, vh] = box
-    ? box[1].trim().split(/[\s,]+/).map(Number)
+    ? box[1]
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
     : [0, 0, 1000, 1000];
 
   const segments = [];
@@ -275,9 +278,15 @@ export function signature(segments, points, ancre) {
  * solution. Il doit y en avoir une seule, sans quoi le joueur peut en trouver
  * une que la validation refusera.
  */
-export function chercherSolutions({ grille, pieces }, segments, { plafond = 200, budget = 200_000 } = {}) {
+export function chercherSolutions(
+  { grille, pieces },
+  segments,
+  { plafond = 200, budget = 200_000 } = {},
+) {
   const cote = grille * SOUS;
-  const attendu = pieces.map((points) => signature(segments, points, [boite(points).x, boite(points).y]));
+  const attendu = pieces.map((points) =>
+    signature(segments, points, [boite(points).x, boite(points).y]),
+  );
 
   const places = pieces.map((points, i) => {
     const b = boite(points);
@@ -293,7 +302,12 @@ export function chercherSolutions({ grille, pieces }, segments, { plafond = 200,
   // Masque de chaque pièce à chacune de ses ancres possibles, calculé une fois.
   const masques = pieces.map((points, i) => {
     const b = boite(points);
-    return places[i].map(([x, y]) => masque(points.map(([px, py]) => [px + x - b.x, py + y - b.y]), grille));
+    return places[i].map(([x, y]) =>
+      masque(
+        points.map(([px, py]) => [px + x - b.x, py + y - b.y]),
+        grille,
+      ),
+    );
   });
 
   const occupe = new Uint8Array(cote * cote);

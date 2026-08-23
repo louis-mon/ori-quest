@@ -130,8 +130,7 @@ export class PontScene extends PointClickScene {
         // Elle est sur la rive d'en face : inatteignable tant que le pont
         // n'est pas posé. Une fois découpée, elle est devenue du bois et il ne
         // reste rien.
-        visibleIf: () =>
-          gameState.flag('pont_plie') && !gameState.flag('vieil_arbre_decoupe'),
+        visibleIf: () => gameState.flag('pont_plie') && !gameState.flag('vieil_arbre_decoupe'),
       },
     });
   }

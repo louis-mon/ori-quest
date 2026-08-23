@@ -44,7 +44,7 @@ sont des objets, quel que soit le nom qu'on leur donne.
 tag `# give:`, même condition `has_` dans la narration. Deux mécanismes
 parallèles pour « savoir plier une hache » et « avoir une hache » coûteraient
 deux fois le code pour une distinction que le joueur ne rencontre jamais : on
-n'a jamais l'idée *et* l'objet en même temps, l'un devient l'autre.
+n'a jamais l'idée _et_ l'objet en même temps, l'un devient l'autre.
 
 La distinction est **visuelle, et elle seule** : un identifiant qui commence par
 `idee_` s'affiche dans une **bulle** — coins entièrement arrondis, contour
@@ -214,17 +214,17 @@ du nom) vit dans `src/game/systems/personnages.ts` ; voir l'en-tête de
 
 ## Ce qui reste dans l'interface
 
-| Élément | Statut |
-| --- | --- |
-| Boîte de dialogue + choix | ✅ garder tel quel |
-| En-tête de locuteur (nom + vignette) | ✅ implémenté |
-| Marqueur cocotte sur les hotspots | ✅ garder |
-| Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |
-| Menu (plein écran, recommencer) | ✅ implémenté |
-| Menu de verbes | ✅ retiré (verbe unique `analyser`) |
-| Inventaire (objets + idées) | ✅ colonne à gauche, tap = description |
-| Carnet d'idées | ✅ c'est l'inventaire — pas d'écran séparé |
-| Flèches de navigation | ✅ implémenté |
+| Élément                              | Statut                                                |
+| ------------------------------------ | ----------------------------------------------------- |
+| Boîte de dialogue + choix            | ✅ garder tel quel                                    |
+| En-tête de locuteur (nom + vignette) | ✅ implémenté                                         |
+| Marqueur cocotte sur les hotspots    | ✅ garder                                             |
+| Légende fugace (nom de l'élément)    | ✅ gardée avec le menu de verbes, retirée des sorties |
+| Menu (plein écran, recommencer)      | ✅ implémenté                                         |
+| Menu de verbes                       | ✅ retiré (verbe unique `analyser`)                   |
+| Inventaire (objets + idées)          | ✅ colonne à gauche, tap = description                |
+| Carnet d'idées                       | ✅ c'est l'inventaire — pas d'écran séparé            |
+| Flèches de navigation                | ✅ implémenté                                         |
 
 **Une sortie ne s'annonce plus.** Taper une flèche affichait le nom de la
 destination dans la légende fugace. Deux raisons de l'avoir retiré. La légende

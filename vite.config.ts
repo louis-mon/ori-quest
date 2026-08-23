@@ -416,9 +416,7 @@ function rendreFichier(source: string, recu: unknown): string {
     const a = angles.map((v) => Math.round(nombre(v, -LIMITES.angle, LIMITES.angle, nom)));
     const pliage = nombre(p.pliage, ...LIMITES.pliage, `${nom}.pliage`);
     const echelle = nombre(p.echelle, ...LIMITES.echelle, `${nom}.echelle`);
-    lignes.push(
-      `  ${nom}: { angles: [${a.join(', ')}], pliage: ${pliage}, echelle: ${echelle} },`,
-    );
+    lignes.push(`  ${nom}: { angles: [${a.join(', ')}], pliage: ${pliage}, echelle: ${echelle} },`);
   }
   if (lignes.length !== connus.size) throw new Error('il manque des modèles');
 

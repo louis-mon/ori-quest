@@ -39,10 +39,7 @@ export interface DialogueEffects {
  * Un handler peut renvoyer le nom d'un knot : le récit y repart aussitôt le tag
  * appliqué. Voir `puzzle` ci-dessous pour la raison d'être de ce détour.
  */
-type TagHandler = (
-  value: string,
-  fx: DialogueEffects,
-) => void | string | Promise<void | string>;
+type TagHandler = (value: string, fx: DialogueEffects) => void | string | Promise<void | string>;
 
 /**
  * Identifiants qui rendent la parole à la narration, plutôt que de désigner un

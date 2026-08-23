@@ -31,7 +31,13 @@ npm run enigmes                  # découpages des énigmes -> src/generated/eni
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
+npm run format                   # Prettier sur tout le dépôt
 ```
+
+Le style est celui du code déjà écrit — guillemets simples, largeur 100 — et il
+est figé dans `.prettierrc` : ce sont les deux seuls réglages qui s'écartent des
+défauts de Prettier, tout le reste vient de lui. Les `.json` de `public/assets/`
+sont exclus, ils sont écrits par `npm run bake`.
 
 `npm run bake` nécessite `npx playwright install chromium` une fois.
 
@@ -73,7 +79,7 @@ contenu ajoutable sans toucher à la logique.
 **Une idée est un objet d'inventaire comme un autre.** Même `# give:`, même
 condition `has_` dans ink, même liste. Seul l'affichage les distingue, à partir
 du préfixe `idee_` (bulle arrondie). Ne pas créer de mécanisme parallèle pour
-les idées : le joueur n'a jamais l'idée *et* l'objet en même temps. **Tout se consomme**, idées comprises : ce qui a servi est retiré (`# drop:`),
+les idées : le joueur n'a jamais l'idée _et_ l'objet en même temps. **Tout se consomme**, idées comprises : ce qui a servi est retiré (`# drop:`),
 sinon la colonne s'allonge sur un jeu qui se finit vite. Ce qui doit rester
 acquis — un dialogue déjà tenu, un fait appris — est un **drapeau**, pas un
 objet : conditionner une scène de première rencontre sur la possession d'une
@@ -123,7 +129,7 @@ silence le jour où l'on renomme une zone.
 **La carte Tiled est la source de vérité de la géométrie.** Chaque scène a un
 plan dans `game-design/scenes/`, dessiné à l'échelle 1280×720 dans
 [Tiled](https://www.mapeditor.org/) ; `npm run scenes` en tire les zones. La
-scène ne déclare plus que le *sens* de chacune — libellé, verbes, condition
+scène ne déclare plus que le _sens_ de chacune — libellé, verbes, condition
 d'apparition — et croise les deux avec `hotspotsFrom()`. Le serveur de dev
 surveille les cartes : enregistrer dans Tiled suffit, il n'y a pas de commande à
 relancer. Voir `game-design/06-plans-de-scene.md`.
@@ -165,7 +171,7 @@ rejouer ne donne donc rien de plus que la première fois. Sans cette règle,
 quatre lectures du tutoriel suffisaient à résoudre le pont.
 
 **Ce texte-là n'est pas dans ink, et c'est le seul du jeu.** Un tutoriel se joue
-pendant que le récit *attend* le verdict de l'énigme (`# puzzle:`) :
+pendant que le récit _attend_ le verdict de l'énigme (`# puzzle:`) :
 `DialogueRunner` n'a qu'une instance de `Story` et refuse d'être relancé pendant
 qu'il tourne. Le tutoriel écrit donc directement dans la boîte de dialogue, qui,
 elle, est libre. Ne pas « corriger » ça en déplaçant les répliques dans
@@ -177,7 +183,7 @@ baké comme les autres, et le trait bleu est **peint dans la texture du papier**
 trait est imprimé sur le papier et se plie avec lui : le joueur voit la ligne
 qu'il a regardé se tracer devenir l'arête du pli. Un trait posé en surimpression
 resterait droit pendant que le papier se plie. Il n'est peint que **sur la face
-de devant** : on trace un pli *sur* une feuille, on n'imprime pas un schéma à
+de devant** : on trace un pli _sur_ une feuille, on n'imprime pas un schéma à
 travers. Peint des deux côtés, il ressortait sur les rabats que le pliage
 retourne, et le joueur voyait des lignes de couleur là où il n'avait jamais rien
 vu dessiner.
@@ -186,14 +192,14 @@ vu dessiner.
 `bombe`), comme n'importe quel modèle du jeu, et pour la même raison : sans lui,
 le papier replié n'est qu'un aplat clair où le pli ne se lit qu'à l'ombre. C'est
 le bois du pont qui se retourne, et c'est lui qui rend le pliage lisible — et
-elles le partagent toutes les trois, pour qu'on reconnaisse *la feuille sur
-laquelle on explique* d'un tutoriel à l'autre.
+elles le partagent toutes les trois, pour qu'on reconnaisse _la feuille sur
+laquelle on explique_ d'un tutoriel à l'autre.
 
 **Elle est posée, pas présentée** (`posee`, dans `OrigamiLayer.load`) : bien à
 plat devant le joueur, **d'aplomb** et **sans balancement**. Un carré s'y voit
 donc comme un carré. Deux façons de rater ça, toutes deux essayées :
 
-- la laisser dans le plan du solveur — elle y est plate *pour de vrai*, mais la
+- la laisser dans le plan du solveur — elle y est plate _pour de vrai_, mais la
   caméra du jeu la regarde de 70° au-dessus et la projette en **trapèze** ;
 - la tourner avec `quaternionFeuille`, qui pointe sa normale vers l'œil mais
   laisse le **roulis au hasard** : elle arrive de travers de quelques degrés.
@@ -252,8 +258,8 @@ jeu.
 
 Ce qui reste permis, et doit le rester : les positions **dérivées** d'une zone
 nommée. Cinq nuages répartis sur `dec_nuages`, le feuillage calculé sur
-`hs_arbre` — on ne pose pas un repère de plan par nuage. La ligne : *où vit un
-élément* appartient au plan, *comment il est dessiné à l'intérieur* appartient au
+`hs_arbre` — on ne pose pas un repère de plan par nuage. La ligne : _où vit un
+élément_ appartient au plan, _comment il est dessiné à l'intérieur_ appartient au
 code. Un pixel absolu qui ne dérive d'aucune boîte est le signe qu'il manque un
 repère dans la carte.
 
@@ -355,7 +361,7 @@ le jour où elle est passée d'un `<img>` à un `<svg>`. `toggleAttribute('hidde
 **Le solveur ne gère pas les collisions entre couches.** Les pliages à peu de
 couches (bases, tessellations, Miura-ori) convergent bien ; la grue
 traditionnelle ne se referme pas complètement. Augmenter les itérations
-n'arrange rien — vérifié, ça donne un résultat *moins* replié. C'est une limite
+n'arrange rien — vérifié, ça donne un résultat _moins_ replié. C'est une limite
 du modèle physique.
 
 **Hotspots qui se chevauchent** : la profondeur est assignée par surface
@@ -363,10 +369,10 @@ croissante (`PontScene`), sinon la grande zone avale les taps destinés au
 détail posé dessus.
 
 **`input.windowEvents: false` est indispensable, ne pas le retirer.** Par défaut
-Phaser double ses écouteurs de pointeur sur `window` en phase de *capture*. Un
+Phaser double ses écouteurs de pointeur sur `window` en phase de _capture_. Un
 tap sur un bouton de l'interface DOM était donc traité par le jeu **avant**
 d'atteindre le bouton, et déclenchait le hotspot situé dessous : appuyer sur
-« Recommencer » ouvrait la confirmation *et* lançait le dialogue de l'étagère
+« Recommencer » ouvrait la confirmation _et_ lançait le dialogue de l'étagère
 derrière. Arrêter la propagation côté DOM ne suffit pas — la capture passe
 avant. Le canvas ne reçoit que des taps — le seul glisser du jeu, celui des
 pièces d'énigme, vit dans la couche DOM et s'appuie sur `setPointerCapture`,

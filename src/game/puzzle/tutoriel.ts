@@ -310,9 +310,12 @@ interface Scene {
    * survivent d'une lecture à l'autre (voir `coucheDemo`). Ce champ, lui, ne vit
    * que le temps d'une feuille.
    */
-  feuille:
-    | { couche: OrigamiLayer; papier: PapierTrace; modele: string; traits: readonly TracePli[] }
-    | null;
+  feuille: {
+    couche: OrigamiLayer;
+    papier: PapierTrace;
+    modele: string;
+    traits: readonly TracePli[];
+  } | null;
   /**
    * Le joueur a-t-il renoncé ? À relire **avant de démarrer une étape** : un
    * effet est appelé pour produire la promesse qu'on attend, donc ses effets de
@@ -492,9 +495,7 @@ const EFFETS: {
       // Posée : on va la regarder un moment avant de la plier, et une feuille
       // qui se présente face à la caméra en se balançant n'a l'air posée sur
       // rien.
-      await scene.jusqua(
-        couche.load(feuille.modele, { textures: papier.textures, posee: true }),
-      );
+      await scene.jusqua(couche.load(feuille.modele, { textures: papier.textures, posee: true }));
       // Le papier précédent n'est lâché qu'ici : jusqu'à ce `load`, c'est encore
       // lui qui est monté sur le mesh.
       papierDemo?.dispose();
@@ -515,9 +516,7 @@ const EFFETS: {
   async 'tracer-pli'(scene) {
     if (!scene.feuille) return;
     const { papier, traits } = scene.feuille;
-    await scene.jusqua(
-      animer(TRACE_MS * traits.length, (t) => papier.tracer(t)),
-    );
+    await scene.jusqua(animer(TRACE_MS * traits.length, (t) => papier.tracer(t)));
   },
 
   async plier(scene) {

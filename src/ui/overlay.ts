@@ -105,12 +105,7 @@ export class Overlay {
    * Affiche les actions disponibles au point tapé. Remplace le survol du
    * point & click classique, qui n'existe pas sur écran tactile.
    */
-  showVerbs(
-    screenX: number,
-    screenY: number,
-    verbs: Verb[],
-    onPick: (verb: Verb | null) => void,
-  ) {
+  showVerbs(screenX: number, screenY: number, verbs: Verb[], onPick: (verb: Verb | null) => void) {
     this.verbMenu.innerHTML = '';
     for (const verb of verbs) {
       const btn = document.createElement('button');
@@ -320,10 +315,7 @@ export class Overlay {
     this.caption.textContent = text;
     this.caption.classList.add('is-visible');
     clearTimeout(this.captionTimer);
-    this.captionTimer = window.setTimeout(
-      () => this.caption.classList.remove('is-visible'),
-      ms,
-    );
+    this.captionTimer = window.setTimeout(() => this.caption.classList.remove('is-visible'), ms);
   }
 
   /**
@@ -408,4 +400,3 @@ export class Overlay {
     }
   }
 }
-

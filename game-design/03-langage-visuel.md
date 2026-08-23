@@ -11,10 +11,10 @@ permanence, sans transformer la scène en sapin de Noël.
 
 ## Deux signes, deux fonctions
 
-| Signe | Signifie | Où |
-| --- | --- | --- |
-| **Cocotte en papier** | ici, on peut analyser | sur les objets et les feuilles |
-| **Flèche pliée** | ici, on change de scène | sur les bords gauche et droit |
+| Signe                 | Signifie                | Où                             |
+| --------------------- | ----------------------- | ------------------------------ |
+| **Cocotte en papier** | ici, on peut analyser   | sur les objets et les feuilles |
+| **Flèche pliée**      | ici, on change de scène | sur les bords gauche et droit  |
 
 Ces deux signes ne se mélangent jamais. Un joueur doit pouvoir distinguer, d'un
 coup d'œil et sans lire, ce qui fait avancer l'histoire de ce qui fait changer de
@@ -28,7 +28,7 @@ manipule au bout des doigts. La pajarita a une silhouette bien plus
 caractéristique, donc plus lisible en petit.
 
 C'est le pliage le plus reconnaissable de l'enfance, et il porte le bon
-sous-texte : *une feuille peut devenir autre chose*.
+sous-texte : _une feuille peut devenir autre chose_.
 
 **✅ C'est le pliage de l'artiste** (`public/assets/ui/parajita.png`, posé par
 `src/game/systems/hotspot-marker.ts`), photographié comme les personnages et les
@@ -132,13 +132,13 @@ négatives), de sorte qu'un rempart passe devant les nuages.
 
 Définie dans `src/game/config.ts`.
 
-| Rôle | Usage |
-| --- | --- |
-| `paper` / `paperDark` | le papier, les origamis, le texte |
-| `ink` | les fonds sombres, les contours |
-| `wood` / `woodDark` | le mobilier, les décors |
+| Rôle                  | Usage                                         |
+| --------------------- | --------------------------------------------- |
+| `paper` / `paperDark` | le papier, les origamis, le texte             |
+| `ink`                 | les fonds sombres, les contours               |
+| `wood` / `woodDark`   | le mobilier, les décors                       |
 | `accent` (terracotta) | les plis, les actions, ce qui répond au doigt |
-| `glow` (jaune chaud) | les sources de lumière |
+| `glow` (jaune chaud)  | les sources de lumière                        |
 
 L'accent terracotta sert aux **traits de pli** dans les crease patterns comme aux
 **boutons pressés** : c'est la couleur de ce qui se plie et de ce qui réagit.
@@ -147,18 +147,18 @@ L'accent terracotta sert aux **traits de pli** dans les crease patterns comme au
 
 Une feuille d'origami a **deux faces qui ne se ressemblent pas**, et c'est ce qui
 rend un pliage lisible : le verso n'apparaît qu'aux endroits où le papier s'est
-retourné, donc il *dessine les plis*. Un modèle uniformément blanc se lit comme
+retourné, donc il _dessine les plis_. Un modèle uniformément blanc se lit comme
 une bosse.
 
 Chaque modèle a donc son papier, déclaré dans
 [`src/origami/papier.ts`](../src/origami/papier.ts) :
 
 | Modèle | Recto (ce qu'on voit) | Verso (ce que les plis retournent) |
-| --- | --- | --- |
-| pont | papier | bois |
-| arbre | feuille verte | bois — c'est lui qui fait le tronc |
-| hache | métal poli | marron |
-| porte | **papier noir** | bois, comme l'arbre |
+| ------ | --------------------- | ---------------------------------- |
+| pont   | papier                | bois                               |
+| arbre  | feuille verte         | bois — c'est lui qui fait le tronc |
+| hache  | métal poli            | marron                             |
+| porte  | **papier noir**       | bois, comme l'arbre                |
 
 Le noir de la porte est du **papier**, pas un fond : ce qui l'en distingue est
 son reflet. Un noir mat et uniforme se lit comme un vide découpé dans le décor —
@@ -191,7 +191,7 @@ rien de commun avec le pliage : on regardait une animation, et la scène montrai
 autre chose.
 
 **L'angle est le même partout** ([`vue.ts`](../src/origami/vue.ts)). Ces crease
-patterns sont *plats* : le solveur les replie dans leur propre plan, il n'en sort
+patterns sont _plats_ : le solveur les replie dans leur propre plan, il n'en sort
 presque rien. Le modèle plié n'est pas un volume, c'est une **silhouette** — et
 une silhouette ne se lit que de face. D'où une caméra presque à la verticale du
 papier, à ~70° au-dessus de l'horizon, exactement la vue de pliage d'ORIPA. Les

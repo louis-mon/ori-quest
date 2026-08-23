@@ -184,8 +184,9 @@ export class OrigamiLayer {
     if (textures) {
       // Les matériaux sont créés pour ce mesh-ci — seules les textures sont
       // partagées — donc en écraser une n'atteint aucun autre modèle.
-      const faces = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]) as
-        THREE_NS.MeshPhongMaterial[];
+      const faces = (
+        Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+      ) as THREE_NS.MeshPhongMaterial[];
       faces.forEach((face, i) => {
         if (!textures[i]) return;
         face.map = textures[i];
@@ -200,16 +201,10 @@ export class OrigamiLayer {
     this.scene.add(this.pivot);
 
     this.balancement = !posee;
-    this.poseDepart = posee
-      ? quaternionFeuilleDeFace(this.THREE)
-      : quaternionFeuille(this.THREE);
+    this.poseDepart = posee ? quaternionFeuilleDeFace(this.THREE) : quaternionFeuille(this.THREE);
     this.poseFin = quaternionModele(this.THREE, nom);
     this.pose = this.poseDepart.clone();
-    this.axeBalancement ??= new this.THREE.Vector3(
-      HAUT_VUE.x,
-      HAUT_VUE.y,
-      HAUT_VUE.z,
-    ).normalize();
+    this.axeBalancement ??= new this.THREE.Vector3(HAUT_VUE.x, HAUT_VUE.y, HAUT_VUE.z).normalize();
     this.rotBalancement ??= new this.THREE.Quaternion();
 
     // Recadrage : on mesure l'encombrement sur *tous* les frames, sinon le
@@ -223,8 +218,12 @@ export class OrigamiLayer {
     const anim = this.anim;
     if (!anim || !this.mesh) return;
 
-    let minX = Infinity, minY = Infinity, minZ = Infinity;
-    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+    let minX = Infinity,
+      minY = Infinity,
+      minZ = Infinity;
+    let maxX = -Infinity,
+      maxY = -Infinity,
+      maxZ = -Infinity;
     const p = anim.positions;
     for (let i = 0; i < p.length; i += 3) {
       if (p[i] < minX) minX = p[i];

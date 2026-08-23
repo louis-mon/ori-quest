@@ -10,7 +10,6 @@ Une feuille de papier déplié peut être examinée.
 Si examinée et que la réponse du pont est selectionée, l'énigme du pont est lancée (assets-src/enigmes/pont).
 En cas de réussite, le pont est plié (animation) et placé sur le précipice.
 
-
 # Annexe
 
 ## Choses à examiner

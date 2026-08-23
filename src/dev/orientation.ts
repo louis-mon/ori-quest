@@ -35,7 +35,10 @@ const TAILLE_APERCU = 460;
 
 /** État courant, initialisé sur ce que le jeu utilise aujourd'hui. */
 const reglages = new Map<string, Pose>(
-  Object.entries(POSES).map(([nom, pose]) => [nom, { ...pose, angles: [...pose.angles] as Angles }]),
+  Object.entries(POSES).map(([nom, pose]) => [
+    nom,
+    { ...pose, angles: [...pose.angles] as Angles },
+  ]),
 );
 
 let courant = [...reglages.keys()][0];
@@ -315,10 +318,7 @@ apercu.addEventListener('pointerdown', (e) => {
 });
 
 /** Quaternion -> trois angles en degrés, dans l'ordre X, Y, Z du jeu. */
-function versDegres(
-  THREE: typeof import('three'),
-  q: import('three').Quaternion,
-): Angles {
+function versDegres(THREE: typeof import('three'), q: import('three').Quaternion): Angles {
   const e = new THREE.Euler().setFromQuaternion(q, 'XYZ');
   const deg = 180 / Math.PI;
   return [

@@ -193,7 +193,7 @@ export const TUTORIELS = {
     titre: 'Le pli montagne',
     invite: "Celui-là semble plus compliqué : il n'y a pas que des plis vallée.",
     etapes: [
-      "Un autre type de pli est nécessaire pour plier ce modèle : le pli montagne.",
+      'Un autre type de pli est nécessaire pour plier ce modèle : le pli montagne.',
       "Comme son nom l'indique, c'est une montagne — l'inverse du pli vallée.",
       'Je vais te montrer en pratique.',
       { faire: 'montrer-feuille', feuille: FEUILLE_MONTAGNE },
@@ -206,12 +206,12 @@ export const TUTORIELS = {
       'En rouge le pli montagne, là où le pli vallée était en bleu. Je vais le plier.',
       { faire: 'plier' },
       "Voilà un pli montagne. Le même trait que tout à l'heure, et le papier part de l'autre côté.",
-      "Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simple de les combiner.",
+      'Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simple de les combiner.',
       // Remplace la feuille pliée sans rendre l'énigme au joueur : on reste
       // dans la démonstration, on change seulement de papier.
       { faire: 'montrer-feuille', feuille: FEUILLE_BOMBE },
       { faire: 'tracer-pli' },
-      "Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes. Je vais la plier.",
+      'Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes. Je vais la plier.',
       { faire: 'plier' },
       // La réplique **avant** de ranger la feuille : c'est elle qui tient le
       // pliage à l'écran, le temps qu'on le regarde. L'effacer d'abord, c'était
