@@ -1,16 +1,16 @@
 # Game design — Ori-Quest
 
-Les décisions de conception du jeu. Le code documente _comment_ ; ces fichiers
-documentent _pourquoi_.
+Les décisions de conception du jeu. Le code documente *comment* ; ces fichiers
+documentent *pourquoi*.
 
-| Document                                                   | Sujet                                              |
-| ---------------------------------------------------------- | -------------------------------------------------- |
-| [01-boucle-de-jeu.md](01-boucle-de-jeu.md)                 | la boucle idée → feuille → minijeu → pliage        |
-| [02-chapitres-et-scenes.md](02-chapitres-et-scenes.md)     | découpage en chapitres, navigation                 |
-| [03-langage-visuel.md](03-langage-visuel.md)               | la cocotte, les flèches, la lisibilité tactile     |
-| [04-interface.md](04-interface.md)                         | verbes, inventaire, carnet d'idées                 |
-| [05-puzzle-crease-pattern.md](05-puzzle-crease-pattern.md) | le minijeu : reconstituer le crease pattern        |
-| [06-plans-de-scene.md](06-plans-de-scene.md)               | la carte Tiled qui donne les positions d'une scène |
+| Document | Sujet |
+| --- | --- |
+| [01-boucle-de-jeu.md](01-boucle-de-jeu.md) | la boucle idée → feuille → minijeu → pliage |
+| [02-chapitres-et-scenes.md](02-chapitres-et-scenes.md) | découpage en chapitres, navigation |
+| [03-langage-visuel.md](03-langage-visuel.md) | la cocotte, les flèches, la lisibilité tactile |
+| [04-interface.md](04-interface.md) | verbes, inventaire, carnet d'idées |
+| [05-puzzle-crease-pattern.md](05-puzzle-crease-pattern.md) | le minijeu : reconstituer le crease pattern |
+| [06-plans-de-scene.md](06-plans-de-scene.md) | la carte Tiled qui donne les positions d'une scène |
 
 ## Le pitch en une phrase
 
@@ -21,7 +21,7 @@ l'aventure.
 ## Les trois partis pris
 
 **Le papier est le seul verbe.** Le joueur collectionne d'abord des
-_savoir-faire_ : ce qu'il emporte d'une scène à l'autre, ce sont des idées de
+*savoir-faire* : ce qu'il emporte d'une scène à l'autre, ce sont des idées de
 pliage — et le peu d'objets qu'il ramasse tient dans la même liste, se dépense
 pareil, et ne franchit pas la fin du chapitre.
 

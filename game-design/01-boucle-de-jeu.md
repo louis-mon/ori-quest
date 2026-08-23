@@ -52,10 +52,10 @@ l'écran. Voir [02-chapitres-et-scenes.md](02-chapitres-et-scenes.md).
 Certaines feuilles exigent d'avoir déjà l'idée. D'autres non — le dialogue la
 fait naître.
 
-| Cas                     | Comportement                                                                                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cas | Comportement |
+| --- | --- |
 | Feuille **verrouillée** | Sans l'idée requise, le dialogue tourne court : le héros regarde le papier sans savoir qu'en faire. Il faut aller chercher l'idée ailleurs dans la scène ou le chapitre. |
-| Feuille **libre**       | Le dialogue amène l'idée de lui-même, par l'observation ou le souvenir. La feuille est à la fois l'énigme et l'indice.                                                   |
+| Feuille **libre** | Le dialogue amène l'idée de lui-même, par l'observation ou le souvenir. La feuille est à la fois l'énigme et l'indice. |
 
 Ce mélange est délibéré. Le verrou crée le rythme d'exploration (« il me manque
 quelque chose, je retourne voir »), la feuille libre évite l'impasse et relance
@@ -75,7 +75,7 @@ choisir un modèle qu'on ne connaît pas. C'est le dialogue qui les présente : 
 n'y a pas d'écran de carnet à consulter avant
 (voir [04-interface.md](04-interface.md)). Le bon choix lance le minijeu.
 
-**Tranché : le mauvais choix est _doux_.** Le héros écarte la piste, la feuille
+**Tranché : le mauvais choix est *doux*.** Le héros écarte la piste, la feuille
 reste utilisable, le joueur réessaie aussitôt. Rien n'est perdu, rien n'est
 puni.
 
@@ -133,12 +133,12 @@ joueur qui revient dans la pièce trois chapitres plus tard doit voir ses pliage
 
 ## État de l'implémentation
 
-| Élément                                  | Statut                                                      |
-| ---------------------------------------- | ----------------------------------------------------------- |
-| Hotspot → dialogue → tag d'effet         | ✅ fonctionne                                               |
-| Animation de pliage depuis un CP         | ✅ fonctionne                                               |
-| Distinction objet / feuille              | ⚠ pas encore implémenté                                     |
-| Carnet d'idées                           | ✅ c'est l'inventaire — pas de liste séparée                |
-| Verrou par idée requise                  | ⚠ mécanisme prêt (`has_`), pas encore utilisé dans le récit |
-| Minijeu (énigme de crease pattern)       | ✅ fonctionne                                               |
-| État persistant de scène (feuille pliée) | ⚠ partiel — le retrait d'un objet du décor fonctionne       |
+| Élément | Statut |
+| --- | --- |
+| Hotspot → dialogue → tag d'effet | ✅ fonctionne |
+| Animation de pliage depuis un CP | ✅ fonctionne |
+| Distinction objet / feuille | ⚠ pas encore implémenté |
+| Carnet d'idées | ✅ c'est l'inventaire — pas de liste séparée |
+| Verrou par idée requise | ⚠ mécanisme prêt (`has_`), pas encore utilisé dans le récit |
+| Minijeu (énigme de crease pattern) | ✅ fonctionne |
+| État persistant de scène (feuille pliée) | ⚠ partiel — le retrait d'un objet du décor fonctionne |

@@ -81,5 +81,5 @@ détruits.
 Un chapitre = **2 à 4 pliages**, répartis sur ses deux scènes. En dessous, le chapitre ne raconte rien ;
 au-dessus, la mécanique s'épuise avant la fin.
 
-Chaque pliage devrait sembler _mérité_ : le joueur a cherché l'idée, choisi le
+Chaque pliage devrait sembler *mérité* : le joueur a cherché l'idée, choisi le
 modèle, réussi le minijeu. Trois petites victoires par origami.

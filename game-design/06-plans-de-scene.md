@@ -13,14 +13,14 @@ Un plan dessiné à l'échelle, lui, **est** la coordonnée.
 **[Tiled](https://www.mapeditor.org/)** — gratuit, libre, macOS/Windows/Linux.
 On ouvre le **projet**, pas les fichiers un par un :
 
-_File > Open File or Project…_ → `game-design/scenes/ori-quest.tiled-project`
+*File > Open File or Project…* → `game-design/scenes/ori-quest.tiled-project`
 
-Les scènes apparaissent alors dans le panneau _Project_, et les trois classes du
+Les scènes apparaissent alors dans le panneau *Project*, et les trois classes du
 jeu sont proposées dans une liste au lieu d'être à retaper.
 
 Tiled est un éditeur de tile map détourné : il impose une grille de 80 px qui n'a
-aucun sens ici. C'est le prix à payer, et il se débraye — _View > Snapping > No
-Snapping_. Le reste (undo, zoom, copier/coller, panneau des objets) est
+aucun sens ici. C'est le prix à payer, et il se débraye — *View > Snapping > No
+Snapping*. Le reste (undo, zoom, copier/coller, panneau des objets) est
 exactement ce qu'un éditeur vectoriel généraliste faisait mal.
 
 ## Le format
@@ -31,21 +31,21 @@ bord gauche arrive à 240 px du bord gauche dans le jeu.
 
 Chaque élément est un **objet**, et deux choses le décrivent :
 
-|               | Rôle                                               |
-| ------------- | -------------------------------------------------- |
-| la **classe** | ce que c'est — `hotspot`, `exit`, `decor`          |
-| le **nom**    | son identifiant côté code — `feuille`, `precipice` |
+| | Rôle |
+| --- | --- |
+| la **classe** | ce que c'est — `hotspot`, `exit`, `decor` |
+| le **nom** | son identifiant côté code — `feuille`, `precipice` |
 
 Trois classes, c'est tout :
 
-| Classe     | Rôle                         | Ce que ça devient                       |
-| ---------- | ---------------------------- | --------------------------------------- |
-| `hotspot`  | à examiner                   | une zone tactile, avec sa cocotte       |
-| `exit`     | passage vers une autre scène | une zone tactile de navigation          |
-| `decor`    | repère de décor              | un bord, une surface, une emprise       |
-| `marqueur` | où se pose la cocotte        | un point rattaché à la zone du même nom |
+| Classe | Rôle | Ce que ça devient |
+| --- | --- | --- |
+| `hotspot` | à examiner | une zone tactile, avec sa cocotte |
+| `exit` | passage vers une autre scène | une zone tactile de navigation |
+| `decor` | repère de décor | un bord, une surface, une emprise |
+| `marqueur` | où se pose la cocotte | un point rattaché à la zone du même nom |
 
-Quatre classes d'**objet**, s'entend : un _calque_ porte lui aussi une classe, et
+Quatre classes d'**objet**, s'entend : un *calque* porte lui aussi une classe, et
 `fond` y désigne le terrain peint (plus bas).
 
 `decor` n'est pas cliquable : il sert à caler le dessin — où s'arrête le sol, où
@@ -61,11 +61,11 @@ généré, un accent ou une espace casserait le fichier.
 
 ## Les formes
 
-| Forme              | Quand                                               | Ce que le jeu en fait                                  |
-| ------------------ | --------------------------------------------------- | ------------------------------------------------------ |
-| **rectangle**      | le cas normal                                       | une boîte, élargie à 88 px si elle est plus petite     |
-| **polygone** (`P`) | quand la forme _est_ le propos — une berge en biais | le contour sert au test tactile, tel quel              |
-| **point** (`I`)    | une ancre, une position d'apparition                | une boîte de taille nulle ; le code en prend le centre |
+| Forme | Quand | Ce que le jeu en fait |
+| --- | --- | --- |
+| **rectangle** | le cas normal | une boîte, élargie à 88 px si elle est plus petite |
+| **polygone** (`P`) | quand la forme *est* le propos — une berge en biais | le contour sert au test tactile, tel quel |
+| **point** (`I`) | une ancre, une position d'apparition | une boîte de taille nulle ; le code en prend le centre |
 
 Un polygone n'est **pas** élargi à la taille du pouce : l'élargir déplacerait
 son coin haut-gauche, donc le repère de son contour, et la forme touchée ne
@@ -86,7 +86,7 @@ Le terrain peint par l'artiste. Il **entre dans le jeu** : `npm run scenes` le
 reporte dans le plan généré, et la scène le pose sous le décor (voir
 `src/game/scenes/fond.ts`).
 
-_Layer > New > Image Layer_, propriété _Image_, puis _Class_ → `fond`. Le mettre
+*Layer > New > Image Layer*, propriété *Image*, puis *Class* → `fond`. Le mettre
 en **verrouillé** évite de le déplacer en ajustant les zones par-dessus.
 
 Le calque pointe **directement le fichier que le jeu charge**, dans `public/` —
@@ -200,8 +200,8 @@ dans la scène.
 **Ce qui reste permis dans le code**, et doit le rester : les positions
 **dérivées** d'une zone nommée. Cinq nuages répartis sur la bande `dec_nuages`,
 le feuillage d'un arbre calculé sur `hs_arbre` — on ne va pas poser un repère de
-plan par nuage. La ligne est là : _où vit un élément_ est une décision du plan,
-_comment il est dessiné à l'intérieur_ est une décision de code.
+plan par nuage. La ligne est là : *où vit un élément* est une décision du plan,
+*comment il est dessiné à l'intérieur* est une décision de code.
 
 ## Les contrôles automatiques
 

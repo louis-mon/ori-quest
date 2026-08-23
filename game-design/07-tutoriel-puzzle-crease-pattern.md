@@ -6,13 +6,13 @@ Quand un tutoriel est lancé, il se passe sur un overlay, aucune interaction n'e
 Il est possible d'y mettre fin avec un bouton "Passer" (fenêtre de confirmation) en haut à droite.
 
 Il peut se lancer de deux façon:
-
 - avec le bouton "?"
 - automatiquement dans les cas suivants, si il n'a jamais été lancé:
-  - le puzzle du pont lance le tutoriel pli vallée.
-  - le tutoriel pli montagne est porté par les trois puzzles qui contiennent
-    un pli montagne — l'arbre, la porte et la hache — et c'est donc le premier
-    ouvert qui le lance, quel que soit l'ordre où le joueur les rencontre.
+    - le puzzle du pont lance le tutoriel pli vallée.
+    - le tutoriel pli montagne est porté par les trois puzzles qui contiennent
+      un pli montagne — l'arbre, la porte et la hache — et c'est donc le premier
+      ouvert qui le lance, quel que soit l'ordre où le joueur les rencontre.
+
 
 En cas de lancement automatique, une question est posée pour éventuelement le skip
 
@@ -67,6 +67,7 @@ Une flèche pointe en clignotant sur le bouton d'aide.
 La flèche disparaît, le tutoriel et son overlay disparaissent.
 
 # Pli montagne
+
 
 ## lancement auto
 

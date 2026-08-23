@@ -9,5 +9,10 @@ public/assets/
 # avant — on formaterait un fichier pour rien, à chaque aller-retour.
 game-design/enigmes/
 
+# La documentation reste écrite à la main. Prettier aligne joliment les tableaux,
+# mais il impose « _italique_ » là où le projet écrit « *italique* », et ce
+# choix-là n'est pas réglable : le rendu est le même, la source change partout.
+*.md
+
 # Le reste — dist/, src/generated/ — est déjà couvert par .gitignore, que
 # Prettier lit de lui-même.

@@ -19,15 +19,15 @@ Le serveur écoute aussi sur le réseau local (`host: true` dans `vite.config.ts
 l'URL « Network » affichée permet de tester depuis un vrai téléphone, ce qui est
 le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 
-| Commande                          | Effet                                                             |
-| --------------------------------- | ----------------------------------------------------------------- |
-| `npm run dev`                     | serveur de dev (compile ink et les plans de scène, puis les suit) |
-| `npm run build`                   | typecheck + build de production dans `dist/`                      |
-| `npm run ink`                     | compile `content/story.ink` -> `src/generated/story.json`         |
-| `npm run scenes`                  | cartes Tiled `game-design/scenes/` -> `src/generated/scenes/`     |
-| `npm run enigmes`                 | découpages `game-design/enigmes/` -> `src/generated/enigmes.ts`   |
-| `npm run check-puzzle [-- <nom>]` | un découpage a-t-il bien une solution unique ?                    |
-| `npm run bake -- <cp.svg>`        | crease pattern -> animation `.origami`                            |
+| Commande | Effet |
+| --- | --- |
+| `npm run dev` | serveur de dev (compile ink et les plans de scène, puis les suit) |
+| `npm run build` | typecheck + build de production dans `dist/` |
+| `npm run ink` | compile `content/story.ink` -> `src/generated/story.json` |
+| `npm run scenes` | cartes Tiled `game-design/scenes/` -> `src/generated/scenes/` |
+| `npm run enigmes` | découpages `game-design/enigmes/` -> `src/generated/enigmes.ts` |
+| `npm run check-puzzle [-- <nom>]` | un découpage a-t-il bien une solution unique ? |
+| `npm run bake -- <cp.svg>` | crease pattern -> animation `.origami` |
 
 Pages de réglage, en développement uniquement (hors build) :
 
@@ -153,13 +153,13 @@ et son module disparaissent entièrement du build publié.
 
 ## Stack
 
-| Rôle         | Choix                                        | Licence |
-| ------------ | -------------------------------------------- | ------- |
-| Moteur 2D    | Phaser 4                                     | MIT     |
-| Narration    | inkjs (langage ink d'inkle)                  | MIT     |
-| Origami 3D   | three.js                                     | MIT     |
-| Bake origami | Origami Simulator (A. Ghassaei) + Playwright | MIT     |
-| Build        | Vite + TypeScript                            | MIT     |
+| Rôle | Choix | Licence |
+| --- | --- | --- |
+| Moteur 2D | Phaser 4 | MIT |
+| Narration | inkjs (langage ink d'inkle) | MIT |
+| Origami 3D | three.js | MIT |
+| Bake origami | Origami Simulator (A. Ghassaei) + Playwright | MIT |
+| Build | Vite + TypeScript | MIT |
 
 Tout est permissif. **Rabbit Ear a été volontairement écarté : il est en GPLv3**,
 et le lier dans le bundle obligerait à publier le jeu entier sous GPLv3.
@@ -183,10 +183,7 @@ du modèle (`montrer()` dans `origami-decor.ts`) : ouvrir la première scène, o
 rien n'est encore plié, ne charge toujours rien. Vérifiable en console :
 
 ```js
-performance
-  .getEntriesByType('resource')
-  .map((e) => e.name)
-  .filter((n) => /three/.test(n));
+performance.getEntriesByType('resource').map((e) => e.name).filter((n) => /three/.test(n))
 ```
 
 Les textures de papier, elles, sont **peintes au canvas** et ne pèsent rien au
@@ -224,11 +221,11 @@ poses partagent la même topologie, donc c'est un simple `lerp` sur un
 Un SVG où la couleur du trait porte le sens du pli — la convention d'Origami
 Simulator :
 
-| Couleur    | Sens                  |
-| ---------- | --------------------- |
-| rouge      | pli montagne          |
-| bleu       | pli vallée            |
-| noir       | bord / découpe        |
+| Couleur | Sens |
+| --- | --- |
+| rouge | pli montagne |
+| bleu | pli vallée |
+| noir | bord / découpe |
 | gris clair | pli plat (facultatif) |
 
 Inkscape ou Illustrator suffisent. Les `.fold` sont acceptés aussi.
@@ -249,7 +246,7 @@ mesurées sur ce projet :
   effondrement crédible, pas une grue nette. Les pliages à peu de couches, eux
   (bases, tessellations, le pont), convergent proprement.
   C'est une limite du modèle physique, **pas un manque d'itérations** — vérifié :
-  passer de 600 à 2500 itérations par pose donne un résultat _moins_ replié.
+  passer de 600 à 2500 itérations par pose donne un résultat *moins* replié.
 - Certains CP dégénèrent (géométrie réduite à un point). Le script le détecte et
   s'arrête plutôt que d'écrire un asset vide.
 
@@ -259,12 +256,12 @@ targets glTF) — le format runtime est le même.
 
 ### Réglages
 
-| Option     | Défaut | Rôle                                                 |
-| ---------- | ------ | ---------------------------------------------------- |
-| `--frames` | 24     | nombre de poses (coût linéaire en taille de fichier) |
-| `--steps`  | 400    | itérations du solveur entre deux poses               |
-| `--settle` | 1500   | itérations supplémentaires sur la pose finale        |
-| `--debug`  | —      | ouvre le navigateur pour voir la simulation          |
+| Option | Défaut | Rôle |
+| --- | --- | --- |
+| `--frames` | 24 | nombre de poses (coût linéaire en taille de fichier) |
+| `--steps` | 400 | itérations du solveur entre deux poses |
+| `--settle` | 1500 | itérations supplémentaires sur la pose finale |
+| `--debug` | — | ouvre le navigateur pour voir la simulation |
 
 ## Architecture
 
@@ -353,7 +350,7 @@ npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 200
   minimum ; l'UI DOM garde des boutons à 44 px **réels** même quand le décor
   rétrécit (`--ui-scale` ne descend pas sous 0.62).
 - **Priorité des hotspots** : les zones se chevauchent (le diagramme est posé
-  _sur_ l'établi) ; la profondeur est assignée par surface croissante, sinon la
+  *sur* l'établi) ; la profondeur est assignée par surface croissante, sinon la
   grande zone avale les taps destinés au détail.
 - **Audio** : le contexte est débloqué au premier `pointerdown` (obligatoire sur iOS).
 - **Sauvegarde** : écrite sur `visibilitychange`/`pagehide`, le dernier moment

@@ -47,10 +47,10 @@ Le verdict est publié dans un drapeau `<nom>_resolu`, que la narration teste po
 
 Dans le dossier d'assets source de l'énigme :
 
-| Fichier                          | Rôle                                                                                                 |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `idee_<item>.svg` (et `.jpg`)    | la **forme une fois pliée**, vue à plat. Sert de référence de travail ; **le jeu ne s'en sert plus** |
-| `solution_<item>.(cp\|jpg\|svg)` | le **crease pattern solution**, celui qu'il faut reconstituer                                        |
+| Fichier | Rôle |
+| --- | --- |
+| `idee_<item>.svg` (et `.jpg`) | la **forme une fois pliée**, vue à plat. Sert de référence de travail ; **le jeu ne s'en sert plus** |
+| `solution_<item>.(cp\|jpg\|svg)` | le **crease pattern solution**, celui qu'il faut reconstituer |
 
 Servi au jeu sous `public/assets/enigmes/<item>/solution.svg`, en chemin
 **relatif** — itch.io sert le jeu depuis un sous-dossier.
