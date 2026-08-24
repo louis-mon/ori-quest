@@ -16,6 +16,23 @@
       ],
       "port": 5173,
       "autoPort": true
+    },
+    {
+      "name": "ori-quest (délai de tap)",
+      "//": "Le même serveur, avec le garde anti-double-tap des dialogues actif (il est nul en développement par défaut — voir DELAI_ANTI_TAP dans src/ui/overlay.ts). Pour le régler, changer la valeur ci-dessous. Le PATH et le -C sont là pour les mêmes raisons que dans la configuration voisine.",
+      "runtimeExecutable": "/usr/bin/env",
+      "runtimeArgs": [
+        "-C",
+        "/Users/louismonestier/Documents/projects/ori-quest",
+        "PATH=/Users/louismonestier/.nvm/versions/node/v24.19.0/bin:/usr/bin:/bin",
+        "VITE_DELAI_TAP=300",
+        "npm",
+        "run",
+        "dev"
+      ],
+      "port": 5173,
+      "autoPort": true,
+      "//port": "Le même port que la configuration voisine : c'est le même serveur, réglé autrement. Les deux ne tournent pas en même temps."
     }
   ]
 }

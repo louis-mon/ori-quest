@@ -231,6 +231,20 @@ suite. `jouer()` (`puzzle/tutoriel.ts`) l'appelle après tout effet ; `pump()`
 `# origami:`, et seulement dans ce cas — une réplique se lit plus longtemps
 qu'un pliage ne dure, donc le cas courant n'a pas de tap en plus.
 
+**Et il n'avance qu'une fois par tap.** Deux contacts rapprochés — le doigt qui
+rebondit, l'impatience de qui enchaîne — dépensaient deux répliques : la seconde
+s'affichait et disparaissait sans avoir été lue, et rien dans le jeu ne revient
+en arrière. Une attente de tap fraîchement ouverte ignore donc les taps pendant
+`DELAI_ANTI_TAP` (`src/ui/overlay.ts`), **choix compris** — c'est même là que ça
+compte le plus : un tap de trop sur une réplique arrive pile quand les choix la
+remplacent, et prend alors une branche que personne n'a lue.
+
+Ce délai est **nul en développement**, où l'on traverse le récit dix fois par
+heure pour aller vérifier autre chose. `VITE_DELAI_TAP=300 npm run dev` le
+rallume le temps de le régler — c'est ce que fait la configuration « ori-quest
+(délai de tap) » de `.claude/launch.json` — et `npm run preview` donne le
+comportement livré sans rien régler du tout.
+
 **Trois couches à ne pas intervertir** : l'énigme est à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la fenêtre de
 confirmation à 7. D'où le fait que `.tuto` ne soit **pas positionné** : positionné,

@@ -13,6 +13,36 @@ import { vignette } from './vignettes';
  * itérer sur la mise en page se fait en CSS plutôt qu'en repositionnant des
  * sprites à la main.
  */
+/**
+ * Le temps, en millisecondes, pendant lequel une attente de tap fraîchement
+ * ouverte ignore les taps. Zéro la désactive.
+ *
+ * Sans ce délai, deux contacts rapprochés dépensent deux répliques : le doigt
+ * qui rebondit, ou l'impatience de qui enchaîne, fait disparaître une ligne
+ * jamais lue — et rien, dans le jeu, ne permet de revenir en arrière.
+ *
+ * 300 ms est la valeur du genre, et ce n'est pas un hasard : c'est aussi le
+ * seuil de double-tap d'iOS et d'Android (`DOUBLE_TAP_TIMEOUT`), donc la durée
+ * en deçà de laquelle le système lui-même tient deux contacts pour un seul
+ * geste. En dessous de ~200 ms le rebond repasse ; au-delà de ~400 ms, c'est le
+ * tap volontaire d'un lecteur rapide qui est avalé, la boîte a l'air cassée et
+ * le joueur retape — plus fort, et deux fois.
+ *
+ * **Nul par défaut en développement**, où l'on traverse le récit vingt fois par
+ * heure pour aller vérifier autre chose : le délai n'y protège personne et
+ * ralentit tout. Pour le sentir quand c'est *lui* qu'on règle, il suffit de
+ * poser la valeur voulue dans l'environnement :
+ *
+ *     VITE_DELAI_TAP=300 npm run dev
+ *
+ * ou une ligne `VITE_DELAI_TAP=300` dans un `.env.local` (ignoré par git, Vite
+ * redémarre tout seul quand le fichier change). La même variable sert dans
+ * l'autre sens — `VITE_DELAI_TAP=0 npm run build` livrerait sans délai. Et
+ * `npm run preview` donne le comportement réel sans rien régler du tout.
+ */
+const delaiDemande = Number(import.meta.env.VITE_DELAI_TAP);
+const DELAI_ANTI_TAP = Number.isFinite(delaiDemande) ? delaiDemande : import.meta.env.DEV ? 0 : 300;
+
 /** Repli quand un objet n'a pas encore de description écrite. */
 function nomDe(id: string): string {
   return objet(id).nom;
@@ -184,6 +214,7 @@ export class Overlay {
    */
   attendreUnTap(): Promise<void> {
     if (this.dialogue.hidden) return Promise.resolve();
+    const debut = performance.now();
     return new Promise((resolve) => {
       this.lignesEnCours++;
       let fait = false;
@@ -196,7 +227,10 @@ export class Overlay {
         resolve();
       };
       const advance = (e: Event) => {
+        // Arrêter la propagation même quand le tap est ignoré : avalé ici, il
+        // ne doit pas non plus aller fermer un menu de verbes derrière.
         e.stopPropagation();
+        if (performance.now() - debut < DELAI_ANTI_TAP) return;
         finir();
       };
       this.dialogue.addEventListener('pointerup', advance);
@@ -255,6 +289,11 @@ export class Overlay {
 
   /** Affiche des choix et attend une sélection. Résout l'index choisi. */
   choose(options: string[]): Promise<number> {
+    // Un tap de trop sur une réplique arrive pile quand les choix la
+    // remplacent, et prend alors une branche que personne n'a lue. C'est le cas
+    // le plus coûteux du lot : une ligne sautée se devine à la suivante, un
+    // choix pris tout seul emmène le récit ailleurs.
+    const debut = performance.now();
     return new Promise((resolve) => {
       this.dialogue.hidden = false;
       this.dialogueNext.hidden = true;
@@ -265,6 +304,7 @@ export class Overlay {
         btn.textContent = label;
         btn.addEventListener('pointerup', (e) => {
           e.stopPropagation();
+          if (performance.now() - debut < DELAI_ANTI_TAP) return;
           this.dialogueChoices.innerHTML = '';
           this.lignesEnCours--;
           resolve(i);
