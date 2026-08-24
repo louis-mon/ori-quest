@@ -22,6 +22,13 @@ fois, et chaque chapitre n'a plus qu'à fournir un motif et un découpage.
   Le désordre est tiré d'une **graine fixe** : la même énigme retrouve le même
   tas à chaque ouverture, donc un placement gênant se revoit au lieu de se
   perdre.
+- **Une pièce a la même taille des deux côtés.** Le bac a longtemps rétréci les
+  siennes pour tenir dans sa colonne : elles grossissaient d'un tiers à
+  l'instant où on les attrapait, pile au moment où le joueur commence son geste,
+  et ce saut se lit comme un défaut d'affichage. Le tas et le conteneur se
+  partagent donc la largeur de l'écran **à la même échelle** ; quand un
+  découpage encombrant ne laisse pas assez de place au tas, c'est le conteneur
+  qui rétrécit — les deux ensemble.
 - **Deux boutons** : « Vérifier la solution » et « Abandonner ».
 
 On glisse-dépose les pièces dans le conteneur. Les pièces **ne pivotent pas** :

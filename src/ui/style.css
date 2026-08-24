@@ -657,7 +657,12 @@ body {
    positionnées en pourcentage, pas placées dans des cases. */
 .puzzle__board {
   position: relative;
-  height: 70%;
+  /* `--plateau` est le côté que le bac impose : ses pièces sont posées à la
+     taille exacte des cellules, donc c'est la grille qui cède quand le tas n'a
+     plus la place de s'étaler (voir eparpiller()). Les 70 % restent le plafond,
+     et reprennent la main si la fenêtre descend sous la taille mesurée au
+     montage — sans quoi le plateau déborderait de son panneau. */
+  height: min(70%, var(--plateau, 100%));
   max-width: 100%;
   aspect-ratio: 1;
   border-radius: 6px;

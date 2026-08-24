@@ -58,8 +58,10 @@ const FLASH_MS = 900;
  */
 const MIN_TOUCH_PX = 44;
 
-/** Part du cadre que le bac ne doit pas dépasser, même pour élargir les pièces. */
-const MAX_TRAY_RATIO = 0.42;
+/** De combien on rétrécit l'échelle commune quand le vrac ne tient pas. */
+const PAS_ECHELLE = 0.96;
+/** Rétrécissements tentés avant de forcer le vrac coûte que coûte. */
+const ESSAIS_ECHELLE = 24;
 
 export interface CreasePuzzleDef {
   /** Crease pattern solution, servi depuis public/ (chemin relatif). */
@@ -378,8 +380,10 @@ export async function runCreasePuzzle(
      *
      * Même mécanique que le glisser : `position: fixed` le temps du trajet, donc
      * la pièce échappe au rognage du bac et passe au-dessus du reste. La taille
-     * est animée elle aussi — une pièce qui prend d'un coup sa taille de plateau
-     * au départ du mouvement fait un saut que l'œil lit comme un défaut.
+     * est interpolée elle aussi — elle ne bouge plus, le bac et le plateau
+     * partageant maintenant la même échelle (voir `eparpiller`), mais elle
+     * bougerait de nouveau si la fenêtre rétrécissait sous ce qui a été mesuré
+     * au montage, et un saut de taille en plein trajet se lit comme un défaut.
      */
     function poserEnSolution(piece: HTMLElement): Promise<void> {
       const forme = pieceOf(piece).boite;
@@ -499,7 +503,8 @@ interface TrayLayout {
 }
 
 /**
- * Jette les pièces en vrac dans le bac.
+ * Jette les pièces en vrac dans le bac, **à la taille qu'elles auront sur le
+ * plateau**.
  *
  * **En vrac, mais sans jamais sortir du bac** : le bac est la seule surface où
  * l'on est sûr qu'une pièce ne recouvre ni le plateau ni les boutons. Les
@@ -513,11 +518,20 @@ interface TrayLayout {
  * moins qu'il n'en paraît : deux boîtes qui mordent l'une sur l'autre de 15 %
  * ne montrent souvent aucun recouvrement de papier.
  *
- * Toutes les pièces partagent un même facteur `k` (pixels par cellule) : elles
- * gardent donc entre elles les proportions qu'elles auront sur le plateau, ce
- * qui aide à reconnaître laquelle va où. `k` est plafonné à la taille réelle —
- * une pièce n'est jamais **plus grande** dans le bac que sur le plateau — et
- * rétrécit tant que le vrac ne tient pas.
+ * **Une seule échelle `k` (pixels par cellule) pour le bac et pour le
+ * plateau.** Le bac a longtemps rétréci ses pièces pour tenir dans sa colonne :
+ * elles grossissaient d'un tiers à l'instant où on les attrapait, et ce saut,
+ * pile au moment où le joueur commence son geste, se lit comme un défaut
+ * d'affichage. Le plateau et le bac se partagent donc la largeur du cadre à
+ * **la même échelle**, et c'est cette échelle-là qu'on cherche : la plus grande
+ * qui laisse au bac de quoi étaler son tas.
+ *
+ * Les deux contraintes tirent en sens inverse — agrandir les pièces agrandit le
+ * plateau, donc rétrécit le bac au moment même où il en faudrait plus —, d'où
+ * la recherche par rétrécissements successifs plutôt qu'un calcul direct. Le
+ * plafond est la taille naturelle du plateau (`min(70 %, …)` en CSS) : on ne
+ * l'agrandit jamais, on ne fait que le rendre au bac quand le découpage est
+ * trop encombrant.
  */
 function eparpiller(
   root: HTMLElement,
@@ -527,26 +541,41 @@ function eparpiller(
   grille: number,
   seed: number,
 ): TrayLayout {
-  const cadre = tray.getBoundingClientRect();
-  const largeur = root.getBoundingClientRect().width * MAX_TRAY_RATIO;
-  const hauteur = cadre.height;
-  const trueCell = board.getBoundingClientRect().width / grille;
+  const cadre = root.getBoundingClientRect();
+  const panneau = board.parentElement!.getBoundingClientRect();
+  const flanc = tray.parentElement!.getBoundingClientRect();
+  const hauteur = tray.getBoundingClientRect().height;
 
-  // Point de départ : le facteur qui ferait occuper aux boîtes des pièces un
-  // peu plus de la moitié du bac. Le reste est du vide, et c'est lui qui rend
-  // le vrac possible.
-  const cellules = pieces.reduce((somme, p) => somme + p.boite.w * p.boite.h, 0);
-  const depart = Math.min(trueCell, Math.sqrt((largeur * hauteur * 0.55) / cellules));
+  // Ce que la mise en page prend en largeur hors plateau et hors bac : les
+  // marges du cadre, la gouttière entre les deux colonnes, et une gouttière de
+  // plus pour que le plateau ne vienne pas coller au tas. Mesuré sur la page
+  // plutôt que recopié du CSS — sinon les deux divergent au premier réglage.
+  const gouttiere = flanc.left - panneau.right;
+  const reserve = cadre.width - panneau.width - flanc.width + gouttiere;
 
-  let k = depart;
+  /** Ce qui reste au bac quand le plateau prend `cote` pixels de côté. */
+  const largeurBac = (cote: number) => cadre.width - reserve - cote;
+
+  // Le plafond : le côté que le CSS donne au plateau quand rien ne le serre.
+  const cellMax = board.getBoundingClientRect().width / grille;
+
+  let k = cellMax;
+  let largeur = largeurBac(grille * k);
   let poses: PoseBac[] | null = null;
-  for (let essai = 0; essai < 14 && !poses; essai++) {
+  for (let essai = 0; essai < ESSAIS_ECHELLE && !poses; essai++) {
     poses = tenterVrac(pieces, largeur, hauteur, k, seed);
-    if (!poses) k *= 0.9;
+    if (!poses) {
+      k *= PAS_ECHELLE;
+      largeur = largeurBac(grille * k);
+    }
   }
   // Dernier recours : à cette taille-là toutes les pièces tiennent côte à côte
   // dans le bac, le vrac n'a plus le choix.
-  if (!poses) poses = tenterVrac(pieces, largeur, hauteur, k, seed, 1) ?? [];
+  poses ??= tenterVrac(pieces, largeur, hauteur, k, seed, 1) ?? [];
+
+  // Le plateau se règle sur l'échelle trouvée, et non l'inverse : c'est tout ce
+  // qui fait qu'une pièce garde sa taille en passant du bac à la grille.
+  root.style.setProperty('--plateau', `${grille * k}px`);
 
   const pose = new Map<HTMLElement, PoseBac>();
   for (const [i, p] of pieces.entries()) {
