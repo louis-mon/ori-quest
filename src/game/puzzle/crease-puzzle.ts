@@ -776,6 +776,12 @@ async function loadPattern(url: string) {
  * et déjà à sa taille de plateau. Elle échappe ainsi à tout rognage par un
  * conteneur, et ce qu'on voit sous le doigt est exactement ce qui sera posé.
  *
+ * Elle se déplace par `transform`, jamais par `left`/`top` : ces deux-là
+ * repeignent la pièce — détourage et ombres portées compris — et le décor
+ * derrière elle, à chaque frame. Elle traînait alors derrière la souris. Rien
+ * ici ne lisse le mouvement ; un retard sur le pointeur est toujours un coût de
+ * rendu, jamais une intention.
+ *
  * L'écouteur est posé sur la pièce, mais le tap n'est reçu que par le papier :
  * le détourage laisse du vide dans la boîte, et c'est le CSS
  * (`pointer-events`) qui le rend traversant, sans quoi une pièce en recouvrirait
@@ -792,8 +798,7 @@ function makeDraggable(
   let height = 0;
 
   const moveTo = (x: number, y: number) => {
-    piece.style.left = `${x - width / 2}px`;
-    piece.style.top = `${y - height / 2}px`;
+    piece.style.transform = `translate3d(${x - width / 2}px, ${y - height / 2}px, 0)`;
   };
 
   piece.addEventListener('pointerdown', (e) => {
@@ -803,7 +808,11 @@ function makeDraggable(
     const b = board.getBoundingClientRect();
     width = (forme.w / grille) * b.width;
     height = (forme.h / grille) * b.height;
+    // `transform` porte la position, donc l'origine doit être neutre : sans ça
+    // la pièce garderait le décalage qu'elle avait dans le bac.
     piece.style.position = 'fixed';
+    piece.style.left = '0';
+    piece.style.top = '0';
     piece.style.width = `${width}px`;
     piece.style.height = `${height}px`;
     moveTo(e.clientX, e.clientY);
@@ -824,7 +833,7 @@ function makeDraggable(
 
     const rect = piece.getBoundingClientRect();
     piece.classList.remove('is-dragging');
-    for (const prop of ['position', 'width', 'height', 'left', 'top'] as const) {
+    for (const prop of ['position', 'width', 'height', 'left', 'top', 'transform'] as const) {
       piece.style.removeProperty(prop);
     }
 

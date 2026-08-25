@@ -852,11 +852,13 @@ body {
   position: absolute;
 }
 
-/* Pendant le glisser, le positionnement est piloté par le script
-   (position: fixed, centré sous le doigt) — ici on ne fait que le signaler. */
+/* Position pilotée par le script (fixed + `transform`, centré sous le doigt).
+   `will-change` est ici et non sur `.puzzle__piece` : une couche de composition
+   par pièce, en permanence, coûterait sa texture en mémoire vidéo pour rien. */
 .puzzle__piece.is-dragging {
   z-index: 20;
   cursor: grabbing;
+  will-change: transform;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55));
 }
 
