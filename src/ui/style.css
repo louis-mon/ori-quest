@@ -158,7 +158,9 @@ body {
   border-radius: 16px;
   background: rgba(26, 23, 20, 0.94);
   box-shadow: 0 10px 30px var(--shadow);
-  backdrop-filter: blur(6px);
+  /* Pas de `backdrop-filter` : invisible derrière un fond opaque à 94 %, et
+     recalculé à chaque frame puisque le décor dessous ne s'arrête jamais de
+     bouger. Il ralentissait le canvas lui-même, marqueurs compris. */
   /* Vignette à gauche, texte à droite : en paysage sur téléphone, la hauteur
      est la ressource rare — un en-tête sur sa propre ligne coûterait une ligne
      de texte. */
