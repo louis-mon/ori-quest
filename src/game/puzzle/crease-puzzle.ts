@@ -206,13 +206,31 @@ export async function runCreasePuzzle(
     </div>
     <div class="puzzle__side">
       <div class="puzzle__tray"></div>
+      <!-- L'abandon à gauche, la vérification à droite : l'ordre des fenêtres
+           de confirmation du jeu, et de la plupart des interfaces. Ces deux
+           boutons étaient l'un sous l'autre, à portée du même pouce — un tap
+           qui glissait d'un cran abandonnait l'énigme. -->
       <div class="puzzle__actions">
-        <button class="puzzle__check" type="button">Vérifier la solution</button>
         <button class="puzzle__quit" type="button">Abandonner</button>
+        <button class="puzzle__check" type="button">Vérifier la solution</button>
       </div>
     </div>
     <div class="puzzle__zoom" hidden>
       <img class="puzzle__zoom-image" alt="Le pliage une fois terminé, agrandi" />
+    </div>
+    <div class="puzzle__confirm" hidden role="alertdialog" aria-modal="true">
+      <div class="menu__confirm-box">
+        <p class="menu__confirm-text">
+          Abandonner l'énigme ?
+          <strong>Les pièces déjà posées retourneront dans le tas.</strong>
+        </p>
+        <div class="menu__confirm-actions">
+          <button class="menu__item" data-action="continuer">Continuer</button>
+          <button class="menu__item menu__item--danger" data-action="abandonner">
+            Abandonner
+          </button>
+        </div>
+      </div>
     </div>
   `;
   el.querySelector('.puzzle__title')!.textContent = def.title;
@@ -233,6 +251,7 @@ export async function runCreasePuzzle(
   const quit = el.querySelector<HTMLButtonElement>('.puzzle__quit')!;
   const goal = el.querySelector<HTMLButtonElement>('.puzzle__goal')!;
   const zoom = el.querySelector<HTMLElement>('.puzzle__zoom')!;
+  const confirm = el.querySelector<HTMLElement>('.puzzle__confirm')!;
   const help = el.querySelector<HTMLButtonElement>('.puzzle__help')!;
 
   // Sans lanceur — un appel qui ne passe pas par le jeu, un test — le bouton
@@ -481,9 +500,24 @@ export async function runCreasePuzzle(
       window.setTimeout(() => board.classList.remove('is-wrong'), FLASH_MS);
     });
 
+    // Abandonner ne se fait plus d'un seul tap : c'est la seule action de
+    // l'énigme qu'on ne peut pas défaire, et elle arrivait par erreur. Même
+    // fenêtre que la remise à zéro et que « Passer » le tutoriel — sûr à
+    // gauche, irréversible à droite.
     quit.addEventListener('pointerup', (e) => {
       e.stopPropagation();
-      finish('abandoned');
+      confirm.hidden = false;
+    });
+    confirm.addEventListener('pointerup', (e) => {
+      e.stopPropagation();
+      const action = (e.target as HTMLElement)
+        .closest('[data-action]')
+        ?.getAttribute('data-action');
+      // Le fond de la fenêtre ne referme rien : il n'est là que pour avaler les
+      // taps destinés au plateau.
+      if (!action) return;
+      confirm.hidden = true;
+      if (action === 'abandonner') finish('abandoned');
     });
   });
 }

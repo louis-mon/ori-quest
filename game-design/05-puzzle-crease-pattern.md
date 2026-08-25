@@ -29,7 +29,13 @@ fois, et chaque chapitre n'a plus qu'à fournir un motif et un découpage.
   partagent donc la largeur de l'écran **à la même échelle** ; quand un
   découpage encombrant ne laisse pas assez de place au tas, c'est le conteneur
   qui rétrécit — les deux ensemble.
-- **Deux boutons** : « Vérifier la solution » et « Abandonner ».
+- **Deux boutons, en ligne, dans le coin bas-droit du cadre** : « Abandonner »
+  à gauche, « Vérifier la solution » à droite. C'est l'ordre des fenêtres de
+  confirmation du jeu, et celui de la plupart des interfaces. Ils ont longtemps
+  été **l'un sous l'autre**, à portée du même pouce : un tap qui glissait d'un
+  cran abandonnait l'énigme, et c'est arrivé. Ils sont calés sur le bord, et non
+  centrés sous le tas : la colonne du tas est aussi large que lui, donc deux
+  boutons centrés dedans flottaient au milieu de rien, alignés sur rien.
 
 On glisse-dépose les pièces dans le conteneur. Les pièces **ne pivotent pas** :
 le découpage produit des morceaux distinguables un à un, et une rotation rendrait
@@ -45,7 +51,11 @@ a **aucune notion de qualité** du pliage : c'est fait ou ce n'est pas fait.
 l'énigme pour revenir à la scène précédente.
 
 **On peut abandonner à tout moment** et revenir à la scène. La feuille est
-toujours là, l'énigme se rouvre.
+toujours là, l'énigme se rouvre — mais le tas est retiré de la même graine fixe,
+donc tout ce qui était posé retourne à sa place de départ. C'est la seule action
+de l'énigme qui défait le travail en cours, et elle ne se fait donc **pas d'un
+seul tap** : une fenêtre de confirmation la couvre, la même que la remise à zéro
+et que le « Passer » du tutoriel — sûr à gauche, irréversible à droite.
 
 Le verdict est publié dans un drapeau `<nom>_resolu`, que la narration teste pour
 écrire la réussite comme l'abandon — les deux branches existent toujours.

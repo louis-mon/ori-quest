@@ -803,9 +803,11 @@ body {
 
 /* Largeur dictée par la forme des pièces : `--tray-width` est calculé au
    montage pour qu'une pièce large et plate reste attrapable au doigt. Le
-   plancher garde les boutons lisibles quand les pièces sont petites. */
+   plancher garde les boutons lisibles quand les pièces sont petites — et
+   depuis qu'ils sont côte à côte, il lui faut de quoi les poser tous les deux
+   sans les faire passer à la ligne. */
 .puzzle__side {
-  width: max(var(--tray-width, 96px), calc(96px * var(--ui-scale)));
+  width: max(var(--tray-width, 96px), calc(230px * var(--ui-scale)));
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1064,16 +1066,33 @@ body {
   background: var(--accent);
 }
 
+/* En ligne, l'abandon à gauche et la vérification à droite — l'ordre des
+   fenêtres de confirmation du jeu. Empilés, les deux boutons se suivaient sous
+   le même pouce et l'abandon se prenait par erreur.
+
+   **Calés à droite**, donc dans le coin du cadre. Ils ne s'étirent pas — un
+   bouton « Abandonner » large de toute la colonne est justement la cible qu'on
+   cherche à réduire —, et la colonne, elle, est aussi large que le tas : deux
+   boutons centrés dedans flottaient au milieu de rien, trop loin du bord pour
+   s'y rattacher et alignés sur aucun autre élément. Le bord droit du cadre est
+   le seul repère fixe de ce côté-là, c'est celui du tas comme du menu.
+
+   `flex-wrap` reste : si un découpage donnait un jour une colonne trop étroite
+   pour les deux, mieux vaut qu'ils s'empilent que qu'ils se serrent sous le
+   seuil tactile. */
 .puzzle__actions {
   display: flex;
-  flex-direction: column;
-  gap: calc(8px * var(--ui-scale));
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: calc(10px * var(--ui-scale));
 }
 
 .puzzle__check,
 .puzzle__quit {
+  flex: 0 1 auto;
+  min-width: calc(104px * var(--ui-scale));
   min-height: 44px;
-  padding: 0 calc(10px * var(--ui-scale));
+  padding: 0 calc(14px * var(--ui-scale));
   border: 0;
   border-radius: 10px;
   font: inherit;
@@ -1106,6 +1125,28 @@ body {
 .puzzle__quit:active {
   background: var(--accent);
   color: var(--paper);
+}
+
+/* Même fenêtre que la remise à zéro et que « Passer » le tutoriel — d'où les
+   classes `.menu__confirm-*` réutilisées telles quelles.
+
+   Le 7 est local : `.puzzle` est positionné avec un z-index, donc il fait
+   contexte d'empilement et ses enfants se rangent entre eux. C'est le numéro
+   de la couche de confirmation dans le reste du jeu, gardé ici pour qu'on lise
+   la même échelle partout — au-dessus de l'agrandissement du but (6), qui est
+   le plus haut de l'énigme. */
+.puzzle__confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(16, 14, 12, 0.82);
+}
+
+.puzzle__confirm[hidden] {
+  display: none;
 }
 
 /* ---------- Tutoriel d'énigme ---------- */
