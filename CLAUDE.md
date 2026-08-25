@@ -91,6 +91,26 @@ acquis — un dialogue déjà tenu, un fait appris — est un **drapeau**, pas u
 objet : conditionner une scène de première rencontre sur la possession d'une
 idée la fait rejouer dès l'idée dépensée. Voir `src/game/systems/objets.ts`.
 
+**Obtenir un objet se montre, et ça part du centre.** Le playtest a montré que
+les joueurs ignoraient et l'objet reçu et l'existence de l'inventaire : la
+colonne est en haut à gauche, ils lisent en bas, et rien ne bougeait. La vignette
+vole donc du centre du cadre jusqu'à sa case, un bandeau la nomme contre la
+colonne, et la colonne ne s'efface plus quand elle est vide. **Le départ est le
+centre pour tous les objets** — c'est déjà l'endroit où ce jeu montre (pliage,
+objet examiné, but de l'énigme, feuille du tutoriel), alors qu'un départ depuis
+la source dans le décor serait faux dès la deuxième idée : elle se forme dans la
+tête du héros, pas dans le corps de son interlocuteur. Voir `src/ui/obtention.ts`
+et `game-design/04-interface.md`.
+
+Deux pièges à ne pas défaire. **Le vol se déclenche sur le tag `# give:`**
+(`donner()` dans `main.ts`), jamais sur un changement d'inventaire :
+`gameState.give()` sert aussi à charger une sauvegarde et à sauter à un point
+d'étape, où faire voler trois objets à la file n'a aucun sens. Et
+**`renderInventory()` rend par identifiant, sans jamais repartir d'un `innerHTML`
+vide** : la colonne se redessine à chaque changement d'état, drapeau compris — en
+la reconstruisant, un vol en cours perd la case où il doit se poser et toutes les
+cases rejouent leur arrivée à chaque objet ramassé ailleurs.
+
 **Le décor ne dessine pas les origamis.** Le pont posé, le vieil arbre, la porte
 en place sont les fichiers `.origami` eux-mêmes, rendus en 3D et posés dans la
 scène (`src/game/scenes/origami-decor.ts`). Idem pour le but affiché pendant
@@ -247,9 +267,11 @@ comportement livré sans rien régler du tout.
 
 **Trois couches à ne pas intervertir** : l'énigme est à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la fenêtre de
-confirmation à 7. D'où le fait que `.tuto` ne soit **pas positionné** : positionné,
-il ferait contexte d'empilement et ses enfants ne pourraient plus encadrer la
-boîte de dialogue. Et le voile est là dès la première réplique, transparent :
+confirmation à 7, le vol d'obtention et son bandeau à 8 — ces deux-là sont
+fugaces et ne peuvent pas être à l'écran en même temps que la confirmation, mais
+ils doivent passer devant la réplique qu'on est en train de lire. D'où le fait
+que `.tuto` ne soit **pas positionné** : positionné, il ferait contexte
+d'empilement et ses enfants ne pourraient plus encadrer la boîte de dialogue. Et le voile est là dès la première réplique, transparent :
 c'est lui qui absorbe les taps destinés à l'énigme, il ne s'assombrit que pour la
 démonstration.
 

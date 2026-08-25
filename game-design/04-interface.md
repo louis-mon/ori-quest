@@ -124,8 +124,85 @@ origami a une épaisseur, un dos, des plis qui prennent la lumière — rien de 
 C'est la couche de pliage qui s'en charge (`presenter()` dans `origami-layer.ts`),
 la même qui joue les animations.
 
-La barre disparaît d'elle-même quand elle est vide
-([`style.css`](../src/ui/style.css)).
+**La colonne reste à l'écran même vide**, avec un emplacement en pointillés.
+C'est un revirement : elle s'effaçait quand elle ne contenait rien, et c'est
+justement ce qui la rendait introuvable — voir la section suivante.
+
+### Obtenir un objet, ça se montre
+
+**Tranché après un playtest.** Les joueurs ne savaient ni qu'ils venaient de
+recevoir un objet, ni que l'inventaire existait. Le diagnostic n'est pas un
+manque de texte, c'est un problème de place : l'objet est donné pendant qu'on lit
+une réplique en bas du cadre, et il arrive dans une colonne haute à gauche, à
+quarante pixels de côté, qui n'était pas là une seconde plus tôt. Rien ne bouge
+dans le champ de vision, donc rien ne se remarque.
+
+Le point & click du genre n'a pas ce problème, et c'est instructif : il le règle
+sans jamais notifier quoi que ce soit. Son inventaire occupe le bas de l'écran en
+permanence (Monkey Island, Thimbleweed Park) ou tient à un bord fixe qu'on
+apprend en dix minutes (Broken Sword, Machinarium) ; le personnage joue le
+ramassage à l'écran, ce qui prend deux bonnes secondes au centre du regard ; et la
+narration le dit — *« You pick up the rubber chicken »*. Le bandeau d'obtention,
+lui, vient des RPG et du mobile, où l'inventaire est caché derrière une touche et
+compte trois cents entrées.
+
+Ori-Quest est entre les deux : conventions du point & click, mais inventaire
+réduit à une colonne de HUD sur un écran de téléphone, et un héros qui ne se
+penche pas pour ramasser. Aucun des trois remèdes du genre n'était en place. Les
+trois y sont maintenant, transposés.
+
+**1. Le contenant existe avant son contenu.** La colonne ne s'efface plus : vide,
+elle montre un emplacement en pointillés. Un seul, jamais deux — le chapitre ne
+fait jamais tenir plus d'un objet à la fois, et une rangée de cases libres
+promettrait une capacité qui n'existe pas.
+
+**2. L'objet vole du centre du cadre jusqu'à sa case.** C'est l'animation de
+ramassage, dans un jeu qui ne peut pas la jouer sur son héros : un mouvement que
+le regard suit, et qui se termine sur l'endroit à apprendre.
+
+**Le départ est le centre, quel que soit l'objet**, et c'est le point qui a
+demandé le plus de réflexion. Seule la hache est obtenue au sortir d'un pliage ;
+le bois vient du vieux chêne, les idées naissent d'une conversation. Faire partir
+chaque chose de sa source dans le décor serait plus joli sur le papier et faux dès
+le deuxième cas — l'idée de la hache ne sort pas du corps du renard, elle se forme
+dans la tête de la grenouille. Alors que le centre est **déjà l'endroit où ce jeu
+montre** : le pliage s'y joue, l'objet examiné y tourne, le but de l'énigme s'y
+affiche, la feuille du tutoriel y apparaît. Le joueur a appris cette place bien
+avant son premier objet. La règle se dit alors d'une phrase et ne souffre aucune
+exception : *le jeu montre au centre, puis range en haut à gauche.*
+
+Ce qui vole est la vignette de l'objet, donc le modèle plié lui-même — la même
+image que la case, que le but de l'énigme et que l'objet posé dans le décor. Rien
+de dessiné pour l'occasion.
+
+**3. Un bandeau nomme l'objet, contre la colonne.** « Obtenu : la hache »,
+« Nouvelle idée : l'arbre ». Posé à la hauteur de la case et non au centre du
+cadre : centré, il nommerait l'objet en laissant le joueur ignorer où il est
+parti, c'est-à-dire la moitié du problème qu'on cherche à régler. Il glisse depuis
+la colonne, et la direction du mouvement désigne l'endroit d'où il vient.
+
+L'ordre compte : **le mouvement dit *où*, l'atterrissage dit *maintenant*, le
+texte dit *quoi*.** Le nom affiché en premier ferait lire le bandeau au lieu de
+suivre le vol — et c'est le vol qui enseigne la colonne.
+
+**Et une case qui part s'efface** au lieu de disparaître. Un objet consommé —
+l'idée dépensée en pliant, la hache usée sur le vieux chêne — quittait la colonne
+d'une frame à l'autre. Le remplacement le plus important du jeu, l'idée qui
+devient l'objet, passait ainsi tout entier inaperçu : même vignette, même place,
+aucun mouvement. Il se lit maintenant en deux temps — la bulle s'efface, l'objet
+arrive s'y poser.
+
+**Ce qui a été écarté.** Une pastille « nouveau » persistante sur la case, qui
+rattraperait le joueur ayant regardé ailleurs. Elle est bon marché et elle reste
+disponible si le prochain playtest montre que le vol ne suffit pas ; on ne l'ajoute
+pas d'avance, parce que la case porte déjà le nom de l'objet et que trois signaux
+pour un seul événement, c'est un de trop.
+
+**Une obtention n'est pas une possession.** Le vol se déclenche sur le tag
+`# give:` d'une réplique, et sur lui seul — jamais sur un changement de
+l'inventaire. L'état est aussi rempli au chargement d'une sauvegarde et par le
+menu des points d'étape, où faire voler trois objets à la file n'aurait aucun
+sens. Voir `donner()` dans [`main.ts`](../src/main.ts).
 
 ## Le carnet d'idées : c'est l'inventaire
 

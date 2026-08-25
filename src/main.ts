@@ -200,10 +200,26 @@ const goto = (room: string) => {
   game.scene.start(room, { overlay, dialogue, goto });
 };
 
+/**
+ * Donne un objet, et le montre arriver dans l'inventaire.
+ *
+ * Les deux gestes sont ici et pas dans l'état : `gameState.give()` sert aussi à
+ * restaurer une sauvegarde et à sauter à un point d'étape, deux cas où il n'y a
+ * rien à annoncer. Seul le tag `# give:` d'une réplique est une *obtention*.
+ *
+ * Rien à annoncer non plus quand l'objet est déjà là — un `# give:` rejoué sur
+ * une branche déjà prise ne fait pas voler une seconde hache.
+ */
+function donner(item: string) {
+  if (!gameState.has(item)) overlay.annoncerObtention(item);
+  gameState.give(item);
+}
+
 const dialogue = new DialogueRunner(storyJson, overlay, {
   origami: playFold,
   puzzle: playPuzzle,
   goto,
+  donner,
 });
 
 const game = new Phaser.Game({
@@ -248,7 +264,9 @@ if (import.meta.env.DEV) {
   // et les scènes se mettent à jour toutes seules par l'abonnement.
   // `plier('arbre')` rejoue une animation de pliage sans avoir à refaire
   // l'énigme : c'est l'outil de réglage de la caméra et des textures.
-  Object.assign(window, { game, etat: gameState, plier: playFold });
+  // `donner('bois')` rejoue une obtention — le vol jusqu'à la colonne et son
+  // bandeau — sans avoir à retraverser le dialogue qui la déclenche.
+  Object.assign(window, { game, etat: gameState, plier: playFold, donner });
 }
 
 new Menu(uiRoot, { onLayoutChange: syncStage });

@@ -308,8 +308,24 @@ body {
   background: rgba(26, 23, 20, 0.7);
 }
 
-.inventory:empty {
-  display: none;
+/* Pas de `:empty { display: none }` ici, et c'est délibéré : la colonne reste à
+   l'écran même vide, avec l'emplacement en pointillés ci-dessous. Elle
+   s'effaçait jusqu'ici, et le premier objet faisait apparaître le contenant et
+   son contenu du même geste — le joueur n'avait jamais vu qu'il y avait là un
+   endroit où les choses se rangent. Voir renderInventory() dans ui/overlay.ts. */
+
+/* L'emplacement vide : la forme d'une case, en pointillés. Il dit « il manque
+   quelque chose ici » là où un cadre seul n'aurait dit que « il y a une boîte
+   dans le coin ». Un seul, jamais deux : le chapitre ne fait jamais tenir plus
+   d'un objet à la fois, et une rangée de cases libres promettrait une capacité
+   qui n'existe pas. */
+.inventory__vide {
+  width: calc(96px * var(--ui-scale));
+  height: calc(62px * var(--ui-scale));
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px dashed rgba(242, 236, 225, 0.3);
+  border-radius: 8px;
 }
 
 .inventory__item {
@@ -342,10 +358,16 @@ body {
 .inventory__image {
   display: block;
   width: 100%;
-  /* Volontairement contenue : la colonne s'allonge d'une case par objet, et
+  /* Hauteur **fixe**, et non `max-height` : la place est ainsi réservée dès que
+     la case existe, avant même que le rendu 3D ne soit décodé. Sans ça la case
+     mesurait zéro de haut le temps du chargement — la colonne se dépliait sous
+     les yeux du joueur, et le vol qui devait s'y poser ne trouvait pas de cible
+     et renonçait (voir rectArrivee() dans ui/obtention.ts).
+
+     Volontairement contenue : la colonne s'allonge d'une case par objet, et
      elle partage le bord gauche avec la flèche de sortie. Une vignette plus
      grande était plus belle et recouvrait le passage. */
-  max-height: calc(42px * var(--ui-scale));
+  height: calc(42px * var(--ui-scale));
   object-fit: contain;
   /* Le rendu est sur fond transparent et le décor derrière peut être clair :
      une ombre portée détache la silhouette dans les deux cas. */
@@ -372,6 +394,105 @@ body {
   background: rgba(240, 201, 135, 0.1);
   font-weight: 500;
   font-style: italic;
+}
+
+/* Une case attendue par un vol : invisible, mais bien présente. Il faut pouvoir
+   la mesurer pour savoir où l'image doit atterrir — d'où `opacity` et non
+   `display`. */
+.inventory__item--arrive {
+  opacity: 0;
+}
+
+/* La case se pose sous l'image qui vient de s'y ranger : c'est ce petit
+   dépassement qui fait lire l'arrivée comme un objet qu'on repose, et non comme
+   un élément d'interface qui s'allume. */
+.inventory__item--pose {
+  animation: pose 280ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes pose {
+  0% {
+    transform: scale(0.82);
+  }
+  55% {
+    transform: scale(1.07);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Une case qui part. Voir DEPART_MS dans ui/overlay.ts : un objet consommé
+   disparaissait d'une frame à l'autre, et l'idée qui devient l'objet — même
+   vignette, même place — ne se voyait pas du tout. */
+.inventory__item--part {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+/* ---------- Obtenir un objet ---------- */
+
+/* L'image qui vole du centre du cadre jusqu'à sa case (ui/obtention.ts).
+   `pointer-events` explicite : `#ui > *` les rétablit pour tous ses enfants, et
+   une image qui traverse l'écran ne doit pas avaler le tap qu'elle croise.
+
+   Au-dessus de la boîte de dialogue (6) et de la confirmation (7) : ces deux
+   éléments-là ne peuvent pas être à l'écran pendant qu'un objet est donné, et
+   au-dessous le vol passerait derrière la boîte que le joueur est en train de
+   lire. */
+.vol {
+  position: absolute;
+  z-index: 8;
+  pointer-events: none;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(16, 14, 12, 0.55));
+}
+
+/* Le bandeau « Obtenu : … », posé contre la case par placerBandeau(). Il entre
+   en glissant depuis la colonne : la direction du mouvement désigne l'endroit
+   d'où il vient, c'est-à-dire là où l'objet est rangé. */
+.obtenu {
+  position: absolute;
+  z-index: 8;
+  pointer-events: none;
+  max-width: calc(280px * var(--ui-scale));
+  margin-left: calc(10px * var(--ui-scale));
+  padding: calc(5px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-radius: 999px;
+  background: rgba(26, 23, 20, 0.86);
+  font-size: calc(14px * var(--ui-scale));
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transform: translate(calc(-8px * var(--ui-scale)), -50%);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.obtenu.is-visible {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+/* Le vol est un confort, pas une information : sans lui l'objet est dans la
+   colonne, la case se pose et le bandeau la nomme. C'est ui/obtention.ts qui
+   saute le vol lui-même ; ici on désamorce ce qui reste. */
+@media (prefers-reduced-motion: reduce) {
+  .inventory__item--pose {
+    animation: none;
+  }
+
+  .inventory__item--part,
+  .obtenu {
+    transition-duration: 1ms;
+  }
 }
 
 /* ---------- Menu ---------- */

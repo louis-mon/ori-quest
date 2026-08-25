@@ -27,6 +27,16 @@ export interface DialogueEffects {
   /** Change de scène. */
   goto(room: string): void;
   /**
+   * Donne un objet au joueur **et le montre** arriver dans l'inventaire.
+   *
+   * Passe par les effets plutôt que d'appeler `gameState.give()` d'ici, parce
+   * que c'est le seul chemin où l'on sait que l'objet vient d'être *obtenu*.
+   * L'état, lui, ne fait pas la différence : il est aussi rempli au chargement
+   * d'une sauvegarde et par le menu des points d'étape, où faire voler trois
+   * objets à la file n'aurait aucun sens.
+   */
+  donner(item: string): void;
+  /**
    * Ouvre une énigme et attend son issue, qu'elle publie dans un drapeau
    * `<nom>_resolu`. Le tag doit donc être posé sur une ligne **sans texte** :
    * l'énigme prend tout l'écran, et la ligne suivante ne doit être évaluée
@@ -48,7 +58,7 @@ type TagHandler = (value: string, fx: DialogueEffects) => void | string | Promis
 const NARRATION = new Set(['narrateur', '-', 'aucun']);
 
 const handlers: Record<string, TagHandler> = {
-  give: (value) => gameState.give(value),
+  give: (value, fx) => fx.donner(value),
   drop: (value) => gameState.take(value),
   flag: (value) => gameState.setFlag(value),
   unflag: (value) => gameState.setFlag(value, false),
