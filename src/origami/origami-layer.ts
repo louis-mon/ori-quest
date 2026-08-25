@@ -1,4 +1,5 @@
 import type * as THREE_NS from 'three';
+import { PREFERENCE_GPU } from '../gpu';
 import { animationOrigami, sampleFold, type FoldAnimation } from './fold-file';
 import { creerMeshOrigami, libererMateriaux } from './papier';
 import {
@@ -116,7 +117,7 @@ export class OrigamiLayer {
       // L'antialias est cher sur GPU mobile. Au-delà de 2x en densité de
       // pixels il n'apporte quasiment rien de visible : on l'économise.
       antialias: window.devicePixelRatio < 2,
-      powerPreference: 'low-power',
+      powerPreference: PREFERENCE_GPU,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearAlpha(0);

@@ -1,4 +1,5 @@
 import type * as THREE_NS from 'three';
+import { PREFERENCE_GPU } from '../gpu';
 import { animationOrigami, sampleFold } from './fold-file';
 import { creerMeshOrigami, libererMateriaux } from './papier';
 import { eclairer, pliageDe, quaternionDegres, quaternionModele, repereVue } from './vue';
@@ -67,6 +68,9 @@ function renderer(THREE: typeof THREE_NS): THREE_NS.WebGLRenderer {
     atelier = new THREE.WebGLRenderer({
       alpha: true,
       antialias: true,
+      // La même carte que les deux autres contextes de la page, sinon le
+      // compositeur recopie chaque frame de l'une à l'autre. Voir `gpu.ts`.
+      powerPreference: PREFERENCE_GPU,
       // La lecture des pixels se fait après `render()` : sans ce drapeau, le
       // navigateur a le droit d'avoir déjà vidé le tampon.
       preserveDrawingBuffer: true,

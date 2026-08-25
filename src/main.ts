@@ -3,6 +3,7 @@ import './ui/style.css';
 
 import storyJson from './generated/story.json';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './game/config';
+import { PREFERENCE_GPU } from './gpu';
 
 import { PontScene } from './game/scenes/pont-scene';
 import { PorteScene } from './game/scenes/porte-scene';
@@ -232,11 +233,12 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  // Sur mobile, un devicePixelRatio de 3 triple le coût de remplissage pour
-  // un gain visuel marginal sur un décor 2D. On plafonne à 2.
+  // `Scale.FIT` fige déjà le tampon de rendu à la taille de conception
+  // (1280x720) et laisse le navigateur l'agrandir : la densité de l'écran ne
+  // change donc rien au coût de remplissage, quel que soit le téléphone.
   render: {
     antialias: true,
-    powerPreference: 'low-power',
+    powerPreference: PREFERENCE_GPU,
   },
   input: {
     // Par défaut Phaser double ses écouteurs sur `window`, en phase de
