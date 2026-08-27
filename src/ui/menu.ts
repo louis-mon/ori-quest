@@ -85,6 +85,8 @@ export class Menu {
   private fullscreenItem: HTMLButtonElement;
   private confirm: HTMLElement;
   private etapes: HTMLElement;
+  /** Transparent, plein cadre : il absorbe les taps pendant que le menu est ouvert. */
+  private voile: HTMLElement;
 
   constructor(
     root: HTMLElement,
@@ -93,6 +95,7 @@ export class Menu {
     const el = document.createElement('div');
     el.className = 'menu';
     el.innerHTML = `
+      <div class="menu__voile" hidden></div>
       <button class="menu__button" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -134,6 +137,7 @@ export class Menu {
     this.fullscreenItem = el.querySelector('[data-action="fullscreen"]')!;
     this.confirm = el.querySelector('.menu__confirm')!;
     this.etapes = el.querySelector('.menu__etapes')!;
+    this.voile = el.querySelector('.menu__voile')!;
 
     if (!fullscreenSupported()) this.fullscreenItem.hidden = true;
 
@@ -160,7 +164,19 @@ export class Menu {
       });
     });
 
-    // Un tap hors du menu le referme, comme le menu de verbes.
+    // Un tap hors du menu le referme, comme le menu de verbes — et le **voile**
+    // est ce qui l'empêche d'aller déclencher autre chose au passage.
+    //
+    // L'écouteur ci-dessous est en bouillonnement sur `window`, quand Phaser,
+    // lui, écoute sur le canvas (`input.windowEvents: false`). Un tap sur le
+    // décor était donc traité par le jeu **puis** remontait fermer le menu :
+    // un seul geste, deux effets, et le hotspot sous le doigt partait alors
+    // qu'on voulait juste refermer. `occupeLeJoueur` ne pouvait pas l'attraper —
+    // il ne connaît que la boîte de dialogue et le menu de verbes.
+    this.voile.addEventListener('pointerup', (e) => {
+      e.stopPropagation();
+      this.close();
+    });
     window.addEventListener('pointerup', () => {
       if (!this.panel.hidden) this.close();
     });
@@ -243,6 +259,7 @@ export class Menu {
   }
 
   private open() {
+    this.voile.hidden = false;
     this.panel.hidden = false;
     this.button.setAttribute('aria-expanded', 'true');
     this.syncFullscreenLabel();
@@ -250,6 +267,7 @@ export class Menu {
 
   private close() {
     this.panel.hidden = true;
+    this.voile.hidden = true;
     this.button.setAttribute('aria-expanded', 'false');
   }
 

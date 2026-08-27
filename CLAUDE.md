@@ -275,6 +275,22 @@ d'empilement et ses enfants ne pourraient plus encadrer la boîte de dialogue. E
 c'est lui qui absorbe les taps destinés à l'énigme, il ne s'assombrit que pour la
 démonstration.
 
+**Le menu passe au-dessus de tout ça** — voile à 6, bouton et panneau à 7,
+fenêtres à 8 — parce que plein écran et remise à zéro doivent rester
+atteignables énigme ouverte. Le bouton n'avait pas de `z-index` et restait
+**dessiné mais inerte** sous le tas de pièces : un bouton visible qui ne répond
+pas se lit comme un jeu planté. Attention à l'ordre du DOM, qui départage à
+`z-index` égal : l'énigme est montée bien après le menu, donc un voile de menu à
+4 passerait dessous.
+
+**Le menu ouvert a lui aussi son voile**, transparent et plein cadre, pour la
+même raison que celui du tutoriel : sans lui, refermer le menu d'un tap sur le
+décor déclenchait au passage le hotspot visé. `input.windowEvents: false` garde
+Phaser sur le canvas, mais le tap y est traité **puis** remonte jusqu'à
+l'écouteur `window` qui referme le menu — un geste, deux effets.
+`occupeLeJoueur` ne pouvait pas l'attraper : il ne connaît que la boîte de
+dialogue et le menu de verbes.
+
 **La flèche du tutoriel est un SVG, pas le pliage de l'artiste.** Le marqueur de
 sortie (`assets/ui/fleche.png`) fait partie du décor et attend qu'on le
 remarque ; celle du tutoriel interrompt une explication pour dire « regarde ça,
