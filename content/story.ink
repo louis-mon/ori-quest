@@ -44,7 +44,6 @@ VAR flag_arbre_plie = false
 // L'accord du fils. C'est un savoir acquis, pas un objet : il est demandé une
 // fois et vaut pour toujours, y compris après que la hache a changé de main.
 VAR flag_arbre_demande = false
-VAR flag_arbre_merci = false
 VAR flag_vieil_arbre_decoupe = false
 
 // Chapitre 1 — la porte. Même partage : ce que le renard a dit reste su
@@ -171,10 +170,6 @@ La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: ar
   - flag_arbre_demande:
     # qui: arbre
     J'espère qu'il fera de beaux meubles !
-  // Avant la demande : on obtient la hache avant de plier l'arbre, donc la
-  // branche suivante gagnait toujours et ce merci n'était jamais atteint.
-  - flag_arbre_plie && not flag_arbre_merci:
-    -> pont_arbre_merci
   - flag_arbre_plie && has_hache:
     # qui: heros
     J'ai replié ton père, le vieux chêne vénérable ! Tu vas pouvoir te recueillir. En plus le pont est à nouveau là.
@@ -187,17 +182,14 @@ La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: ar
     # qui: heros
     Merci, s'il reste des planches on pourra peut-être faire de beaux meubles au château.
     # flag: arbre_demande
+  - flag_arbre_plie:
+    # qui: arbre
+    Merci, Maître origamiste, d'avoir restauré le pont et feu mon vieux père.
+    Les voyageurs qui se retrouvaient bloqués ici cesseront de m'importuner, et l'ombre de mon père m'évitera les coups de soleil.
   - else:
     # qui: arbre
     Snif... Mon père me manque terriblement...
 }
--> DONE
-
-=== pont_arbre_merci ===
-# qui: arbre
-Merci, Maître origamiste, d'avoir restauré le pont et feu mon vieux père.
-Les voyageurs qui se retrouvaient bloqués ici cesseront de m'importuner, et l'ombre de mon père m'évitera les coups de soleil.
-# flag: arbre_merci
 -> DONE
 
 // La grande feuille de la rive d'en face — le vieil arbre en puissance.
