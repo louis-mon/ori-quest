@@ -27,14 +27,9 @@ body {
   touch-action: manipulation;
 }
 
-/*
- * Rien ne se sélectionne dans le jeu. `user-select` sur `body` seul ne suffit
- * pas partout : il s'hérite, mais plusieurs navigateurs le réinitialisent sur
- * les champs et les zones éditables, et surtout iOS garde son appui long — la
- * loupe et le menu « Copier » apparaissent alors par-dessus une scène, en plein
- * point & click où l'appui long n'a aucun sens. D'où le sélecteur universel et
- * `-webkit-touch-callout`.
- */
+/* Sélecteur universel plutôt que `user-select` sur `body` : plusieurs
+   navigateurs le réinitialisent sur les zones éditables, et iOS garde son appui
+   long — loupe et menu « Copier » par-dessus la scène. */
 *,
 *::before,
 *::after {
@@ -77,13 +72,9 @@ body {
   pointer-events: none;
   opacity: 0;
   transition: opacity 400ms ease;
-  /* Le voile. Le contexte WebGL est transparent : cette couleur de fond est ce
-     qu'on voit partout où le modèle n'est pas, et elle apparaît et disparaît
-     avec lui — un seul élément, aucune synchronisation à tenir.
-
-     Assez sombre pour que le pliage se détache du décor, assez clair pour qu'on
-     reconnaisse la scène derrière : ce n'est pas un écran de chargement, le
-     joueur doit garder le fil de l'endroit où il est. */
+  /* Le voile est le fond de la toile WebGL elle-même : un seul élément,
+     aucune synchronisation à tenir. Assez sombre pour que le pliage se détache,
+     assez clair pour qu'on reconnaisse la scène derrière. */
   background: rgba(16, 14, 12, 0.5);
 }
 
@@ -173,10 +164,8 @@ body {
   display: none;
 }
 
-/* Au-dessus de l'énigme (z-index 4) et du voile du tutoriel (5), sous la
-   fenêtre de confirmation (7). Posé par `Overlay.mettreDevant()` le temps d'un
-   tutoriel : sans lui, tout ce que celui-ci raconte se joue derrière le panneau
-   de l'énigme, donc invisible. */
+/* Au-dessus de l'énigme (4) et du voile du tutoriel (5), sous la confirmation
+   (7). Sans lui, ce qu'un tutoriel raconte se joue derrière le panneau. */
 .dialogue--devant {
   z-index: 6;
 }
@@ -258,10 +247,8 @@ body {
   border-color: var(--accent);
 }
 
-/* Un élément de la rangée, et non un rond posé en absolu dans le coin : en
-   absolu il se superposait à la dernière ligne de texte dès qu'elle allait
-   jusqu'au bord, et le dernier mot passait sous la pastille. Dans le flux, le
-   texte s'arrête forcément avant lui. */
+/* Dans le flux et non en absolu dans le coin : en absolu, le dernier mot d'une
+   ligne qui va jusqu'au bord passait sous la pastille. */
 .dialogue__next {
   flex: none;
   align-self: flex-end;
@@ -292,13 +279,10 @@ body {
 /* Ancré à gauche plutôt qu'au centre : le haut-centre est occupé par le titre
    de scène, et sur un écran étroit les deux se chevauchent. */
 .inventory {
-  /* En colonne, sur le bord gauche : en paysage la hauteur est la ressource
-     rare, une barre horizontale mangerait la ligne d'horizon du décor.
-
-     Ancrée en HAUT et non centrée : centrée, elle grandissait vers le milieu du
-     bord gauche, c'est-à-dire pile sur la flèche de sortie, qu'elle finissait
-     par recouvrir. En haut elle ne descend que si l'inventaire s'allonge, et le
-     coin haut-gauche est le seul des quatre qui ne serve à rien d'autre. */
+  /* En colonne : en paysage la hauteur est la ressource rare, une barre
+     horizontale mangerait la ligne d'horizon. Ancrée en haut et non centrée,
+     sinon elle grandit vers le milieu du bord gauche et recouvre la flèche de
+     sortie. */
   position: absolute;
   top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));
   left: calc(var(--ui-gap) + env(safe-area-inset-left, 0px));
@@ -310,17 +294,14 @@ body {
   background: rgba(26, 23, 20, 0.7);
 }
 
-/* Pas de `:empty { display: none }` ici, et c'est délibéré : la colonne reste à
-   l'écran même vide, avec l'emplacement en pointillés ci-dessous. Elle
-   s'effaçait jusqu'ici, et le premier objet faisait apparaître le contenant et
-   son contenu du même geste — le joueur n'avait jamais vu qu'il y avait là un
-   endroit où les choses se rangent. Voir renderInventory() dans ui/overlay.ts. */
+/* Pas de `:empty { display: none }`, délibérément : quand la colonne s'effaçait,
+   le premier objet faisait apparaître le contenant et son contenu du même geste,
+   et le joueur n'apprenait jamais qu'il y a là un endroit où les choses se
+   rangent. */
 
-/* L'emplacement vide : la forme d'une case, en pointillés. Il dit « il manque
-   quelque chose ici » là où un cadre seul n'aurait dit que « il y a une boîte
-   dans le coin ». Un seul, jamais deux : le chapitre ne fait jamais tenir plus
-   d'un objet à la fois, et une rangée de cases libres promettrait une capacité
-   qui n'existe pas. */
+/* En pointillés, il dit « il manque quelque chose ici » là où un cadre plein
+   n'aurait dit que « il y a une boîte ». Un seul, jamais deux : une rangée de
+   cases libres promettrait une capacité qui n'existe pas. */
 .inventory__vide {
   width: calc(96px * var(--ui-scale));
   height: calc(62px * var(--ui-scale));
@@ -352,23 +333,16 @@ body {
   cursor: pointer;
 }
 
-/* La vignette : le modèle plié lui-même (voir ui/vignettes.ts). Elle porte
-   l'essentiel de la reconnaissance — on repère une forme bien plus vite qu'on
-   ne lit une étiquette — d'où sa taille par rapport au nom, qui ne fait que
-   confirmer. `object-fit: contain` parce que les rendus n'ont pas tous les
-   mêmes proportions : la hache est haute, le pont large. */
+/* On repère une forme plus vite qu'on ne lit une étiquette, d'où sa taille par
+   rapport au nom. `contain` parce que les rendus n'ont pas les mêmes
+   proportions : la hache est haute, le pont large. */
 .inventory__image {
   display: block;
   width: 100%;
-  /* Hauteur **fixe**, et non `max-height` : la place est ainsi réservée dès que
-     la case existe, avant même que le rendu 3D ne soit décodé. Sans ça la case
-     mesurait zéro de haut le temps du chargement — la colonne se dépliait sous
-     les yeux du joueur, et le vol qui devait s'y poser ne trouvait pas de cible
-     et renonçait (voir rectArrivee() dans ui/obtention.ts).
-
-     Volontairement contenue : la colonne s'allonge d'une case par objet, et
-     elle partage le bord gauche avec la flèche de sortie. Une vignette plus
-     grande était plus belle et recouvrait le passage. */
+  /* Fixe et non `max-height` : la place est réservée avant que le rendu 3D ne
+     soit décodé. Sinon la case mesurait zéro le temps du chargement, et le vol
+     qui devait s'y poser ne trouvait pas de cible. Contenue, parce que la
+     colonne partage le bord gauche avec la flèche de sortie. */
   height: calc(42px * var(--ui-scale));
   object-fit: contain;
   /* Le rendu est sur fond transparent et le décor derrière peut être clair :
@@ -438,14 +412,10 @@ body {
 
 /* ---------- Obtenir un objet ---------- */
 
-/* L'image qui vole du centre du cadre jusqu'à sa case (ui/obtention.ts).
-   `pointer-events` explicite : `#ui > *` les rétablit pour tous ses enfants, et
+/* `pointer-events` explicite : `#ui > *` les rétablit pour tous ses enfants, et
    une image qui traverse l'écran ne doit pas avaler le tap qu'elle croise.
-
-   Au-dessus de la boîte de dialogue (6) et de la confirmation (7) : ces deux
-   éléments-là ne peuvent pas être à l'écran pendant qu'un objet est donné, et
-   au-dessous le vol passerait derrière la boîte que le joueur est en train de
-   lire. */
+   Au-dessus de la boîte de dialogue (6) et de la confirmation (7), qui ne
+   peuvent pas être à l'écran pendant qu'un objet est donné. */
 .vol {
   position: absolute;
   z-index: 8;
@@ -501,11 +471,9 @@ body {
 
 /* Fenêtre des points d'étape : même boîte que la confirmation de remise à zéro,
    avec une liste qui défile si le chapitre est long. */
-/* Centré en flex et non en grid, pour la même raison que `.puzzle__zoom` : sur
-   une piste de grille dimensionnée sur son contenu, le `max-height: 100%` de la
-   boîte ci-dessous est circulaire et le navigateur le laisse tomber. La boîte
-   dépassait alors du cadre, et la dernière étape se retrouvait sous le bouton
-   « Fermer ». En flex, le pourcentage se résout sur la hauteur du conteneur. */
+/* Flex et non grid, comme `.puzzle__zoom` : sur une piste dimensionnée par son
+   contenu, le `max-height: 100%` de la boîte est circulaire et le navigateur le
+   laisse tomber. En flex, le pourcentage se résout sur le conteneur. */
 .menu__etapes {
   position: absolute;
   inset: 0;
@@ -750,12 +718,10 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* Le geste va du **portrait vers le paysage**, dans ce sens-là : le joueur qui
-   voit cette invite tient déjà son téléphone debout, et ce qu'on lui demande est
-   de le coucher. L'animation partait de la position couchée et y revenait, donc
-   elle montrait exactement l'inverse de ce qu'il fallait faire. La pose
-   d'arrivée est tenue plus longtemps que celle de départ : c'est elle, la
-   consigne. */
+/* Du portrait vers le paysage, dans ce sens-là : celui qui voit l'invite tient
+   déjà son téléphone debout. L'animation partait de la position couchée et
+   montrait donc l'inverse du geste attendu. La pose d'arrivée est tenue plus
+   longtemps : c'est elle, la consigne. */
 @keyframes tip {
   0%,
   15% {
@@ -790,10 +756,9 @@ body {
   background: rgba(16, 14, 12, 0.92);
 }
 
-/* `position: relative` pour le bouton « ? » : posé dans le panneau, il est
-   forcément à gauche du bac, quelle que soit la largeur que les pièces lui ont
-   donnée. Calé sur le cadre de l'énigme, il aurait fallu refaire à la main le
-   calcul de `--tray-width`, et il finirait par recouvrir les pièces. */
+/* `position: relative` pour le bouton « ? » : posé dans le panneau, il reste à
+   gauche du bac quelle que soit la largeur que les pièces lui donnent. Calé sur
+   le cadre, il faudrait refaire à la main le calcul de `--tray-width`. */
 .puzzle__panel {
   position: relative;
   flex: 1;
@@ -818,11 +783,9 @@ body {
    positionnées en pourcentage, pas placées dans des cases. */
 .puzzle__board {
   position: relative;
-  /* `--plateau` est le côté que le bac impose : ses pièces sont posées à la
-     taille exacte des cellules, donc c'est la grille qui cède quand le tas n'a
-     plus la place de s'étaler (voir eparpiller()). Les 70 % restent le plafond,
-     et reprennent la main si la fenêtre descend sous la taille mesurée au
-     montage — sans quoi le plateau déborderait de son panneau. */
+  /* `--plateau` est le côté que le bac impose : ses pièces sont à la taille exacte
+     des cellules, donc c'est la grille qui cède quand le tas n'a plus la place
+     de s'étaler. Les 70 % restent le plafond, sinon le plateau déborde. */
   height: min(70%, var(--plateau, 100%));
   max-width: 100%;
   aspect-ratio: 1;
@@ -841,11 +804,9 @@ body {
   height: calc(100% / var(--grid) * var(--h));
 }
 
-/* Largeur dictée par la forme des pièces : `--tray-width` est calculé au
-   montage pour qu'une pièce large et plate reste attrapable au doigt. Le
-   plancher garde les boutons lisibles quand les pièces sont petites — et
-   depuis qu'ils sont côte à côte, il lui faut de quoi les poser tous les deux
-   sans les faire passer à la ligne. */
+/* `--tray-width` est calculé au montage pour qu'une pièce large et plate reste
+   attrapable au doigt. Le plancher garde les deux boutons côte à côte et
+   lisibles quand les pièces sont petites. */
 .puzzle__side {
   width: max(var(--tray-width, 96px), calc(230px * var(--ui-scale)));
   display: flex;
@@ -855,22 +816,18 @@ body {
   gap: calc(12px * var(--ui-scale));
 }
 
-/* Le bac est un tas, pas une liste : les pièces y sont posées en vrac, à des
-   positions calculées une fois pour toutes par eparpiller() et écrites en
-   pixels. D'où le positionnement absolu — et d'où l'absence de défilement, le
-   vrac se resserre au lieu de déborder. */
+/* Un tas, pas une liste : les positions sont calculées par eparpiller() et
+   écrites en pixels, d'où l'absolu. Pas de défilement, le vrac se resserre. */
 .puzzle__tray {
   position: relative;
   flex: 1;
   min-height: 0;
 }
 
-/* `--w` et `--h` portent la BOÎTE de la pièce, en cellules de la grille : elle
-   donne sa taille sur le plateau. La pièce, elle, n'occupe qu'une partie de
-   cette boîte — le papier est un polygone, tracé dans le SVG.
-   L'ombre est un `drop-shadow` et non un `box-shadow` : le filtre suit l'alpha
-   du rendu, donc la découpe, là où l'ombre de boîte trahirait le rectangle dès
-   que deux pièces se chevauchent dans le bac. */
+/* `--w` et `--h` portent la BOÎTE de la pièce, en cellules ; le papier n'en
+   occupe qu'une partie, c'est un polygone tracé dans le SVG. D'où `drop-shadow`
+   et non `box-shadow` : le filtre suit l'alpha, donc la découpe, là où l'ombre
+   de boîte trahirait le rectangle dès que deux pièces se chevauchent. */
 .puzzle__piece {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)) drop-shadow(0 4px 7px rgba(0, 0, 0, 0.3));
   cursor: grab;
@@ -920,29 +877,23 @@ body {
    exactement les proportions de la pièce, donc l'étirement est nul — mais sans
    lui le SVG se recentrerait avec des marges. */
 
-/* Les plis reprennent la convention ORIPA (montagne / vallée / bord / facette)
-   mais dans la palette du jeu. `non-scaling-stroke` garde une épaisseur
-   constante à l'écran : sans lui, la même pièce aurait des traits deux fois
-   plus fins dans le bac que sur le plateau. */
+/* Convention ORIPA, palette du jeu. `non-scaling-stroke` : sans lui, la même
+   pièce aurait des traits deux fois plus fins dans le bac que sur le plateau. */
 .puzzle__piece svg :is(.mo, .va, .bo, .fl) {
   fill: none;
   vector-effect: non-scaling-stroke;
 }
 
-/* Les bords du carré ne sont PAS rendus : ils diraient au joueur quelle pièce
-   vient d'une rive, ce qui rendrait le placement trop évident. Seuls les plis
-   se voient. Conséquence à connaître : plus rien ne fixe l'abscisse d'une
-   pièce, donc l'unicité de la solution doit venir de la découpe et du motif —
-   voir la note dans puzzles.ts. */
+/* Les bords du carré ne sont PAS rendus : ils diraient quelle pièce vient d'une
+   rive et le placement serait évident. Conséquence : plus rien ne fixe
+   l'abscisse d'une pièce, l'unicité doit venir de la découpe et du motif. */
 .puzzle__piece svg .bo {
   display: none;
 }
 
-/* Épaisseur en pixels d'écran, `non-scaling-stroke` oblige : c'est donc une
-   valeur ergonomique, pas une proportion du motif. À 2, les plis se perdaient
-   sur une pièce claire au milieu d'un panneau sombre — et ce sont eux, le
-   contenu de l'énigme. La légende plus bas porte la même épaisseur : les deux
-   doivent se reconnaître d'un coup d'œil. */
+/* En pixels d'écran, `non-scaling-stroke` oblige : valeur ergonomique, pas
+   proportion du motif. À 2, les plis se perdaient sur une pièce claire au milieu
+   d'un panneau sombre. La légende porte la même épaisseur. */
 .puzzle__piece svg .mo {
   stroke: var(--accent);
   stroke-width: 4;
@@ -1108,19 +1059,13 @@ body {
   background: var(--accent);
 }
 
-/* En ligne, l'abandon à gauche et la vérification à droite — l'ordre des
-   fenêtres de confirmation du jeu. Empilés, les deux boutons se suivaient sous
-   le même pouce et l'abandon se prenait par erreur.
+/* En ligne, l'abandon à gauche : empilés, les deux boutons se suivaient sous le
+   même pouce et l'abandon se prenait par erreur. Calés à droite, sur le seul
+   repère fixe de ce côté — centrés dans une colonne aussi large que le tas, ils
+   flottaient au milieu de rien. Ils ne s'étirent pas : un « Abandonner » large
+   de toute la colonne est la cible qu'on cherche à réduire.
 
-   **Calés à droite**, donc dans le coin du cadre. Ils ne s'étirent pas — un
-   bouton « Abandonner » large de toute la colonne est justement la cible qu'on
-   cherche à réduire —, et la colonne, elle, est aussi large que le tas : deux
-   boutons centrés dedans flottaient au milieu de rien, trop loin du bord pour
-   s'y rattacher et alignés sur aucun autre élément. Le bord droit du cadre est
-   le seul repère fixe de ce côté-là, c'est celui du tas comme du menu.
-
-   `flex-wrap` reste : si un découpage donnait un jour une colonne trop étroite
-   pour les deux, mieux vaut qu'ils s'empilent que qu'ils se serrent sous le
+   `flex-wrap` reste : mieux vaut qu'ils s'empilent que qu'ils passent sous le
    seuil tactile. */
 .puzzle__actions {
   display: flex;
@@ -1169,14 +1114,11 @@ body {
   color: var(--paper);
 }
 
-/* Même fenêtre que la remise à zéro et que « Passer » le tutoriel — d'où les
-   classes `.menu__confirm-*` réutilisées telles quelles.
+/* Même fenêtre que la remise à zéro, d'où les classes `.menu__confirm-*`.
 
-   Le 7 est local : `.puzzle` est positionné avec un z-index, donc il fait
-   contexte d'empilement et ses enfants se rangent entre eux. C'est le numéro
-   de la couche de confirmation dans le reste du jeu, gardé ici pour qu'on lise
-   la même échelle partout — au-dessus de l'agrandissement du but (6), qui est
-   le plus haut de l'énigme. */
+   Le 7 est local : `.puzzle` fait contexte d'empilement, ses enfants se rangent
+   entre eux. C'est le numéro de la confirmation dans le reste du jeu, gardé pour
+   qu'on lise la même échelle partout. */
 .puzzle__confirm {
   position: absolute;
   inset: 0;
@@ -1193,14 +1135,9 @@ body {
 
 /* ---------- Tutoriel d'énigme ---------- */
 
-/*
- * `.tuto` n'est **pas positionné**, et c'est délibéré : positionné, il ferait
- * contexte d'empilement et enfermerait ses enfants entre 0 et son propre
- * z-index. Or ils doivent encadrer la boîte de dialogue — le voile dessous
- * (5), la boîte au milieu (6), la confirmation dessus (7). Sans box propre,
- * ils se placent par rapport à `#ui` et se rangent dans la même pile que
- * l'énigme.
- */
+/* `.tuto` n'est PAS positionné, délibérément : il ferait contexte d'empilement
+   et enfermerait ses enfants, qui doivent encadrer la boîte de dialogue — voile
+   dessous (5), boîte (6), confirmation dessus (7). */
 .tuto {
   position: static;
 }
@@ -1220,15 +1157,11 @@ body {
   background: rgba(16, 14, 12, 0.82);
 }
 
-/* La feuille de démonstration : un vrai pliage rendu en 3D (voir tutoriel.ts).
-   Posée au-dessus du centre plutôt qu'en plein milieu — le bas de l'écran est
-   à la boîte de dialogue, et une feuille centrée passe dessous.
-
-   La toile est plus grande que la feuille n'en a l'air : le cadrage de
-   `frameModel` tient compte de **toutes** les poses, et le pli du tutoriel ne
-   suit pas un axe de symétrie du carré — des coins sortent de son emprise en se
-   repliant. La feuille à plat n'occupe donc que les trois quarts du cadre, et
-   c'est la toile qu'on agrandit pour lui rendre sa taille à l'écran. */
+/* Au-dessus du centre plutôt qu'en plein milieu : le bas de l'écran est à la
+   boîte de dialogue. La toile est plus grande que la feuille n'en a l'air —
+   `frameModel` cadre sur toutes les poses, et le pli du tutoriel ne suit pas un
+   axe de symétrie du carré, donc des coins sortent de l'emprise en se repliant.
+   La feuille à plat n'occupe que les trois quarts du cadre. */
 .tuto__feuille {
   position: absolute;
   left: 50%;
@@ -1246,15 +1179,11 @@ body {
   opacity: 1;
 }
 
-/* Un simple chevron plein, tracé en SVG — pas le pliage de l'artiste, qui sert
-   déjà à signaler les sorties de scène. Les deux ne disent pas la même chose :
-   le marqueur de sortie fait partie du décor et attend qu'on le remarque, celle
-   d'ici interrompt une explication pour dire « regarde ça, maintenant ». Elle
-   pointe vers la droite dans son viewBox, et se pose donc à gauche de ce qu'elle
-   désigne (voir `designer()`).
-
-   L'accent du jeu et un liseré sombre : elle passe aussi bien sur le fond noir
-   de l'énigme que sur une pièce de papier clair. */
+/* Un chevron SVG, pas le pliage de l'artiste qui signale les sorties : celui-là
+   fait partie du décor et attend qu'on le remarque, celle-ci interrompt une
+   explication pour dire « regarde ça, maintenant ». Elle pointe à droite dans
+   son viewBox, donc se pose à gauche de ce qu'elle désigne. Liseré sombre pour
+   passer sur le fond noir comme sur une pièce claire. */
 .tuto__fleche {
   position: absolute;
   z-index: 5;
