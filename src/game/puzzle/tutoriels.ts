@@ -168,7 +168,7 @@ export const TUTORIELS = {
     etapes: [
       'Je vais devoir retrouver les plis nécessaires pour remettre ce pont en place.',
       "Pour l'instant je n'ai besoin que d'un type de pli : le pli vallée.",
-      "Il apparaît en bleu sur le schéma : tout ce que j'ai à faire, c'est remettre les pièces en place dans le carré.",
+      "Il apparaît en bleu sur les pièces : tout ce que j'ai à faire, c'est remettre les pièces en place dans le carré.",
       {
         faire: 'poser-une-piece',
         // Sautée avec l'effet : sur un plateau déjà entamé, aucune pièce ne
@@ -203,7 +203,7 @@ export const TUTORIELS = {
       // pas le temps de reconnaître la feuille d'avant.
       { faire: 'un-temps' },
       { faire: 'tracer-pli' },
-      'En rouge le pli montagne, là où le pli vallée était en bleu. Je vais le plier.',
+      'En rouge le pli montagne, là où le pli vallée était en bleu.',
       { faire: 'plier' },
       "Voilà un pli montagne. Le même trait que tout à l'heure, et le papier part de l'autre côté.",
       'Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simples de les combiner.',
@@ -211,7 +211,7 @@ export const TUTORIELS = {
       // dans la démonstration, on change seulement de papier.
       { faire: 'montrer-feuille', feuille: FEUILLE_BOMBE },
       { faire: 'tracer-pli' },
-      'Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes. Je vais la plier.',
+      'Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes.',
       { faire: 'plier' },
       // La réplique **avant** de ranger la feuille : c'est elle qui tient le
       // pliage à l'écran, le temps qu'on le regarde. L'effacer d'abord, c'était

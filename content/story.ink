@@ -76,13 +76,12 @@ VAR has_bois = false
 # qui: heros
 Pfiou... ce voyage de retour dans mon pays natal a été épuisant. Crôa crôa
 J'ai hâte de retrouver tous mes amis !
-Tiens, je ne me rappelais pas que la route était bloquée ici, qu'est-ce qu'il s'est passé ?
+Tiens, il me semblait qu'on pouvait traverser ce ravin avant, qu'est-ce qu'il s'est passé ?
 # flag: pont_vu
 -> DONE
 
 === pont_precipice ===
 # qui: heros
-J'aurais juré qu'on pouvait traverser ici avant... Crôa crôa
 Il devait y avoir un pont, mais plus aucune trace.
 -> DONE
 
@@ -99,7 +98,7 @@ Je devrais bien pouvoir en faire quelque chose.
 + [plier une catapulte]
     Si je traverse en catapulte, je risque de finir en pâté de grenouille...
 + [plier un pont]
-    Je me disais bien qu'il y avait un pont ici avant.
+    Essayons de remettre ce pont en place.
     -> pont_enigme
 + [plier un avion]
     Ça a l'air rigolo, mais j'ai bien peur de ne pas savoir piloter un tel engin...
@@ -124,7 +123,7 @@ Je vais pouvoir mettre en pratique mes talents d'origamiste ! Revoyons les bases
 
 === pont_enigme_issue ===
 { flag_pont_resolu:
-    Je n'ai pas trop perdu de mes talents d'origamiste. Bon, ce n'était que deux plis. # origami: pont # flag: pont_plie
+    Je n'ai pas trop perdu la main. Bon, ce n'était que deux plis. # origami: pont # flag: pont_plie
     Le pont se positionne pile au-dessus du vide, je vais pouvoir rentrer chez moi !
   - else:
     Hmm je crois avoir le syndrome de la page blanche...
@@ -236,7 +235,7 @@ Essayons de reproduire ce modèle d'arbre.
 }
 { not flag_arbre_demande:
     # qui: heros
-    Je pourrais couper l'arbre avec ma hache pour réparer la porte, mais je ne veux pas commettre un arbricide, même s'il paraît qu'il est déjà mort.
+    Je pourrais couper l'arbre avec ma hache pour réparer la porte, mais je ne veux pas commettre un arbricide, c'est un peu comme si je l'avais ressuscité en le pliant à nouveau.
     Je devrais demander l'autorisation à son fils d'abord.
     -> DONE
 }
@@ -370,7 +369,7 @@ Voilà un papier parfait pour plier une hache. Le côté métallisé fera une be
     Celui-là était plus complexe. # origami: hache # flag: hache_pliee # give: hache # drop: idee_hache
     Je vais pouvoir faire de belles planches avec cette hache toute neuve !
   - else:
-    Ça ne doit pas être ça...
+    Je réessayerai plus tard...
 }
 -> DONE
 
