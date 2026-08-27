@@ -1,20 +1,10 @@
 import { gameState } from '../game/systems/state';
 import { allerA, CHAPITRES } from '../game/systems/etapes';
 
-/**
- * Menu du jeu : plein écran et remise à zéro de la progression.
- *
- * Comme le reste de l'interface, c'est du DOM posé au-dessus du canvas — voir
- * la note d'architecture dans CLAUDE.md.
- */
+// Menu du jeu : plein écran et remise à zéro de la progression.
 
-/**
- * Le plein écran s'applique à `#app`, pas au canvas Phaser.
- *
- * Passer le seul canvas en plein écran laisserait dehors toute l'interface
- * (dialogues, inventaire, ce menu), puisqu'elle vit dans des éléments frères.
- * `#app` est le plus petit ancêtre qui contienne l'ensemble.
- */
+// Le plein écran s'applique à `#app` et pas au canvas : l'interface vit dans des
+// éléments frères et resterait dehors.
 function fullscreenTarget(): HTMLElement {
   return document.getElementById('app') ?? document.documentElement;
 }
@@ -31,9 +21,8 @@ type FullscreenCapableDocument = Document & {
 function fullscreenSupported(): boolean {
   const d = document as FullscreenCapableDocument;
   // Safari sur iPhone n'implémente toujours pas l'API plein écran pour un
-  // élément quelconque (seules les vidéos y ont droit). Sur ces appareils on
-  // masque l'entrée plutôt que d'offrir un bouton qui ne fait rien — et itch.io
-  // fournit de toute façon son propre plein écran.
+  // élément quelconque : mieux vaut masquer l'entrée qu'offrir un bouton inerte,
+  // et itch.io fournit de toute façon le sien.
   return Boolean(d.fullscreenEnabled || d.webkitFullscreenEnabled);
 }
 
@@ -58,13 +47,8 @@ async function toggleFullscreen(): Promise<void> {
   }
 }
 
-/**
- * Le sélecteur de point d'étape, en développement seulement.
- *
- * `import.meta.env.DEV` est remplacé par une constante à la compilation : en
- * production la condition est fausse, et le bloc — comme le module `etapes` —
- * disparaît du bundle. Rien de ce menu de test ne part sur itch.io.
- */
+// `import.meta.env.DEV` est remplacé par une constante à la compilation : en
+// production le bloc, et avec lui le module `etapes`, disparaît du bundle.
 function etapesHtml(): string {
   if (!import.meta.env.DEV) return '';
   const items = CHAPITRES.map(
@@ -75,7 +59,7 @@ function etapesHtml(): string {
 }
 
 export interface MenuOptions {
-  /** Appelé après un changement de mise en page (entrée/sortie de plein écran). */
+  // Appelé après une entrée ou une sortie de plein écran.
   onLayoutChange: () => void;
 }
 
@@ -85,7 +69,7 @@ export class Menu {
   private fullscreenItem: HTMLButtonElement;
   private confirm: HTMLElement;
   private etapes: HTMLElement;
-  /** Transparent, plein cadre : il absorbe les taps pendant que le menu est ouvert. */
+  // Transparent, plein cadre : il absorbe les taps pendant que le menu est ouvert.
   private voile: HTMLElement;
 
   constructor(
@@ -149,10 +133,10 @@ export class Menu {
     el.querySelectorAll<HTMLButtonElement>('.menu__item').forEach((item) => {
       item.addEventListener('pointerup', (e) => {
         e.stopPropagation();
-        // Le test `import.meta.env.DEV` est ici AUSSI, et pas seulement autour
-        // du HTML : sans lui, `CHAPITRES` reste référencé depuis ce
-        // gestionnaire, le module `etapes` ne peut pas être élagué, et la liste
-        // des points d'étape part dans le bundle publié. Vérifié — elle y était.
+        // Le test est ici AUSSI, et pas seulement autour du HTML : sans lui,
+        // `CHAPITRES` reste référencé depuis ce gestionnaire, `etapes` ne peut
+        // plus être élagué et la liste des points d'étape part dans le bundle
+        // publié. Vérifié — elle y était.
         if (import.meta.env.DEV) {
           const chapitre = item.dataset.chapitre;
           if (chapitre !== undefined) {
@@ -203,13 +187,8 @@ export class Menu {
     }
   }
 
-  /**
-   * Ouvre la fenêtre des points d'étape d'un chapitre (développement).
-   *
-   * La liste est construite à l'ouverture plutôt qu'au démarrage : elle ne sert
-   * qu'à ce moment-là, et la reconstruire évite d'entretenir des écouteurs sur
-   * des boutons cachés en permanence.
-   */
+  // La liste est construite à l'ouverture : elle ne sert qu'à ce moment-là, et
+  // la reconstruire évite d'entretenir des écouteurs sur des boutons cachés.
   private ouvrirEtapes(index: number) {
     if (!import.meta.env.DEV) return;
     const chapitre = CHAPITRES[index];
@@ -233,15 +212,10 @@ export class Menu {
     this.etapes.hidden = false;
   }
 
-  /**
-   * Écrase la sauvegarde puis recharge la page.
-   *
-   * Le rechargement complet n'est pas de la paresse : l'état de jeu n'est pas
-   * le seul à devoir repartir de zéro. Le récit ink garde ses propres variables
-   * dans son instance `Story`, la couche origami garde un contexte WebGL et un
-   * modèle chargé. Redémarrer la seule scène Phaser laisserait tout cela en
-   * place, avec une partie « neuve » qui se souviendrait des dialogues déjà lus.
-   */
+  // Le rechargement complet n'est pas de la paresse : ink garde ses variables
+  // dans son instance `Story` et la couche origami son contexte WebGL.
+  // Redémarrer la seule scène Phaser donnerait une partie « neuve » qui se
+  // souvient des dialogues déjà lus.
   private resetProgress() {
     gameState.reset();
     window.location.reload();
