@@ -208,9 +208,14 @@ Essayons de reproduire ce modèle d'arbre.
 # puzzle: arbre # then: pont_arbre_enigme_issue
 -> DONE
 
+// ⚠ Le `# origami:` porte une réplique, comme les trois autres pliages du
+// chapitre. Sur une ligne nue, le pliage se jouait cinq secondes en silence —
+// et surtout boîte fermée, donc l'inventaire restait tapable par-dessus
+// l'animation (`lignesEnCours` à zéro, voir `creerCase` dans ui/overlay.ts).
 === pont_arbre_enigme_issue ===
 { flag_arbre_resolu:
-    # origami: arbre # flag: arbre_plie # drop: idee_arbre
+    # qui: heros
+    Le papier se souvient de lui. # origami: arbre # flag: arbre_plie # drop: idee_arbre
     -> pont_vieil_arbre_plie
   - else:
     # qui: heros
@@ -237,10 +242,14 @@ Essayons de reproduire ce modèle d'arbre.
 }
 # qui: heros
 Je suis un peu ému à l'idée de transformer en planches ce respectable voisin que je connais depuis mon enfance...
+// ⚠ Les tags sont sur la LIGNE DU TEXTE, comme partout ailleurs dans ce
+// fichier. Sur une ligne à eux, ink ne les émet qu'au `Continue()` suivant,
+// c'est-à-dire au tap qui referme la boîte : l'arbre restait debout pendant
+// qu'on lisait qu'il était abattu, et la vignette du bois volait vers
+// l'inventaire une fois la réplique partie, quand plus personne ne regardait.
 + [découper le vieil arbre]
     # qui: narrateur
-    La hache travaille et notre vaillante grenouille est épuisée. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête !
-    # give: bois # drop: hache # flag: vieil_arbre_decoupe
+    La hache travaille et notre vaillante grenouille est épuisée. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête ! # give: bois # drop: hache # flag: vieil_arbre_decoupe
 + [le laisser debout]
     Je n'ai pas le coeur à faire ça pour l'instant...
 - -> DONE
