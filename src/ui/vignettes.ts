@@ -1,29 +1,16 @@
 import { objet, type Dessin } from '../game/systems/objets';
 import { urlApercuOrigami } from '../origami/apercu';
 
-/**
- * La vignette d'un objet d'inventaire.
- *
- * Deux sources, et une règle : **tout ce qui est un pliage se montre par son
- * modèle**. La vignette d'une idée et le but affiché pendant l'énigme sont donc
- * la même image, et l'objet obtenu la garde — le joueur suit un seul dessin de
- * « je sais faire ça » jusqu'à « j'ai ça ».
- *
- * Le reste est dessiné ici, au canvas, pour les mêmes raisons que les textures
- * de papier : quelques lignes plutôt qu'un PNG à télécharger.
- */
+// Une règle : tout ce qui est un pliage se montre par son modèle. La vignette
+// d'une idée, le but de l'énigme et l'objet obtenu sont donc la même image, et
+// le joueur suit un seul dessin de « je sais faire ça » à « j'ai ça ».
 
-/** Côté de la vignette, en pixels. Elle s'affiche à ~48 px. */
-const TAILLE = 128;
+const TAILLE = 128; // pixels ; elle s'affiche à ~48
 
 const vignettes = new Map<string, Promise<string | null>>();
 
-/**
- * URL de la vignette d'un objet, ou `null` s'il n'en a pas.
- *
- * Le résultat est mis en cache par identifiant : l'inventaire est redessiné à
- * chaque changement d'état, et rendre un modèle 3D à chaque fois serait absurde.
- */
+// En cache par identifiant : l'inventaire est redessiné à chaque changement
+// d'état, et rendre un modèle 3D à chaque fois serait absurde.
 export function vignette(id: string): Promise<string | null> {
   let promesse = vignettes.get(id);
   if (!promesse) {
@@ -50,12 +37,8 @@ async function resoudre(id: string): Promise<string | null> {
 }
 
 const DESSINS: Record<Dessin, (ctx: CanvasRenderingContext2D) => void> = {
-  /**
-   * Du bois : trois rondins vus en bout, empilés.
-   *
-   * Les cernes concentriques sont ce qui fait lire « bois coupé » plutôt que
-   * « cailloux » à 48 px — c'est le seul détail qu'on garde à cette taille.
-   */
+  // Les cernes concentriques font lire « bois coupé » plutôt que « cailloux » à
+  // 48 px : c'est le seul détail qui tienne à cette taille.
   bois: (ctx) => {
     const rondin = (cx: number, cy: number, r: number) => {
       ctx.fillStyle = '#8a6440';
