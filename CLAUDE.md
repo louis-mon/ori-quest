@@ -406,6 +406,20 @@ traditionnelle ne se referme pas complètement. Augmenter les itérations
 n'arrange rien — vérifié, ça donne un résultat *moins* replié. C'est une limite
 du modèle physique.
 
+**Une énigme ouverte doit survivre à un changement de taille du cadre.**
+`eparpiller()` écrit des **pixels** — le côté du plateau (`--plateau`), la
+largeur du bac (`--tray-width`), la position de chaque pièce en vrac — et ces
+valeurs ne valent que pour les dimensions mesurées au montage. Elle est donc
+rejouée sur `resize`, groupée dans une frame pour laisser `syncStage()` recaler
+le cadre d'abord. Le cas n'a rien de théorique : **sur itch.io le plein écran
+est un bouton du site**, hors du jeu, donc atteignable énigme ouverte, et sur
+téléphone la barre d'adresse qui se rétracte fait la même chose en plus discret.
+Sans ce recalcul, les pièces débordaient du cadre et le plateau perdait son
+carré. Deux précautions dans la fonction : effacer les deux variables avant de
+mesurer — sinon on mesure le plateau du calcul précédent et l'échelle rétrécit à
+chaque passage — et ne reposer que les pièces **encore dans le bac**, celles du
+plateau étant en pourcentages de la grille.
+
 **Hotspots qui se chevauchent** : la profondeur est assignée par surface
 croissante (`PontScene`), sinon la grande zone avale les taps destinés au
 détail posé dessus.
