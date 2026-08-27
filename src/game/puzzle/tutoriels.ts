@@ -181,7 +181,7 @@ export const TUTORIELS = {
       { faire: 'tracer-pli' },
       "J'ai ajouté le pli sur la feuille, en bleu. Voyons ce que ça donne en action.",
       { faire: 'plier' },
-      "Voilà ce qu'est un pli vallée. Un bon moyen mnémotechnique pour s'en rappeler : vallée comme la vallée d'une montagne.",
+      "Voilà ce qu'est un pli vallée. Un bon moyen mnémotechnique pour s'en souvenir : vallée comme la vallée d'une montagne.",
       { faire: 'cacher-feuille' },
       { faire: 'designer-aide' },
       'Tu peux rejouer ce tutoriel à tout moment avec ce bouton.',
@@ -206,7 +206,7 @@ export const TUTORIELS = {
       'En rouge le pli montagne, là où le pli vallée était en bleu. Je vais le plier.',
       { faire: 'plier' },
       "Voilà un pli montagne. Le même trait que tout à l'heure, et le papier part de l'autre côté.",
-      'Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simple de les combiner.',
+      'Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simples de les combiner.',
       // Remplace la feuille pliée sans rendre l'énigme au joueur : on reste
       // dans la démonstration, on change seulement de papier.
       { faire: 'montrer-feuille', feuille: FEUILLE_BOMBE },

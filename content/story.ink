@@ -95,7 +95,7 @@ Ok, heureusement que je ne suis pas trop lourd et que j'ai pas trop le vertige..
 === pont_feuille ===
 Une feuille de papier est posée devant le précipice.
 # qui: heros
-Je devrais bien pouvoir en faire quelque chose
+Je devrais bien pouvoir en faire quelque chose.
 + [plier une catapulte]
     Si je traverse en catapulte, je risque de finir en pâté de grenouille...
 + [plier un pont]
@@ -196,7 +196,7 @@ La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: ar
     Une grande feuille aux teintes de... feuille. Je ne sais pas quoi en faire pour le moment.
     -> DONE
 }
-Ca doit être là que se trouvait le vieil arbre. Je peux le faire revenir.
+Ça doit être là que se trouvait le vieil arbre. Je peux le faire revenir.
 -> pont_arbre_enigme
 
 === pont_arbre_enigme ===
@@ -281,7 +281,7 @@ Beaucoup de choses ont changé depuis mon départ...
     Ahah, très drôle. Moi aussi je voudrais bien rentrer. J'étais parti chercher des insectes effrayants pour faire peur au Petit Chat.
     Mais quand je suis revenu, plus de porte. À la place, il y a ce papier.
     # flag: porte_disparue # then: porte_renard_choix
-+ { flag_porte_disparue && not flag_renard_bois_su } [Parle moi de la porte]
++ { flag_porte_disparue && not flag_renard_bois_su } [Parle-moi de la porte]
     # qui: renard
     Bah, qu'est-ce que tu veux que je te dise...
     # qui: heros
@@ -292,7 +292,7 @@ Beaucoup de choses ont changé depuis mon départ...
     # qui: heros
     Bon, ça ira, je vais voir ce que je peux faire.
     # qui: renard
-    Dépêche-toi, je m'inquète quand même un peu pour le petit chat, je ne pourrais plus l'embêter s'il est transformé en feuille de papier.
+    Dépêche-toi, je m'inquiète quand même un peu pour le Petit Chat, je ne pourrai plus l'embêter s'il est transformé en feuille de papier.
     # flag: renard_bois_su # then: porte_renard_choix
 + { flag_renard_bois_su && not has_idee_hache && not flag_hache_pliee } [Tu as du bois ?]
     # qui: renard
@@ -358,7 +358,7 @@ Voilà un papier parfait pour plier une hache. Le côté métallisé fera une be
 === porte_hache_enigme_issue ===
 # qui: heros
 { flag_hache_resolu:
-    Celui là était plus complexe. # origami: hache # flag: hache_pliee # give: hache # drop: idee_hache
+    Celui-là était plus complexe. # origami: hache # flag: hache_pliee # give: hache # drop: idee_hache
     Je vais pouvoir faire de belles planches avec cette hache toute neuve !
   - else:
     Ça ne doit pas être ça...
