@@ -44,11 +44,13 @@ VAR flag_arbre_plie = false
 // L'accord du fils. C'est un savoir acquis, pas un objet : il est demandé une
 // fois et vaut pour toujours, y compris après que la hache a changé de main.
 VAR flag_arbre_demande = false
+VAR flag_arbre_merci = false
 VAR flag_vieil_arbre_decoupe = false
 
 // Chapitre 1 — la porte. Même partage : ce que le renard a dit reste su
 // (`flag_renard_bois_su`), l'idée qu'on en tire se dépense.
 VAR flag_porte_vue = false
+VAR flag_renard_vu = false
 VAR flag_porte_disparue = false
 VAR flag_renard_bois_su = false
 VAR has_idee_hache = false
@@ -169,6 +171,10 @@ La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: ar
   - flag_arbre_demande:
     # qui: arbre
     J'espère qu'il fera de beaux meubles !
+  // Avant la demande : on obtient la hache avant de plier l'arbre, donc la
+  // branche suivante gagnait toujours et ce merci n'était jamais atteint.
+  - flag_arbre_plie && not flag_arbre_merci:
+    -> pont_arbre_merci
   - flag_arbre_plie && has_hache:
     # qui: heros
     J'ai replié ton père, le vieux chêne vénérable ! Tu vas pouvoir te recueillir. En plus le pont est à nouveau là.
@@ -183,8 +189,15 @@ La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: ar
     # flag: arbre_demande
   - else:
     # qui: arbre
-    Snif...
+    Snif... Mon père me manque terriblement...
 }
+-> DONE
+
+=== pont_arbre_merci ===
+# qui: arbre
+Merci, Maître origamiste, d'avoir restauré le pont et feu mon vieux père.
+Les voyageurs qui se retrouvaient bloqués ici cesseront de m'importuner, et l'ombre de mon père m'évitera les coups de soleil.
+# flag: arbre_merci
 -> DONE
 
 // La grande feuille de la rive d'en face — le vieil arbre en puissance.
@@ -207,10 +220,8 @@ Essayons de reproduire ce modèle d'arbre.
 # puzzle: arbre # then: pont_arbre_enigme_issue
 -> DONE
 
-// ⚠ Le `# origami:` porte une réplique, comme les trois autres pliages du
-// chapitre. Sur une ligne nue, le pliage se jouait cinq secondes en silence —
-// et surtout boîte fermée, donc l'inventaire restait tapable par-dessus
-// l'animation (`lignesEnCours` à zéro, voir `creerCase` dans ui/overlay.ts).
+// ⚠ Le `# origami:` porte une réplique : sur une ligne nue le pliage se joue
+// boîte fermée, et l'inventaire reste tapable par-dessus l'animation.
 === pont_arbre_enigme_issue ===
 { flag_arbre_resolu:
     # qui: heros
@@ -241,11 +252,9 @@ Essayons de reproduire ce modèle d'arbre.
 }
 # qui: heros
 Je suis un peu ému à l'idée de transformer en planches ce respectable voisin que je connais depuis mon enfance...
-// ⚠ Les tags sont sur la LIGNE DU TEXTE, comme partout ailleurs dans ce
-// fichier. Sur une ligne à eux, ink ne les émet qu'au `Continue()` suivant,
-// c'est-à-dire au tap qui referme la boîte : l'arbre restait debout pendant
-// qu'on lisait qu'il était abattu, et la vignette du bois volait vers
-// l'inventaire une fois la réplique partie, quand plus personne ne regardait.
+// ⚠ Tags sur la LIGNE DU TEXTE : seuls, ink ne les émet qu'au `Continue()`
+// suivant, donc au tap qui referme la boîte — l'arbre serait resté debout
+// pendant qu'on lit qu'il est abattu.
 + [découper le vieil arbre]
     # qui: narrateur
     La hache travaille et notre vaillante grenouille est épuisée. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête ! # give: bois # drop: hache # flag: vieil_arbre_decoupe
@@ -274,6 +283,9 @@ Me voici arrivé devant le village fortifié du château. Mais je ne vois plus d
 // ink construit la liste des choix pendant le `Continue()` qui émet le tag, donc
 // avant que le drapeau ne soit levé.
 === porte_renard ===
+// Les retrouvailles ne se jouent qu'une fois : « tu n'as pas l'air malin coincé
+// ici » se retournait contre le héros une fois la porte posée.
+{ flag_renard_vu: -> porte_renard_suite }
 # qui: renard
 Mais voici notre origamiste royal de retour !
 # qui: heros
@@ -281,7 +293,17 @@ Content de te revoir, Monsieur le Renard Futé !
 Même si tu n'as pas l'air malin coincé ici.
 Dis-moi, tu n'as pas une idée de ce qu'il se passe ici ? D'abord le pont avait disparu et j'ai dû le replier, ensuite impossible de rentrer en ville, il y a juste une muraille.
 Beaucoup de choses ont changé depuis mon départ...
--> porte_renard_choix
+# flag: renard_vu
+-> porte_renard_suite
+
+=== porte_renard_suite ===
+{ - flag_porte_plie:
+    # qui: renard
+    La porte est de retour ! Le Petit Chat ne sait pas ce qui l'attend, héhé...
+  - else:
+    -> porte_renard_choix
+}
+-> DONE
 
 === porte_renard_choix ===
 + { not flag_porte_disparue } [Pourquoi tu restes planté là ? Tu n'as pas un vilain tour à préparer pour embêter le Petit Chat ?]
@@ -308,7 +330,10 @@ Beaucoup de choses ont changé depuis mon départ...
     # qui: heros
     Je suis origamiste, pas bûcheron, mais merci pour l'idée.
     # give: idee_hache # then: porte_renard_choix
-+ [Partir]
+// « Partir » seul en piste ne servait qu'à fermer une boîte que `pump()` ferme
+// déjà quand il ne reste aucun choix. Compteur plutôt que liste de drapeaux :
+// une option ajoutée demain n'obligera pas à la recopier ici.
++ { CHOICE_COUNT() > 0 } [Partir]
 - -> DONE
 
 // La grande feuille tendue dans l'embrasure, à la place du battant.

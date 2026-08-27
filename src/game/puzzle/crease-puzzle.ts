@@ -194,11 +194,8 @@ export async function runCreasePuzzle(
     <div class="puzzle__panel">
       <button class="puzzle__help" type="button" aria-label="Revoir un tutoriel">?</button>
       <h2 class="puzzle__title"></h2>
-      <!-- La légende est AU-DESSUS du plateau, contre le titre. Sous lui, elle
-           tombait derrière la boîte de dialogue — qui occupe le bas du cadre —
-           et le libellé « pli montagne » se retrouvait masqué pendant le
-           tutoriel qui vient justement de l'expliquer. Le haut du panneau, lui,
-           est libre : rien d'autre n'y passe. -->
+      <!-- Au-dessus du plateau : sous lui, la légende tombe derrière la boîte
+           de dialogue, qui occupe le bas du cadre. -->
       <ul class="puzzle__legend">
         ${legend
           .map(
@@ -321,26 +318,12 @@ export async function runCreasePuzzle(
     let finished = false;
 
     /**
-     * Refait la mise en page quand le cadre change de taille.
+     * `eparpiller()` écrit des pixels, qui ne valent que pour les dimensions
+     * mesurées au montage : sans ce recalcul, l'énigme redimensionnée devient
+     * injouable. Le cas arrive vraiment — sur itch.io le plein écran est un
+     * bouton du site, hors du jeu.
      *
-     * `eparpiller()` écrit des **pixels** : la taille du plateau, la largeur du
-     * bac, et la position de chaque pièce en vrac. Ces valeurs ne valent que
-     * pour les dimensions mesurées au montage. Sans ce recalcul, redimensionner
-     * pendant une énigme la rendait injouable — les pièces débordaient du cadre,
-     * le plateau perdait son carré, les boutons passaient dessous.
-     *
-     * Le cas n'a rien de théorique : **sur itch.io, le plein écran est un bouton
-     * du site**, hors du jeu, donc parfaitement atteignable énigme ouverte. Sur
-     * téléphone, la barre d'adresse qui se rétracte produit la même chose en
-     * plus discret.
-     *
-     * Le vrac est tiré d'une graine fixe, donc le tas se retrouve identique à
-     * l'échelle près : rien ne bouge du point de vue du joueur, tout se remet
-     * simplement à la bonne taille. Les pièces déjà posées, elles, sont en
-     * pourcentages du plateau et suivent toutes seules.
-     *
-     * Groupé dans une frame : un redimensionnement arrive en rafale, et
-     * `syncStage()` (main.ts) doit avoir recalé le cadre avant qu'on le mesure.
+     * Groupé dans une frame, le temps que `syncStage()` recale le cadre.
      */
     let recalculDemande = 0;
     const replacer = () => {
@@ -607,14 +590,10 @@ interface TrayLayout {
  * l'agrandit jamais, on ne fait que le rendre au bac quand le découpage est
  * trop encombrant.
  *
- * **Rejouable**, et c'est ce qui permet à l'énigme de survivre à un changement
- * de taille du cadre (voir `replacer()`). Deux précautions pour ça : on efface
- * d'abord les deux variables qu'on a écrites la fois d'avant, faute de quoi on
- * mesurerait le plateau de l'ancien calcul au lieu de son plafond CSS et
- * l'échelle rétrécirait à chaque passage ; et on ne repose que les pièces
- * **encore dans le bac** — celles du plateau sont en pourcentages de la grille
- * et suivent d'elles-mêmes, les repositionner en pixels les décrocherait de leur
- * case.
+ * **Rejouable** (voir `replacer()`), d'où deux précautions : effacer les deux
+ * variables écrites au passage précédent, sinon on mesure l'ancien plateau au
+ * lieu de son plafond CSS et l'échelle rétrécit à chaque fois ; et ne reposer
+ * que les pièces encore dans le bac, celles du plateau étant en pourcentages.
  */
 function eparpiller(
   root: HTMLElement,
@@ -666,8 +645,7 @@ function eparpiller(
   const pose = new Map<HTMLElement, PoseBac>();
   for (const [i, p] of pieces.entries()) {
     const ou = poses[i] ?? { x: 0, y: 0, w: p.boite.w * k, h: p.boite.h * k };
-    // La place de retour se met à jour pour **toutes** les pièces, y compris
-    // celles posées : c'est là qu'elles reviendront si le joueur les décroche.
+    // Y compris pour les pièces posées : c'est là qu'elles reviendront.
     pose.set(p.el, ou);
     if (p.el.parentElement !== tray) continue;
     p.el.style.width = `${ou.w}px`;
@@ -853,15 +831,9 @@ function makeDraggable(
   let height = 0;
 
   /**
-   * Ce que la pièce portait en style avant qu'on la saisisse.
-   *
-   * Ces propriétés-là sont écrites en ligne : `left`/`top` en pourcentages sur
-   * le plateau, en pixels dans le bac. Le glisser les écrase toutes, et un
-   * `pointercancel` doit pouvoir les rendre — les retirer, comme on le faisait,
-   * renvoie la pièce en `auto`, c'est-à-dire dans le coin haut-gauche de son
-   * conteneur, alors qu'elle reste enregistrée dans `placed` à son ancienne
-   * ancre. Ce qu'on voit et ce que « Vérifier » compte divergent alors en
-   * silence.
+   * Ce que la pièce portait en style avant la saisie : un `pointercancel` doit
+   * pouvoir le rendre. Les retirer renvoie la pièce en `auto`, donc dans le coin
+   * de son conteneur, alors qu'elle reste enregistrée à son ancienne ancre.
    */
   let avant: Partial<Record<'position' | 'width' | 'height' | 'left' | 'top', string>> = {};
 
@@ -912,8 +884,7 @@ function makeDraggable(
     piece.style.removeProperty('transform');
 
     if (dropped) {
-      // `onDrop` va reposer la pièce lui-même — `place()` ou `toTray()` — donc
-      // on lui rend une ardoise propre.
+      // `place()` ou `toTray()` va la reposer : on leur rend une ardoise propre.
       for (const prop of ['position', 'width', 'height', 'left', 'top'] as const) {
         piece.style.removeProperty(prop);
       }

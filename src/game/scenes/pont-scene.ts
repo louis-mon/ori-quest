@@ -43,11 +43,6 @@ import { dessinerFeuille } from './feuille';
 
 const PLAN = plan;
 
-/**
- * Le jeune arbre. Même pliage que le vieil arbre du fond — le père et le fils —
- * mais celui-ci est une photo posée dans le décor, quand l'autre est le modèle
- * `arbre.origami` rendu en 3D : lui, le joueur le plie.
- */
 const JEUNE_ARBRE = 'jeune-arbre';
 
 /**

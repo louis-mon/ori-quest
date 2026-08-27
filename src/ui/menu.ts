@@ -164,15 +164,9 @@ export class Menu {
       });
     });
 
-    // Un tap hors du menu le referme, comme le menu de verbes — et le **voile**
-    // est ce qui l'empêche d'aller déclencher autre chose au passage.
-    //
-    // L'écouteur ci-dessous est en bouillonnement sur `window`, quand Phaser,
-    // lui, écoute sur le canvas (`input.windowEvents: false`). Un tap sur le
-    // décor était donc traité par le jeu **puis** remontait fermer le menu :
-    // un seul geste, deux effets, et le hotspot sous le doigt partait alors
-    // qu'on voulait juste refermer. `occupeLeJoueur` ne pouvait pas l'attraper —
-    // il ne connaît que la boîte de dialogue et le menu de verbes.
+    // Le voile absorbe le tap qui referme le menu. Sans lui, Phaser le traite
+    // sur le canvas avant qu'il ne remonte à l'écouteur `window` ci-dessous :
+    // un seul geste, et le hotspot sous le doigt partait aussi.
     this.voile.addEventListener('pointerup', (e) => {
       e.stopPropagation();
       this.close();

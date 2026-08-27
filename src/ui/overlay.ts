@@ -360,6 +360,10 @@ export class Overlay {
   hideDialogue() {
     this.dialogue.hidden = true;
     this.dialogueChoices.innerHTML = '';
+    // Le texte part avec le reste : un knot qui ouvre directement des choix, sans
+    // réplique avant eux, rouvrait la boîte sur la dernière ligne du dialogue
+    // précédent — attribuée à personne, puisque le locuteur, lui, était rendu.
+    this.dialogueText.textContent = '';
     this.showSpeaker(null);
   }
 

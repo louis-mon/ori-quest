@@ -521,11 +521,8 @@ body {
   display: none;
 }
 
-/* La boîte se borne au cadre, et c'est la LISTE qui absorbe ce qui dépasse.
-   Sans ça, en paysage de téléphone, le titre et le bouton « Fermer »
-   s'ajoutaient aux 60 vh de la liste : la dernière étape passait sous le bouton,
-   inatteignable. `min-height: 0` est ce qui autorise un enfant flex à rétrécir
-   sous sa hauteur de contenu — sans lui, `overflow-y` ne défile jamais. */
+/* La boîte se borne au cadre, la liste absorbe ce qui dépasse. `min-height: 0`
+   autorise l'enfant flex à rétrécir : sans lui, `overflow-y` ne défile pas. */
 .menu__etapes .menu__confirm-box {
   display: flex;
   flex-direction: column;
@@ -551,15 +548,9 @@ body {
   letter-spacing: 0.08em;
 }
 
-/* Le voile du menu ouvert : transparent, plein cadre, et **sous le panneau**.
-   Il n'assombrit rien — il n'est là que pour avaler les taps, comme celui du
-   tutoriel. Sans lui, refermer le menu d'un tap sur le décor déclenchait au
-   passage le hotspot visé : Phaser traite l'événement sur le canvas, puis
-   celui-ci remonte jusqu'à l'écouteur `window` du menu.
-
-   `6`, et pas `4` comme l'énigme : à z-index égal c'est l'ordre du DOM qui
-   tranche, et l'énigme est montée bien après le menu. Le voile passait donc
-   dessous, et énigme ouverte le menu ne se refermait plus d'un tap à côté. */
+/* Transparent : il n'est là que pour avaler les taps, comme celui du tutoriel.
+   `6` et non `4` comme l'énigme — à z-index égal l'ordre du DOM tranche, et
+   l'énigme est montée après le menu. */
 .menu__voile {
   position: absolute;
   inset: 0;
@@ -573,11 +564,8 @@ body {
 /* `.menu` reste non positionné exprès : ses enfants se placent alors par
    rapport à #ui, ce qui permet à la confirmation de couvrir tout le cadre du
    jeu plutôt que le seul coin du bouton. */
-/* Au-dessus de son propre voile (6), donc au-dessus de l'énigme. Sans z-index,
-   le bouton restait **dessiné mais inerte** pendant toute une énigme : le tas de
-   pièces le recouvrait, et un bouton visible qui ne répond pas se lit comme un
-   jeu planté. La confirmation de remise à zéro, elle, était déjà au-dessus — le
-   chemin pour y arriver, non. */
+/* Au-dessus de son voile (6), donc de l'énigme : sans z-index le bouton restait
+   dessiné mais inerte sous le tas de pièces. */
 .menu__button {
   position: absolute;
   z-index: 7;
@@ -621,9 +609,8 @@ body {
   gap: 6px;
   padding: 8px;
   border-radius: 12px;
-  /* Opaque, et non 94 % : depuis que le menu s'ouvre par-dessus une énigme, ce
-     qu'il recouvre n'est plus le décor mais un tas de pièces très claires — les
-     traits de pli transparaissaient à travers les libellés. */
+  /* Opaque : le menu s'ouvre aussi par-dessus une énigme, dont les pièces très
+     claires transparaissaient à travers les libellés. */
   background: rgb(26, 23, 20);
   box-shadow: 0 8px 24px var(--shadow);
   animation: pop-down 140ms ease-out;
@@ -1289,11 +1276,8 @@ body {
 
 /* En haut à droite du cadre : le coin que l'énigme laisse libre — sa vignette
    de but est en haut à gauche, son bouton « ? » contre le bac. */
-/* Rangé **à gauche du bouton de menu**, pas dessus.
-   Les deux avaient le même ancrage — `top` et `right` à `--ui-gap` — et celui-ci
-   passait devant : on visait le menu, on ouvrait « Passer le tutoriel ? ». Le
-   décalage vaut la largeur du hamburger plus une gouttière, donc il suit le
-   bouton s'il change de taille au lieu d'être un nombre recopié. */
+/* À gauche du bouton de menu, qu'il recouvrait exactement. Le décalage vaut la
+   largeur du hamburger plus une gouttière, pour le suivre s'il change. */
 .tuto__passer {
   position: absolute;
   top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));

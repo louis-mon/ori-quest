@@ -183,8 +183,10 @@ export const TUTORIELS = {
       { faire: 'plier' },
       "Voilà ce qu'est un pli vallée. Un bon moyen mnémotechnique pour s'en souvenir : vallée comme la vallée d'une montagne.",
       { faire: 'cacher-feuille' },
-      { faire: 'designer-aide' },
+      // La réplique avant la flèche : un effet laisse à l'écran la ligne qui
+      // le précède, et c'est elle qui lui sert de légende.
       'Tu peux rejouer ce tutoriel à tout moment avec ce bouton.',
+      { faire: 'designer-aide' },
       'À nous de jouer maintenant.',
     ],
   },
