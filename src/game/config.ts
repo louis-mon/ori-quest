@@ -1,16 +1,10 @@
-/**
- * Résolution logique de référence. Tout le jeu est conçu dans cet espace de
- * coordonnées ; Phaser.Scale.FIT s'occupe de la mise à l'échelle et du
- * letterbox sur les écrans réels (du 16:9 au 20:9 des téléphones récents).
- */
+// Résolution logique de référence : tout le jeu est conçu dans cet espace, et
+// Phaser.Scale.FIT s'occupe de l'échelle et du letterbox.
 export const DESIGN_WIDTH = 1280;
 export const DESIGN_HEIGHT = 720;
 
-/**
- * Taille tactile minimale recommandée (~44px CSS sur un écran de téléphone,
- * converti dans notre espace logique). Toute zone cliquable plus petite que
- * ça est injouable au doigt.
- */
+// ~44 px CSS sur un téléphone, converti dans l'espace logique : plus petit est
+// injouable au doigt.
 export const MIN_TOUCH_SIZE = 88;
 
 export const COLORS = {

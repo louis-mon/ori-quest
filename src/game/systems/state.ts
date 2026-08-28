@@ -1,12 +1,10 @@
-/**
- * État de jeu global, sérialisable. Volontairement minimal : des drapeaux
- * booléens et un inventaire de chaînes. C'est tout ce dont un point & click a
- * besoin, et ça se sauvegarde en une ligne dans localStorage.
- */
+// Volontairement minimal : des drapeaux booléens et un inventaire de chaînes.
+// C'est tout ce dont un point & click a besoin, et ça tient en une ligne de
+// localStorage.
 
 const SAVE_KEY = 'ori-quest.save.v1';
 
-/** Scène de départ, et point de retour après une remise à zéro. */
+// Scène de départ, et point de retour après une remise à zéro.
 export const FIRST_ROOM = 'pont';
 
 export interface SaveData {
@@ -73,16 +71,10 @@ class GameState {
     this.autosave();
   }
 
-  /**
-   * Sauvegarde différée, à chaque changement d'état.
-   *
-   * `visibilitychange` et `pagehide` ne suffisaient pas : ils ne se déclenchent
-   * pas quand l'onglet est tué sans passer en arrière-plan (l'OS qui récupère
-   * de la mémoire sur mobile, un rechargement forcé), et toute la progression
-   * de la session était alors perdue. Un changement d'état est rare — un
-   * drapeau, un objet, une pièce — donc écrire à chaque fois ne coûte rien ;
-   * le délai n'est là que pour regrouper la rafale de tags d'une même réplique.
-   */
+  // `visibilitychange` et `pagehide` ne suffisaient pas : ils ne se déclenchent
+  // pas quand l'onglet est tué sans passer en arrière-plan, et la progression de
+  // la session était perdue. Un changement d'état est rare, donc écrire à chaque
+  // fois ne coûte rien ; le délai regroupe la rafale de tags d'une réplique.
   private autosaveTimer = 0;
 
   private autosave() {
@@ -95,8 +87,8 @@ class GameState {
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(this.data));
     } catch {
-      // Safari en navigation privée refuse localStorage : ne jamais crasher
-      // le jeu pour une sauvegarde ratée.
+      // Safari en navigation privée refuse localStorage : ne jamais crasher le
+      // jeu pour une sauvegarde ratée.
     }
   }
 
@@ -118,13 +110,9 @@ class GameState {
     }
   }
 
-  /**
-   * Remet la progression à zéro et **écrase** la sauvegarde par un état neuf.
-   *
-   * On réécrit plutôt qu'on ne supprime : effacer la clé laisserait le
-   * gestionnaire `pagehide` réenregistrer l'état courant pendant le rechargement
-   * qui suit, avec le risque de ressusciter la partie qu'on vient d'effacer.
-   */
+  // On réécrit plutôt qu'on ne supprime : effacer la clé laisserait `pagehide`
+  // réenregistrer l'état courant pendant le rechargement qui suit, et
+  // ressusciter la partie qu'on vient d'effacer.
   reset() {
     this.data = { room: FIRST_ROOM, flags: {}, inventory: [] };
     this.save();
