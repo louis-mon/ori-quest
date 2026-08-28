@@ -15,8 +15,8 @@ On ouvre le **projet**, pas les fichiers un par un :
 
 *File > Open File or Project…* → `game-design/scenes/ori-quest.tiled-project`
 
-Les scènes apparaissent alors dans le panneau *Project*, et les trois classes du
-jeu sont proposées dans une liste au lieu d'être à retaper.
+Les scènes apparaissent alors dans le panneau *Project*, et les classes du jeu
+sont proposées dans une liste au lieu d'être à retaper.
 
 Tiled est un éditeur de tile map détourné : il impose une grille de 80 px qui n'a
 aucun sens ici. C'est le prix à payer, et il se débraye — *View > Snapping > No
@@ -36,7 +36,7 @@ Chaque élément est un **objet**, et deux choses le décrivent :
 | la **classe** | ce que c'est — `hotspot`, `exit`, `decor` |
 | le **nom** | son identifiant côté code — `feuille`, `precipice` |
 
-Trois classes, c'est tout :
+Cinq classes, c'est tout :
 
 | Classe | Rôle | Ce que ça devient |
 | --- | --- | --- |
@@ -44,8 +44,9 @@ Trois classes, c'est tout :
 | `exit` | passage vers une autre scène | une zone tactile de navigation |
 | `decor` | repère de décor | un bord, une surface, une emprise |
 | `marqueur` | où se pose la cocotte | un point rattaché à la zone du même nom |
+| `chemin` | trajet d'un objet qui se déplace | une suite ordonnée de sommets |
 
-Quatre classes d'**objet**, s'entend : un *calque* porte lui aussi une classe, et
+Cinq classes d'**objet**, s'entend : un *calque* porte lui aussi une classe, et
 `fond` y désigne le terrain peint (plus bas).
 
 `decor` n'est pas cliquable : il sert à caler le dessin — où s'arrête le sol, où
@@ -66,6 +67,7 @@ généré, un accent ou une espace casserait le fichier.
 | **rectangle** | le cas normal | une boîte, élargie à 88 px si elle est plus petite |
 | **polygone** (`P`) | quand la forme *est* le propos — une berge en biais | le contour sert au test tactile, tel quel |
 | **point** (`I`) | une ancre, une position d'apparition | une boîte de taille nulle ; le code en prend le centre |
+| **polyligne** (`L`) | un trajet, et lui seul — classe `chemin` | la suite de ses sommets, dans l'ordre du tracé |
 
 Un polygone n'est **pas** élargi à la taille du pouce : l'élargir déplacerait
 son coin haut-gauche, donc le repère de son contour, et la forme touchée ne
@@ -182,6 +184,48 @@ L'import refuse un marqueur qui ne tient pas la promesse de son nom :
 - **une forme qui n'est pas un point** — un marqueur est une position, et un
   rectangle laisserait croire qu'on dimensionne la cocotte ici.
 
+### Un objet qui se déplace — la classe `chemin`
+
+Un trajet se dessine, comme le reste de la géométrie. C'est une **polyligne**
+(`L`), de classe `chemin`, avec un nom :
+
+```
+chemin  « fuite »  polyligne, du pied de l'arbre jusque hors du cadre
+```
+
+Elle ne dit **que le trajet**. Ce qui l'emprunte, à quelle vitesse, dans quel
+sens et quand, c'est la scène qui le décide — `deplacer()`, dans
+`src/game/scenes/deplacement.ts`. La carte ne sait pas ce qui passe dessus, et
+c'est ce qui permet au même tracé de servir deux fois.
+
+**Le sens est l'ordre des clics.** Une polyligne est ordonnée, le premier sommet
+est celui qu'on a posé en premier, et le `.tmj` le garde tel quel. Rien à
+déclarer — mais rien ne le montre non plus dans l'éditeur, où les deux bouts se
+ressemblent : `npm run scenes` affiche donc les extrémités de chaque chemin, dans
+l'ordre. Et un trajet parcouru dans les deux sens ne se dessine pas deux fois :
+`{ inverse: true }` retourne le même.
+
+**Le premier sommet est la position de l'objet** quand le déplacement commence.
+C'est une convention de dessin, pas un contrôle : le trajet part toujours de là
+où l'objet se trouve réellement, donc un premier sommet posé ailleurs le fait
+rejoindre plutôt qu'il ne l'y téléporte.
+
+**Un chemin a le droit de sortir du cadre.** Tiled ne borne pas les objets au
+plan : on tire le dernier sommet dans la zone grise, au-delà du bord, et c'est
+par là que l'objet quitte l'écran. Le tracé donne la **direction** et l'endroit
+du franchissement ; **la distance appartient au code** (`{ sortie: true }`), qui
+poursuit le dernier segment jusqu'à ce que l'objet ait entièrement disparu. Elle
+ne peut pas se dessiner : elle dépend de la taille de l'objet à l'écran, que la
+carte ne connaît pas.
+
+Aucune position n'est donc vérifiée sur un chemin — ni débordement, ni cible
+tactile. Seule la forme l'est : une polyligne, et au moins deux sommets.
+
+**Un déplacement ne bloque pas la scène.** Le joueur continue de toucher le
+décor pendant qu'un objet traverse — un nuage qui dérive n'a pas à suspendre la
+partie. `{ bloquant: true }` pour l'exception, ce qui doit être vu avant qu'on
+puisse agir.
+
 ## La carte est la source de vérité
 
 Le plan généré est figé en `as const`, et `boxOf` / `hotspotsFrom` en tirent la
@@ -209,6 +253,10 @@ L'import **refuse** une carte qui n'est pas au bon format, un objet sans classe
 ou sans nom, un nom en double dans la même classe, un nom qui n'est pas un
 identifiant valide, une boîte plate, et un marqueur qui ne désigne aucune zone,
 tombe hors de la sienne, est ambigu ou n'est pas tracé au point (voir plus haut).
+
+Il refuse aussi les deux confusions de forme autour de la polyligne : une zone
+tracée à la polyligne — un trait n'a pas d'intérieur, donc rien à toucher — et un
+`chemin` qui n'en est pas une.
 
 Il **signale**, sans refuser :
 

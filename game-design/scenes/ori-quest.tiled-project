@@ -51,6 +51,17 @@
             ]
         },
         {
+            "color": "#ffb07bd9",
+            "drawFill": false,
+            "id": 6,
+            "members": [],
+            "name": "chemin",
+            "type": "class",
+            "useAs": [
+                "object"
+            ]
+        },
+        {
             "color": "#ff6b8fbf",
             "drawFill": true,
             "id": 4,

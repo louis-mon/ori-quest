@@ -142,6 +142,17 @@ répartis sur `dec_nuages`, le feuillage calculé sur `hs_arbre`. *Où vit un
 code ; un pixel absolu qui ne dérive d'aucune boîte est le signe qu'il manque un
 repère dans la carte.
 
+**Un déplacement se dessine aussi**, classe `chemin` : une polyligne dont l'ordre
+des sommets est le sens de parcours, et dont le premier est la position de
+l'objet au départ. Elle ne dit que le trajet — `deplacer()`
+(`src/game/scenes/deplacement.ts`) accepte aussi bien un chemin qu'un repère du
+plan ou une position, et c'est la scène qui décide de la vitesse. **Sortir de
+l'écran ne se dessine qu'à moitié** : le dernier sommet tiré hors cadre donne la
+direction, la distance est calculée (`sortie`) parce qu'elle dépend de la taille
+de l'objet à l'écran, que la carte ne connaît pas. Et **un déplacement ne bloque
+pas la scène** — le décor reste touchable pendant qu'un objet traverse, sauf
+`bloquant: true` pour ce qui doit être vu avant qu'on puisse agir.
+
 **Le découpage des énigmes se dessine aussi, et ailleurs que dans le code.** Il
 vit dans `game-design/enigmes/<nom>.json`, se trace dans
 `http://localhost:5173/decoupage.html` (page de développement, hors build) et

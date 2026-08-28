@@ -13,6 +13,7 @@
  *   exit      passage vers une scène -> hotspot de navigation
  *   decor     repère de décor        -> bord, surface, position
  *   marqueur  où se pose la cocotte  -> point rattaché à la zone du même nom
+ *   chemin    trajet d'un objet      -> polyligne, la suite ordonnée des sommets
  *
  * Le NOM de l'objet est son identifiant côté code. Un `marqueur` ne s'en invente
  * donc pas un : il porte le nom de la zone qu'il désigne, et c'est ce nom qui
@@ -41,6 +42,12 @@ const ROLES = { hotspot: 'hotspots', exit: 'exits', decor: 'decor' };
 // À part : un marqueur n'est pas une zone mais un point posé SUR une zone. Il ne
 // sort pas dans une liste à lui, il s'accroche à celle qui porte le même nom.
 const CLASSE_MARQUEUR = 'marqueur';
+
+// À part aussi, et pour la raison inverse : un chemin n'est ni une zone ni une
+// position mais un trajet. Il sort tel qu'il est tracé — l'ordre des sommets est
+// le sens de parcours — et n'est soumis à aucun contrôle de position : un chemin
+// a le droit de sortir du cadre, c'est même par là qu'un objet quitte l'écran.
+const CLASSE_CHEMIN = 'chemin';
 
 // Classe du calque image qui porte le fond de la scène.
 const CLASSE_FOND = 'fond';
@@ -147,7 +154,13 @@ function geometrieDe(objet) {
     return { box: { x, y, w: 0, h: 0 }, forme: 'point' };
   }
   if (objet.polyline) {
-    return { erreur: 'une polyligne est un trait, pas une zone — utiliser un polygone' };
+    const points = tourner(
+      objet.polyline.map((p) => [x + p.x, y + p.y]),
+      x,
+      y,
+      rotation,
+    );
+    return { points, forme: 'polyligne' };
   }
   if (objet.gid !== undefined) {
     return { erreur: "un objet-tuile n'a pas de sens dans un plan — utiliser un rectangle" };
@@ -263,6 +276,7 @@ function importScene(fichier, nom) {
     hotspots: [],
     exits: [],
     decor: {},
+    chemins: {},
   };
 
   let carte;
@@ -300,7 +314,13 @@ function importScene(fichier, nom) {
     if (erreur) errors.push(erreur);
   }
 
-  const vus = { hotspot: new Set(), exit: new Set(), decor: new Set(), marqueur: new Set() };
+  const vus = {
+    hotspot: new Set(),
+    exit: new Set(),
+    decor: new Set(),
+    marqueur: new Set(),
+    chemin: new Set(),
+  };
   // Rattachés à leur zone une fois toutes les zones connues.
   const marqueurs = [];
 
@@ -315,8 +335,8 @@ function importScene(fichier, nom) {
       errors.push(`${ou} n'a pas de classe — la choisir dans Properties > Class`);
       continue;
     }
-    if (!ROLES[role] && role !== CLASSE_MARQUEUR) {
-      const connues = [...Object.keys(ROLES), CLASSE_MARQUEUR].join(', ');
+    if (!ROLES[role] && role !== CLASSE_MARQUEUR && role !== CLASSE_CHEMIN) {
+      const connues = [...Object.keys(ROLES), CLASSE_MARQUEUR, CLASSE_CHEMIN].join(', ');
       errors.push(`${ou} a la classe « ${role} », inconnue (${connues})`);
       continue;
     }
@@ -341,6 +361,29 @@ function importScene(fichier, nom) {
     const geo = geometrieDe(objet);
     if (geo.erreur) {
       errors.push(`« ${nomObjet} » : ${geo.erreur}`);
+      continue;
+    }
+
+    if (role === CLASSE_CHEMIN) {
+      if (geo.forme !== 'polyligne') {
+        errors.push(
+          `« ${nomObjet} » est un chemin ${geo.forme} — un chemin est un trajet, à ` +
+            "tracer avec l'outil Polyligne (raccourci L)",
+        );
+        continue;
+      }
+      if (geo.points.length < 2) {
+        errors.push(`« ${nomObjet} » n'a qu'un sommet — un chemin va d'un point à un autre`);
+        continue;
+      }
+      layout.chemins[nomObjet] = geo.points.map(([x, y]) => [Math.round(x), Math.round(y)]);
+      continue;
+    }
+    if (geo.forme === 'polyligne') {
+      errors.push(
+        `« ${nomObjet} » : une polyligne est un trait, pas une zone — utiliser un ` +
+          `polygone, ou la classe « ${CLASSE_CHEMIN} » si c'est un trajet`,
+      );
       continue;
     }
 
@@ -449,6 +492,9 @@ function importScene(fichier, nom) {
   layout.decor = Object.fromEntries(
     Object.entries(layout.decor).sort(([a], [b]) => a.localeCompare(b)),
   );
+  layout.chemins = Object.fromEntries(
+    Object.entries(layout.chemins).sort(([a], [b]) => a.localeCompare(b)),
+  );
 
   if (layout.hotspots.length === 0 && layout.exits.length === 0) {
     warn('aucun hotspot ni exit — les classes des objets sont-elles renseignées ?');
@@ -460,11 +506,13 @@ function importScene(fichier, nom) {
 // Écriture
 // ---------------------------------------------------------------------------
 
+const pointsLitteraux = (points) => `[${points.map(([x, y]) => `[${x}, ${y}]`).join(', ')}]`;
+
 const boiteLitterale = (b) => `{ x: ${b.x}, y: ${b.y}, w: ${b.w}, h: ${b.h} }`;
 
 function zoneLitterale(z) {
   let out = `{ id: '${z.id}', x: ${z.x}, y: ${z.y}, w: ${z.w}, h: ${z.h}`;
-  if (z.points) out += `, points: [${z.points.map(([x, y]) => `[${x}, ${y}]`).join(', ')}]`;
+  if (z.points) out += `, points: ${pointsLitteraux(z.points)}`;
   if (z.marqueur) out += `, marqueur: [${z.marqueur[0]}, ${z.marqueur[1]}]`;
   return `${out} }`;
 }
@@ -484,6 +532,12 @@ function rendre(layout) {
       ? '{}'
       : `{\n${reperes.map(([id, b]) => `    ${id}: ${boiteLitterale(b)},`).join('\n')}\n  }`;
 
+  const trajets = Object.entries(layout.chemins);
+  const chemins =
+    trajets.length === 0
+      ? '{}'
+      : `{\n${trajets.map(([id, pts]) => `    ${id}: ${pointsLitteraux(pts)},`).join('\n')}\n  }`;
+
   return `/**
  * Généré par « npm run scenes » — ne pas modifier à la main.
  * Source : ${layout.source}
@@ -495,6 +549,7 @@ export default {
   hotspots: ${liste(layout.hotspots)},
   exits: ${liste(layout.exits)},
   decor: ${decor},
+  chemins: ${chemins},
 } as const;
 `;
 }
@@ -554,9 +609,18 @@ function main() {
       `${layout.hotspots.length} hotspot(s)`,
       `${layout.exits.length} sortie(s)`,
       `${Object.keys(layout.decor).length} repère(s)`,
+      `${Object.keys(layout.chemins).length} chemin(s)`,
       `${[...layout.hotspots, ...layout.exits].filter((z) => z.marqueur).length} marqueur(s)`,
     ].join(', ');
     console.log(`  ${counts}`);
+
+    // L'ordre des sommets est le sens de parcours, et rien ne le montre dans
+    // Tiled : les deux bouts d'une polyligne se ressemblent. On le dit ici.
+    for (const [id, points] of Object.entries(layout.chemins)) {
+      const [dx, dy] = points[0];
+      const [ax, ay] = points[points.length - 1];
+      console.log(`  chemin « ${id} » : (${dx}, ${dy}) → (${ax}, ${ay})`);
+    }
 
     if (check) continue;
     mkdirSync(OUT_DIR, { recursive: true });

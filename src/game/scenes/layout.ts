@@ -31,6 +31,10 @@ export interface SceneLayout {
   readonly hotspots: readonly PlanZone[];
   readonly exits: readonly PlanZone[];
   readonly decor: { readonly [id: string]: Box };
+  // Les trajets, dans l'ordre où ils ont été tracés : l'ordre des sommets EST le
+  // sens de parcours, et le premier est la position de l'objet quand le
+  // déplacement commence.
+  readonly chemins: { readonly [id: string]: Contour };
 }
 
 // Les identifiants réellement présents dans une liste de zones du plan.
@@ -40,12 +44,17 @@ type Ids<Z extends readonly PlanZone[]> = Z[number]['id'];
 export type PlanRef<L extends SceneLayout> =
   `hs_${Ids<L['hotspots']>}` | `exit_${Ids<L['exits']>}` | `dec_${keyof L['decor'] & string}`;
 
+// Sans préfixe, contrairement à `PlanRef` : `cheminOf` n'a qu'un espace de noms
+// à désigner, là où `boxOf` en croise trois.
+export type CheminId<L extends SceneLayout> = keyof L['chemins'] & string;
+
 // Ce que la scène ajoute à la géométrie : le sens.
 type DuPlan = 'id' | 'x' | 'y' | 'w' | 'h' | 'points' | 'marqueur';
 export type HotspotContent = Omit<HotspotDef, DuPlan>;
 export type ExitContent = Omit<ExitDef, DuPlan>;
 
 const EMPTY: Box = { x: 0, y: 0, w: 0, h: 0 };
+const AUCUN_CHEMIN: Contour = [];
 
 // `hotspots()` est rappelé à chaque changement d'état : sans ce garde-fou, la
 // liste défilerait en boucle dans la console pendant la partie.
@@ -65,6 +74,15 @@ export function boxOf<L extends SceneLayout>(layout: L, ref: PlanRef<L>): Box {
   if (found) return found;
   console.error(`[plan] « ${ref} » est absent de ${layout.source} — pense à « npm run scenes »`);
   return EMPTY;
+}
+
+// Le tracé tel qu'il a été dessiné, à donner à `deplacer()`. Même garantie que
+// `boxOf` : un chemin absent de la carte ne compile pas.
+export function cheminOf<L extends SceneLayout>(layout: L, id: CheminId<L>): Contour {
+  const found = layout.chemins[id];
+  if (found) return found;
+  console.error(`[plan] le chemin « ${id} » est absent de ${layout.source} — « npm run scenes »`);
+  return AUCUN_CHEMIN;
 }
 
 // L'ordre du résultat suit celui de la table : c'est la scène qui décide de

@@ -14,6 +14,12 @@ import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
 import { signalerNonCables, type SceneLayout } from './layout';
+import {
+  deplacer as animerDeplacement,
+  type Destination,
+  type Mobile,
+  type OptionsDeplacement,
+} from './deplacement';
 
 export interface SceneServices {
   overlay: Overlay;
@@ -45,6 +51,11 @@ export abstract class PointClickScene extends Phaser.Scene {
   private emprises = new Map<string, Box>();
   // Centre du marqueur déjà posé, pour ne le refaire que s'il a bougé.
   private centres = new Map<string, string>();
+
+  // Déplacements en cours qui demandent l'attention du joueur. Un compteur et
+  // non un drapeau : deux objets peuvent partir ensemble, et le premier arrivé
+  // ne doit pas rendre la main pour l'autre.
+  private bloquants = 0;
 
   protected abstract hotspots(): HotspotDef[];
   protected abstract exits(): ExitDef[];
@@ -97,6 +108,30 @@ export abstract class PointClickScene extends Phaser.Scene {
     if (arrivee && !gameState.flag(arrivee.flag)) {
       this.time.delayedCall(400, () => void this.services.dialogue.run(arrivee.knot));
     }
+  }
+
+  // Emmène un objet du décor vers un chemin, un repère du plan ou une position.
+  // La promesse se dénoue à l'arrivée, mais **la scène n'est pas bloquée pour
+  // autant** : le joueur continue de toucher le décor pendant qu'un objet
+  // traverse, ce qui est le cas normal — un nuage qui dérive n'a pas à
+  // suspendre la partie. `bloquant: true` pour l'exception, ce qui doit être vu
+  // avant qu'on puisse agir.
+  //
+  // Le trajet part de la position courante de l'objet ; voir `deplacement.ts`.
+  protected deplacer(
+    objet: Mobile,
+    destination: Destination,
+    options: OptionsDeplacement = {},
+  ): Promise<void> {
+    const trajet = animerDeplacement(this, objet, destination, options);
+    if (!options.bloquant) return trajet;
+
+    this.bloquants++;
+    // Toujours décrémenté : la promesse se dénoue aussi quand la scène est
+    // quittée en cours de route, sans quoi le décor resterait sourd au retour.
+    return trajet.finally(() => {
+      this.bloquants--;
+    });
   }
 
   // Une boîte du plan est une emprise généreuse, et un élément qui change d'état
@@ -239,6 +274,9 @@ export abstract class PointClickScene extends Phaser.Scene {
     // où le moteur de narration travaille boîte fermée — une animation de
     // pliage, un changement de scène — sans qu'aucune réplique n'attende de tap.
     if (dialogue.isRunning || overlay.occupeLeJoueur) return;
+    // Un déplacement ordinaire laisse la scène jouable ; seul celui qui a
+    // demandé le silence compte ici.
+    if (this.bloquants > 0) return;
     if (def.visibleIf && !def.visibleIf()) return;
 
     if (estSortie(def)) {
