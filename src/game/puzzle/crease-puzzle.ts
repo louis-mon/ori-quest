@@ -1,40 +1,17 @@
-/**
- * Le minijeu commun à (presque) toutes les énigmes : reconstituer un crease
- * pattern à partir de morceaux découpés.
- *
- * Voir game-design/05-puzzle-crease-pattern.md. Le plateau est à gauche, les
- * pièces en vrac dans un bac à droite, un bouton vérifie la solution. Échec =
- * clignotement rouge et attente ; réussite = on rend la main à la scène, qui
- * joue le pliage.
- *
- * **Le découpage est un pavage de polygones**, décrit en cellules de la grille
- * d'ancrage et dessiné dans `decoupage.html` (voir `decoupage.ts`). Chaque pièce
- * porte sa position solution : c'est le coin haut-gauche de sa boîte
- * englobante. Le découpage n'est pas régulier, et c'est ce qui rend la solution
- * unique — des parts égales sur un motif symétrique laissent plusieurs
- * dispositions correctes alors qu'une seule est validée.
- *
- * **La grille d'ancrage** est plus fine que les pièces : une pièce lâchée
- * n'importe où se cale sur la cellule la plus proche, ce qui évite au joueur de
- * viser au pixel. Une pièce posée à cheval sur une voisine renvoie celle-ci au
- * bac plutôt que de la recouvrir.
- *
- * **Les pièces sont détourées, pas rognées à leur boîte.** Le polygone sert de
- * `clipPath` au motif et de silhouette au papier ; l'ombre portée est un
- * `drop-shadow` CSS, qui suit l'alpha du rendu, donc la découpe elle-même. Sans
- * ça, deux pièces qui se chevauchent dans le bac montreraient leurs rectangles.
- *
- * **Pourquoi en DOM et pas dans le canvas Phaser.** D'abord la règle
- * d'architecture du projet : toute l'interface est en DOM. Ensuite et surtout,
- * `input.windowEvents: false` limite volontairement Phaser aux événements du
- * canvas — un glisser dont le doigt sort du cadre n'y verrait jamais son
- * relâchement et laisserait la pièce collée au pointeur. En DOM,
- * `setPointerCapture` garantit que la pièce reçoit `pointermove` et `pointerup`
- * où que parte le doigt, y compris hors de la fenêtre.
- *
- * Les pièces ne pivotent pas : le découpage produit des morceaux distinguables
- * un à un, et une rotation rendrait ambigus des motifs souvent symétriques.
- */
+// Reconstituer un crease pattern à partir de morceaux découpés. Voir
+// game-design/05-puzzle-crease-pattern.md.
+//
+// Le découpage est un pavage de polygones décrit en cellules de la grille
+// d'ancrage, chaque pièce portant le coin de sa boîte comme position solution.
+// Il n'est pas régulier, et c'est ce qui rend la solution unique : des parts
+// égales sur un motif symétrique laissent plusieurs dispositions correctes.
+//
+// En DOM et pas dans le canvas : `input.windowEvents: false` limite Phaser aux
+// événements du canvas, et un glisser dont le doigt sort du cadre n'y verrait
+// jamais son relâchement. `setPointerCapture` le garantit.
+//
+// Les pièces ne pivotent pas : une rotation rendrait ambigus des motifs souvent
+// symétriques.
 
 import { urlApercuOrigami } from '../../origami/apercu';
 import type { NomTutoriel } from './tutoriels';
@@ -48,92 +25,53 @@ import {
   type Masque,
 } from './decoupage';
 
-/** Durée du clignotement rouge, calée sur l'animation CSS `puzzle-wrong`. */
+// Calé sur l'animation CSS `puzzle-wrong`.
 const FLASH_MS = 900;
 
-/**
- * Plus petite dimension tolérée pour une pièce dans le bac, en pixels **réels**.
- * Seuil ergonomique tactile, pas une proportion du décor : il ne suit pas
- * `--ui-scale`.
- */
+// Seuil ergonomique tactile en pixels réels, pas une proportion du décor : il ne
+// suit pas `--ui-scale`.
 const MIN_TOUCH_PX = 44;
 
-/** De combien on rétrécit l'échelle commune quand le vrac ne tient pas. */
 const PAS_ECHELLE = 0.96;
-/** Rétrécissements tentés avant de forcer le vrac coûte que coûte. */
 const ESSAIS_ECHELLE = 24;
 
 export interface CreasePuzzleDef {
-  /** Crease pattern solution, servi depuis public/ (chemin relatif). */
+  // Servi depuis public/, chemin relatif.
   svg: string;
-  /**
-   * Le modèle `.origami` qu'on est en train de plier, montré en vignette et
-   * agrandissable. C'est le but à atteindre : sans lui, le joueur reconstitue
-   * un motif abstrait sans savoir ce qu'il fabrique.
-   *
-   * C'est le **modèle rendu**, pas une illustration : le joueur reconnaît là ce
-   * qu'il va voir se plier, puis retrouver dans le décor et dans son inventaire.
-   */
+  // Le but à atteindre, et c'est le modèle rendu, pas une illustration : le
+  // joueur reconnaît là ce qu'il va voir se plier puis retrouver dans le décor.
   modele: string;
-  /** Grille d'ancrage et pièces, tirées de `game-design/enigmes/<nom>.json`. */
   decoupage: Decoupage;
-  /** Titre affiché au-dessus du plateau. */
   title: string;
-  /**
-   * Le tutoriel que cette énigme lance d'elle-même, la première fois qu'on
-   * l'ouvre. Voir `src/game/puzzle/tutoriels.ts`.
-   *
-   * Une énigme sans tutoriel n'en propose pas moins le bouton « ? » : c'est de
-   * là qu'on rejoue n'importe lequel des tutoriels, à tout moment.
-   */
+  // Lancé de lui-même à la première ouverture. Une énigme sans tutoriel garde le
+  // bouton « ? », d'où l'on rejoue n'importe lequel.
   tutoriel?: NomTutoriel;
 }
 
 export type PuzzleOutcome = 'solved' | 'abandoned';
 
-/**
- * Ce qu'un tutoriel peut faire de l'énigme qu'il recouvre.
- *
- * Le tutoriel vit **au-dessus** de l'énigme et lui interdit tout tap ; c'est
- * donc lui qui doit pouvoir bouger une pièce pour en faire la démonstration. On
- * lui donne le strict nécessaire plutôt que l'énigme entière — une poignée de
- * gestes nommés, pas le DOM à manipuler à l'aveugle.
- */
+// Le tutoriel vit au-dessus de l'énigme et lui interdit tout tap : c'est donc
+// lui qui doit pouvoir bouger une pièce. Une poignée de gestes nommés plutôt que
+// le DOM à manipuler à l'aveugle.
 export interface ControlePuzzle {
-  /** Le bouton « ? », que le tutoriel désigne du doigt avant de rendre la main. */
   readonly boutonAide: HTMLElement;
-  /**
-   * La pièce que la démonstration ira poser, ou `null` s'il n'y a rien à
-   * démontrer.
-   *
-   * La plus grande du bac : elle se suit du regard le plus facilement pendant
-   * qu'elle glisse, et sa place est la plus évidente une fois posée — le
-   * tutoriel montre le geste, il ne résout pas l'énigme à la place du joueur.
-   *
-   * **Seulement sur un plateau vide**, et c'est ce qui empêche d'en tirer une
-   * solution : le vrac du bac est tiré d'une graine fixe, donc plateau vide
-   * c'est toujours *la même* pièce qui part. Rejouer le tutoriel ne donne jamais
-   * rien de plus que la première fois. Sans cette condition, chaque lecture en
-   * posait une de plus et quatre suffisaient à résoudre le pont.
-   */
+  // La plus grande pièce du bac : elle se suit du regard le plus facilement.
+  //
+  // Seulement sur un plateau vide, et c'est ce qui empêche d'en tirer une
+  // solution : le vrac étant tiré d'une graine fixe, c'est toujours la même
+  // pièce qui part. Sans cette condition, quatre lectures du tutoriel
+  // suffisaient à résoudre le pont.
   pieceADemontrer(): HTMLElement | null;
-  /**
-   * Fait passer une pièce **au-dessus des autres** dans le bac.
-   *
-   * Le vrac les fait se chevaucher : une pièce désignée du doigt mais à moitié
-   * enfouie sous deux voisines ne se distingue pas, et la flèche semble montrer
-   * le tas plutôt qu'un morceau. À appeler avant de la désigner, pas au moment
-   * de la déplacer — c'est pendant qu'on la regarde qu'il faut la voir.
-   */
+  // Le vrac fait se chevaucher les pièces : une pièce désignée mais à moitié
+  // enfouie ne se distingue pas de son tas. À appeler avant de la désigner, pas
+  // au moment de la déplacer.
   mettreEnAvant(piece: HTMLElement): void;
-  /** Fait glisser une pièce jusqu'à sa position solution, à vitesse lisible. */
   poserEnSolution(piece: HTMLElement): Promise<void>;
 }
 
-/** Ouvre un tutoriel par-dessus l'énigme, et résout quand il se termine. */
 export type LanceurTutoriel = (
   controle: ControlePuzzle,
-  /** Le tutoriel de l'énigme, à l'ouverture — sinon le tap sur « ? ». */
+  // Le tutoriel de l'énigme à l'ouverture, sinon le tap sur « ? ».
   auto: boolean,
 ) => Promise<void>;
 
@@ -141,36 +79,26 @@ export interface OptionsPuzzle {
   tutoriel?: LanceurTutoriel;
 }
 
-/**
- * Durée du glissement démonstratif d'une pièce, en millisecondes.
- *
- * Lent pour un déplacement — c'est une démonstration, pas un geste : le joueur
- * doit avoir le temps de suivre la pièce du regard depuis le bac jusqu'à sa
- * place, et de comprendre que c'est *ça* qu'on lui demande de faire.
- */
+// Lent pour un déplacement : c'est une démonstration, le joueur doit avoir le
+// temps de suivre la pièce du regard du bac jusqu'à sa place.
 const DEMO_MS = 3000;
 
-/** Position d'une pièce sur la grille d'ancrage, en cellules. */
+// En cellules de la grille d'ancrage.
 interface Anchor {
   c: number;
   r: number;
 }
 
-/** Une pièce montée : son élément, sa forme, et de quoi tester les collisions. */
 interface Piece {
   el: HTMLElement;
-  /** Boîte englobante en cellules. Son coin est la position solution. */
+  // Boîte englobante en cellules. Son coin est la position solution.
   boite: Boite;
   masque: Masque;
 }
 
-/** Les `clipPath` vivent dans le document : leurs identifiants doivent l'être aussi. */
+// Les `clipPath` vivent dans le document : leurs identifiants doivent l'être.
 let numeroPuzzle = 0;
 
-/**
- * Ouvre l'énigme et résout quand le joueur a gagné ou abandonné.
- * Nettoie son DOM et ses minuteurs dans tous les cas.
- */
 export async function runCreasePuzzle(
   root: HTMLElement,
   def: CreasePuzzleDef,
@@ -237,9 +165,8 @@ export async function runCreasePuzzle(
   `;
   el.querySelector('.puzzle__title')!.textContent = def.title;
 
-  // Le rendu du modèle arrive en différé (three.js et le `.origami` sont
-  // chargés à la demande). L'énigme est jouable sans lui ; l'image se pose
-  // quand elle est prête.
+  // three.js et le `.origami` sont chargés à la demande : l'énigme est jouable
+  // sans le but, l'image se pose quand elle est prête.
   const buts = el.querySelectorAll<HTMLImageElement>('.puzzle__goal-image, .puzzle__zoom-image');
   void urlApercuOrigami(def.modele, { taille: 640 })
     .then((url) => {
@@ -260,8 +187,7 @@ export async function runCreasePuzzle(
   // n'aurait rien à ouvrir : mieux vaut qu'il ne soit pas là.
   help.hidden = !options.tutoriel;
 
-  // La vignette est petite par nécessité — elle ne doit pas manger le plateau —
-  // donc on donne un moyen de la regarder vraiment.
+  // La vignette ne doit pas manger le plateau, d'où l'agrandissement.
   goal.addEventListener('pointerup', (e) => {
     e.stopPropagation();
     zoom.hidden = false;
@@ -281,9 +207,8 @@ export async function runCreasePuzzle(
     piece.style.setProperty('--w', String(b.w));
     piece.style.setProperty('--h', String(b.h));
 
-    // La fenêtre découpée dans le motif, en unités du crease pattern : la
-    // boîte de la pièce, pas la pièce elle-même. Le polygone, lui, sert de
-    // `clipPath` — d'où le détourage.
+    // La fenêtre découpée dans le motif est la BOÎTE de la pièce ; le polygone,
+    // lui, sert de `clipPath`.
     const vx = viewBox.x + (b.x / grille) * viewBox.w;
     const vy = viewBox.y + (b.y / grille) * viewBox.h;
     const vw = (b.w / grille) * viewBox.w;
@@ -317,14 +242,10 @@ export async function runCreasePuzzle(
     const placed = new Map<HTMLElement, Anchor>();
     let finished = false;
 
-    /**
-     * `eparpiller()` écrit des pixels, qui ne valent que pour les dimensions
-     * mesurées au montage : sans ce recalcul, l'énigme redimensionnée devient
-     * injouable. Le cas arrive vraiment — sur itch.io le plein écran est un
-     * bouton du site, hors du jeu.
-     *
-     * Groupé dans une frame, le temps que `syncStage()` recale le cadre.
-     */
+    // `eparpiller()` écrit des pixels qui ne valent que pour les dimensions
+    // mesurées au montage. Le cas arrive vraiment : sur itch.io le plein écran
+    // est un bouton du site, hors du jeu, donc atteignable énigme ouverte.
+    // Groupé dans une frame, le temps que `syncStage()` recale le cadre.
     let recalculDemande = 0;
     const replacer = () => {
       if (finished || recalculDemande) return;
@@ -345,15 +266,10 @@ export async function runCreasePuzzle(
       resolve(outcome);
     };
 
-    /**
-     * Remet une pièce dans le bac, là où le vrac l'avait posée et à sa taille
-     * de bac.
-     *
-     * Deux détails qui ne se voient qu'à l'usage : le glisser lui a donné sa
-     * taille de plateau, qu'il faut défaire, sinon elle revient trop grande et
-     * déborde ; et elle est réinsérée en fin de bac, donc au-dessus des autres,
-     * ce qui la rend attrapable même si elle en recouvre une.
-     */
+    // Deux détails qui ne se voient qu'à l'usage : le glisser lui a donné sa
+    // taille de plateau, qu'il faut défaire, sinon elle revient trop grande ; et
+    // elle est réinsérée en fin de bac, donc au-dessus des autres, ce qui la
+    // rend attrapable même si elle en recouvre une.
     function toTray(piece: HTMLElement) {
       placed.delete(piece);
 
@@ -367,7 +283,7 @@ export async function runCreasePuzzle(
       tray.appendChild(piece);
     }
 
-    /** Pose une pièce sur la grille, en dégageant ce qu'elle recouvrirait. */
+    // Dégage au passage ce que la pièce recouvrirait.
     function place(piece: HTMLElement, anchor: Anchor) {
       const { masque: m } = pieceOf(piece);
       for (const [other, at] of placed) {
@@ -385,16 +301,9 @@ export async function runCreasePuzzle(
       board.appendChild(piece);
     }
 
-    /**
-     * Décide du sort d'une pièce lâchée : sur le plateau ou retour au bac.
-     *
-     * C'est le **point de relâchement** qui tranche, pas le rectangle de la
-     * pièce. Avec le rectangle, une pièce large de six cellules chevauchait
-     * encore le plateau même le doigt loin à l'extérieur : impossible de la
-     * rendre au bac. Le doigt, lui, dit sans ambiguïté où le joueur visait.
-     *
-     * La position du rectangle sert ensuite à choisir la cellule d'ancrage.
-     */
+    // C'est le point de relâchement qui tranche, pas le rectangle de la pièce :
+    // avec le rectangle, une pièce large de six cellules chevauchait encore le
+    // plateau le doigt loin dehors, et devenait impossible à rendre au bac.
     function drop(piece: HTMLElement, rect: DOMRect, x: number, y: number) {
       const b = board.getBoundingClientRect();
       const onBoard = x >= b.left && x <= b.right && y >= b.top && y <= b.bottom;
@@ -417,16 +326,10 @@ export async function runCreasePuzzle(
 
     // ---------- Le tutoriel ----------
 
-    /**
-     * Fait glisser une pièce du bac jusqu'à sa place, comme le ferait un doigt.
-     *
-     * Même mécanique que le glisser : `position: fixed` le temps du trajet, donc
-     * la pièce échappe au rognage du bac et passe au-dessus du reste. La taille
-     * est interpolée elle aussi — elle ne bouge plus, le bac et le plateau
-     * partageant maintenant la même échelle (voir `eparpiller`), mais elle
-     * bougerait de nouveau si la fenêtre rétrécissait sous ce qui a été mesuré
-     * au montage, et un saut de taille en plein trajet se lit comme un défaut.
-     */
+    // `position: fixed` le temps du trajet, comme le glisser : la pièce échappe
+    // au rognage du bac. La taille est interpolée elle aussi — elle ne bouge
+    // plus, bac et plateau partageant la même échelle, mais elle bougerait si la
+    // fenêtre rétrécissait sous la taille mesurée au montage.
     function poserEnSolution(piece: HTMLElement): Promise<void> {
       const forme = pieceOf(piece).boite;
       const b = board.getBoundingClientRect();
@@ -481,8 +384,7 @@ export async function runCreasePuzzle(
           .el;
       },
       // Les pièces du bac se rangent dans l'ordre du DOM, sans `z-index` : la
-      // dernière insérée passe devant. C'est déjà ce dont `toTray` se sert pour
-      // rendre attrapable une pièce qui revient sur une autre.
+      // dernière insérée passe devant.
       mettreEnAvant: (piece) => tray.appendChild(piece),
       poserEnSolution,
     };
@@ -493,8 +395,7 @@ export async function runCreasePuzzle(
         e.stopPropagation();
         void lanceur(controle, false);
       });
-      // Le tutoriel d'ouverture ne bloque pas la promesse de l'énigme : il se
-      // pose par-dessus et lui rendra la main tout seul. C'est son voile qui
+      // Ne bloque pas la promesse de l'énigme : c'est le voile du tutoriel qui
       // interdit les taps entre-temps, pas une garde ici.
       void lanceur(controle, true);
     }
@@ -517,16 +418,13 @@ export async function runCreasePuzzle(
         return;
       }
 
-      // Aucune pénalité : on peut revérifier autant de fois qu'on veut. Seul
-      // le clignotement rouge signale l'erreur.
+      // Aucune pénalité : on revérifie autant de fois qu'on veut.
       board.classList.add('is-wrong');
       window.setTimeout(() => board.classList.remove('is-wrong'), FLASH_MS);
     });
 
-    // Abandonner ne se fait plus d'un seul tap : c'est la seule action de
-    // l'énigme qu'on ne peut pas défaire, et elle arrivait par erreur. Même
-    // fenêtre que la remise à zéro et que « Passer » le tutoriel — sûr à
-    // gauche, irréversible à droite.
+    // La seule action de l'énigme qu'on ne peut pas défaire, et elle arrivait
+    // par erreur : sûr à gauche, irréversible à droite.
     quit.addEventListener('pointerup', (e) => {
       e.stopPropagation();
       confirm.hidden = false;
@@ -536,8 +434,8 @@ export async function runCreasePuzzle(
       const action = (e.target as HTMLElement)
         .closest('[data-action]')
         ?.getAttribute('data-action');
-      // Le fond de la fenêtre ne referme rien : il n'est là que pour avaler les
-      // taps destinés au plateau.
+      // Le fond ne referme rien : il n'est là que pour avaler les taps destinés
+      // au plateau.
       if (!action) return;
       confirm.hidden = true;
       if (action === 'abandonner') finish('abandoned');
@@ -545,7 +443,7 @@ export async function runCreasePuzzle(
   });
 }
 
-/** Où et à quelle taille une pièce repose dans le bac, en pixels. */
+// Où et à quelle taille une pièce repose dans le bac, en pixels.
 interface PoseBac {
   x: number;
   y: number;
@@ -555,46 +453,30 @@ interface PoseBac {
 
 interface TrayLayout {
   pose: Map<HTMLElement, PoseBac>;
-  /** Pixels par cellule dans le bac. */
+  // Pixels par cellule dans le bac.
   scale: number;
 }
 
-/**
- * Jette les pièces en vrac dans le bac, **à la taille qu'elles auront sur le
- * plateau**.
- *
- * **En vrac, mais sans jamais sortir du bac** : le bac est la seule surface où
- * l'on est sûr qu'une pièce ne recouvre ni le plateau ni les boutons. Les
- * positions sont tirées d'un générateur **à graine fixe** (`graine()`), donc le
- * désordre est le même à chaque ouverture de la même énigme : deux parties se
- * comparent, un bug se reproduit, et rien ne dépend du hasard de la session.
- *
- * Le chevauchement est toléré — c'est ce qui fait le tas — mais mesuré et
- * plafonné : au-delà, une pièce disparaît sous une autre et devient
- * inattrapable. Il se mesure sur les **boîtes** des pièces, donc on en tolère
- * moins qu'il n'en paraît : deux boîtes qui mordent l'une sur l'autre de 15 %
- * ne montrent souvent aucun recouvrement de papier.
- *
- * **Une seule échelle `k` (pixels par cellule) pour le bac et pour le
- * plateau.** Le bac a longtemps rétréci ses pièces pour tenir dans sa colonne :
- * elles grossissaient d'un tiers à l'instant où on les attrapait, et ce saut,
- * pile au moment où le joueur commence son geste, se lit comme un défaut
- * d'affichage. Le plateau et le bac se partagent donc la largeur du cadre à
- * **la même échelle**, et c'est cette échelle-là qu'on cherche : la plus grande
- * qui laisse au bac de quoi étaler son tas.
- *
- * Les deux contraintes tirent en sens inverse — agrandir les pièces agrandit le
- * plateau, donc rétrécit le bac au moment même où il en faudrait plus —, d'où
- * la recherche par rétrécissements successifs plutôt qu'un calcul direct. Le
- * plafond est la taille naturelle du plateau (`min(70 %, …)` en CSS) : on ne
- * l'agrandit jamais, on ne fait que le rendre au bac quand le découpage est
- * trop encombrant.
- *
- * **Rejouable** (voir `replacer()`), d'où deux précautions : effacer les deux
- * variables écrites au passage précédent, sinon on mesure l'ancien plateau au
- * lieu de son plafond CSS et l'échelle rétrécit à chaque fois ; et ne reposer
- * que les pièces encore dans le bac, celles du plateau étant en pourcentages.
- */
+// Jette les pièces en vrac, à la taille qu'elles auront sur le plateau.
+//
+// Les positions viennent d'un générateur à graine fixe : le désordre est le même
+// à chaque ouverture, donc un bug de placement se reproduit. Le chevauchement
+// est toléré — c'est ce qui fait le tas — mais plafonné, sinon une pièce
+// disparaît sous une autre. Il se mesure sur les boîtes, donc on en tolère moins
+// qu'il n'y paraît : deux boîtes qui mordent de 15 % ne montrent souvent aucun
+// recouvrement de papier.
+//
+// Une seule échelle `k` pour le bac et le plateau : quand le bac rétrécissait
+// ses pièces pour tenir dans sa colonne, elles grossissaient d'un tiers à
+// l'instant où on les attrapait. Les deux contraintes tirent en sens inverse —
+// agrandir les pièces agrandit le plateau, donc rétrécit le bac —, d'où la
+// recherche par rétrécissements successifs. Le plafond est la taille naturelle
+// du plateau : on ne l'agrandit jamais.
+//
+// Rejouable, d'où deux précautions : effacer les deux variables du passage
+// précédent, sinon on mesure l'ancien plateau au lieu de son plafond CSS et
+// l'échelle rétrécit à chaque fois ; et ne reposer que les pièces encore dans le
+// bac, celles du plateau étant en pourcentages.
 function eparpiller(
   root: HTMLElement,
   tray: HTMLElement,
@@ -611,14 +493,11 @@ function eparpiller(
   const flanc = tray.parentElement!.getBoundingClientRect();
   const hauteur = tray.getBoundingClientRect().height;
 
-  // Ce que la mise en page prend en largeur hors plateau et hors bac : les
-  // marges du cadre, la gouttière entre les deux colonnes, et une gouttière de
-  // plus pour que le plateau ne vienne pas coller au tas. Mesuré sur la page
-  // plutôt que recopié du CSS — sinon les deux divergent au premier réglage.
+  // Mesuré sur la page plutôt que recopié du CSS, sinon les deux divergent au
+  // premier réglage.
   const gouttiere = flanc.left - panneau.right;
   const reserve = cadre.width - panneau.width - flanc.width + gouttiere;
 
-  /** Ce qui reste au bac quand le plateau prend `cote` pixels de côté. */
   const largeurBac = (cote: number) => cadre.width - reserve - cote;
 
   // Le plafond : le côté que le CSS donne au plateau quand rien ne le serre.
@@ -634,12 +513,11 @@ function eparpiller(
       largeur = largeurBac(grille * k);
     }
   }
-  // Dernier recours : à cette taille-là toutes les pièces tiennent côte à côte
-  // dans le bac, le vrac n'a plus le choix.
+  // Dernier recours : à cette taille toutes les pièces tiennent côte à côte.
   poses ??= tenterVrac(pieces, largeur, hauteur, k, seed, 1) ?? [];
 
-  // Le plateau se règle sur l'échelle trouvée, et non l'inverse : c'est tout ce
-  // qui fait qu'une pièce garde sa taille en passant du bac à la grille.
+  // Le plateau se règle sur l'échelle trouvée, et non l'inverse : c'est ce qui
+  // fait qu'une pièce garde sa taille en passant du bac à la grille.
   root.style.setProperty('--plateau', `${grille * k}px`);
 
   const pose = new Map<HTMLElement, PoseBac>();
@@ -669,18 +547,16 @@ function eparpiller(
   return { pose, scale: k };
 }
 
-/** Recouvrement toléré entre deux boîtes, en part de la plus petite des deux. */
+// En part de la plus petite des deux boîtes.
 const CHEVAUCHEMENT = 0.18;
-/** Ce qu'on accepte faute de mieux, plutôt que de tout rétrécir encore. */
+// Ce qu'on accepte faute de mieux, plutôt que de tout rétrécir encore.
 const CHEVAUCHEMENT_MAX = 0.4;
-/** Positions tirées par pièce avant d'abandonner cette taille. */
+// Positions tirées par pièce avant d'abandonner cette taille.
 const ESSAIS = 400;
 
-/**
- * Un jet de pièces à la taille `k`, ou `null` si le bac est trop petit pour ça.
- * Les grandes pièces d'abord : posées en dernier, elles ne trouvent plus de
- * place et font échouer des tailles pourtant tenables.
- */
+// `null` si le bac est trop petit. Les grandes pièces d'abord : posées en
+// dernier, elles ne trouvent plus de place et font échouer des tailles pourtant
+// tenables.
 function tenterVrac(
   pieces: Piece[],
   largeur: number,
@@ -695,9 +571,8 @@ function tenterVrac(
   );
 
   const poses: PoseBac[] = new Array(pieces.length);
-  // Les pièces déjà posées, dans l'ordre où elles l'ont été. Une liste à part,
-  // et non `poses` : celle-ci se remplit dans le désordre des tailles, et ses
-  // trous se compareraient à `undefined`.
+  // Une liste à part, et non `poses` : celle-ci se remplit dans le désordre des
+  // tailles, et ses trous se compareraient à `undefined`.
   const deja: PoseBac[] = [];
 
   for (const i of ordre) {
@@ -729,7 +604,7 @@ function tenterVrac(
   return poses;
 }
 
-/** Part de la plus petite des deux boîtes que l'autre recouvre. */
+// Part de la plus petite des deux boîtes que l'autre recouvre.
 function recouvrement(a: PoseBac, b: PoseBac): number {
   const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
   const h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
@@ -737,11 +612,8 @@ function recouvrement(a: PoseBac, b: PoseBac): number {
   return (w * h) / Math.min(a.w * a.h, b.w * b.h);
 }
 
-/**
- * Générateur pseudo-aléatoire à graine (mulberry32) : même graine, même vrac.
- * `Math.random()` donnerait un tas différent à chaque ouverture, donc un bug
- * de placement impossible à revoir.
- */
+// mulberry32 : même graine, même vrac. `Math.random()` donnerait un tas
+// différent à chaque ouverture, donc un bug de placement impossible à revoir.
 function melangeur(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
@@ -752,10 +624,8 @@ function melangeur(seed: number): () => number {
   };
 }
 
-/**
- * La graine vient de l'énigme elle-même (son chemin de motif), pas d'un nombre
- * écrit à la main : chaque énigme a son vrac, et il ne bouge pas.
- */
+// La graine vient du chemin de motif de l'énigme, pas d'un nombre écrit à la
+// main : chaque énigme a son vrac, et il ne bouge pas.
 function graine(texte: string): number {
   let h = 2166136261;
   for (let i = 0; i < texte.length; i++) {
@@ -769,15 +639,9 @@ function clamp(v: number, lo: number, hi: number) {
   return Math.min(Math.max(v, lo), hi);
 }
 
-/**
- * Charge le crease pattern et en extrait de quoi fabriquer les pièces.
- *
- * Le `<style>` embarqué par ORIPA est retiré : injecté tel quel dans la page il
- * s'appliquerait au document entier (les styles d'un SVG inline ne sont pas
- * encapsulés), et il serait dupliqué à chaque pièce. Les classes `mo`/`va`/`bo`
- * sont restylées dans style.css, ce qui permet au passage d'accorder les plis à
- * la palette du jeu.
- */
+// Le `<style>` embarqué par ORIPA est retiré : les styles d'un SVG inline ne
+// sont pas encapsulés, il s'appliquerait au document entier et serait dupliqué à
+// chaque pièce. Les classes mo/va/bo sont restylées dans style.css.
 async function loadPattern(url: string) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`crease pattern introuvable : ${url}`);
@@ -788,9 +652,8 @@ async function loadPattern(url: string) {
 
   const [x, y, w, h] = (svg.getAttribute('viewBox') ?? '0 0 1000 1000').split(/[\s,]+/).map(Number);
 
-  // La légende se construit à partir du motif, pas d'une liste écrite à la main :
-  // le pont n'a que des plis vallée, et annoncer un pli montagne inexistant
-  // enverrait le joueur chercher une couleur qu'il ne trouvera jamais.
+  // La légende se construit à partir du motif : le pont n'a que des plis vallée,
+  // et annoncer un pli montagne enverrait chercher une couleur introuvable.
   return {
     viewBox: { x, y, w, h },
     inner: svg.innerHTML,
@@ -798,28 +661,19 @@ async function loadPattern(url: string) {
   };
 }
 
-/**
- * Rend une pièce déplaçable au doigt.
- *
- * `setPointerCapture` est le cœur du mécanisme : il redirige tous les
- * événements du pointeur vers la pièce jusqu'au relâchement, donc un doigt qui
- * sort du plateau — ou du cadre du jeu — ne laisse jamais de pièce orpheline.
- *
- * Pendant le glisser la pièce passe en `position: fixed`, centrée sous le doigt
- * et déjà à sa taille de plateau. Elle échappe ainsi à tout rognage par un
- * conteneur, et ce qu'on voit sous le doigt est exactement ce qui sera posé.
- *
- * Elle se déplace par `transform`, jamais par `left`/`top` : ces deux-là
- * repeignent la pièce — détourage et ombres portées compris — et le décor
- * derrière elle, à chaque frame. Elle traînait alors derrière la souris. Rien
- * ici ne lisse le mouvement ; un retard sur le pointeur est toujours un coût de
- * rendu, jamais une intention.
- *
- * L'écouteur est posé sur la pièce, mais le tap n'est reçu que par le papier :
- * le détourage laisse du vide dans la boîte, et c'est le CSS
- * (`pointer-events`) qui le rend traversant, sans quoi une pièce en recouvrirait
- * une autre par un coin transparent.
- */
+// `setPointerCapture` redirige tous les événements du pointeur vers la pièce
+// jusqu'au relâchement : un doigt qui sort du cadre ne laisse pas de pièce
+// orpheline. Elle passe en `position: fixed` le temps du glisser, échappant au
+// rognage de son conteneur.
+//
+// Elle se déplace par `transform`, jamais par `left`/`top` : ceux-là repeignent
+// la pièce — détourage et ombres compris — et le décor derrière elle à chaque
+// frame, et elle traînait derrière la souris. Rien ici ne lisse le mouvement :
+// un retard sur le pointeur est toujours un coût de rendu.
+//
+// Le tap n'est reçu que par le papier : le détourage laisse du vide dans la
+// boîte, que le CSS rend traversant, sinon une pièce en recouvrirait une autre
+// par un coin transparent.
 function makeDraggable(
   { el: piece, boite: forme }: Piece,
   board: HTMLElement,
@@ -830,11 +684,9 @@ function makeDraggable(
   let width = 0;
   let height = 0;
 
-  /**
-   * Ce que la pièce portait en style avant la saisie : un `pointercancel` doit
-   * pouvoir le rendre. Les retirer renvoie la pièce en `auto`, donc dans le coin
-   * de son conteneur, alors qu'elle reste enregistrée à son ancienne ancre.
-   */
+  // Un `pointercancel` doit pouvoir rendre ces styles : les retirer renverrait
+  // la pièce en `auto`, donc dans le coin de son conteneur, alors qu'elle reste
+  // enregistrée à son ancienne ancre.
   let avant: Partial<Record<'position' | 'width' | 'height' | 'left' | 'top', string>> = {};
 
   const moveTo = (x: number, y: number) => {
@@ -900,7 +752,7 @@ function makeDraggable(
   };
 
   piece.addEventListener('pointerup', (e) => end(e, true));
-  // Interruption système (appel entrant, geste de l'OS) : on repose la pièce
-  // là où elle était plutôt que de la téléporter sous le dernier point connu.
+  // Interruption système : on repose la pièce là où elle était plutôt que de
+  // la téléporter sous le dernier point connu.
   piece.addEventListener('pointercancel', (e) => end(e, false));
 }
