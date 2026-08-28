@@ -1,36 +1,18 @@
-/**
- * Ce que le héros emporte — registre des objets.
- *
- * **Une idée est un objet comme un autre.** Rien ne les distingue dans la
- * logique du jeu : même inventaire, même `# give:`, même condition `has_` dans
- * la narration. La seule différence est à l'écran, et elle se lit au nom : un
- * identifiant qui commence par `idee_` s'affiche dans une bulle. C'est ce qui
- * évite d'avoir deux mécanismes parallèles pour « savoir plier une hache » et
- * « avoir une hache » — deux choses que le joueur ne possède d'ailleurs jamais
- * en même temps.
- *
- * Des données, comme les personnages et les hotspots : ajouter un objet ne
- * demande pas de toucher au moteur.
- */
+// Une idée est un objet comme un autre : même inventaire, même `# give:`, même
+// condition `has_`. Seul l'affichage les distingue, à partir du préfixe `idee_`.
+// C'est ce qui évite deux mécanismes parallèles pour « savoir plier une hache »
+// et « avoir une hache », que le joueur ne possède jamais en même temps.
 
-/** Vignettes dessinées, pour ce qui n'est pas un pliage. Voir ui/vignettes.ts. */
+// Pour ce qui n'est pas un pliage. Voir ui/vignettes.ts.
 export type Dessin = 'bois';
 
 export interface Objet {
-  /** Nom affiché dans la case d'inventaire. Court : la colonne est étroite. */
+  // Court : la colonne d'inventaire est étroite.
   nom: string;
-  /** Texte affiché au tap, puis estompé. */
   description: string;
-  /**
-   * Modèle origami dont le rendu sert de vignette.
-   *
-   * Une **idée** porte le modèle qu'elle permet de plier : la vignette de
-   * l'inventaire est alors exactement l'image que l'énigme montre comme but,
-   * et l'objet obtenu garde la même. Le joueur suit un seul dessin du début à
-   * la fin — « je sais faire ça » puis « j'ai ça ».
-   */
+  // Une idée porte le modèle qu'elle permet de plier : sa vignette est alors
+  // l'image que l'énigme montre comme but, et l'objet obtenu garde la même.
   modele?: string;
-  /** Vignette dessinée, quand l'objet n'est pas un pliage. */
   dessin?: Dessin;
 }
 
@@ -53,24 +35,21 @@ export const OBJETS: Record<string, Objet> = {
   bois: {
     nom: 'Du bois',
     description: 'De belles planches de bois. Merci vieux chêne.',
-    // Le seul objet du chapitre qui ne soit pas un pliage : le vieil arbre a
-    // été découpé, il n'en reste que de la matière. D'où une vignette dessinée.
+    // Le seul objet du chapitre qui ne soit pas un pliage, d'où une vignette
+    // dessinée.
     dessin: 'bois',
   },
 };
 
-/** Une idée se dessine dans une bulle ; un objet, non. */
+// Une idée se dessine dans une bulle ; un objet, non.
 export function estIdee(id: string): boolean {
   return id.startsWith('idee_');
 }
 
 const inconnus = new Set<string>();
 
-/**
- * Un objet absent du registre reste jouable — il s'affiche sous son
- * identifiant, avec un avertissement. Écrire la narration ne doit pas attendre
- * que la fiche de l'objet existe.
- */
+// Un objet absent du registre reste jouable, sous son identifiant : écrire la
+// narration ne doit pas attendre que sa fiche existe.
 export function objet(id: string): Objet {
   const connu = OBJETS[id];
   if (connu) return connu;
