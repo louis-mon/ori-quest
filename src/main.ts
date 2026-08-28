@@ -26,19 +26,11 @@ if (import.meta.env.DEV) {
 
 const uiRoot = document.getElementById('ui')!;
 
-/**
- * Empêche les taps sur l'interface de se propager au-delà de la couche DOM.
- *
- * Filet de sécurité pour les écouteurs de niveau fenêtre (fermeture du menu au
- * tap extérieur, par exemple). L'étanchéité vis-à-vis du jeu, elle, vient de
- * `input.windowEvents: false` dans la configuration Phaser plus bas : Phaser
- * écoutait en phase de *capture*, donc traitait l'événement avant qu'il ne
- * parvienne ici.
- *
- * On écoute en bouillonnement : la cible doit d'abord traiter l'événement
- * normalement ; on ne fait que l'empêcher d'aller plus loin. `#ui` a
- * `pointer-events: none`, donc seul un vrai élément d'interface peut être cible.
- */
+// Filet de sécurité pour les écouteurs de niveau fenêtre. L'étanchéité
+// vis-à-vis du jeu vient de `input.windowEvents: false` plus bas.
+//
+// En bouillonnement : la cible traite l'événement normalement, on l'empêche
+// seulement d'aller plus loin.
 for (const type of ['pointerdown', 'pointerup'] as const) {
   uiRoot.addEventListener(type, (event) => {
     if (event.target !== uiRoot) event.stopPropagation();
@@ -49,14 +41,10 @@ const overlay = new Overlay(uiRoot);
 const origamiCanvas = document.getElementById('origami-canvas') as HTMLCanvasElement;
 const stage = document.getElementById('stage')!;
 
-/**
- * Recale la couche DOM/3D sur le canvas Phaser.
- *
- * En Scale.FIT le canvas est letterboxé : sa taille et sa position ne suivent
- * pas celles de la fenêtre. Sans cette synchro, l'inventaire et la 3D
- * atterrissent sur les bandes noires — très visible dès qu'on quitte le 16:9,
- * c'est-à-dire sur à peu près tous les téléphones.
- */
+// En Scale.FIT le canvas est letterboxé : sa taille et sa position ne suivent
+// pas celles de la fenêtre. Sans cette synchro, l'inventaire et la 3D dérivent
+// sur les bandes noires — dès qu'on quitte le 16:9, donc sur presque tous les
+// téléphones.
 function syncStage() {
   const canvas = game.canvas;
   if (!canvas) return;
@@ -66,42 +54,26 @@ function syncStage() {
   stage.style.width = `${rect.width}px`;
   stage.style.height = `${rect.height}px`;
 
-  // L'UI est en DOM, donc en pixels CSS : sans ce facteur elle garderait sa
-  // taille absolue pendant que le jeu rétrécit, et mangerait tout le cadre sur
-  // un petit écran. Plancher à 0.62 pour que le texte reste lisible et les
-  // cibles tactiles utilisables.
+  // L'UI est en pixels CSS : sans ce facteur elle garderait sa taille absolue
+  // pendant que le jeu rétrécit. Plancher à 0.62 pour que le texte reste lisible
+  // et les cibles tactiles utilisables.
   const scale = Math.max(Math.min(rect.width / DESIGN_WIDTH, 1), 0.62);
   stage.style.setProperty('--ui-scale', String(scale));
 }
 
-/**
- * La couche origami (et donc three.js) n'est instanciée qu'à la première
- * demande de pliage. Tant que le joueur n'en a pas déclenché un, elle ne coûte
- * ni téléchargement ni contexte WebGL supplémentaire.
- */
+// Instanciée à la première demande de pliage : tant que le joueur n'en a pas
+// déclenché un, three.js ne coûte ni téléchargement ni contexte WebGL.
 let origamiLayer: OrigamiLayer | null = null;
 
-/**
- * Temps pendant lequel le modèle reste à l'écran une fois plié.
- *
- * C'est le moment que le jeu doit récompenser : l'objet vient d'apparaître, il
- * se balance doucement, on le regarde. Trop court, on ne voyait que la fin du
- * mouvement et l'écran était déjà rendu à la scène. Le joueur pourra ensuite le
- * revoir tourner sur lui-même en le tapant dans son inventaire.
- */
+// Temps où le modèle reste à l'écran une fois plié. Trop court, on ne voit que
+// la fin du mouvement et l'écran est déjà rendu à la scène.
 const POSE_MS = 2600;
 
-/**
- * Vrai pendant qu'un pliage se joue.
- *
- * La couche 3D est unique : présenter un objet d'inventaire pendant qu'un
- * pliage est à l'écran remplacerait le modèle en cours de route. Le cas est
- * rare — l'inventaire est inerte pendant une réplique — mais un pliage se joue
- * justement entre deux répliques.
- */
+// La couche 3D est unique : présenter un objet d'inventaire pendant qu'un pliage
+// est à l'écran remplacerait le modèle en cours de route. Le cas est rare, mais
+// un pliage se joue justement entre deux répliques.
 let pliageEnCours = false;
 
-/** Instancie la couche 3D à la première demande, quelle qu'elle soit. */
 async function couche(): Promise<OrigamiLayer> {
   origamiLayer ??= await OrigamiLayer.create(origamiCanvas);
   return origamiLayer;
@@ -114,9 +86,9 @@ async function playFold(name: string) {
     await layer.load(name);
     layer.setFold(0);
     layer.show();
-    // On s'arrête au pliage de ce modèle-là, pas à 1 : c'est exactement la pose
-    // que le décor et l'inventaire montreront ensuite (voir origami/vue.ts), et
-    // la pose finale du solveur est souvent tout à fait plate.
+    // Au pliage de ce modèle-là, pas à 1 : c'est la pose que le décor et
+    // l'inventaire montreront ensuite, et la pose finale du solveur est souvent
+    // tout à fait plate.
     await layer.playTo(pliageDe(name), 2600);
     await new Promise((r) => setTimeout(r, POSE_MS));
     layer.hide();
@@ -129,10 +101,6 @@ async function playFold(name: string) {
   }
 }
 
-/**
- * Montre un modèle plié en grand, tournant sur lui-même, tant que le joueur
- * regarde l'objet correspondant dans son inventaire.
- */
 overlay.brancherApercu({
   montrer(modele) {
     if (pliageEnCours) return;
@@ -144,8 +112,8 @@ overlay.brancherApercu({
         await layer.load(modele);
         layer.presenter(pliageDe(modele));
       } catch (err) {
-        // Regarder un objet ne doit jamais rien casser : sans modèle, il reste
-        // sa description.
+        // Regarder un objet ne doit rien casser : sans modèle, il reste sa
+        // description.
         console.error(`[origami] aperçu de "${modele}" impossible`, err);
       }
     })();
@@ -155,14 +123,9 @@ overlay.brancherApercu({
   },
 });
 
-/**
- * Ouvre l'énigme demandée et publie son issue dans un drapeau `<nom>_resolu`,
- * que la narration relit juste après (voir content/story.ink).
- *
- * L'énigme est montée dans la couche DOM, au-dessus du canvas : c'est là que
- * vit toute l'interface, et c'est ce qui permet un glisser-déposer fiable
- * malgré `input.windowEvents: false`.
- */
+// Publie l'issue dans un drapeau `<nom>_resolu`, que la narration relit juste
+// après. Montée dans la couche DOM, ce qui permet un glisser-déposer fiable
+// malgré `input.windowEvents: false`.
 async function playPuzzle(name: string) {
   const def = PUZZLES[name];
   if (!def) {
@@ -176,24 +139,21 @@ async function playPuzzle(name: string) {
     });
     gameState.setFlag(`${name}_resolu`, outcome === 'solved');
   } catch (err) {
-    // Un crease pattern manquant ne doit pas bloquer la partie : on repart
-    // comme d'un abandon, la narration a déjà une branche pour ça.
+    // Un crease pattern manquant ne doit pas bloquer la partie : on repart comme
+    // d'un abandon, la narration a déjà une branche pour ça.
     console.error(`[puzzle] "${name}" n'a pas pu s'ouvrir`, err);
     gameState.setFlag(`${name}_resolu`, false);
   }
 }
 
-/**
- * Change de scène. Un seul chemin pour les deux façons d'en changer — le tag
- * ink `# goto:` et la flèche de navigation d'une scène — sinon l'une des deux
- * finit par oublier d'enregistrer la pièce courante.
- */
+// Un seul chemin pour les deux façons de changer de scène — le tag `# goto:` et
+// la flèche — sinon l'une des deux oublie d'enregistrer la pièce courante.
 const goto = (room: string) => {
   gameState.goTo(room);
 
-  // `start` démarre la scène demandée mais **n'arrête pas** celle qu'on quitte :
-  // les deux resteraient actives, avec deux décors superposés et deux jeux de
-  // zones tactiles. Invisible tant que le jeu n'avait qu'une pièce.
+  // `start` démarre la scène demandée mais n'arrête pas celle qu'on quitte : les
+  // deux resteraient actives, avec deux décors superposés et deux jeux de zones
+  // tactiles.
   for (const active of game.scene.getScenes(true)) {
     if (active.scene.key !== room) game.scene.stop(active.scene.key);
   }
@@ -201,16 +161,10 @@ const goto = (room: string) => {
   game.scene.start(room, { overlay, dialogue, goto });
 };
 
-/**
- * Donne un objet, et le montre arriver dans l'inventaire.
- *
- * Les deux gestes sont ici et pas dans l'état : `gameState.give()` sert aussi à
- * restaurer une sauvegarde et à sauter à un point d'étape, deux cas où il n'y a
- * rien à annoncer. Seul le tag `# give:` d'une réplique est une *obtention*.
- *
- * Rien à annoncer non plus quand l'objet est déjà là — un `# give:` rejoué sur
- * une branche déjà prise ne fait pas voler une seconde hache.
- */
+// Ici et pas dans l'état : `gameState.give()` sert aussi à restaurer une
+// sauvegarde et à sauter à un point d'étape, où il n'y a rien à annoncer. Seul
+// le tag `# give:` est une obtention — et pas quand l'objet est déjà là, sinon
+// un `# give:` rejoué ferait voler une seconde hache.
 function donner(item: string) {
   if (!gameState.has(item)) overlay.annoncerObtention(item);
   gameState.give(item);
@@ -233,41 +187,33 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  // `Scale.FIT` fige déjà le tampon de rendu à la taille de conception
-  // (1280x720) et laisse le navigateur l'agrandir : la densité de l'écran ne
-  // change donc rien au coût de remplissage, quel que soit le téléphone.
+  // `Scale.FIT` fige le tampon de rendu à 1280x720 et laisse le navigateur
+  // l'agrandir : la densité de l'écran ne change rien au coût de remplissage.
   render: {
     antialias: true,
     powerPreference: PREFERENCE_GPU,
   },
   input: {
-    // Par défaut Phaser double ses écouteurs sur `window`, en phase de
-    // *capture*, pour rattraper les relâchements hors canvas. Résultat : un tap
-    // sur un bouton de l'interface DOM était traité par le jeu avant même
+    // Par défaut Phaser double ses écouteurs sur `window` en phase de CAPTURE :
+    // un tap sur un bouton de l'interface DOM était traité par le jeu avant
     // d'atteindre le bouton, et déclenchait le hotspot situé dessous.
     //
-    // Le canvas ne reçoit que des taps. Le seul glisser du jeu — les pièces
-    // d'énigme — vit dans la couche DOM et s'appuie sur `setPointerCapture`,
-    // qui suit le doigt même hors du cadre. Se limiter au canvas ne coûte donc
-    // rien et rend la couche DOM réellement étanche.
+    // Le canvas ne reçoit que des taps ; le seul glisser du jeu vit dans la
+    // couche DOM et s'appuie sur `setPointerCapture`, qui suit le doigt hors du
+    // cadre.
     windowEvents: false,
   },
-  // Volontairement vide : les scènes sont enregistrées plus bas *sans* démarrage
-  // automatique. Listée ici, Phaser lancerait la première de lui-même, sans les
-  // services que main.ts injecte — la scène était alors créée deux fois, et
-  // chaque création laissait un abonné `gameState` de plus derrière elle.
+  // Volontairement vide : listée ici, Phaser lancerait la première scène de
+  // lui-même, sans les services que main.ts injecte — elle était créée deux fois,
+  // et chaque création laissait un abonné `gameState` de plus.
   scene: [],
 });
 
 if (import.meta.env.DEV) {
-  // Accès au jeu et à l'état depuis la console, en développement seulement.
-  // `etat` évite d'avoir à passer par une sauvegarde bricolée dans localStorage
-  // pour vérifier une branche de dialogue : `etat.setFlag('pont_plie')` suffit,
-  // et les scènes se mettent à jour toutes seules par l'abonnement.
-  // `plier('arbre')` rejoue une animation de pliage sans avoir à refaire
-  // l'énigme : c'est l'outil de réglage de la caméra et des textures.
-  // `donner('bois')` rejoue une obtention — le vol jusqu'à la colonne et son
-  // bandeau — sans avoir à retraverser le dialogue qui la déclenche.
+  // Accès depuis la console, en développement : `etat.setFlag('pont_plie')`
+  // vérifie une branche de dialogue sans sauvegarde bricolée, `plier('arbre')`
+  // rejoue un pliage sans refaire l'énigme, `donner('bois')` rejoue une
+  // obtention sans retraverser le dialogue.
   Object.assign(window, { game, etat: gameState, plier: playFold, donner });
 }
 
@@ -282,26 +228,23 @@ game.events.once(Phaser.Core.Events.READY, () => {
   game.scene.add('pont', PontScene, false);
   game.scene.add('porte', PorteScene, false);
 
-  // La scène restaurée depuis la sauvegarde, ou FIRST_ROOM pour une partie
-  // neuve : reprendre systématiquement à la première scène renverrait le joueur
-  // en arrière à chaque retour dans le jeu.
+  // La scène restaurée depuis la sauvegarde : repartir systématiquement de la
+  // première renverrait le joueur en arrière à chaque retour dans le jeu.
   game.scene.start(gameState.room, { overlay, dialogue, goto });
 });
 
 window.addEventListener('resize', syncStage);
-// L'orientation change avant que le navigateur n'ait fini de recalculer la
-// mise en page : un tick de retard évite de mesurer l'ancien cadre.
+// L'orientation change avant que le navigateur n'ait fini de recalculer la mise
+// en page : un tick de retard évite de mesurer l'ancien cadre.
 window.addEventListener('orientationchange', () => setTimeout(syncStage, 100));
 
-// Sauvegarde opportuniste : quand l'onglet passe en arrière-plan, c'est le
-// dernier moment fiable pour écrire sur iOS (l'onglet peut être tué ensuite).
+// Dernier moment fiable pour écrire sur iOS : l'onglet peut être tué ensuite.
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') gameState.save();
 });
 window.addEventListener('pagehide', () => gameState.save());
 
 // L'audio Web ne démarre qu'après un vrai geste utilisateur sur iOS/Safari.
-// On débloque le contexte au premier contact, quel qu'il soit.
 const unlockAudio = () => {
   const ctx = (game.sound as unknown as { context?: AudioContext }).context;
   if (ctx && ctx.state === 'suspended') void ctx.resume();
