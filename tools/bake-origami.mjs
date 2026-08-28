@@ -4,14 +4,11 @@
  *
  *   npm run bake -- content/origami/crane.svg --name crane
  *
- * Le pliage n'est pas modélisé à la main : on pilote Origami Simulator
- * (Amanda Ghassaei, MIT) dans un Chromium headless. Son solveur GPU résout la
- * géométrie pliée, et on échantillonne la position des sommets à N étapes de
- * pliage. Le jeu ne fait ensuite qu'interpoler entre ces poses — coût runtime
- * quasi nul, y compris sur un téléphone d'entrée de gamme.
+ * On pilote Origami Simulator (Amanda Ghassaei, MIT) dans un Chromium headless :
+ * son solveur GPU résout la géométrie pliée, et on échantillonne la position des
+ * sommets à N étapes. Le jeu ne fait ensuite qu'interpoler entre ces poses.
  *
- * Prérequis (une seule fois) :
- *   npx playwright install chromium
+ * Prérequis, une seule fois : npx playwright install chromium
  */
 import { createServer } from 'node:http';
 import { createReadStream, existsSync, mkdirSync, copyFileSync, writeFileSync } from 'node:fs';
@@ -165,8 +162,8 @@ async function main() {
   const browser = await chromium.launch({
     headless: !opts.keepOpen,
     args: [
-      // Origami Simulator résout le pliage dans des shaders WebGL avec
-      // textures flottantes ; SwiftShader les fournit sans GPU physique.
+      // Origami Simulator résout le pliage dans des shaders WebGL avec textures
+      // flottantes ; SwiftShader les fournit sans GPU physique.
       '--use-gl=angle',
       '--use-angle=swiftshader',
       '--enable-unsafe-swiftshader',
@@ -176,7 +173,7 @@ async function main() {
 
   const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
 
-  // Coupe l'analytics : inutile ici, et la requête pend en environnement isolé.
+  // Coupe l'analytics : la requête pend en environnement isolé.
   await page.route('**://www.googletagmanager.com/**', (r) => r.abort());
   await page.addInitScript(() => {
     window.gtag = () => {};
@@ -227,11 +224,11 @@ async function main() {
         const g = window.globals;
         g.creasePercent = t;
         // Sans ce drapeau, le solveur ne repousse jamais le nouveau pourcentage
-        // vers les uniformes GPU : la simulation tournerait indéfiniment sur la
+        // vers les uniformes GPU : la simulation tourne indéfiniment sur la
         // valeur figée à l'initialisation des shaders.
         g.shouldChangeCreasePercent = true;
-        // La pose finale reçoit plus d'itérations : c'est celle qu'on regarde
-        // le plus longtemps, elle doit être complètement relaxée.
+        // La pose finale reçoit plus d'itérations : c'est celle qu'on regarde le
+        // plus longtemps, elle doit être complètement relaxée.
         g.model.step(isLast ? Math.max(steps, settle) : steps);
         return Array.from(g.model.getPositionsArray());
       },
@@ -255,8 +252,8 @@ async function main() {
       await fail('La simulation a divergé (NaN)');
     }
 
-    // Une géométrie qui s'effondre sur un point passe le test NaN mais ne
-    // produit rien de visible : c'est l'autre façon dont ce solveur échoue.
+    // Une géométrie qui s'effondre sur un point passe le test NaN sans rien
+    // produire de visible : c'est l'autre façon dont ce solveur échoue.
     let extent = 0;
     for (let c = 0; c < 3; c++) {
       let min = Infinity;
