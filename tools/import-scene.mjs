@@ -6,41 +6,28 @@
  *   npm run scenes -- game-design/scenes/chapter-1/pont.tmj
  *   npm run scenes -- --check                         # valide sans écrire
  *
- * Le problème résolu : décrire une scène en français ne donne jamais de
- * coordonnées. « La feuille est à gauche du pont » demande trois allers-retours
- * avant d'être jouable. Un plan dessiné à l'échelle, lui, EST la coordonnée.
- *
- * Le plan se dessine dans Tiled (gratuit, libre) sur un cadre 1280x720 — la
- * résolution logique du jeu, cf. src/game/config.ts. Un objet par élément, et
- * c'est sa **classe** qui porte son rôle :
+ * Le plan se dessine dans Tiled sur un cadre 1280x720, un objet par élément, et
+ * c'est sa CLASSE qui porte son rôle :
  *
  *   hotspot   zone à examiner        -> hotspot, avec sa cocotte
  *   exit      passage vers une scène -> hotspot de navigation
  *   decor     repère de décor        -> bord, surface, position
  *   marqueur  où se pose la cocotte  -> point rattaché à la zone du même nom
  *
- * Le **nom** de l'objet est son identifiant côté code (`feuille`, `precipice`).
- * Un `marqueur` ne s'en invente donc pas un : il porte le nom de la zone qu'il
- * désigne, et c'est ce nom qui les relie — le code n'a rien à câbler.
+ * Le NOM de l'objet est son identifiant côté code. Un `marqueur` ne s'en invente
+ * donc pas un : il porte le nom de la zone qu'il désigne, et c'est ce nom qui
+ * les relie. Un calque image de classe `fond` porte le terrain peint ; les
+ * autres — le croquis posé dessous — restent ignorés.
  *
- * Un **calque image** de classe `fond` porte le terrain peint par l'artiste, et
- * il entre dans le jeu. Les autres — le croquis posé dessous pour placer les
- * zones — restent ignorés : c'est la classe qui départage, comme pour les
- * objets.
- *
- * La sortie est du **TypeScript** et non du JSON, et c'est délibéré : figée en
- * `as const`, elle donne au compilateur la liste exacte des noms du plan. Une
- * zone inventée dans le code — `dec_nuages` qui n'existe dans aucune carte —
- * devient une erreur de `tsc`, pas une découverte à l'exécution. Voir
- * src/game/scenes/layout.ts.
+ * La sortie est du TypeScript figé en `as const` : le compilateur connaît alors
+ * la liste exacte des noms du plan, et une zone inventée dans le code est une
+ * erreur de `tsc`, pas une découverte à l'exécution.
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 
-/**
- * Recopiés de src/game/config.ts : un outil Node ne peut pas importer du
- * TypeScript. Ces trois valeurs doivent rester synchronisées à la main.
- */
+// Recopiés de src/game/config.ts : un outil Node ne peut pas importer du
+// TypeScript. À tenir synchronisés à la main.
 const DESIGN_WIDTH = 1280;
 const DESIGN_HEIGHT = 720;
 const MIN_TOUCH_SIZE = 88;
@@ -48,36 +35,28 @@ const MIN_TOUCH_SIZE = 88;
 const SCENES_DIR = 'game-design/scenes';
 const OUT_DIR = 'src/generated/scenes';
 
-/** Classes reconnues -> clé du plan produit. */
+// Classes reconnues -> clé du plan produit.
 const ROLES = { hotspot: 'hotspots', exit: 'exits', decor: 'decor' };
 
-/**
- * La quatrième classe, à part : un marqueur n'est pas une zone du plan, c'est un
- * point posé **sur** une zone. Il ne sort donc pas dans une liste à lui — il
- * vient s'accrocher au hotspot ou à la sortie qui porte le même nom.
- */
+// À part : un marqueur n'est pas une zone mais un point posé SUR une zone. Il ne
+// sort pas dans une liste à lui, il s'accroche à celle qui porte le même nom.
 const CLASSE_MARQUEUR = 'marqueur';
 
-/** Classe du calque image qui porte le fond de la scène. */
+// Classe du calque image qui porte le fond de la scène.
 const CLASSE_FOND = 'fond';
 
-/** Le dossier que Vite sert tel quel : un fond doit y vivre pour arriver au jeu. */
+// Le dossier que Vite sert tel quel : un fond doit y vivre pour arriver au jeu.
 const PUBLIC_DIR = 'public';
 
-/** Un identifiant doit rester écrivable tel quel dans le code généré. */
+// Un identifiant doit rester écrivable tel quel dans le code généré.
 const ID_VALIDE = /^[a-z][a-z0-9_]*$/;
 
 // ---------------------------------------------------------------------------
 // Lecture de la carte
 // ---------------------------------------------------------------------------
 
-/**
- * Les objets de tous les calques, les groupes aplatis.
- *
- * Tiled autorise des calques de groupe imbriqués, avec leur propre décalage
- * (`offsetx`/`offsety`). On l'accumule en descendant plutôt que de l'ignorer :
- * un plan rangé dans un groupe déplacé sortirait sinon décalé du même montant.
- */
+// Tiled autorise des groupes imbriqués avec leur propre décalage : on l'accumule
+// en descendant, sinon un plan rangé dans un groupe déplacé sort décalé d'autant.
 function collecterObjets(calques, dx = 0, dy = 0) {
   const objets = [];
   for (const calque of calques ?? []) {
@@ -93,11 +72,8 @@ function collecterObjets(calques, dx = 0, dy = 0) {
   return objets;
 }
 
-/**
- * Les calques image, les groupes aplatis. Même accumulation du décalage que
- * ci-dessus — à ceci près qu'un calque image n'a pas de coordonnées propres :
- * sa position **est** son décalage.
- */
+// Même accumulation du décalage, à ceci près qu'un calque image n'a pas de
+// coordonnées propres : sa position EST son décalage.
 function collecterCalquesImage(calques, dx = 0, dy = 0) {
   const images = [];
   for (const calque of calques ?? []) {
@@ -118,7 +94,7 @@ const arrondir = (b) => ({
   h: Math.round(b.h),
 });
 
-/** Boîte englobante d'une liste de points. */
+// Boîte englobante d'une liste de points.
 function boiteDe(points) {
   const xs = points.map((p) => p[0]);
   const ys = points.map((p) => p[1]);
@@ -127,13 +103,9 @@ function boiteDe(points) {
   return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
 }
 
-/**
- * Un point est-il dans un polygone ? Lancer de rayon, la recette habituelle.
- *
- * Sert au seul contrôle des marqueurs : sur une zone tracée au polygone, la
- * boîte englobante ne dit rien — c'est le contour qui est le sujet, et un
- * marqueur posé dans un coin vide de la boîte tomberait à côté du dessin.
- */
+// Sert au seul contrôle des marqueurs : sur une zone tracée au polygone, la
+// boîte englobante ne dit rien, et un marqueur posé dans un coin vide tomberait
+// à côté du dessin.
 function dansLePolygone(px, py, points) {
   let dedans = false;
   for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
@@ -144,7 +116,7 @@ function dansLePolygone(px, py, points) {
   return dedans;
 }
 
-/** Applique la rotation Tiled (degrés, autour de l'origine de l'objet). */
+// Rotation Tiled : degrés, autour de l'origine de l'objet.
 function tourner(points, ox, oy, degres) {
   if (!degres) return points;
   const a = (degres * Math.PI) / 180;
@@ -157,10 +129,8 @@ function tourner(points, ox, oy, degres) {
   });
 }
 
-/**
- * Géométrie d'un objet Tiled, ramenée au vocabulaire du jeu : une boîte, et un
- * contour quand la zone est un polygone.
- */
+// Ramenée au vocabulaire du jeu : une boîte, et un contour quand la zone est un
+// polygone.
 function geometrieDe(objet) {
   const { x, y, width = 0, height = 0, rotation = 0 } = objet;
 
@@ -197,13 +167,9 @@ function geometrieDe(objet) {
   return { box: boiteDe(coins), forme: objet.ellipse ? 'ellipse' : 'rectangle', rotation };
 }
 
-/**
- * Dimensions réelles d'une image, en pixels.
- *
- * PNG et WebP seulement — les deux formats que l'artiste livre. Tout le reste
- * rend `null` : on préfère ne pas vérifier ce qu'on ne sait pas lire plutôt que
- * de refuser une carte par ailleurs valide.
- */
+// PNG et WebP seulement, les deux formats que l'artiste livre. Le reste rend
+// `null` : mieux vaut ne pas vérifier ce qu'on ne sait pas lire que refuser une
+// carte par ailleurs valide.
 function dimensionsImage(chemin) {
   const o = readFileSync(chemin);
 
@@ -219,8 +185,7 @@ function dimensionsImage(chemin) {
     o.toString('latin1', 8, 12) === 'WEBP'
   ) {
     switch (o.toString('latin1', 12, 16)) {
-      // VP8X, le WebP « étendu » — celui qui porte une couche alpha. Les
-      // dimensions du canevas y sont stockées sur 24 bits, moins un.
+      // VP8X, le WebP étendu : dimensions du canevas sur 24 bits, moins un.
       case 'VP8X':
         return { w: o.readUIntLE(24, 3) + 1, h: o.readUIntLE(27, 3) + 1 };
       // VP8, avec perte : en-tête de trame clé, 14 bits par dimension.
@@ -236,17 +201,12 @@ function dimensionsImage(chemin) {
   return null;
 }
 
-/**
- * Le fond de la scène : le terrain peint par l'artiste, posé sous le décor et
- * au-dessus du ciel.
- *
- * Le calque pointe **directement** le fichier que le jeu charge, dans
- * `public/`. C'est ce qui garantit qu'on place les zones, dans Tiled, sur les
- * pixels exacts que le joueur aura sous les yeux ; une copie de travail rangée
- * à côté de la carte finirait par diverger de celle du build.
- *
- * Rend `null` si tout va bien, le message d'erreur sinon.
- */
+// Le calque pointe DIRECTEMENT le fichier que le jeu charge, dans `public/` :
+// c'est ce qui garantit qu'on place les zones sur les pixels exacts que le
+// joueur aura sous les yeux. Une copie de travail rangée à côté de la carte
+// finirait par diverger de celle du build.
+//
+// Rend `null` si tout va bien, le message d'erreur sinon.
 function lireFond(calque, fichierCarte, layout, warn) {
   const ou = `« ${calque.name || CLASSE_FOND} »`;
   if (!calque.image) return `${ou} est de classe « ${CLASSE_FOND} » mais n'a pas d'image`;
@@ -265,10 +225,9 @@ function lireFond(calque, fichierCarte, layout, warn) {
   const h = Math.round(calque.imageheight ?? 0);
   if (w <= 0 || h <= 0) return `le fond ${ou} n'a pas de dimensions`;
 
-  // Tiled ne redimensionne jamais un calque image : ce qu'il affiche est la
-  // taille du fichier, et c'est cette taille-là que le jeu doit reprendre. Si
-  // les deux ont divergé, c'est que le fichier a changé depuis que la carte l'a
-  // lu — le jeu dessinerait alors autre chose que l'éditeur.
+  // Tiled ne redimensionne jamais un calque image. Si les deux tailles ont
+  // divergé, c'est que le fichier a changé depuis que la carte l'a lu, et le jeu
+  // dessinerait autre chose que l'éditeur.
   const reel = dimensionsImage(absolu);
   if (reel && (reel.w !== w || reel.h !== h)) {
     return (
@@ -332,7 +291,7 @@ function importScene(fichier, nom) {
   }
 
   // Les calques image sans classe sont ignorés : le croquis posé sous le plan
-  // pour placer les zones est un outil de travail, il n'entre pas dans le jeu.
+  // est un outil de travail, il n'entre pas dans le jeu.
   const fonds = collecterCalquesImage(carte.layers).filter((c) => c.class === CLASSE_FOND);
   if (fonds.length > 1) {
     errors.push(`${fonds.length} calques de classe « ${CLASSE_FOND} » — une scène n'a qu'un fond`);
@@ -342,12 +301,12 @@ function importScene(fichier, nom) {
   }
 
   const vus = { hotspot: new Set(), exit: new Set(), decor: new Set(), marqueur: new Set() };
-  /** Marqueurs lus, rattachés à leur zone une fois toutes les zones connues. */
+  // Rattachés à leur zone une fois toutes les zones connues.
   const marqueurs = [];
 
   for (const objet of collecterObjets(carte.layers)) {
-    // Tiled a renommé `type` en `class` en 1.9, mais écrit encore `type` dans
-    // les formats de carte antérieurs à 1.10 : les deux sont acceptés.
+    // Tiled a renommé `type` en `class` en 1.9, mais écrit encore `type` dans les
+    // formats antérieurs à 1.10 : les deux sont acceptés.
     const role = objet.class || objet.type || '';
     const nomObjet = (objet.name || '').trim();
     const ou = nomObjet ? `« ${nomObjet} »` : `l'objet #${objet.id}`;
@@ -371,8 +330,8 @@ function importScene(fichier, nom) {
       );
       continue;
     }
-    // L'unicité est **par classe** : `porte` peut être à la fois un hotspot et
-    // un repère de décor, ce sont deux choses différentes au même endroit.
+    // L'unicité est PAR CLASSE : `porte` peut être à la fois un hotspot et un
+    // repère de décor, deux choses différentes au même endroit.
     if (vus[role].has(nomObjet)) {
       errors.push(`« ${nomObjet} » apparaît deux fois en « ${role} »`);
       continue;
@@ -404,8 +363,8 @@ function importScene(fichier, nom) {
     }
 
     if (role === CLASSE_MARQUEUR) {
-      // Un marqueur est une position, pas une emprise : la cocotte a sa taille
-      // à elle, et un rectangle laisserait croire qu'on la dimensionne ici.
+      // Un marqueur est une position, pas une emprise : un rectangle laisserait
+      // croire qu'on dimensionne la cocotte ici.
       if (geo.forme !== 'point') {
         errors.push(
           `« ${nomObjet} » est un marqueur ${geo.forme} — un marqueur est un ` +
@@ -421,9 +380,9 @@ function importScene(fichier, nom) {
       layout.decor[nomObjet] = box;
       continue;
     }
-    // Une zone tactile plus petite que le pouce est élargie par touchRect() ;
-    // on le signale, parce que l'élargissement peut faire mordre sur un voisin.
-    // Un polygone, lui, n'est pas élargissable : sa forme est le propos.
+    // Une zone plus petite que le pouce est élargie par touchRect(), ce qui peut
+    // la faire mordre sur un voisin. Un polygone n'est pas élargissable : sa
+    // forme est le propos.
     if (geo.points) {
       if (box.w < MIN_TOUCH_SIZE || box.h < MIN_TOUCH_SIZE) {
         warn(
@@ -443,8 +402,8 @@ function importScene(fichier, nom) {
     layout[ROLES[role]].push(zone);
   }
 
-  // Les marqueurs se rattachent une fois toutes les zones lues : l'ordre des
-  // objets dans Tiled ne doit rien décider.
+  // Une fois toutes les zones lues : l'ordre des objets dans Tiled ne doit rien
+  // décider.
   for (const m of marqueurs) {
     const zones = [...layout.hotspots, ...layout.exits].filter((z) => z.id === m.nom);
     if (zones.length === 0) {
@@ -456,8 +415,8 @@ function importScene(fichier, nom) {
       );
       continue;
     }
-    // Un même nom peut être un hotspot ET une sortie — c'est permis, l'unicité
-    // est par classe. Le marqueur, lui, ne saurait pas lequel des deux il vise.
+    // Un même nom peut être un hotspot ET une sortie, l'unicité étant par
+    // classe ; le marqueur, lui, ne saurait pas lequel des deux il vise.
     if (zones.length > 1) {
       errors.push(
         `le marqueur ${m.ou} est ambigu : « ${m.nom} » est à la fois un hotspot et ` +
@@ -472,7 +431,7 @@ function importScene(fichier, nom) {
       : m.x >= zone.x && m.x <= zone.x + zone.w && m.y >= zone.y && m.y <= zone.y + zone.h;
     if (!dedans) {
       // Sur un polygone, citer la boîte englobante induirait en erreur : le
-      // point peut y être et rester hors du contour, qui est le vrai sujet.
+      // point peut y être et rester hors du contour.
       const dehors = zone.points
         ? 'hors de son contour'
         : `hors de sa boîte (${zone.x}, ${zone.y} → ${zone.x + zone.w}, ${zone.y + zone.h})`;
