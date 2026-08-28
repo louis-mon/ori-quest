@@ -1,36 +1,26 @@
-/**
- * Le découpage d'une énigme : des pièces **polygonales** posées sur la grille
- * d'ancrage, et la géométrie qui va avec.
- *
- * Le découpage se dessine dans `decoupage.html` (page de développement, hors
- * build) et vit dans `game-design/enigmes/<nom>.json`, comme les plans de scène
- * vivent dans Tiled. `tools/import-decoupage.mjs` en tire
- * `src/generated/enigmes.ts`.
- *
- * **Tout est entier.** Un sommet est une intersection de la grille d'ancrage,
- * jamais autre chose : l'éditeur ne laisse cliquer que là, et une coupe ne
- * touche le bord d'une pièce qu'à ses extrémités — donc les pièces produites
- * ont elles aussi des sommets entiers. Rien ici n'a besoin de tolérance
- * numérique, et deux pièces voisines partagent exactement les mêmes points.
- *
- * **Le recouvrement se teste sur un masque**, pas sur les polygones. Deux
- * pièces posées côte à côte partagent une arête entière : un test d'aire
- * d'intersection exact devrait distinguer « se touchent » de « se recouvrent »,
- * ce qui est justement le cas dégénéré à éviter. On échantillonne donc
- * l'intérieur sur une sous-grille, à des points volontairement décalés
- * (`DECALAGE_X` / `DECALAGE_Y`) pour qu'aucune arête ne tombe dessus.
- */
+// Le découpage se dessine dans `decoupage.html` et vit dans
+// `game-design/enigmes/<nom>.json` ; `tools/import-decoupage.mjs` en tire
+// `src/generated/enigmes.ts`.
+//
+// Tout est entier : un sommet est une intersection de la grille d'ancrage, et
+// une coupe ne touche le bord d'une pièce qu'à ses extrémités. Rien ici n'a donc
+// besoin de tolérance numérique, et deux pièces voisines partagent exactement
+// les mêmes points.
+//
+// Le recouvrement se teste sur un masque et non sur les polygones : deux pièces
+// côte à côte partagent une arête entière, et un test d'aire exact devrait
+// distinguer « se touchent » de « se recouvrent », le cas dégénéré à éviter.
 
-/** Un sommet, en cellules de la grille d'ancrage. Entier. */
+// Un sommet, en cellules de la grille d'ancrage. Entier.
 export type Point = readonly [number, number];
 
-/** Une pièce : un polygone simple, fermé implicitement. */
+// Un polygone simple, fermé implicitement.
 export interface PieceDecoupee {
   readonly points: readonly Point[];
 }
 
 export interface Decoupage {
-  /** Côté de la grille d'ancrage, en cellules. Le motif est carré. */
+  // Côté de la grille d'ancrage, en cellules. Le motif est carré.
   readonly grille: number;
   readonly pieces: readonly PieceDecoupee[];
 }
@@ -42,23 +32,17 @@ export interface Boite {
   h: number;
 }
 
-/** Subdivisions d'une cellule pour l'échantillonnage des masques. */
+// Subdivisions d'une cellule pour l'échantillonnage des masques.
 export const SOUS = 4;
 
-/**
- * Position du point testé dans sa sous-cellule. Deux valeurs différentes, et
- * choisies « de travers » : au centre (0,5 / 0,5), la diagonale d'une pièce
- * coupée en biais passerait pile sur les points d'échantillonnage et deux
- * pièces voisines revendiqueraient les mêmes.
- */
+// Position du point testé dans sa sous-cellule. Deux valeurs différentes et
+// choisies de travers : au centre, la diagonale d'une pièce coupée en biais
+// passerait pile dessus et deux pièces voisines revendiqueraient les mêmes.
 const DECALAGE_X = 0.37;
 const DECALAGE_Y = 0.61;
 
-/**
- * Le point est-il sur le contour ? Sommets entiers et point entier : le test
- * est exact, aucun epsilon en jeu. Sert à l'éditeur, qui n'accepte une coupe
- * que d'un bord à l'autre de la pièce.
- */
+// Sommets entiers et point entier : le test est exact, aucun epsilon en jeu.
+// Sert à l'éditeur, qui n'accepte une coupe que d'un bord à l'autre.
 export function surLeBord(points: readonly Point[], x: number, y: number): boolean {
   for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
     const [xi, yi] = points[i];
@@ -76,14 +60,14 @@ export function surLeBord(points: readonly Point[], x: number, y: number): boole
   return false;
 }
 
-/** Masque d'occupation d'une pièce, relatif au coin haut-gauche de sa boîte. */
+// Relatif au coin haut-gauche de la boîte de la pièce.
 export interface Masque {
   cols: number;
   rows: number;
   bits: Uint8Array;
 }
 
-/** Boîte englobante, en cellules. Son coin est la position solution de la pièce. */
+// En cellules. Son coin est la position solution de la pièce.
 export function boite(points: readonly Point[]): Boite {
   const xs = points.map((p) => p[0]);
   const ys = points.map((p) => p[1]);
@@ -92,7 +76,7 @@ export function boite(points: readonly Point[]): Boite {
   return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
 }
 
-/** Aire du polygone (formule du lacet), toujours positive. */
+// Formule du lacet, toujours positive.
 export function aire(points: readonly Point[]): number {
   let somme = 0;
   for (let i = 0; i < points.length; i++) {
@@ -103,11 +87,8 @@ export function aire(points: readonly Point[]): number {
   return Math.abs(somme) / 2;
 }
 
-/**
- * Le point est-il strictement à l'intérieur ? Lancer de rayon horizontal.
- * Les points sur le bord ne sont pas décidés — les appelants n'en testent pas,
- * grâce aux décalages ci-dessus.
- */
+// Lancer de rayon horizontal. Les points sur le bord ne sont pas décidés : les
+// appelants n'en testent pas, grâce aux décalages ci-dessus.
 export function pointDans(points: readonly Point[], x: number, y: number): boolean {
   let dedans = false;
   for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
@@ -118,7 +99,6 @@ export function pointDans(points: readonly Point[], x: number, y: number): boole
   return dedans;
 }
 
-/** Masque d'occupation, en sous-cellules, relatif à la boîte de la pièce. */
 export function masque(points: readonly Point[]): Masque {
   const b = boite(points);
   const cols = b.w * SOUS;
@@ -134,13 +114,8 @@ export function masque(points: readonly Point[]): Masque {
   return { cols, rows, bits };
 }
 
-/**
- * Deux pièces posées sur la grille se recouvrent-elles ? Les ancres sont les
- * coins haut-gauche, en cellules ; les masques sont relatifs à ces coins.
- *
- * Se toucher par une arête ne compte pas : c'est le cas normal d'un découpage
- * bien posé.
- */
+// Les ancres sont les coins haut-gauche, en cellules. Se toucher par une arête
+// ne compte pas : c'est le cas normal d'un découpage bien posé.
 export function chevauchent(
   a: Masque,
   ancreA: { c: number; r: number },
@@ -161,7 +136,7 @@ export function chevauchent(
   return false;
 }
 
-/** Chemin SVG fermé, chaque sommet passé par `vers` (cellules -> unités de sortie). */
+// Chemin SVG fermé ; `vers` convertit des cellules en unités de sortie.
 export function chemin(points: readonly Point[], vers: (p: Point) => Point): string {
   return (
     points
