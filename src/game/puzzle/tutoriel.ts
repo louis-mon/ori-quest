@@ -1,37 +1,19 @@
-/**
- * Le moteur des tutoriels d'énigme — ce qui joue les étapes écrites dans
- * `tutoriels.ts`. Voir game-design/07-tutoriel-puzzle-crease-pattern.md.
- *
- * Un tutoriel est une **couche posée sur l'énigme ouverte** : elle en interdit
- * tous les taps, écrit dans la boîte de dialogue habituelle, et pilote l'énigme
- * par la poignée que celle-ci lui tend (`ControlePuzzle`). Le joueur ne quitte
- * jamais l'énigme pour aller lire une aide ailleurs — c'est tout l'intérêt :
- * ce qu'on lui montre, il l'a sous les yeux.
- *
- * **La démonstration du pli est un vrai pliage.** Une feuille `.origami` bakée
- * depuis un crease pattern, sur laquelle les traits de pli sont **peints dans la
- * texture du papier** — ils se plient donc avec elle. Le projet s'interdit de
- * dessiner ce qui se plie (CLAUDE.md) et un tutoriel du pliage était le dernier
- * endroit où on aurait pu être tenté de faire l'exception.
- *
- * **Un tutoriel peut montrer plusieurs feuilles**, et c'est l'étape qui dit
- * laquelle (`montrer-feuille`) : celui du pli montagne enchaîne le pli seul puis
- * la base de la bombe à eau, où les deux plis se combinent. Une feuille déjà à
- * l'écran s'efface avant que la suivante n'arrive, sans rendre l'énigme au
- * joueur — on change de papier, on ne sort pas de la démonstration.
- *
- * **Trois pièges de superposition** valent d'être connus avant de toucher au
- * CSS de cette couche :
- *
- * - l'énigme est à `z-index: 4` et la boîte de dialogue n'en a pas : sans
- *   `mettreDevant()`, tout ce que le tutoriel raconte se joue *derrière*
- *   l'énigme, invisible ;
- * - `.tuto` n'est **pas** positionné, exprès. Positionné, il ferait contexte
- *   d'empilement et ses enfants ne pourraient plus encadrer la boîte de
- *   dialogue — le voile dessous, la fenêtre de confirmation dessus ;
- * - le voile est transparent tant qu'on ne montre pas la feuille, mais il est
- *   là dès le début : c'est **lui** qui absorbe les taps destinés à l'énigme.
- */
+// Le moteur des tutoriels d'énigme, qui joue les étapes écrites dans
+// `tutoriels.ts`. Voir game-design/07-tutoriel-puzzle-crease-pattern.md.
+//
+// Un tutoriel est une couche posée sur l'énigme ouverte : elle en interdit tous
+// les taps, écrit dans la boîte de dialogue habituelle, et pilote l'énigme par
+// `ControlePuzzle`. La démonstration du pli est un vrai pliage, comme partout
+// dans le projet — rien n'est dessiné pour ressembler.
+//
+// Trois pièges de superposition, à connaître avant de toucher au CSS :
+//
+// - l'énigme est à z-index 4 et la boîte de dialogue n'en a pas : sans
+//   `mettreDevant()`, ce que le tutoriel raconte se joue derrière elle ;
+// - `.tuto` n'est PAS positionné, exprès : positionné, il ferait contexte
+//   d'empilement et ses enfants ne pourraient plus encadrer la boîte ;
+// - le voile est transparent tant qu'on ne montre pas la feuille, mais présent
+//   dès le début : c'est lui qui absorbe les taps destinés à l'énigme.
 
 import type { Overlay } from '../../ui/overlay';
 import { OrigamiLayer } from '../../origami/origami-layer';
@@ -48,100 +30,60 @@ import {
   type Tutoriel,
 } from './tutoriels';
 
-/**
- * Durée du tracé d'**un** pli sur la feuille.
- *
- * Par trait, pas par feuille : la base de la bombe à eau en a quatre, et les
- * dessiner tous dans le temps d'un seul les réduirait à un clignotement. Chacun
- * est une chose à regarder, chacun prend le même temps.
- */
+// Par trait et non par feuille : la base de la bombe à eau en a quatre, et les
+// dessiner tous dans le temps d'un seul les réduirait à un clignotement.
 const TRACE_MS = 1100;
 
-/** Durée du pliage de démonstration. Lent : c'est le sujet de la leçon. */
+// Lent : c'est le sujet de la leçon.
 const PLIAGE_MS = 4200;
 
-/**
- * Temps où la flèche désigne une pièce avant qu'elle ne bouge.
- *
- * Long, et volontairement : c'est le temps qu'il faut pour quitter la boîte de
- * dialogue des yeux, trouver la flèche à l'autre bout de l'écran, et regarder ce
- * qu'elle montre. Un clignotement bref ne se voit que si on regardait déjà.
- */
+// Long, volontairement : c'est le temps de quitter la boîte de dialogue des
+// yeux, de trouver la flèche à l'autre bout de l'écran et de regarder ce qu'elle
+// montre. Un clignotement bref ne se voit que si on regardait déjà.
 const DESIGNATION_MS = 3000;
 
-/**
- * Un temps : ce qu'on laisse au joueur pour regarder ce qui vient d'arriver.
- *
- * Une feuille nue qui apparaît, un pliage qui vient de se terminer — sans ce
- * silence, l'étape suivante démarre pendant que l'œil cherche encore ce qui a
- * changé, et le tutoriel montre sans jamais laisser voir.
- */
+// Le silence qu'on laisse pour regarder ce qui vient d'arriver : sans lui,
+// l'étape suivante démarre pendant que l'œil cherche encore ce qui a changé.
 const UN_TEMPS_MS = 3000;
 
-/** Espace entre la pointe de la flèche et ce qu'elle désigne, en pixels. */
 const ECART_FLECHE = 14;
 
-/** Fondus du voile et de la feuille, calés sur les transitions CSS. */
+// Calés sur les transitions CSS.
 const FONDU_MS = 420;
 
-/** C'est le héros qui explique : personne d'autre n'est là pendant une énigme. */
+// C'est le héros qui explique : personne d'autre n'est là pendant une énigme.
 const HEROS = personnage('heros');
 
-/**
- * Un tutoriel déjà proposé ne se repropose pas. Le drapeau est levé **au moment
- * où la question est posée**, pas à la fin : le joueur qui passe le tutoriel
- * n'a pas envie qu'on lui redemande à chaque fois qu'il rouvre l'énigme.
- */
+// Levé au moment où la question est posée, pas à la fin : le joueur qui passe le
+// tutoriel n'a pas envie qu'on lui redemande à chaque ouverture.
 const vu = (nom: NomTutoriel) => `tuto_${nom}_vu`;
 
-/**
- * Les effets qui **touchent à l'énigme** au lieu de l'expliquer.
- *
- * Un tutoriel rejoué depuis une autre énigme que la sienne les saute : poser une
- * pièce ailleurs, ce serait offrir un morceau de solution dans une énigme dont
- * ce tutoriel ne parle même pas.
- */
+// Les effets qui touchent à l'énigme au lieu de l'expliquer. Un tutoriel rejoué
+// depuis une autre énigme les saute : poser une pièce là-bas offrirait un
+// morceau de solution dans une énigme dont ce tutoriel ne parle pas.
 const TOUCHE_A_LENIGME = new Set<Effet>(['poser-une-piece']);
 
-/**
- * La couche 3D de la démonstration, créée **une fois pour toute la partie**.
- *
- * Un contexte WebGL par lecture du tutoriel, c'était la première version, et
- * elle finissait par casser le jeu : `renderer.dispose()` ne rend pas le
- * contexte tout de suite, ils s'accumulent, et au-delà d'une quinzaine le
- * navigateur tue le **plus ancien** — celui de Phaser. L'écran clignotait, et
- * la feuille ne s'affichait plus. Un seul contexte, gardé et redonné à chaque
- * démonstration, supprime le problème à la racine ; c'est aussi ce que fait
- * `main.ts` avec la couche du récit.
- *
- * La toile sort et rentre du DOM avec chaque tutoriel — déplacer un canvas ne
- * touche pas à son contexte.
- */
+// Une seule couche 3D pour toute la partie. Un contexte WebGL par lecture du
+// tutoriel — la première version — les accumulait, et au-delà d'une quinzaine le
+// navigateur tue le plus ancien, celui de Phaser. La toile sort et rentre du DOM
+// à chaque tutoriel : déplacer un canvas ne touche pas à son contexte.
 let toileDemo: HTMLCanvasElement | null = null;
 
-/**
- * La couche de la toile ci-dessus, mémorisée **en promesse**.
- *
- * En mémorisant l'objet plutôt que la promesse, deux appels rapprochés
- * passaient tous deux le test « pas encore créée » — `await create()` rend la
- * main — et fabriquaient chacun un contexte WebGL, dont l'un restait orphelin
- * pour toujours. C'est la fuite qui finit par faire tuer le contexte de Phaser.
- * La promesse, elle, est posée avant le premier `await` : le second appel
- * attend la même.
- */
+// Mémorisée EN PROMESSE : en mémorisant l'objet, deux appels rapprochés passaient
+// tous deux le test « pas encore créée » — `await create()` rend la main — et
+// fabriquaient chacun leur contexte, dont l'un restait orphelin.
 let coucheDemo_: Promise<OrigamiLayer> | null = null;
 
-/** Le papier de la dernière démonstration, gardé le temps de le remplacer. */
+// Gardé le temps de le remplacer.
 let papierDemo: PapierTrace | null = null;
 
 async function coucheDemo() {
   if (!toileDemo || !coucheDemo_) {
     const canvas = document.createElement('canvas');
     canvas.className = 'tuto__feuille';
-    // Un contexte perdu ne se répare pas : on oublie la couche ici même, et la
-    // démonstration suivante en refabriquera une. L'oubli est **synchrone**,
-    // au moment de la perte, donc aucun appel ne peut attendre une couche
-    // morte. Rien à `dispose()` — il n'y a plus de contexte à rendre.
+    // Un contexte perdu ne se répare pas. L'oubli est synchrone, au moment de la
+    // perte, donc aucun appel ne peut attendre une couche morte. Rien à
+    // `dispose()` : il n'y a plus de contexte à rendre.
     canvas.addEventListener('webglcontextlost', () => {
       console.warn('[tutoriel] contexte WebGL perdu, la feuille sera refaite');
       toileDemo = null;
@@ -153,24 +95,13 @@ async function coucheDemo() {
   return { canvas: toileDemo, couche: await coucheDemo_ };
 }
 
-/**
- * Abandon volontaire du tutoriel — le bouton « Passer ».
- *
- * Une **exception**, parce que le tutoriel passe son temps à attendre — un tap,
- * un fondu, un pliage de quatre secondes — et qu'un drapeau seul ne serait relu
- * qu'à la fin de l'attente en cours ; le joueur qui passe veut que ça s'arrête
- * maintenant. Et un **drapeau en plus** (`Scene.abandonne`), parce qu'une
- * exception ne rattrape pas ce qui a déjà démarré : une étape est *appelée* pour
- * produire la promesse qu'on attend, donc ses effets de bord partent avant toute
- * course. Les deux, donc : l'un coupe l'attente, l'autre empêche la suivante de
- * commencer.
- */
+// Une exception, parce que le tutoriel passe son temps à attendre et qu'un
+// drapeau seul ne serait relu qu'à la fin de l'attente en cours. Et un drapeau
+// EN PLUS (`Scene.abandonne`), parce qu'une exception ne rattrape pas ce qui a
+// déjà démarré : une étape est appelée pour produire la promesse qu'on attend,
+// donc ses effets de bord partent avant toute course.
 class Passe extends Error {}
 
-/**
- * Fabrique le lanceur que l'énigme appellera — à son ouverture, et à chaque tap
- * sur « ? ».
- */
 export function lanceurTutoriel(
   root: HTMLElement,
   overlay: Overlay,
@@ -188,13 +119,8 @@ export function lanceurTutoriel(
   };
 }
 
-/**
- * Monte la couche, choisit le tutoriel, le joue, puis nettoie — quoi qu'il
- * arrive.
- *
- * `impose` est le tutoriel du lancement automatique. `null` = le joueur a tapé
- * « ? » et choisit lui-même dans la liste.
- */
+// `impose` est le tutoriel du lancement automatique ; `null`, le joueur a tapé
+// « ? » et choisit lui-même.
 async function ouvrir(
   root: HTMLElement,
   overlay: Overlay,
@@ -213,27 +139,26 @@ async function ouvrir(
     scene.passer.hidden = false;
     await jouer(scene, tuto, def.tutoriel === nom);
   } catch (err) {
-    // Un abandon est une fin normale ; le reste ne doit jamais laisser le
-    // joueur devant une énigme recouverte d'un voile qui ne s'en va plus.
+    // Un abandon est une fin normale ; le reste ne doit jamais laisser le joueur
+    // devant une énigme recouverte d'un voile qui ne s'en va plus.
     if (!(err instanceof Passe)) console.error('[tutoriel] interrompu', err);
   } finally {
     scene.demonter();
   }
 }
 
-/** La liste du bouton « ? ». Résout `null` si le joueur referme. */
+// `null` si le joueur referme.
 async function choisir(overlay: Overlay): Promise<NomTutoriel | null> {
   const noms = Object.keys(TUTORIELS) as NomTutoriel[];
-  // En narration, sans locuteur : c'est une question de l'interface, pas une
-  // réplique du héros. La différence se voit avant d'être lue (voir
-  // `showSpeaker`), et le tutoriel, lui, parlera bien de sa voix.
+  // Sans locuteur : c'est une question de l'interface, pas une réplique du
+  // héros — qui, lui, parlera bien de sa voix ensuite.
   await overlay.say('Quel tutoriel revoir ?');
   const choix = await overlay.choose([...noms.map((n) => TUTORIELS[n].titre), 'Fermer']);
   overlay.hideDialogue();
   return noms[choix] ?? null;
 }
 
-/** L'invite du lancement automatique. Faux si le joueur préfère passer. */
+// Faux si le joueur préfère passer.
 async function proposer(overlay: Overlay, tuto: Tutoriel): Promise<boolean> {
   await overlay.say(tuto.invite, HEROS);
   const choix = await overlay.choose(['Lancer le tutoriel', 'Passer le tutoriel']);
@@ -241,19 +166,14 @@ async function proposer(overlay: Overlay, tuto: Tutoriel): Promise<boolean> {
   return choix === 0;
 }
 
-/**
- * `sonEnigme` : l'énigme ouverte est bien celle à qui ce tutoriel appartient.
- *
- * **Une réplique qui suit un effet attend un tap avant de s'afficher.** Le
- * joueur a tapé pour lancer ce qu'il vient de regarder ; ce tap-là est dépensé.
- * Sans l'attente, la ligne suivante prend sa place à la seconde où l'animation
- * se termine — un tap, deux avancées, et le texte change sous les yeux de
- * quelqu'un qui regardait ailleurs. La réplique restée à l'écran pendant
- * l'effet sert de légende à ce qu'on montre, et le chevron dit quoi faire pour
- * la suite : c'est le geste habituel du jeu, pas une exception à apprendre.
- */
+// `sonEnigme` : l'énigme ouverte est celle à qui ce tutoriel appartient.
+//
+// Une réplique qui suit un effet attend un tap avant de s'afficher : le joueur a
+// tapé pour lancer ce qu'il vient de regarder, ce tap-là est dépensé. Sans
+// l'attente, la ligne suivante prend sa place à la seconde où l'animation se
+// termine — un tap, deux avancées.
 async function jouer(scene: Scene, tuto: Tutoriel, sonEnigme: boolean) {
-  /** Un effet vient de se jouer : la prochaine réplique doit être demandée. */
+  // Un effet vient de se jouer : la prochaine réplique doit être demandée.
   let aRegarder = false;
 
   const dire = async (ligne: string) => {
@@ -270,15 +190,15 @@ async function jouer(scene: Scene, tuto: Tutoriel, sonEnigme: boolean) {
     }
     if (!sonEnigme && TOUCHE_A_LENIGME.has(etape.faire)) continue;
 
-    // `false` = l'effet n'a rien eu à faire. Sa réplique de commentaire tombe
+    // `false` = l'effet n'a rien eu à faire, et sa réplique de commentaire tombe
     // avec lui : « cette pièce semble bien placée » ne veut rien dire quand
-    // aucune pièce n'a bougé. Et rien n'a été montré, donc rien à demander.
+    // aucune pièce n'a bougé.
     const fait = (await scene.jusqua(jouerEffet(scene, etape))) !== false;
     if (!fait) continue;
 
-    // Deux effets qui s'enchaînent ne s'interrompent pas — la feuille qui
-    // arrive et les plis qui s'y tracent sont un seul geste. C'est le passage à
-    // la **parole** qui se demande.
+    // Deux effets qui s'enchaînent ne s'interrompent pas : la feuille qui arrive
+    // et les plis qui s'y tracent sont un seul geste. C'est le passage à la
+    // parole qui se demande.
     aRegarder = true;
     if (etape.puis) await dire(etape.puis);
   }
@@ -293,39 +213,25 @@ interface Scene {
   controle: ControlePuzzle;
   el: HTMLElement;
   voile: HTMLElement;
-  /**
-   * Un `SVGElement`, pas un `HTMLElement` : `hidden` y est un **attribut**, pas
-   * une propriété. `fleche.hidden = false` posait bien une propriété JavaScript
-   * sur l'objet, sans rien retirer du DOM — la règle `[hidden]` continuait de
-   * s'appliquer et la flèche ne se montrait jamais. D'où `toggleAttribute`.
-   */
+  // Un SVGElement, pas un HTMLElement : `hidden` y est un attribut, pas une
+  // propriété. `fleche.hidden = false` posait une propriété JavaScript sans rien
+  // retirer du DOM, la règle `[hidden]` continuait de s'appliquer et la flèche
+  // ne se montrait jamais. D'où `toggleAttribute`.
   fleche: SVGElement;
   passer: HTMLButtonElement;
-  /**
-   * La feuille à l'écran : la couche qui la rend, le papier qu'on trace dessus,
-   * et ce qu'elle montre — `tracer-pli` et `plier` n'ont pas d'autre source pour
-   * savoir combien de traits dessiner et jusqu'où plier.
-   *
-   * La couche et sa toile appartiennent au module, pas au tutoriel : elles
-   * survivent d'une lecture à l'autre (voir `coucheDemo`). Ce champ, lui, ne vit
-   * que le temps d'une feuille.
-   */
+  // La couche et sa toile appartiennent au module et survivent d'une lecture à
+  // l'autre ; ce champ ne vit que le temps d'une feuille.
   feuille: {
     couche: OrigamiLayer;
     papier: PapierTrace;
     modele: string;
     traits: readonly TracePli[];
   } | null;
-  /**
-   * Le joueur a-t-il renoncé ? À relire **avant de démarrer une étape** : un
-   * effet est appelé pour produire la promesse qu'on attend, donc ses effets de
-   * bord partent avant toute course. Rien ne doit plus démarrer une fois la
-   * couche démontée.
-   */
+  // À relire AVANT de démarrer une étape : un effet est appelé pour produire la
+  // promesse qu'on attend, donc ses effets de bord partent avant toute course.
   readonly abandonne: boolean;
-  /** Court une attente jusqu'à son terme, ou jusqu'au « Passer » du joueur. */
+  // Court une attente jusqu'à son terme, ou jusqu'au « Passer » du joueur.
   jusqua<T>(attente: Promise<T>): Promise<T>;
-  /** Attend `ms`, interruptible. */
   pause(ms: number): Promise<void>;
   demonter(): void;
 }
@@ -355,8 +261,8 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
   const passer = el.querySelector<HTMLButtonElement>('.tuto__passer')!;
   const confirm = el.querySelector<HTMLElement>('.tuto__confirm')!;
 
-  // L'abandon est une promesse qui ne se résout jamais et ne rejette qu'une
-  // fois : chaque attente du tutoriel court contre elle.
+  // Une promesse qui ne se résout jamais et ne rejette qu'une fois : chaque
+  // attente du tutoriel court contre elle.
   let abandonne = false;
   let abandonner = () => {};
   const abandon = new Promise<never>((_, rejeter) => {
@@ -379,10 +285,9 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
     if (!action) return;
     confirm.hidden = true;
     if (action === 'passer') {
-      // **Dans cet ordre.** `interrompre()` résout la réplique en attente, donc
-      // l'attente du tutoriel se termine *normalement* et la boucle enchaîne sur
-      // l'étape suivante — qui démarrerait alors qu'on vient de tout démonter,
-      // une démonstration orpheline en travers de la lecture d'après. Renoncer
+      // DANS CET ORDRE : `interrompre()` résout la réplique en attente, donc
+      // l'attente du tutoriel se termine normalement et la boucle enchaînerait
+      // sur l'étape suivante alors qu'on vient de tout démonter. Renoncer
       // d'abord fait que la course est déjà perdue quand la réplique se résout.
       abandonner();
       // La réplique en cours attend un tap qui ne viendra plus : sans ça son
@@ -419,46 +324,31 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
 // Les effets
 // ------------------------------------------------------------------
 
-/**
- * Joue l'effet d'une étape.
- *
- * Le transtypage est là parce que le compilateur ne rapproche pas `etape.faire`
- * de la signature qu'il sert à indexer, alors que les deux sortent du même
- * objet. La table, elle, est bien vérifiée à l'écriture : chaque effet y reçoit
- * exactement l'étape qui le déclenche, `montrer-feuille` avec sa feuille et les
- * autres sans.
- */
+// Le transtypage est là parce que le compilateur ne rapproche pas `etape.faire`
+// de la signature qu'il sert à indexer, alors que les deux sortent du même
+// objet. La table, elle, est vérifiée à l'écriture.
 function jouerEffet(scene: Scene, etape: EtapeEffet) {
   const effet = EFFETS[etape.faire] as (s: Scene, e: EtapeEffet) => Promise<void | false>;
   return effet(scene, etape);
 }
 
-/** L'étape qui déclenche un effet donné — sa feuille, s'il en porte une. */
 type Declencheur<E extends Effet> = Extract<EtapeEffet, { faire: E }>;
 
-/**
- * Ce que fait chaque effet. Un effet qui répond **`false`** annonce qu'il n'a
- * rien fait, et sa réplique de commentaire (`puis`) est sautée avec lui.
- */
+// Un effet qui répond `false` annonce qu'il n'a rien fait, et sa réplique de
+// commentaire (`puis`) est sautée avec lui.
 const EFFETS: {
   [E in Effet]: (scene: Scene, etape: Declencheur<E>) => Promise<void | false>;
 } = {
-  /**
-   * La démonstration du geste : on désigne une pièce, puis on la pose.
-   *
-   * Elle **reste posée** — le joueur reprend l'énigme avec une pièce de moins à
-   * placer. C'est voulu : montrer le geste puis défaire ce qu'on vient de faire
-   * donnerait une leçon dont il ne resterait rien à l'écran.
-   */
+  // La pièce reste posée : montrer le geste puis défaire ce qu'on vient de faire
+  // donnerait une leçon dont il ne resterait rien à l'écran.
   async 'poser-une-piece'(scene) {
-    // Rien à démontrer sur un plateau déjà entamé — l'énigme n'attend pas qu'on
-    // lui explique un geste que le joueur est en train de faire. Ce n'est pas
-    // une erreur : le tutoriel se rejoue à tout moment. Voir `pieceADemontrer`.
+    // Rien à démontrer sur un plateau déjà entamé, et ce n'est pas une erreur :
+    // le tutoriel se rejoue à tout moment. Voir `pieceADemontrer`.
     const piece = scene.controle.pieceADemontrer();
     if (!piece) return false;
 
-    // Au-dessus du tas d'abord : c'est pendant les trois secondes où la flèche
-    // la désigne qu'il faut pouvoir la distinguer de ses voisines.
+    // Au-dessus du tas d'abord : c'est pendant que la flèche la désigne qu'il
+    // faut pouvoir la distinguer de ses voisines.
     scene.controle.mettreEnAvant(piece);
     designer(scene, piece);
     await scene.pause(DESIGNATION_MS);
@@ -469,20 +359,16 @@ const EFFETS: {
   async 'montrer-feuille'(scene, { feuille }) {
     scene.voile.classList.add('is-sombre');
 
-    // Une feuille déjà à l'écran s'en va d'abord, sans que le voile s'éclaircisse
-    // ni que l'énigme revienne : on change de papier au milieu d'une
-    // démonstration, on n'en sort pas. La toile, elle, reste en place — c'est la
-    // même couche et le même contexte WebGL qui rendront la suivante.
+    // Sans que le voile s'éclaircisse ni que l'énigme revienne : on change de
+    // papier au milieu d'une démonstration, on n'en sort pas.
     if (scene.feuille) {
       scene.feuille.couche.hide();
       scene.feuille = null;
       await scene.pause(FONDU_MS);
     }
 
-    // three.js arrive à la demande, comme partout ailleurs dans le jeu — seul
-    // lui mérite son propre chunk, le reste est déjà dans celui de
-    // l'application. Une démonstration qui ne charge pas ne doit pas emporter le
-    // tutoriel avec elle : les répliques, elles, restent lisibles.
+    // Une démonstration qui ne charge pas ne doit pas emporter le tutoriel avec
+    // elle : les répliques, elles, restent lisibles.
     try {
       const THREE = await scene.jusqua(import('three'));
       const { canvas, couche } = await scene.jusqua(coucheDemo());
@@ -493,8 +379,7 @@ const EFFETS: {
 
       const papier = papierTrace(THREE, feuille.modele, feuille.traits);
       // Posée : on va la regarder un moment avant de la plier, et une feuille
-      // qui se présente face à la caméra en se balançant n'a l'air posée sur
-      // rien.
+      // qui se balance en se présentant n'a l'air posée sur rien.
       await scene.jusqua(couche.load(feuille.modele, { textures: papier.textures, posee: true }));
       // Le papier précédent n'est lâché qu'ici : jusqu'à ce `load`, c'est encore
       // lui qui est monté sur le mesh.
@@ -540,12 +425,8 @@ const EFFETS: {
   },
 };
 
-/**
- * Range la feuille : elle s'arrête et sort de l'écran, mais **rien n'est
- * détruit**. La couche et son contexte WebGL resservent à la prochaine
- * démonstration (voir `coucheDemo`), et son papier reste monté sur le mesh
- * jusqu'à ce qu'un autre le remplace.
- */
+// Rien n'est détruit : la couche et son contexte WebGL resservent à la prochaine
+// démonstration, et le papier reste monté sur le mesh jusqu'à son remplacement.
 function rangerFeuille(scene: Scene) {
   if (!scene.feuille) return;
   scene.feuille.couche.hide();
@@ -553,22 +434,16 @@ function rangerFeuille(scene: Scene) {
   toileDemo?.remove();
 }
 
-/**
- * Pose la flèche à gauche de ce qu'elle désigne, pointe vers la droite.
- *
- * C'est le pliage de l'artiste, celui des sorties de scène — photographié
- * pointant vers la gauche, d'où le miroir (voir `exit-marker.ts`). À gauche de
- * la cible plutôt qu'à droite : les deux choses qu'on désigne ici — une pièce
- * du bac, le bouton « ? » — sont sur le bord droit du cadre, et la flèche y
- * sortirait de l'écran.
- */
+// À gauche de la cible plutôt qu'à droite : les deux choses qu'on désigne ici —
+// une pièce du bac, le bouton « ? » — sont sur le bord droit du cadre, et la
+// flèche y sortirait de l'écran.
 function designer(scene: Scene, cible: HTMLElement) {
   const { fleche } = scene;
   fleche.toggleAttribute('hidden', false);
 
-  // Calée par la DROITE et centrée par une transformation : la largeur et la
-  // hauteur de la flèche n'entrent donc pas dans le calcul, et un PNG pas encore
-  // chargé — donc mesuré à zéro — ne la pose plus de travers.
+  // Calée par la DROITE et centrée par une transformation : ses dimensions
+  // n'entrent pas dans le calcul, donc un rendu pas encore mesurable ne la pose
+  // plus de travers.
   const repere = scene.el.parentElement!.getBoundingClientRect();
   const ou = cible.getBoundingClientRect();
 
@@ -576,7 +451,6 @@ function designer(scene: Scene, cible: HTMLElement) {
   fleche.style.top = `${ou.top - repere.top + ou.height / 2}px`;
 }
 
-/** Joue `ms` millisecondes d'animation, en passant l'avancement à `pas`. */
 function animer(ms: number, pas: (t: number) => void): Promise<void> {
   return new Promise((fini) => {
     const debut = performance.now();
