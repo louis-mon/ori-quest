@@ -1,36 +1,28 @@
 /**
- * Le découpage d'une énigme, côté outils : lecture, validation du pavage,
- * et recherche des dispositions qui donneraient la même image.
- *
- * Le pendant côté jeu est `src/game/puzzle/decoupage.ts`. Les deux se
- * ressemblent parce qu'un outil Node ne peut pas importer du TypeScript —
- * même raison que les constantes recopiées en tête de `import-scene.mjs`.
- * Ce qui compte est que les conventions restent les mêmes : sommets **entiers**
- * en cellules de la grille, et recouvrement testé sur une sous-grille décalée
- * plutôt que sur les polygones, pour que deux pièces qui se touchent par une
- * arête ne comptent pas comme superposées.
+ * Le découpage d'une énigme, côté outils. Le pendant côté jeu est
+ * `src/game/puzzle/decoupage.ts` ; les deux se ressemblent parce qu'un outil Node
+ * ne peut pas importer du TypeScript, et ce qui compte est que les conventions
+ * restent les mêmes : sommets entiers en cellules de la grille, et recouvrement
+ * testé sur une sous-grille décalée plutôt que sur les polygones.
  */
 import { existsSync, readFileSync } from 'node:fs';
 
 const EPS = 1e-9;
 
-/** Subdivisions d'une cellule, et position du point testé dans sa sous-cellule. */
+// Subdivisions d'une cellule, et position du point testé dans sa sous-cellule.
 export const SOUS = 4;
 const DECALAGE_X = 0.37;
 const DECALAGE_Y = 0.61;
 
-/** Bornes de bon sens : au-delà, ce n'est plus un découpage. */
+// Bornes de bon sens : au-delà, ce n'est plus un découpage.
 export const LIMITES = { grille: [2, 24], pieces: [1, 24], sommets: [3, 64] };
 
 // ---------------------------------------------------------------------------
 // Lecture
 // ---------------------------------------------------------------------------
 
-/**
- * Lit un `game-design/enigmes/<nom>.json` et refuse tout ce qui n'est pas un
- * découpage : la seule chose qui doit pouvoir arriver ici est ce qu'écrit
- * l'éditeur, mais le fichier est éditable à la main et le jeu en dépend.
- */
+// Refuse tout ce qui n'est pas un découpage : le fichier est éditable à la main,
+// et le jeu en dépend.
 export function lireDecoupage(fichier) {
   const brut = JSON.parse(readFileSync(fichier, 'utf8'));
   const grille = brut.grille;
@@ -109,7 +101,7 @@ export function surLeBord(points, x, y) {
   return false;
 }
 
-/** Sous-cellules occupées, en coordonnées absolues de la grille. */
+// Sous-cellules occupées, en coordonnées absolues de la grille.
 export function masque(points, grille) {
   const bits = new Uint8Array(grille * SOUS * grille * SOUS);
   const b = boite(points);
@@ -127,12 +119,8 @@ export function masque(points, grille) {
 // Pavage
 // ---------------------------------------------------------------------------
 
-/**
- * Les pièces couvrent-elles le carré exactement une fois ?
- *
- * L'éditeur ne peut pas produire autre chose — il découpe, il n'assemble pas —
- * mais le fichier reste éditable à la main, et le jeu suppose un pavage exact.
- */
+// L'éditeur ne peut pas produire autre chose — il découpe, il n'assemble pas —
+// mais le fichier reste éditable à la main, et le jeu suppose un pavage exact.
 export function verifierPavage({ grille, pieces }) {
   const cote = grille * SOUS;
   const compte = new Uint8Array(cote * cote);
@@ -160,11 +148,8 @@ export function verifierPavage({ grille, pieces }) {
 // Le motif, et ce que chaque pièce en montre
 // ---------------------------------------------------------------------------
 
-/**
- * Segments du crease pattern, ramenés en unités de grille.
- * Les traits de bord (`bo`) sont écartés : le jeu ne les affiche pas, pour ne
- * pas révéler quelle pièce vient d'une rive du carré.
- */
+// En unités de grille. Les traits de bord sont écartés : le jeu ne les affiche
+// pas, pour ne pas révéler quelle pièce vient d'une rive du carré.
 export function lireMotif(fichier, grille, gardeBords = false) {
   const svg = readFileSync(fichier, 'utf8');
   const box = svg.match(/viewBox="([^"]+)"/);
@@ -194,13 +179,9 @@ export function lireMotif(fichier, grille, gardeBords = false) {
   return segments;
 }
 
-/**
- * Portions d'un segment contenues dans le polygone, en coordonnées locales.
- *
- * Un trait posé **sur** une arête de découpe compte pour les deux pièces
- * voisines : c'est ce que le joueur voit, chacune en montrant la moitié de
- * l'épaisseur. D'où le test « dedans ou sur le bord » plutôt que « dedans ».
- */
+// En coordonnées locales. Un trait posé SUR une arête de découpe compte pour les
+// deux pièces voisines, puisque c'est ce que le joueur voit : d'où le test
+// « dedans ou sur le bord » plutôt que « dedans ».
 function decouper(seg, points, ox, oy) {
   const dx = seg.x2 - seg.x1;
   const dy = seg.y2 - seg.y1;
@@ -217,8 +198,8 @@ function decouper(seg, points, ox, oy) {
       const u = ((ax - seg.x1) * dy - (ay - seg.y1) * dx) / den;
       if (t > EPS && t < 1 - EPS && u >= -EPS && u <= 1 + EPS) ts.push(t);
     } else {
-      // Arête parallèle : si elle est colinéaire, ses extrémités peuvent
-      // marquer le début ou la fin d'un passage sur le bord.
+      // Arête parallèle : si elle est colinéaire, ses extrémités peuvent marquer
+      // le début ou la fin d'un passage sur le bord.
       for (const [px, py] of [
         [ax, ay],
         [bx, by],
@@ -248,11 +229,8 @@ function decouper(seg, points, ox, oy) {
   return morceaux;
 }
 
-/**
- * Signature de ce que montre une pièce posée à une ancre donnée : les portions
- * de motif qu'elle couvre, en coordonnées locales. Deux emplacements sont
- * interchangeables aux yeux du joueur si leurs signatures sont identiques.
- */
+// Deux emplacements sont interchangeables aux yeux du joueur si leurs signatures
+// sont identiques.
 export function signature(segments, points, ancre) {
   const b = boite(points);
   const dx = ancre[0] - b.x;
@@ -273,11 +251,8 @@ export function signature(segments, points, ancre) {
     .join(' ');
 }
 
-/**
- * Toutes les dispositions qui produiraient exactement la même image que la
- * solution. Il doit y en avoir une seule, sans quoi le joueur peut en trouver
- * une que la validation refusera.
- */
+// Il doit y en avoir une seule, sans quoi le joueur peut en trouver une que la
+// validation refusera.
 export function chercherSolutions(
   { grille, pieces },
   segments,
@@ -315,9 +290,8 @@ export function chercherSolutions(
   let noeuds = 0;
 
   const poser = (k, acc) => {
-    // L'énumération est exponentielle par nature. Sur un découpage très fin
-    // elle peut ne pas finir, et l'éditeur interroge cet appel à chaque coupe :
-    // mieux vaut répondre « je ne sais pas » que bloquer.
+    // L'énumération est exponentielle. L'éditeur interroge cet appel à chaque
+    // coupe : mieux vaut répondre « je ne sais pas » que bloquer.
     if (++noeuds > budget || solutions.length > plafond) return;
     if (k === pieces.length) {
       solutions.push([...acc]);
@@ -338,12 +312,8 @@ export function chercherSolutions(
   return { solutions, places, interrompu: noeuds > budget };
 }
 
-/**
- * Le verdict complet sur un découpage : pave-t-il le carré, et son image
- * a-t-elle une seule lecture ? C'est ce que disent l'import, l'outil en ligne
- * de commande et l'éditeur — un seul calcul pour les trois, sans quoi l'éditeur
- * finirait par afficher autre chose que ce que le jeu vérifie.
- */
+// Un seul calcul pour l'import, l'outil en ligne de commande et l'éditeur, sans
+// quoi celui-ci finirait par afficher autre chose que ce que le jeu vérifie.
 export function analyser(decoupage, fichierMotif, { bords = false } = {}) {
   const pavage = verifierPavage(decoupage);
   if (pavage.doubles.length) return { etat: 'superposition', pavage };

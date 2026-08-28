@@ -6,24 +6,18 @@
  *   npm run check-puzzle -- pont
  *   npm run check-puzzle -- pont --with-borders
  *
- * Le joueur ne valide qu'une disposition : celle d'origine. Si une AUTRE
- * disposition produit exactement la même image, il croit avoir résolu l'énigme
- * et se voit refusé. C'est arrivé sur le pont, dont le motif — deux plis
- * horizontaux pleine largeur — ne fixe aucune abscisse : toute solution admet
- * son miroir.
+ * Le joueur ne valide qu'une disposition, celle d'origine : si une AUTRE produit
+ * la même image, il croit avoir résolu l'énigme et se voit refusé. C'est arrivé
+ * sur le pont, dont le motif — deux plis horizontaux pleine largeur — ne fixe
+ * aucune abscisse, donc toute solution admet son miroir.
  *
- * L'outil compare les pièces par leur CONTENU : les portions du motif tombant
- * dans le polygone, ramenées en coordonnées locales. Deux emplacements sont
- * interchangeables si ce contenu est identique. On énumère ensuite tous les
- * pavages compatibles.
+ * Les pièces sont comparées par leur CONTENU : les portions de motif tombant
+ * dans le polygone, en coordonnées locales.
  *
- * `import-decoupage` fait la même vérification à chaque enregistrement et le
- * signale en une ligne ; cet outil-ci est là quand la ligne dit non et qu'on
- * veut voir quelles dispositions se valent.
- *
- * Les traits de bord (`bo`) sont ignorés par défaut : le jeu ne les affiche pas,
- * justement pour ne pas révéler quelle pièce vient d'une rive. `--with-borders`
- * les recompte, ce qui montre ce qu'on gagnerait à les rendre visibles.
+ * `import-decoupage` fait la même vérification à chaque enregistrement ; cet
+ * outil-ci sert quand elle dit non et qu'on veut voir quelles dispositions se
+ * valent. Les traits de bord sont ignorés par défaut, comme dans le jeu ;
+ * `--with-borders` montre ce qu'on gagnerait à les afficher.
  */
 import { readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';

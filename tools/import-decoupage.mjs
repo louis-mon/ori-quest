@@ -5,19 +5,13 @@
  *   npm run enigmes            # tout game-design/enigmes/
  *   npm run enigmes -- --check # valide sans écrire
  *
- * Le découpage se dessine dans `decoupage.html` (page de développement) et vit
- * dans `game-design/enigmes/<nom>.json`, exactement comme la géométrie d'une
- * scène vit dans une carte Tiled : c'est **le fichier qui fait foi**, pas le
- * code. Ce script en tire `src/generated/enigmes.ts`.
+ * Le fichier `game-design/enigmes/<nom>.json` fait foi, comme une carte Tiled
+ * pour la géométrie d'une scène. La sortie est figée en `as const` : une énigme
+ * déclarée dans `puzzles.ts` sans découpage est alors une erreur de `tsc`, pas
+ * une surprise à l'ouverture.
  *
- * La sortie est du TypeScript figé en `as const`, pour la même raison que les
- * plans de scène : le compilateur connaît alors la liste exacte des énigmes
- * découpées, et une énigme déclarée dans `puzzles.ts` sans découpage est une
- * erreur de `tsc`, pas une surprise à l'ouverture de l'énigme.
- *
- * En cas de découpage invalide, **rien n'est écrit** : le jeu continue de
- * tourner sur la dernière version valide pendant qu'on corrige, l'erreur allant
- * au terminal (même principe que la compilation ink).
+ * En cas de découpage invalide, rien n'est écrit : le jeu continue de tourner
+ * sur la dernière version valide pendant qu'on corrige.
  */
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -26,7 +20,7 @@ import { aire, analyser, boite, lireDecoupage } from './lib/decoupage.mjs';
 
 const DOSSIER = 'game-design/enigmes';
 const SORTIE = 'src/generated/enigmes.ts';
-/** Là où le jeu sert le crease pattern, par convention de nom. */
+// Là où le jeu sert le crease pattern, par convention de nom.
 const MOTIF = (nom) => `public/assets/enigmes/${nom}/solution.svg`;
 
 const check = process.argv.includes('--check');
@@ -58,16 +52,13 @@ if (!check) {
   writeFileSync(SORTIE, rendre(decoupages));
 }
 
-/**
- * Ce qui doit être vrai d'un découpage, et qui ne se voit pas à l'œil dans le
- * fichier : le carré couvert exactement une fois, et une seule disposition
- * capable de produire l'image de la solution.
- */
+// Ce qui ne se voit pas à l'œil dans le fichier : le carré couvert exactement
+// une fois, et une seule disposition capable de produire l'image de la solution.
 function verifier(nom, decoupage) {
   const rapport = analyser(decoupage, MOTIF(nom));
 
-  // Un pavage inexact est une erreur, pas un avertissement : le jeu suppose que
-  // les pièces couvrent le carré, et rien ne doit être écrit dans ce cas.
+  // Une erreur et pas un avertissement : le jeu suppose que les pièces couvrent
+  // le carré.
   if (rapport.etat === 'superposition') {
     throw new Error(`pièces superposées (${rapport.pavage.doubles.length} sous-cellules)`);
   }
@@ -76,8 +67,7 @@ function verifier(nom, decoupage) {
   }
 
   // Une pièce minuscule est injouable au doigt bien avant d'être ambiguë : le
-  // seuil tactile se mesure à l'écran, mais moins d'une cellule d'aire ne passe
-  // jamais.
+  // seuil tactile se mesure à l'écran, mais moins d'une cellule ne passe jamais.
   for (const [i, points] of decoupage.pieces.entries()) {
     if (aire(points) < 1) {
       console.warn(`⚠ ${nom} : pièce ${i} de ${aire(points)} cellule(s) — sans doute trop petite.`);
@@ -116,10 +106,8 @@ function rendre(decoupages) {
 
   return `// Généré par tools/import-decoupage.mjs — ne pas modifier à la main.
 // La source est game-design/enigmes/<nom>.json, dessinée dans decoupage.html.
-//
-// Les sommets sont en cellules de la grille d'ancrage, origine en haut à
-// gauche. Le commentaire de chaque pièce rappelle sa boîte englobante : son
-// coin est la position solution de la pièce.
+// Sommets en cellules de la grille d'ancrage, origine en haut à gauche ; le coin
+// de la boîte englobante est la position solution de la pièce.
 
 export const DECOUPAGES = {
 ${corps}
