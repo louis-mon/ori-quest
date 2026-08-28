@@ -2,38 +2,27 @@ import './orientation.css';
 import { rendreOrigami } from '../origami/apercu';
 import { POSES, quaternionDegres, repereVue, type Pose } from '../origami/vue';
 
-/**
- * Outil de réglage de la pose des origamis — développement seulement.
- *
- * Le problème qu'il résout : rien dans un crease pattern ne dit comment le
- * modèle se présentera une fois plié. Où tombe le manche de la hache, de quel
- * côté est le tronc de l'arbre, à quel pourcentage la forme se lit — ça se
- * constate en regardant, et ça se règle à la main.
- *
- * Deux choix d'ergonomie, tirés de l'usage de la première version :
- *
- * - **On tourne à la souris**, pas au curseur. Trois angles d'Euler ne se
- *   pensent pas : on veut « fais pivoter ça vers la gauche », et le geste doit
- *   être celui-là. Les curseurs restent pour finir au degré près.
- * - **L'échelle ne bouge jamais.** Le rendu du jeu serre au plus près de la
- *   silhouette, donc l'image grandissait et rétrécissait à chaque degré, et on
- *   perdait le fil de ce qu'on regardait. Ici le cadre est stable (`cadreStable`)
- *   et c'est le zoom, réglé à part, qui décide de la taille.
- *
- * Le rendu passe par le **même code que le jeu** (`rendreOrigami`), donc ce
- * qu'on voit est exactement ce que le décor montrera : même angle de caméra,
- * mêmes papiers, même lumière.
- */
+// Outil de réglage de la pose des origamis — développement seulement. Rien dans
+// un crease pattern ne dit où tombera le manche de la hache : ça se constate en
+// regardant, et ça se règle à la main.
+//
+// On tourne à la souris et pas au curseur — trois angles d'Euler ne se pensent
+// pas —, les curseurs restant pour finir au degré près. Et l'échelle ne bouge
+// jamais : le rendu du jeu serre au plus près de la silhouette, donc l'image
+// grandissait à chaque degré. D'où `cadreStable`, le zoom décidant de la taille.
+//
+// Le rendu passe par le même code que le jeu, donc ce qu'on voit est ce que le
+// décor montrera.
 
 type Angles = [number, number, number];
 
-/** Degrés de rotation pour un déplacement d'un pixel à la souris. */
+// Degrés de rotation pour un déplacement d'un pixel à la souris.
 const SENSIBILITE = 0.55;
 
-/** Côté du rendu principal, en pixels. */
+// Côté du rendu principal, en pixels.
 const TAILLE_APERCU = 460;
 
-/** État courant, initialisé sur ce que le jeu utilise aujourd'hui. */
+// État courant, initialisé sur ce que le jeu utilise aujourd'hui.
 const reglages = new Map<string, Pose>(
   Object.entries(POSES).map(([nom, pose]) => [
     nom,
@@ -43,12 +32,9 @@ const reglages = new Map<string, Pose>(
 
 let courant = [...reglages.keys()][0];
 
-/**
- * Le cadre stable est calé sur le **rayon** du modèle, donc sur sa plus grande
- * dimension : un modèle allongé y flotte au milieu de beaucoup de vide. Partir
- * un peu au-dessus de 1 lui rend une taille confortable sans rien coûter à la
- * stabilité — c'est le même cadre, simplement plus serré.
- */
+// Le cadre stable est calé sur le rayon du modèle, donc sur sa plus grande
+// dimension : un modèle allongé y flotte au milieu de beaucoup de vide. Partir
+// au-dessus de 1 lui rend une taille confortable sans coûter à la stabilité.
 let zoom = 1.3;
 
 const liste = document.getElementById('liste')!;
@@ -68,14 +54,9 @@ const statut = document.getElementById('statut')!;
 // Rendu
 // ------------------------------------------------------------------
 
-/**
- * Un seul rendu en vol à la fois, par modèle.
- *
- * Un glisser produit bien plus d'événements que le GPU ne rend d'images : sans
- * ce garde-fou, on empilerait une centaine de rendus en retard et le modèle
- * suivrait la souris avec plusieurs secondes de décalage. On garde la dernière
- * demande, on jette les autres.
- */
+// Un glisser produit bien plus d'événements que le GPU ne rend d'images : sans
+// ce garde-fou on empile une centaine de rendus en retard et le modèle suit la
+// souris avec plusieurs secondes de décalage.
 const enVol = new Set<string>();
 const aRefaire = new Set<string>();
 
@@ -140,7 +121,7 @@ function choisir(nom: string) {
 // Curseurs
 // ------------------------------------------------------------------
 
-/** Recopie l'état courant dans les curseurs, sans relancer de rendu. */
+// Sans relancer de rendu.
 function poserCurseurs() {
   const pose = reglages.get(courant)!;
   curseursAngle.forEach((ligne, i) => {
@@ -186,14 +167,8 @@ curseurZoom.addEventListener('input', () => {
   rafraichirApercu();
 });
 
-/**
- * Annule les essais en cours et revient à la pose **du jeu** — celle qui est
- * écrite dans `POSES`, angles et pliage compris.
- *
- * C'est le seul retour en arrière qui ait un sens dans cet outil : on y tourne
- * un modèle pendant des dizaines d'essais, et ce qu'on veut retrouver n'est pas
- * une pose neutre mais celle qu'on avait validée la dernière fois.
- */
+// Revient à la pose écrite dans `POSES` : après des dizaines d'essais, ce qu'on
+// veut retrouver n'est pas une pose neutre mais celle validée la dernière fois.
 document.getElementById('revenir')!.addEventListener('click', () => {
   const enregistree = POSES[courant];
   if (!enregistree) return;
@@ -201,10 +176,8 @@ document.getElementById('revenir')!.addEventListener('click', () => {
   appliquerTout();
 });
 
-/**
- * Repose le modèle **face à la caméra**, comme la feuille au début de
- * l'animation : le point de départ naturel quand on ne sait plus où on en est.
- */
+// Face à la caméra, comme la feuille au début de l'animation : le point de
+// départ naturel quand on ne sait plus où on en est.
 document.getElementById('face')!.addEventListener('click', async () => {
   const THREE = await import('three');
   const { oeil } = repereVue(THREE);
@@ -213,18 +186,13 @@ document.getElementById('face')!.addEventListener('click', async () => {
   appliquerTout();
 });
 
-/**
- * Écrit les poses dans `src/origami/poses.ts`, par le serveur de développement.
- *
- * Recopier un bloc entre le navigateur et l'éditeur à chaque essai était le vrai
- * coût du réglage — on tourne un modèle vingt fois avant de trouver. Le point
- * d'entrée est défini dans `vite.config.ts` : il n'existe qu'en développement,
- * n'écrit qu'un fichier connu d'avance, et ne garde que des nombres bornés.
- *
- * Vite recharge la page dans la foulée, puisque le fichier qu'on vient d'écrire
- * est celui d'où l'outil tire son état. Le message de confirmation traverse ce
- * rechargement par `sessionStorage`, sans quoi on ne le verrait jamais.
- */
+// Le point d'entrée est défini dans `vite.config.ts` : il n'existe qu'en
+// développement, n'écrit qu'un fichier connu d'avance et ne garde que des
+// nombres bornés.
+//
+// Vite recharge la page dans la foulée, puisque le fichier qu'on vient d'écrire
+// est celui d'où l'outil tire son état : d'où le message de confirmation qui
+// traverse le rechargement par `sessionStorage`.
 document.getElementById('enregistrer')!.addEventListener('click', async () => {
   dire('Enregistrement…');
   try {
@@ -263,20 +231,12 @@ function appliquerTout() {
 // Rotation à la souris
 // ------------------------------------------------------------------
 
-/**
- * Le geste : un glisser horizontal fait tourner le modèle autour de la
- * **verticale de l'écran**, un glisser vertical le fait basculer autour de
- * l'**horizontale de l'écran**.
- *
- * Ces deux axes sont ceux de l'image, pas ceux du monde — c'est toute la
- * différence entre « ça tourne comme je pousse » et trois curseurs dont il faut
- * deviner l'effet. `repereVue` les donne (voir vue.ts).
- *
- * La rotation est composée **à gauche** du quaternion courant : le nouveau tour
- * s'applique dans le repère de l'écran, indépendamment de la pose déjà prise.
- * Composée à droite, il aurait tourné dans le repère de l'objet et le geste
- * aurait changé de sens selon l'orientation en cours.
- */
+// Les deux axes sont ceux de l'IMAGE et non du monde : c'est la différence entre
+// « ça tourne comme je pousse » et trois curseurs dont il faut deviner l'effet.
+//
+// La rotation est composée À GAUCHE du quaternion courant, donc dans le repère
+// de l'écran. Composée à droite, elle tournerait dans le repère de l'objet et le
+// geste changerait de sens selon l'orientation en cours.
 apercu.addEventListener('pointerdown', (e) => {
   apercu.setPointerCapture(e.pointerId);
   apercu.classList.add('is-tourne');
@@ -317,7 +277,7 @@ apercu.addEventListener('pointerdown', (e) => {
   apercu.addEventListener('pointercancel', lacher);
 });
 
-/** Quaternion -> trois angles en degrés, dans l'ordre X, Y, Z du jeu. */
+// Quaternion -> trois angles en degrés, dans l'ordre X, Y, Z du jeu.
 function versDegres(THREE: typeof import('three'), q: import('three').Quaternion): Angles {
   const e = new THREE.Euler().setFromQuaternion(q, 'XYZ');
   const deg = 180 / Math.PI;
