@@ -12,44 +12,22 @@ import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
 import { dessinerFeuille } from './feuille';
 
-/**
- * Le ravin — première scène du chapitre 1.
- * Voir game-design/scenes/chapter-1/le-pont.md.
- *
- * La **zone** s'appelle le ravin, et c'est ce que le joueur lit : ce qui l'y
- * arrête est le vide, le pont n'existe pas encore. L'identifiant de la scène,
- * lui, reste `pont` — il est gravé dans les knots d'ink, les drapeaux et les
- * sauvegardes, où il désigne aussi bien l'objet que la pièce.
- *
- * Le héros arrive par la gauche, le vide s'ouvre devant lui. Le pont n'est pas
- * cassé : il a **disparu**, il ne reste que la coupure. Une feuille de papier
- * traîne au sol : l'examiner ouvre le choix du modèle, et choisir le pont lance
- * l'énigme. Le pont posé, la rive d'en face devient accessible — avec la feuille
- * du vieil arbre et la sortie vers la porte.
- *
- * Toute la géométrie est lue dans game-design/scenes/chapter-1/pont.tmj. Ce
- * fichier ne décide que du sens.
- *
- * Le terrain — le sol, le ravin, la rive d'en face — est l'image de l'artiste
- * posée par le plan (voir fond.ts). Seul le **ciel** reste peint par le code :
- * le fond est transparent au-dessus de l'horizon, et le soleil et les nuages
- * passent dessous.
- *
- * Le pont posé et le vieil arbre, eux, ne sont dessinés d'aucune des deux
- * façons : ce sont les modèles `pont.origami` et `arbre.origami` rendus tels
- * quels (voir origami-decor.ts). Ce que le joueur vient de plier est ce qu'il
- * retrouve.
- */
+// Le ravin — première scène du chapitre 1.
+// Voir game-design/scenes/chapter-1/le-pont.md.
+//
+// La zone s'appelle le ravin, et c'est ce que le joueur lit : ce qui l'arrête
+// est le vide, le pont n'existe pas encore. L'identifiant de la scène reste
+// `pont`, gravé dans les knots d'ink, les drapeaux et les sauvegardes.
+//
+// La géométrie est lue dans game-design/scenes/chapter-1/pont.tmj ; ce fichier
+// ne décide que du sens.
 
 const PLAN = plan;
 
 const JEUNE_ARBRE = 'jeune-arbre';
 
-/**
- * Graine du semis de nuages. Une valeur par scène : deux ciels tirés de la même
- * graine se ressembleraient trait pour trait, et le passage d'une scène à
- * l'autre le montrerait.
- */
+// Une valeur par scène : deux ciels tirés de la même graine se ressembleraient
+// trait pour trait, et l'aller-retour le montrerait.
 const GRAINE_DU_CIEL = 1907;
 
 const SOL = boxOf(PLAN, 'dec_sol');
@@ -63,24 +41,20 @@ export class PontScene extends PointClickScene {
   private feuilleArbre!: Phaser.GameObjects.Graphics;
   private vieilArbre!: OrigamiDecor;
 
-  /** Emprise de la grande feuille à plat, et celle de l'arbre une fois plié. */
+  // Emprise de la grande feuille à plat, et celle de l'arbre une fois plié.
   private empriseFeuilleArbre?: Box;
   private empriseVieilArbre?: Box;
 
   constructor() {
     // `active: false` est indispensable : Phaser démarre tout seul la première
     // scène du tableau `scene:`, sans les services que main.ts lui passe. La
-    // scène était donc créée deux fois, et le redémarrage en pleine
-    // initialisation laissait une horloge à l'arrêt — les `time.delayedCall`
-    // ne se déclenchaient jamais. C'est main.ts qui décide de la scène à
-    // ouvrir, à partir de la sauvegarde.
+    // scène était créée deux fois, et le redémarrage en pleine initialisation
+    // laissait une horloge à l'arrêt — les `time.delayedCall` ne partaient
+    // jamais.
     super({ key: 'pont', active: false });
   }
 
-  /**
-   * Le sens de chaque zone du plan : son libellé, son knot, sa condition
-   * d'apparition. Les coordonnées viennent du SVG, pas d'ici.
-   */
+  // Libellé, knot, condition d'apparition. Les coordonnées viennent du plan.
   protected preloadAssets() {
     preloadHeros(this);
     preloadCiel(this);
@@ -94,12 +68,11 @@ export class PontScene extends PointClickScene {
         label: 'Le précipice',
         knots: { analyser: 'pont_precipice' },
         // Le vide ne s'examine que tant qu'il barre la route : une fois le pont
-        // posé, `pont_precipice` ferait dire au héros qu'il ne voit aucune
-        // trace de pont alors qu'il en a un sous les yeux.
+        // posé, `pont_precipice` ferait dire au héros qu'il ne voit aucune trace
+        // de pont alors qu'il en a un sous les yeux.
         visibleIf: () => !gameState.flag('pont_plie'),
       },
       // Rien à examiner avant le pliage : le pont n'est pas cassé, il a disparu.
-      // Ce qu'on regarde à sa place, c'est le vide.
       pont_repare: {
         label: 'Le pont',
         knots: { analyser: 'pont_pont' },
@@ -122,9 +95,8 @@ export class PontScene extends PointClickScene {
       feuille_vieil_arbre: {
         label: 'Une grande feuille',
         knots: { analyser: 'pont_feuille_vieil_arbre' },
-        // Elle est sur la rive d'en face : inatteignable tant que le pont
-        // n'est pas posé. Une fois découpée, elle est devenue du bois et il ne
-        // reste rien.
+        // Sur la rive d'en face, donc inatteignable tant que le pont n'est pas
+        // posé. Une fois découpée, elle est devenue du bois.
         visibleIf: () => gameState.flag('pont_plie') && !gameState.flag('vieil_arbre_decoupe'),
       },
     });
@@ -135,8 +107,7 @@ export class PontScene extends PointClickScene {
       porte: {
         label: 'Vers la porte',
         room: 'porte',
-        // Sans le pont, la rive d'en face est inatteignable : la flèche ne doit
-        // pas promettre un passage qui n'existe pas.
+        // Sans le pont, la flèche promettrait un passage qui n'existe pas.
         visibleIf: () => gameState.flag('pont_plie'),
       },
     });
@@ -153,8 +124,7 @@ export class PontScene extends PointClickScene {
     this.vieilArbre?.montrer(arbrePlie && !decoupe);
 
     // Le même hotspot désigne deux choses de tailles très différentes : une
-    // feuille à plat sur la rive, puis un arbre debout. La zone tactile suit
-    // celle qui est effectivement à l'écran.
+    // feuille à plat, puis un arbre debout.
     const emprise = arbrePlie ? this.empriseVieilArbre : this.empriseFeuilleArbre;
     if (emprise) this.caler('feuille_vieil_arbre', emprise);
   }
@@ -164,28 +134,22 @@ export class PontScene extends PointClickScene {
   // ------------------------------------------------------------------
 
   protected drawScenery() {
-    // Le ciel et ses nuages, sous tout le reste (voir ciel.ts). L'horizon est le
-    // haut du sol : le dégradé se cale dessus plutôt que sur des hauteurs
-    // recopiées à la main.
+    // L'horizon est le haut du sol : le dégradé s'y cale plutôt que sur des
+    // hauteurs recopiées à la main.
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 6);
 
-    // Le terrain : les deux rives et le noir du ravin entre elles. Le vide n'est
-    // pas un fond de gorge qu'on pourrait mesurer des yeux — c'est ce qui rend
-    // la traversée inquiétante, et l'image de l'artiste le tient comme le
-    // faisait l'aplat.
+    // Le vide n'est pas un fond de gorge qu'on pourrait mesurer des yeux : c'est
+    // ce qui rend la traversée inquiétante.
     dessinerFond(this, PLAN.fond);
 
-    // Le jeune arbre : le pliage de l'artiste, comme les personnages. La zone
-    // tactile suit l'emprise réelle du sprite, pas la boîte du plan — il y est
-    // ajusté sans déformation et n'en occupe donc qu'une partie.
+    // La zone tactile suit l'emprise réelle du sprite, pas la boîte du plan.
     this.caler('arbre', empriseDe(placeSprite(this, JEUNE_ARBRE, boxOf(PLAN, 'hs_arbre'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
-    // Le pont plié, révélé après l'énigme : le modèle, pas un dessin de pont.
-    // Calé au **centre** de son emprise, elle-même centrée sur le ravin : c'est
-    // le seul élément du décor qui ne repose sur rien, et le caler par le bas le
-    // faisait glisser d'un côté ou de l'autre selon la hauteur de son rendu.
+    // Calé au CENTRE de son emprise : c'est le seul élément du décor qui ne
+    // repose sur rien, et le caler par le bas le faisait glisser selon la hauteur
+    // de son rendu.
     this.folded = poserOrigami(
       this,
       'pont',
@@ -197,14 +161,12 @@ export class PontScene extends PointClickScene {
       { ancrage: 'centre' },
     );
 
-    // La feuille de papier, posée au sol près du héros. Elle occupe exactement
-    // sa zone tactile : c'est le seul objet du décor dont le dessin et la cible
-    // se confondent, autant le lire au même endroit.
+    // Elle occupe exactement sa zone tactile : le seul objet du décor dont le
+    // dessin et la cible se confondent.
     this.sheet = this.add.graphics();
     this.caler('feuille', dessinerFeuille(this.sheet, boxOf(PLAN, 'hs_feuille'), 'pont'));
 
-    // La feuille du vieil arbre, sur la rive d'en face, et l'arbre qu'elle
-    // devient une fois plié.
+    // La feuille du vieil arbre, et l'arbre qu'elle devient une fois pliée.
     const grande = boxOf(PLAN, 'hs_feuille_vieil_arbre');
     this.feuilleArbre = this.add.graphics();
     this.empriseFeuilleArbre = dessinerFeuille(this.feuilleArbre, grande, 'arbre');

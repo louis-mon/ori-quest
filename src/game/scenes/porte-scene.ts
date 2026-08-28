@@ -12,27 +12,14 @@ import { placeHeros, preloadHeros } from './heros';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
 
-/**
- * La porte — seconde scène du chapitre 1.
- * Voir game-design/scenes/chapter-1/la-porte.md.
- *
- * On arrive devant le village fortifié, et la porte manque : il n'y a qu'une
- * grande feuille posée contre le rempart, à sa place. Le renard, coincé dehors, apprend au héros que la
- * porte était en bois — et qu'une hache en ferait. Le chapitre se referme quand
- * la porte est pliée et qu'on la franchit.
- *
- * Le terrain et le rempart sont l'image de l'artiste, posée par le plan (voir
- * fond.ts) ; seul le **ciel** reste peint par le code, et ses nuages dérivent
- * derrière la muraille par la transparence du fond. Le battant, lui, n'est
- * dessiné d'aucune des deux façons : c'est le modèle `porte.origami` rendu tel
- * quel (voir origami-decor.ts).
- */
+// La porte — seconde scène du chapitre 1.
+// Voir game-design/scenes/chapter-1/la-porte.md.
 
 const PLAN = plan;
 
 const RENARD = 'renard';
 
-/** Graine du semis de nuages — voir `semerNuages()`. Une valeur par scène. */
+// Une valeur par scène — voir `semerNuages()`.
 const GRAINE_DU_CIEL = 4211;
 
 const SOL = boxOf(PLAN, 'dec_sol');
@@ -46,7 +33,8 @@ export class PorteScene extends PointClickScene {
   private feuilleHache!: Phaser.GameObjects.Graphics;
 
   constructor() {
-    // Même raison que PontScene : c'est main.ts qui décide de la scène à ouvrir.
+    // Même raison que PontScene : c'est main.ts qui décide de la scène à
+    // ouvrir.
     super({ key: 'porte', active: false });
   }
 
@@ -70,8 +58,8 @@ export class PorteScene extends PointClickScene {
       porte: {
         label: 'La porte',
         knots: { analyser: 'porte_porte' },
-        // Une fois pliée, la porte n'est plus un objet d'étude mais un passage :
-        // c'est `exit_village`, posé au même endroit, qui prend le relais.
+        // Une fois pliée, la porte est un passage : c'est `exit_village`, posé
+        // au même endroit, qui prend le relais.
         visibleIf: () => !gameState.flag('porte_plie'),
       },
       feuille_hache: {
@@ -106,8 +94,8 @@ export class PorteScene extends PointClickScene {
     this.battant?.montrer(plie);
     this.feuillePorte?.setVisible(!plie);
     // Sur le drapeau de PLIAGE, comme le hotspot au-dessus — jamais sur la
-    // possession de la hache : celle-ci se dépense en découpant le vieil arbre,
-    // et le décor faisait alors réapparaître la feuille déjà pliée.
+    // possession de la hache, qui se dépense en découpant le vieil arbre : le
+    // décor faisait alors réapparaître la feuille déjà pliée.
     this.feuilleHache?.setVisible(!gameState.flag('hache_pliee'));
   }
 
@@ -116,26 +104,21 @@ export class PorteScene extends PointClickScene {
   // ------------------------------------------------------------------
 
   protected drawScenery() {
-    // Le même ciel d'après-midi qu'au pont, et les mêmes nuages pliés — semés
-    // sur une autre graine, sinon les deux scènes se partagent le même ciel et
-    // l'aller-retour le montre. Ils passent **derrière** le rempart.
+    // Autre graine qu'au pont, sinon les deux scènes partagent le même ciel et
+    // l'aller-retour le montre. Les nuages passent derrière le rempart.
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
 
     // Le terrain et le rempart, d'un seul tenant.
     dessinerFond(this, PLAN.fond);
 
-    // Pas de trou dans le mur. Tant que la porte n'est pas pliée, on voit le
-    // rempart et, devant lui, la grande feuille — une feuille carrée comme
-    // partout ailleurs, dans le papier de son modèle. Une embrasure béante
-    // se lisait comme un décor de fond, et le joueur n'avait aucune raison de
-    // taper dedans.
+    // Pas de trou dans le mur : une embrasure béante se lisait comme un décor de
+    // fond, et le joueur n'avait aucune raison de taper dedans.
     const ouverture = boxOf(PLAN, 'hs_porte');
     this.feuillePorte = this.add.graphics();
     this.caler('porte', dessinerFeuille(this.feuillePorte, ouverture, 'porte'));
 
-    // La porte pliée : le modèle lui-même, pas un dessin de porte. Une fois
-    // posée, c'est elle le passage, donc c'est elle qui porte la zone tactile
+    // Une fois posée, c'est elle le passage, donc elle qui porte la zone tactile
     // de la sortie `village`.
     this.battant = poserOrigami(this, 'porte', ouverture, (emprise) => {
       this.caler('village', emprise);
