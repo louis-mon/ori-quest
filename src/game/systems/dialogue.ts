@@ -3,58 +3,32 @@ import type { Overlay } from '../../ui/overlay';
 import { personnage, type Personnage } from './personnages';
 import { gameState } from './state';
 
-/**
- * Pont entre le moteur narratif ink et l'interface.
- *
- * Le contenu vit dans `content/story.ink` — du texte, éditable sans toucher au
- * code. Les effets de jeu passent par des tags ink :
- *
- *     Le tracé est juste, le papier sait quoi faire. # origami: pont
- *     Le pont enjambe le vide. # flag: pont_plie
- *
- * Qui parle se déclare de la même façon, avec `# qui:` :
- *
- *     # qui: renard
- *     Tu comptes vraiment traverser ça ?
- *
- * Ajouter un effet = ajouter une entrée dans `handlers`, pas réécrire le
- * runner.
- */
+// Les effets de jeu passent par des tags ink :
+//
+//     Le tracé est juste, le papier sait quoi faire. # origami: pont
+//     Le pont enjambe le vide. # flag: pont_plie
+//
+// Ajouter un effet = ajouter une entrée dans `handlers`, pas réécrire le runner.
 
 export interface DialogueEffects {
-  /** Déclenche une animation de pliage et attend qu'elle se termine. */
   origami(name: string): Promise<void>;
-  /** Change de scène. */
   goto(room: string): void;
-  /**
-   * Donne un objet au joueur **et le montre** arriver dans l'inventaire.
-   *
-   * Passe par les effets plutôt que d'appeler `gameState.give()` d'ici, parce
-   * que c'est le seul chemin où l'on sait que l'objet vient d'être *obtenu*.
-   * L'état, lui, ne fait pas la différence : il est aussi rempli au chargement
-   * d'une sauvegarde et par le menu des points d'étape, où faire voler trois
-   * objets à la file n'aurait aucun sens.
-   */
+  // Donne un objet ET le montre arriver. Passe par les effets plutôt que par
+  // `gameState.give()` parce que c'est le seul chemin où l'on sait que l'objet
+  // vient d'être obtenu : l'état est aussi rempli au chargement d'une sauvegarde
+  // et par le menu des points d'étape.
   donner(item: string): void;
-  /**
-   * Ouvre une énigme et attend son issue, qu'elle publie dans un drapeau
-   * `<nom>_resolu`. Le tag doit donc être posé sur une ligne **sans texte** :
-   * l'énigme prend tout l'écran, et la ligne suivante ne doit être évaluée
-   * qu'une fois le drapeau connu.
-   */
+  // Le verdict est publié dans un drapeau `<nom>_resolu`, donc le tag doit être
+  // posé sur une ligne SANS texte : la ligne suivante ne doit être évaluée
+  // qu'une fois le drapeau connu.
   puzzle(name: string): Promise<void>;
 }
 
-/**
- * Un handler peut renvoyer le nom d'un knot : le récit y repart aussitôt le tag
- * appliqué. Voir `puzzle` ci-dessous pour la raison d'être de ce détour.
- */
+// Un handler peut renvoyer le nom d'un knot : le récit y repart aussitôt le tag
+// appliqué. Voir `puzzle` pour la raison de ce détour.
 type TagHandler = (value: string, fx: DialogueEffects) => void | string | Promise<void | string>;
 
-/**
- * Identifiants qui rendent la parole à la narration, plutôt que de désigner un
- * personnage.
- */
+// Identifiants qui rendent la parole à la narration.
 const NARRATION = new Set(['narrateur', '-', 'aucun']);
 
 const handlers: Record<string, TagHandler> = {
@@ -64,31 +38,20 @@ const handlers: Record<string, TagHandler> = {
   unflag: (value) => gameState.setFlag(value, false),
   origami: (value, fx) => fx.origami(value),
   goto: (value, fx) => fx.goto(value),
-  /**
-   * Ouvre une énigme et attend son verdict, publié dans `<nom>_resolu`.
-   *
-   * À accompagner systématiquement d'un `# then:`. ink évalue son contenu en
-   * avance : une condition `{ flag_<nom>_resolu: ... }` écrite à la suite du tag
-   * serait résolue pendant le `Continue()` qui émet ce tag, donc avant que
-   * l'énigme n'ait rendu son verdict — le joueur lisait toujours la branche
-   * d'échec. Le `# then:` fait repartir le récit par un chemin explicite, une
-   * fois le drapeau à jour.
-   *
-   * La destination ne peut pas s'écrire `-> knot` dans ce tag : ink y verrait un
-   * divert et l'exécuterait lui-même, ce qui ramène exactement le problème.
-   */
+  // À accompagner systématiquement d'un `# then:`. ink évalue son contenu en
+  // avance : une condition `{ flag_<nom>_resolu: ... }` écrite à la suite serait
+  // résolue pendant le `Continue()` qui émet ce tag, donc avant le verdict — le
+  // joueur lisait toujours la branche d'échec. La destination ne peut pas
+  // s'écrire `-> knot` : ink y verrait un divert et l'exécuterait lui-même.
   puzzle: (value, fx) => fx.puzzle(value),
-  /** Repart au knot indiqué, une fois les tags précédents appliqués. */
+  // Repart au knot indiqué, une fois les tags précédents appliqués.
   then: (value) => value,
-  /**
-   * Traité en amont, par `readSpeaker` : la boîte de dialogue doit connaître le
-   * locuteur *avant* d'afficher la ligne. Listé ici pour ne pas ressortir en
-   * « tag inconnu ».
-   */
+  // Traité en amont par `readSpeaker`. Listé ici pour ne pas ressortir en « tag
+  // inconnu ».
   qui: () => {},
 };
 
-/** Découpe `clé: valeur`. Renvoie `null` pour un tag sans deux-points. */
+// `null` pour un tag sans deux-points.
 function parseTag(tag: string): { key: string; value: string } | null {
   const sep = tag.indexOf(':');
   if (sep < 0) return null;
@@ -98,7 +61,7 @@ function parseTag(tag: string): { key: string; value: string } | null {
 export class DialogueRunner {
   private story: Story;
   private running = false;
-  /** Locuteur courant, rémanent d'une ligne à l'autre. `null` = narration. */
+  // Rémanent d'une ligne à l'autre. `null` = narration.
   private speaker: Personnage | null = null;
 
   constructor(
@@ -110,10 +73,8 @@ export class DialogueRunner {
     this.bindStateToInk();
   }
 
-  /**
-   * Expose l'inventaire et les drapeaux à ink, pour écrire des conditions
-   * directement dans la narration : `{ has_crease_pattern: ... }`.
-   */
+  // Expose l'inventaire et les drapeaux à ink, pour écrire des conditions
+  // directement dans la narration : `{ has_crease_pattern: ... }`.
   private bindStateToInk() {
     gameState.subscribe((state) => {
       for (const name of Object.keys(this.story.variablesState as object)) {
@@ -131,12 +92,11 @@ export class DialogueRunner {
     return this.running;
   }
 
-  /** Joue un knot ink du début à la fin. Résout quand le dialogue se ferme. */
   async run(knot: string): Promise<void> {
     if (this.running) return;
     this.running = true;
     // Chaque dialogue s'ouvre sur la narration : un `# qui:` laissé par le
-    // dialogue précédent ferait parler un personnage absent de la scène.
+    // précédent ferait parler un personnage absent de la scène.
     this.speaker = null;
     try {
       this.story.ChoosePathString(knot);
@@ -155,13 +115,12 @@ export class DialogueRunner {
       while (this.story.canContinue) {
         const line = this.story.Continue()?.trim() ?? '';
         const tags = this.story.currentTags ?? [];
-        // Le locuteur se lit à part, et de façon synchrone : `say()` écrit dans
-        // le DOM dès l'appel, tandis que `applyTags` est asynchrone. Passer
-        // `# qui:` par les handlers afficherait la ligne sous le nom du
-        // personnage précédent.
+        // Le locuteur se lit à part et de façon synchrone : `say()` écrit dans
+        // le DOM dès l'appel, `applyTags` est asynchrone. Passer `# qui:` par les
+        // handlers afficherait la ligne sous le nom du personnage précédent.
         this.readSpeaker(tags);
-        // Les tags s'appliquent avant l'affichage : un `# origami:` doit
-        // pouvoir jouer *pendant* que la ligne est lue.
+        // Les tags s'appliquent avant l'affichage : un `# origami:` doit pouvoir
+        // jouer pendant que la ligne est lue.
         let effetFini = false;
         const pending = this.applyTags(tags).then(() => {
           effetFini = true;
@@ -173,15 +132,11 @@ export class DialogueRunner {
         }
 
         await this.overlay.say(line, this.speaker);
-        // Le joueur a-t-il tapé **avant** la fin de l'effet ? Alors son tap a
-        // payé la lecture de la ligne, pas le passage à la suivante : sans
-        // cette question, la réplique d'après prendrait la place de celle-ci à
-        // la seconde exacte où le pliage se termine, sans que personne ne l'ait
-        // demandé. Un dialogue n'avance jamais tout seul.
-        //
-        // Tapé après, il n'y a rien à redemander — `depense` est faux et le
-        // récit enchaîne comme sur n'importe quelle ligne. C'est le cas courant :
-        // une réplique se lit plus longtemps qu'un pliage ne dure.
+        // Tapé AVANT la fin de l'effet, le tap a payé la lecture de la ligne et
+        // non le passage à la suivante : sans cette question, la réplique d'après
+        // prend la place à la seconde où le pliage se termine. Tapé après, il n'y
+        // a rien à redemander — c'est le cas courant, une réplique se lit plus
+        // longtemps qu'un pliage ne dure.
         const depense = !effetFini;
         await pending;
         if (depense) await this.overlay.attendreUnTap();
@@ -195,14 +150,8 @@ export class DialogueRunner {
     }
   }
 
-  /**
-   * Applique le `# qui:` de la ligne, s'il y en a un.
-   *
-   * Le locuteur est **rémanent** : il vaut jusqu'au prochain `# qui:` ou la fin
-   * du dialogue. Une tirade de dix lignes ne demande donc qu'un seul tag, et
-   * l'oublier en cours de réplique ne renvoie pas le personnage au silence.
-   * `# qui: narrateur` rend la parole à la narration.
-   */
+  // Le locuteur est rémanent jusqu'au prochain `# qui:` ou la fin du dialogue :
+  // une tirade de dix lignes ne demande qu'un seul tag.
   private readSpeaker(tags: string[]) {
     for (const tag of tags) {
       const parsed = parseTag(tag);
