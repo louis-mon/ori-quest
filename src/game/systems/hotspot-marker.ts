@@ -1,38 +1,24 @@
 import Phaser from 'phaser';
 import { creerMarqueur, preloadMarqueur } from './marqueur-papier';
 
-/**
- * Le marqueur de hotspot : la cocotte en papier — la **pajarita**, l'oiseau
- * traditionnel espagnol, pas la salière à quatre volets qu'on manipule au bout
- * des doigts. C'est le pliage de l'artiste, photographié comme les personnages
- * et le reste du décor.
- *
- * Sur écran tactile il n'y a pas de survol, donc rien n'indique qu'un élément
- * est actif. Ce marqueur remplace le curseur qui change de forme.
- *
- * Voir game-design/03-langage-visuel.md — la cocotte signale « ici, on analyse »,
- * par opposition à la flèche qui signale « ici, on change de scène ».
- */
+// La cocotte : la pajarita, l'oiseau traditionnel espagnol, pas la salière à
+// quatre volets. Sur écran tactile il n'y a pas de survol, donc rien n'indique
+// qu'un élément est actif : ce marqueur remplace le curseur qui change de forme.
 
 const TEXTURE = 'marqueur-cocotte';
 const FICHIER = 'assets/ui/parajita.png';
 
-/**
- * Taille à l'écran, en pixels du jeu. La silhouette de la pajarita tient dans
- * un carré : monter au-delà et elle rivalise avec les objets qu'elle désigne,
- * descendre en dessous et ses deux pointes — le bec, la queue — se referment.
- */
+// En pixels du jeu. Au-delà, elle rivalise avec les objets qu'elle désigne ; en
+// dessous, ses deux pointes — le bec, la queue — se referment.
 const HAUTEUR = 52;
 
-/** À appeler dans le `preload()` d'une scène. */
+// À appeler dans le `preload()` d'une scène.
 export function preloadCocotte(scene: Phaser.Scene): void {
   preloadMarqueur(scene, TEXTURE, FICHIER);
 }
 
-/**
- * Pose un marqueur animé. Le battement lent doit rester discret : il signale
- * sans réclamer l'attention, sinon une scène à cinq hotspots clignote de partout.
- */
+// Le battement reste lent et discret : sinon une scène à cinq hotspots clignote
+// de partout.
 export function createHotspotMarker(
   scene: Phaser.Scene,
   x: number,
