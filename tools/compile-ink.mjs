@@ -2,9 +2,8 @@
 /**
  * Compile content/story.ink -> src/generated/story.json
  *
- * inkjs embarque le compilateur (build `inkjs/full`), donc pas besoin
- * d'inklecate ni de .NET. Lancé automatiquement par `npm run dev` et
- * `npm run build`.
+ * inkjs embarque le compilateur (build `inkjs/full`), donc ni inklecate ni .NET.
+ * Lancé automatiquement par `npm run dev` et `npm run build`.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -17,12 +16,8 @@ const outFile = resolve(root, 'src/generated/story.json');
 
 const text = readFileSync(source, 'utf8');
 
-/**
- * Sans gestionnaire d'erreurs explicite, inkjs se contente de lever
- * « Compilation failed. » — sans fichier, sans ligne, sans rien. Le détail
- * n'existe que dans ce callback, et une erreur de syntaxe ink sans numéro de
- * ligne se cherche à l'œil dans plusieurs centaines de lignes.
- */
+// Sans gestionnaire explicite, inkjs se contente de lever « Compilation
+// failed. » — sans fichier ni ligne. Le détail n'existe que dans ce callback.
 const problemes = [];
 const options = new CompilerOptions(null, [], false, (message, type) => {
   problemes.push({ message, type });

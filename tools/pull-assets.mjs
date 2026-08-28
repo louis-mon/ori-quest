@@ -2,24 +2,18 @@
 /**
  * Récupère le dossier de travail de l'artiste vers assets-src/.
  *
- * Le transport est délégué à rclone, agnostique du fournisseur : passer de
- * Drive à Dropbox ne touche que la config du remote, pas ce script.
- *
- * Deux raisons de ne PAS utiliser le client de synchro officiel du
- * fournisseur : sur macOS il se monte dans ~/Library/CloudStorage, protégé
- * par TCC — donc illisible sans accorder l'accès complet au disque — et il
- * expose tout le compte. rclone écrit dans un dossier ordinaire, et un
- * remote épinglé avec `root_folder_id` ne peut pas remonter au-dessus du
- * dossier partagé.
- *
- * assets-src/ est une zone de transit gitignorée : les sources brutes de
- * l'artiste n'entrent jamais dans le dépôt. Seul le résultat de l'étape
- * d'intégration rejoint public/assets/ et le build.
- *
- * Usage :
  *   npm run assets:pull
  *   npm run assets:pull -- --mirror    # répercute aussi les suppressions amont
  *   npm run assets:pull -- --dry-run   # montre ce qui serait fait, sans écrire
+ *
+ * Le transport passe par rclone plutôt que par le client de synchro officiel :
+ * sur macOS celui-ci se monte dans ~/Library/CloudStorage, protégé par TCC —
+ * donc illisible sans accorder l'accès complet au disque — et il expose tout le
+ * compte, là où un remote épinglé avec `root_folder_id` ne peut pas remonter
+ * au-dessus du dossier partagé.
+ *
+ * assets-src/ est une zone de transit gitignorée : les sources brutes n'entrent
+ * jamais dans le dépôt.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
@@ -29,8 +23,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DEST = join(ROOT, 'assets-src');
 
-// Nom du remote rclone. Surchargeable pour tester un autre dossier sans
-// toucher au script : ORI_ASSETS_REMOTE=autre: npm run assets:pull
+// Surchargeable pour tester un autre dossier sans toucher au script :
+// ORI_ASSETS_REMOTE=autre: npm run assets:pull
 const REMOTE = process.env.ORI_ASSETS_REMOTE ?? 'ori-assets:';
 
 const WARN_BYTES = 500 * 1024 * 1024;
@@ -50,11 +44,11 @@ try {
   process.exit(1);
 }
 
-// rclone accepte `remote:` comme `remote:sous/dossier` — on ne valide que le
-// nom, la partie avant les deux-points.
+// rclone accepte `remote:` comme `remote:sous/dossier` : on ne valide que le nom,
+// la partie avant les deux-points.
 const remoteName = `${REMOTE.split(':')[0]}:`;
-// --log-level ERROR : tant que ~/.config/rclone/rclone.conf n'existe pas,
-// rclone émet un NOTICE qui s'afficherait avant notre propre diagnostic.
+// --log-level ERROR : tant que ~/.config/rclone/rclone.conf n'existe pas, rclone
+// émet un NOTICE qui s'afficherait avant notre propre diagnostic.
 const known = rclone(['listremotes', '--log-level', 'ERROR'])
   .split('\n')
   .map((l) => l.trim());
@@ -77,10 +71,9 @@ if (!known.includes(remoteName)) {
 
 mkdirSync(DEST, { recursive: true });
 
-// `copy` par défaut : purement additif, il ne supprime jamais en local. Le
-// dossier amont est la référence, mais une suppression accidentelle côté
-// artiste ne doit pas effacer silencieusement ce qu'on a déjà tiré.
-// `--mirror` bascule sur `sync`, qui aligne vraiment le local sur l'amont.
+// `copy` par défaut, purement additif : une suppression accidentelle côté
+// artiste ne doit pas effacer ce qu'on a déjà tiré. `--mirror` bascule sur
+// `sync`, qui aligne vraiment le local sur l'amont.
 const mode = mirror ? 'sync' : 'copy';
 
 const flags = [
@@ -91,8 +84,7 @@ const flags = [
   '--exclude',
   '*.tmp',
   // Spécifique à Drive : les Docs/Sheets natifs n'ont pas de contenu
-  // téléchargeable brut et feraient échouer le transfert. Sans effet sur
-  // les autres backends.
+  // téléchargeable brut et feraient échouer le transfert.
   '--drive-skip-gdocs',
 ];
 
@@ -113,15 +105,9 @@ try {
 
 if (dryRun) process.exit(0);
 
-/**
- * Signale les fichiers dont seule la CASSE diffère de l'amont.
- *
- * macOS ne distingue pas `Solution.svg` de `solution.svg` : renommé côté Drive,
- * le fichier voit son contenu mis à jour mais **garde son ancien nom** en local,
- * et `rclone check` n'y voit rien puisqu'il compare des chemins eux aussi
- * insensibles à la casse. On lit donc les noms exacts de l'amont et on les
- * confronte octet à octet.
- */
+// macOS ne distingue pas `Solution.svg` de `solution.svg` : renommé côté Drive,
+// le fichier voit son contenu mis à jour mais garde son ancien nom en local, et
+// `rclone check` n'y voit rien. D'où la confrontation des noms octet à octet.
 function reportCaseDrift() {
   const remote = rclone(['lsf', '-R', '--files-only', REMOTE, '--log-level', 'ERROR'])
     .split('\n')
@@ -146,7 +132,7 @@ function reportCaseDrift() {
   );
 }
 
-/** Chemins de fichiers relatifs à `dir`, récursivement. */
+// Chemins de fichiers relatifs à `dir`, récursivement.
 function listRelative(dir, prefix = '') {
   const out = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
