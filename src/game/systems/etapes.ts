@@ -1,23 +1,15 @@
 import { gameState } from './state';
 
-/**
- * Points d'étape du chapitre, pour le développement.
- *
- * Rejouer tout le chapitre à chaque essai coûte plusieurs minutes et une
- * énigme ; il suffit d'une correction de dialogue en fin de parcours pour que
- * ça devienne le poste de dépense principal. Ces entrées reconstituent un
- * moment précis de la partie.
- *
- * ⚠ Réservé au mode développement (`import.meta.env.DEV`) : rien de tout ceci
- * n'entre dans le build publié sur itch.io.
- *
- * Chaque étape est l'état **complet** attendu à ce moment-là, pas un delta :
- * une étape qu'on lit doit dire ce que le joueur a en poche sans qu'on ait à
- * remonter la liste.
- */
+// Points d'étape du chapitre, pour le développement.
+//
+// ⚠ Réservé à `import.meta.env.DEV` : rien de tout ceci n'entre dans le build
+// publié sur itch.io.
+//
+// Chaque étape est l'état COMPLET attendu à ce moment-là, pas un delta : on doit
+// pouvoir lire ce que le joueur a en poche sans remonter la liste.
 export interface Etape {
   nom: string;
-  /** Scène dans laquelle on reprend. */
+  // Scène dans laquelle on reprend.
   piece: string;
   drapeaux: string[];
   objets: string[];
@@ -28,11 +20,9 @@ export interface Chapitre {
   etapes: Etape[];
 }
 
-/**
- * Un chapitre par entrée de menu, ses étapes dans une fenêtre à part : à huit
- * étapes le menu principal devenait une liste à faire défiler, et les deux
- * entrées qui comptent vraiment — plein écran, recommencer — s'y noyaient.
- */
+// Un chapitre par entrée de menu, ses étapes dans une fenêtre à part : à huit
+// étapes, le menu principal devenait une liste à faire défiler où plein écran et
+// recommencer se noyaient.
 export const CHAPITRES: Chapitre[] = [
   {
     nom: 'Chapitre 1 — le ravin et la porte',
@@ -85,9 +75,9 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['hache'],
       },
       {
-        // Volontairement **sans** `arbre_demande` : c'est l'étape où il reste à
+        // Volontairement SANS `arbre_demande` : c'est l'étape où il reste à
         // repasser voir le fils pour obtenir son accord, sans quoi la découpe
-        // reste fermée. Voir `pont_vieil_arbre_plie` dans content/story.ink.
+        // reste fermée.
         nom: 'Vieil arbre plié',
         piece: 'pont',
         drapeaux: [
@@ -152,15 +142,9 @@ export const CHAPITRES: Chapitre[] = [
   },
 ];
 
-/**
- * Installe l'étape, puis recharge la page.
- *
- * Le rechargement n'est pas une facilité : le récit ink garde ses variables et
- * ses passages déjà lus dans son instance `Story`, que `gameState` ne touche
- * pas. Sans rechargement, on sauterait à un état de jeu neuf avec une mémoire
- * de narration ancienne — un dialogue « première visite » qui refuse de
- * rejouer, par exemple. Même raison que « Recommencer ».
- */
+// Le rechargement n'est pas une facilité : ink garde ses variables et ses
+// passages déjà lus dans son instance `Story`, que `gameState` ne touche pas. On
+// sauterait sinon à un état neuf avec une mémoire de narration ancienne.
 export function allerA(etape: Etape): void {
   gameState.reset();
   for (const drapeau of etape.drapeaux) gameState.setFlag(drapeau);
