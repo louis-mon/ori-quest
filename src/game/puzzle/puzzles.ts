@@ -1,26 +1,12 @@
 import { DECOUPAGES } from '../../generated/enigmes';
 import type { CreasePuzzleDef } from './crease-puzzle';
 
-/**
- * Les énigmes du jeu, en données. Le nom de la clé est celui qu'on écrit dans
- * la narration : `# puzzle: pont`.
- *
- * **Le découpage n'est pas ici** : il se dessine dans `decoupage.html`, vit dans
- * `game-design/enigmes/<nom>.json` et arrive par `DECOUPAGES`, comme la
- * géométrie d'une scène arrive de sa carte Tiled. Ce fichier ne dit plus que ce
- * qui ne se dessine pas — quel motif, quel modèle, quel titre.
- *
- * Le lien est vérifié par le compilateur : `DECOUPAGES` est figé en `as const`,
- * donc une énigme sans découpage ne compile pas. Redécouper une énigme ne
- * demande aucune modification de ce fichier.
- *
- * Les chemins sont **relatifs** : itch.io sert le jeu depuis un sous-dossier, un
- * chemin absolu n'y résoudrait pas (même raison que `base: './'` côté Vite).
- *
- * `modele` est le pliage montré comme but : c'est le `.origami` lui-même qui
- * est rendu, et non l'ancien `idee.svg` — l'image du but, celle de l'animation
- * et celle de l'inventaire sont donc littéralement la même.
- */
+// Les énigmes du jeu, en données ; la clé est le nom écrit dans la narration
+// (`# puzzle: pont`).
+//
+// Le découpage n'est pas ici : il se dessine dans `decoupage.html` et arrive par
+// `DECOUPAGES`, figé en `as const`, donc une énigme sans découpage ne compile
+// pas. Chemins relatifs : itch.io sert le jeu depuis un sous-dossier.
 export const PUZZLES: Record<string, CreasePuzzleDef> = {
   // game-design/scenes/chapter-1/le-pont.md
   pont: {
@@ -39,12 +25,10 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     modele: 'arbre',
     decoupage: DECOUPAGES.arbre,
     title: 'Le vieil arbre',
-    // Le pli montagne est porté par **les trois énigmes qui en contiennent**,
-    // pas par une seule choisie d'avance : le drapeau `tuto_montagne_vu` fait
-    // que c'est la première ouverte qui le propose, quel que soit l'ordre où le
-    // joueur les rencontre. Désigner l'arbre seul laisserait un joueur passé
-    // directement à la porte devant des traits rouges que personne ne lui a
-    // expliqués.
+    // Le pli montagne est porté par les trois énigmes qui en contiennent, pas
+    // par une seule choisie d'avance : le drapeau `tuto_montagne_vu` fait que
+    // c'est la première ouverte qui le propose. Désigner l'arbre seul laisserait
+    // un joueur passé directement à la porte devant des traits inexpliqués.
     tutoriel: 'montagne',
   },
 
