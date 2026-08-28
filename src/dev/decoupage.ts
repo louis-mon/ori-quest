@@ -1,81 +1,64 @@
-/**
- * Éditeur de découpage des énigmes — développement seulement.
- *
- * Le problème qu'il résout : le découpage décide de la difficulté de l'énigme et
- * de l'unicité de sa solution, et il ne se pense pas en coordonnées. On veut
- * regarder le crease pattern et dire « ici, puis là », pas écrire des
- * rectangles dans un fichier.
- *
- * Trois choix, dont tout le reste découle :
- *
- * - **On trace des coupes, on ne dessine pas des pièces.** Le carré entier est
- *   la première pièce ; chaque trait en fend une en deux. Le pavage est donc
- *   exact par construction — pas d'arête à faire coïncider à la main, pas de
- *   trou possible entre deux pièces voisines. Voir `couper.ts`.
- * - **Rien ne se pose ailleurs que sur la grille d'ancrage.** Un clic se cale
- *   sur l'intersection la plus proche, et c'est tout ce qu'on peut viser : une
- *   pièce dont un sommet tomberait entre deux intersections ne pourrait pas se
- *   caler sur le plateau du jeu.
- * - **Une coupe traverse une pièce à la fois**, d'un bord à l'autre. La pièce
- *   est celle survolée au premier clic — la position réelle du pointeur tranche,
- *   pas le point calé, sinon un point posé sur une frontière serait ambigu.
- *
- * Le fichier écrit est `game-design/enigmes/<nom>.json` : c'est lui qui fait
- * foi, comme la carte Tiled fait foi pour la géométrie d'une scène. Le serveur
- * de dev le regénère en module et recharge la page.
- *
- *     npm run dev  puis  http://localhost:5173/decoupage.html
- */
+// Éditeur de découpage des énigmes — développement seulement.
+//
+//     npm run dev  puis  http://localhost:5173/decoupage.html
+//
+// Trois choix, dont tout le reste découle :
+//
+// - on trace des coupes, on ne dessine pas des pièces : le carré entier est la
+//   première pièce et chaque trait en fend une en deux, donc le pavage est exact
+//   par construction (voir `couper.ts`) ;
+// - rien ne se pose ailleurs que sur la grille d'ancrage, sans quoi une pièce ne
+//   pourrait pas se caler sur le plateau du jeu ;
+// - une coupe traverse une pièce à la fois, celle survolée au premier clic — la
+//   position réelle du pointeur tranche, pas le point calé, sinon un point posé
+//   sur une frontière serait ambigu.
+//
+// Le fichier écrit, `game-design/enigmes/<nom>.json`, fait foi comme la carte
+// Tiled fait foi pour la géométrie d'une scène.
 
 import './decoupage.css';
 import { DECOUPAGES } from '../generated/enigmes';
 import { aire, boite, pointDans, surLeBord, type Point } from '../game/puzzle/decoupage';
 import { couper, longeUnPli, type Segment } from './couper';
 
-/** Côté de la zone de dessin quand la page n'est pas encore mesurée. */
+// Côté de la zone de dessin quand la page n'est pas encore mesurée.
 const COTE = 640;
 
-/** Marge autour du carré, en pixels d'écran : les traits de bord y respirent. */
+// En pixels d'écran : les traits de bord y respirent.
 const MARGE = 14;
 
-/**
- * Les énigmes proposées : celles qui ont déjà un découpage, et celles qui n'ont
- * qu'un crease pattern. Les secondes n'existent pas encore comme fichier — elles
- * démarrent sur le carré entier, et le premier enregistrement crée le fichier.
- * Sans ça, ouvrir une nouvelle énigme demanderait d'écrire un JSON à la main
- * avant de pouvoir la découper.
- */
+// Celles qui ont déjà un découpage, et celles qui n'ont qu'un crease pattern :
+// les secondes démarrent sur le carré entier et le premier enregistrement crée
+// le fichier. Sans ça, ouvrir une énigme neuve demanderait d'écrire un JSON à la
+// main avant de pouvoir la découper.
 const AVEC_MOTIF = Object.keys(import.meta.glob('/public/assets/enigmes/*/solution.svg')).map(
   (chemin) => chemin.split('/').at(-2)!,
 );
 const ENIGMES = [...new Set([...Object.keys(DECOUPAGES), ...AVEC_MOTIF])].sort();
 
-/** Le module généré, relu comme un annuaire : une énigme peut y manquer. */
+// Relu comme un annuaire : une énigme peut y manquer.
 const DECOUPES = DECOUPAGES as Record<
   string,
   { grille: number; pieces: readonly { readonly points: readonly Point[] }[] } | undefined
 >;
 
 let enigme = ENIGMES[0];
-/** Grille par défaut d'une énigme encore vierge. */
+// Grille par défaut d'une énigme encore vierge.
 let grille = 4;
 let pieces: Point[][] = [];
 
-/** Pile d'annulation : l'état complet avant chaque coupe. */
+// Pile d'annulation : l'état complet avant chaque coupe.
 const historique: Point[][][] = [];
 
-/**
- * Les plis du motif, en unités de grille : une coupe n'a pas le droit de les
- * suivre. Chargés à part du reste — l'image du crease pattern est affichée par
- * le navigateur, mais il faut aussi les connaître point par point.
- */
+// En unités de grille : une coupe n'a pas le droit de les suivre. Chargés à part
+// de l'image, que le navigateur affiche sans nous en dire les points.
 let plis: Segment[] = [];
 
-/** Coupe en cours de tracé, et la pièce qu'elle fend. */
+// Coupe en cours de tracé, et la pièce qu'elle fend.
 let trait: Point[] = [];
 let pieceCoupee = -1;
 
-/** Pièce survolée et intersection visée, recalculées à chaque mouvement. */
+// Pièce survolée et intersection visée, recalculées à chaque mouvement.
 let survol = -1;
 let vise: Point | null = null;
 
@@ -112,13 +95,9 @@ function charger(nom: string) {
   dire(source ? `${nom} — ${pieces.length} pièce(s)` : `${nom} — jamais découpée`);
 }
 
-/**
- * Lit les plis du crease pattern, ramenés en unités de grille.
- *
- * Seuls les plis montagne et vallée comptent : les traits de bord (`bo`) sont
- * les rives du carré, qu'une coupe longe forcément à ses extrémités, et les
- * traits de facette (`fl`) ne sont pas des plis.
- */
+// Seuls les plis montagne et vallée comptent : les traits de bord sont les rives
+// du carré, qu'une coupe longe forcément à ses extrémités, et les traits de
+// facette ne sont pas des plis.
 async function chargerPlis(nom: string) {
   plis = [];
   try {
@@ -140,12 +119,12 @@ async function chargerPlis(nom: string) {
       };
     });
   } catch {
-    // Sans motif, on découpe quand même : c'est la vérification d'unicité qui
-    // le signalera.
+    // Sans motif, on découpe quand même : la vérification d'unicité le
+    // signalera.
   }
 }
 
-/** Le carré entier, d'un seul tenant : le point de départ de tout découpage. */
+// Le point de départ de tout découpage.
 function carre(): Point[] {
   return [
     [0, 0],
@@ -169,15 +148,11 @@ function annulerCoupe() {
 // Dessin
 // ---------------------------------------------------------------------------
 
-/**
- * Combien vaut un pixel d'écran en unités de grille. Recalculé à chaque rendu :
- * la zone de dessin suit la fenêtre, et des repères dimensionnés une fois pour
- * toutes deviendraient minuscules sur un grand écran comme énormes sur un
- * petit.
- */
+// Recalculé à chaque rendu : la zone de dessin suit la fenêtre, et des repères
+// dimensionnés une fois pour toutes seraient minuscules sur un grand écran.
 let unite = grille / COTE;
 
-/** Une longueur en pixels d'écran, exprimée dans les unités de la grille. */
+// Une longueur en pixels d'écran, exprimée dans les unités de la grille.
 const px = (n: number) => n * unite;
 
 function rendre() {
@@ -195,10 +170,9 @@ function rendre() {
     traits.push(`M0 ${i} H${grille}`, `M${i} 0 V${grille}`);
   }
 
-  // Les points cliquables, mis en avant selon ce qu'on peut en faire à cet
-  // instant : les bords de la pièce survolée tant qu'aucune coupe n'est
-  // commencée — une coupe part de là — puis tout l'intérieur de la pièce coupée
-  // une fois le trait entamé.
+  // Mis en avant selon ce qu'on peut en faire à cet instant : les bords de la
+  // pièce survolée tant qu'aucune coupe n'est commencée, puis tout l'intérieur
+  // de la pièce coupée une fois le trait entamé.
   const cible = pieceCoupee >= 0 ? pieces[pieceCoupee] : survol >= 0 ? pieces[survol] : null;
   const visable = (x: number, y: number) =>
     !!cible && (surLeBord(cible, x, y) || (trait.length > 0 && pointDans(cible, x, y)));
@@ -213,12 +187,10 @@ function rendre() {
     }
   }
 
-  // Les découpes se voient par-dessus le motif, et ne doivent pas se confondre
-  // avec lui : un pli est un trait fin de couleur, une coupe est un trait épais
-  // en pointillés qui défilent, posé sur un liseré de papier pour rester lisible
-  // là où il croise un pli. D'où le dessin en deux temps — tous les fonds, puis
-  // tous les bords : sinon le fond d'une pièce recouvrirait le bord de sa
-  // voisine.
+  // Une coupe ne doit pas se confondre avec un pli : trait épais en pointillés
+  // qui défilent, sur un liseré de papier pour rester lisible là où elle en
+  // croise un. D'où le dessin en deux temps — tous les fonds, puis tous les
+  // bords : sinon le fond d'une pièce recouvrirait le bord de sa voisine.
   const fonds = pieces
     .map((p, i) => {
       const classes = [
@@ -274,32 +246,24 @@ const chemin = (p: readonly Point[]) => `M${p.map(([x, y]) => `${x} ${y}`).join(
 // Unicité de la solution
 // ---------------------------------------------------------------------------
 
-/**
- * Demande au serveur de dev si le découpage en cours a toujours une solution
- * unique, après chaque coupe.
- *
- * **Le calcul n'est pas refait ici** : c'est le solveur de
- * `tools/lib/decoupage.mjs`, celui-là même qui gardera l'import et
- * `npm run check-puzzle`. Une seconde implémentation en TypeScript aurait fini
- * par répondre autre chose que le jeu, et c'est justement la question où l'on ne
- * veut pas de deux avis.
- *
- * L'énumération est exponentielle : elle est bornée côté serveur, qui répond
- * « indécis » plutôt que de faire attendre.
- */
+// Le calcul n'est PAS refait ici : c'est le solveur de `tools/lib/decoupage.mjs`,
+// celui-là même qui garde l'import et `npm run check-puzzle`. Une seconde
+// implémentation finirait par répondre autre chose que le jeu.
+//
+// L'énumération est exponentielle, donc bornée côté serveur, qui répond
+// « indécis » plutôt que de faire attendre.
 let enVol = 0;
 let minuteur = 0;
 
-/** Attente avant la première tentative, puis entre deux relances. */
+// Attente avant la première tentative, puis entre deux relances.
 const DELAI = 250;
 const RELANCE_MAX = 10_000;
 
 function verifierUnicite(delai = DELAI, relance = 1000, silencieux = false) {
   window.clearTimeout(minuteur);
   const jeton = ++enVol;
-  // Une relance ne remet pas le panneau à « … » : sinon l'explication qu'on
-  // vient d'écrire disparaît aussitôt, et l'utilisateur ne voit qu'un point de
-  // suspension clignotant sans jamais lire pourquoi.
+  // Une relance ne remet pas le panneau à « … » : l'explication qu'on vient
+  // d'écrire disparaîtrait aussitôt, sans jamais être lue.
   if (!silencieux) ecrireVerdict('…', 'attente');
 
   // Une coupe se trace en plusieurs clics et l'énumération n'est pas gratuite :
@@ -311,10 +275,9 @@ function verifierUnicite(delai = DELAI, relance = 1000, silencieux = false) {
     } catch (err) {
       if (jeton !== enVol) return; // une coupe plus récente est déjà partie
 
-      // Un `fetch` qui échoue au niveau réseau lève un TypeError : le serveur
-      // de dev redémarre, ou il est arrêté. Ce n'est pas une réponse sur le
-      // découpage, et le panneau ne doit pas rester bloqué dessus — on retente,
-      // de plus en plus espacé, jusqu'à ce qu'il réponde.
+      // Un `fetch` qui échoue au niveau réseau lève un TypeError : le serveur de
+      // dev redémarre ou est arrêté. Ce n'est pas une réponse sur le découpage,
+      // donc on retente, de plus en plus espacé.
       if (err instanceof TypeError) {
         ecrireVerdict(
           'Serveur de développement injoignable — le verdict revient dès qu’il répond.',
@@ -403,7 +366,7 @@ function rappeler() {
 // Tracé
 // ---------------------------------------------------------------------------
 
-/** Coordonnées du pointeur dans la grille : la vraie, et l'intersection visée. */
+// La vraie position, et l'intersection visée.
 function ou(e: PointerEvent): { brut: [number, number]; cale: Point } {
   const cadre = plan.getBoundingClientRect();
   const vb = plan.viewBox.baseVal;
@@ -421,7 +384,7 @@ plan.addEventListener('pointermove', (e) => {
   const { brut, cale } = ou(e);
   vise = cale;
   // La pièce se décide sur la position réelle du pointeur : le point calé,
-  // souvent posé sur une frontière, appartiendrait à deux pièces à la fois.
+  // souvent sur une frontière, appartiendrait à deux pièces à la fois.
   if (!trait.length) survol = pieces.findIndex((p) => pointDans(p, ...brut));
   rendre();
 });
@@ -437,9 +400,8 @@ plan.addEventListener('pointerdown', (e) => {
   const { brut, cale } = ou(e);
 
   if (!trait.length) {
-    // La pièce se relit sur le clic lui-même, et non sur le dernier survol :
-    // un tap n'est précédé d'aucun déplacement, et le survol serait resté à
-    // ce qu'il était.
+    // La pièce se relit sur le clic lui-même : un tap n'est précédé d'aucun
+    // déplacement, et le survol serait resté à ce qu'il était.
     const cible = pieces.findIndex((p) => pointDans(p, ...brut));
     if (cible < 0) return dire('Commence dans une pièce.', true);
     if (!surLeBord(pieces[cible], ...cale)) {
@@ -475,7 +437,7 @@ plan.addEventListener('pointerdown', (e) => {
   rendre();
 });
 
-/** Applique la coupe si elle tient debout, et laisse la pièce intacte sinon. */
+// Laisse la pièce intacte si la coupe ne tient pas debout.
 function terminer(complet: Point[]) {
   const resultat = couper(pieces[pieceCoupee], complet);
   if (!resultat.ok) {
@@ -545,11 +507,9 @@ document.getElementById('recommencer')!.addEventListener('click', () => {
   verifierUnicite();
 });
 
-/**
- * Changer la grille garde les coupes si elles s'y retrouvent : passer de 4 à 8
- * double simplement les coordonnées. Sinon on refuse — recaler des sommets à
- * l'arrondi déplacerait des coupes déjà réglées sans le dire.
- */
+// Les coupes sont gardées si elles s'y retrouvent — passer de 4 à 8 double les
+// coordonnées. Sinon on refuse : recaler des sommets à l'arrondi déplacerait des
+// coupes déjà réglées sans le dire.
 champGrille.addEventListener('change', () => {
   const n = Number(champGrille.value);
   if (!Number.isInteger(n) || n < 2 || n > 24) {
@@ -573,15 +533,10 @@ champGrille.addEventListener('change', () => {
   verifierUnicite();
 });
 
-/**
- * Écrit le découpage par le serveur de développement, comme l'outil de pose
- * écrit `poses.ts` : le point d'entrée n'existe qu'en dev, ne garde que des
- * entiers bornés et refabrique le fichier lui-même.
- *
- * Vite regénère `src/generated/enigmes.ts` dans la foulée et recharge la page —
- * d'où le message qui traverse le rechargement par `sessionStorage`. Le terminal
- * dit alors si le pavage est exact et si la solution reste unique.
- */
+// Écrit par le serveur de développement, comme l'outil de pose écrit
+// `poses.ts` : le point d'entrée n'existe qu'en dev et ne garde que des entiers
+// bornés. Vite recharge la page dans la foulée, d'où le message qui traverse le
+// rechargement par `sessionStorage`.
 document.getElementById('enregistrer')!.addEventListener('click', async () => {
   dire('Enregistrement…');
   try {
