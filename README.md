@@ -234,6 +234,13 @@ Inkscape ou Illustrator suffisent. Les `.fold` sont acceptés aussi.
 sortir le même carré à 440 sommets au lieu de 4, et le solveur froisse le papier
 au lieu de le plier. Les CP du dépôt sont des exports ORIPA : garder cette forme.
 
+⚠ **Arrondir les coordonnées à l'intégration.** ORIPA écrit le même sommet
+`585.7864376268969` d'un côté et `585.7864376269122` de l'autre, et des zéros en
+notation `5.55E-14` : l'importateur y voit deux points, et le pot sortait à 440
+sommets au lieu de 18 — le même symptôme que ci-dessus. Six décimales suffisent,
+et le fichier de `content/origami/` doit rester **identique** à celui servi dans
+`public/assets/enigmes/<nom>/solution.svg`.
+
 ### Ce que le pipeline sait et ne sait pas faire
 
 Origami Simulator **relaxe une feuille physique** ; ce n'est pas un solveur de
@@ -380,5 +387,9 @@ pour que le plein écran parte dans le bon sens.
 
 ## Points ouverts
 
-- Le décor est dessiné en primitives Phaser (placeholder) — pas encore d'assets.
-- Une seule scène, pas de transition entre pièces (le tag `goto:` est prêt).
+- Les deux scènes du **chapitre 2** attendent leur fond peint : elles tournent
+  sur `decor-provisoire.ts`, qui l'annonce à l'écran. Le remplacement est un
+  calque image de classe `fond` dans la carte, rien à toucher dans le code.
+- **Rien ne remet l'état à zéro entre deux chapitres**, alors que le game design
+  le prévoit (voir [game-design/02-chapitres-et-scenes.md](game-design/02-chapitres-et-scenes.md)).
+  Sans conséquence tant que les drapeaux d'un chapitre ne servent pas au suivant.

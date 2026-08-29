@@ -105,3 +105,37 @@ export function dessinerFeuille(g: Phaser.GameObjects.Graphics, box: Box, modele
 
   return { x, y, w: cote, h: cote };
 }
+
+// Une feuille qui doit pouvoir se déplacer — celle de l'os, suspendue puis
+// tombée. Le dessin est le même ; il vit dans un conteneur posé au centre du
+// carré, donc en coordonnées locales, et c'est le conteneur que `deplacer()`
+// emmène. Dessinée à ses coordonnées du plan, la feuille ne saurait que sauter
+// d'un endroit à l'autre.
+export interface FeuilleMobile {
+  // Ce qu'on donne à `deplacer()`, et ce qu'on montre ou cache.
+  conteneur: Phaser.GameObjects.Container;
+  // L'emprise réelle, qui suit le conteneur : c'est elle, et pas la boîte du
+  // plan, qui doit servir de zone tactile une fois la feuille tombée.
+  emprise(): Box;
+}
+
+export function poserFeuille(scene: Phaser.Scene, box: Box, modele: string): FeuilleMobile {
+  const dessin = scene.add.graphics();
+  const carre = dessinerFeuille(dessin, box, modele);
+  const depart = { x: carre.x + carre.w / 2, y: carre.y + carre.h / 2 };
+
+  // Le tracé est en coordonnées du plan : on décale le graphique d'autant pour
+  // qu'il retombe au bon endroit une fois le conteneur posé sur le centre.
+  dessin.setPosition(-depart.x, -depart.y);
+  const conteneur = scene.add.container(depart.x, depart.y, [dessin]);
+
+  return {
+    conteneur,
+    emprise: () => ({
+      x: carre.x + conteneur.x - depart.x,
+      y: carre.y + conteneur.y - depart.y,
+      w: carre.w,
+      h: carre.h,
+    }),
+  };
+}

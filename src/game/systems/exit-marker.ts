@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { creerMarqueur, preloadMarqueur } from './marqueur-papier';
+import { battre, creerMarqueur, preloadMarqueur } from './marqueur-papier';
 
 // La flèche dit « ici, on change de scène », la cocotte « ici, on analyse » :
 // ils ne doivent jamais se confondre, d'où trois différences tenues ensemble —
@@ -30,8 +30,7 @@ export function createExitMarker(
 ): Phaser.GameObjects.Container {
   const marker = creerMarqueur(scene, TEXTURE, x, y, HAUTEUR, sens > 0);
 
-  scene.tweens.add({
-    targets: marker,
+  battre(marker, {
     x: { from: x - 6 * sens, to: x + 6 * sens },
     alpha: { from: 0.55, to: 0.95 },
     duration: 1600,

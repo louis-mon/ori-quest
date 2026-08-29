@@ -71,6 +71,9 @@ export class Overlay {
   // De quoi résoudre la réplique en attente sans tap. Voir `interrompre()`.
   private terminerLigne: (() => void) | null = null;
 
+  // Le temps d'un déplacement bloquant. Voir `suspendreLInventaire()`.
+  private inventaireSuspendu = false;
+
   // Branché depuis `main.ts`, qui possède la couche 3D : l'interface n'a pas à
   // savoir que three.js existe. Absent, l'examen se contente de la description.
   private apercu?: ApercuOrigami;
@@ -292,6 +295,18 @@ export class Overlay {
     }
   }
 
+  // Pendant qu'un objet traverse la scène, le décor ne répond plus aux taps et
+  // l'inventaire non plus : la description d'un objet s'ouvrirait par-dessus ce
+  // qu'il y avait justement à regarder. La classe éteint la colonne, le drapeau
+  // ferme la porte — une case grisée qui répond quand même est pire que rien.
+  //
+  // Toujours relevé : `PointClickScene` le retire à la fin du trajet comme au
+  // shutdown.
+  suspendreLInventaire(suspendu: boolean) {
+    this.inventaireSuspendu = suspendu;
+    this.inventory.classList.toggle('inventory--suspendue', suspendu);
+  }
+
   // ---------- Divers ----------
 
   // Nomme l'objet dont on ouvre le menu de verbes, et rien d'autre : les
@@ -392,7 +407,7 @@ export class Overlay {
       e.stopPropagation();
       // Pas pendant une réplique : la boîte est prise, et le joueur retrouverait
       // cette description à la place de ce qu'il lisait.
-      if (this.dialogueOccupe) return;
+      if (this.dialogueOccupe || this.inventaireSuspendu) return;
       void this.examiner(id);
     });
     return el;

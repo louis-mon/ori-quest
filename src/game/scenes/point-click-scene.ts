@@ -9,6 +9,7 @@ import {
   type Verb,
 } from '../systems/hotspots';
 import { createHotspotMarker, preloadCocotte } from '../systems/hotspot-marker';
+import { endormirMarqueur } from '../systems/marqueur-papier';
 import { createExitMarker, preloadFleche } from '../systems/exit-marker';
 import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
@@ -52,10 +53,18 @@ export abstract class PointClickScene extends Phaser.Scene {
   // Centre du marqueur déjà posé, pour ne le refaire que s'il a bougé.
   private centres = new Map<string, string>();
 
-  // Déplacements en cours qui demandent l'attention du joueur. Un compteur et
+  // Déplacements en cours qui demandent l'attention du joueur. Un ensemble et
   // non un drapeau : deux objets peuvent partir ensemble, et le premier arrivé
   // ne doit pas rendre la main pour l'autre.
-  private bloquants = 0;
+  //
+  // ⚠ Cet état est transitoire, et rien ne doit pouvoir l'y laisser : il se vide
+  // à la fin de chaque trajet — y compris quand la scène est quittée en cours de
+  // route, `deplacer()` dénouant alors sa promesse — et au shutdown. Un ensemble
+  // resté plein rendrait la pièce sourde pour de bon.
+  private attentes = new Set<object>();
+
+  // Ce que la narration déclenche une fois : voir `auLeverDe()`.
+  private declencheurs: { flag: string; jouer: () => void; fait: boolean }[] = [];
 
   protected abstract hotspots(): HotspotDef[];
   protected abstract exits(): ExitDef[];
@@ -77,6 +86,10 @@ export abstract class PointClickScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.fadeIn(FONDU, 0, 0, 0);
+    // Phaser réutilise l'instance d'un passage à l'autre : les déclencheurs du
+    // passage précédent parleraient d'objets détruits.
+    this.declencheurs = [];
+    this.attentes.clear();
     this.drawScenery();
     this.monterZones();
 
@@ -88,6 +101,9 @@ export abstract class PointClickScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       unsubscribe();
       // Une scène quittée ne doit rien retenir.
+      this.attentes.clear();
+      this.services.overlay.suspendreLInventaire(false);
+      this.declencheurs = [];
       this.markers.clear();
       this.centres.clear();
       this.emprises.clear();
@@ -126,12 +142,40 @@ export abstract class PointClickScene extends Phaser.Scene {
     const trajet = animerDeplacement(this, objet, destination, options);
     if (!options.bloquant) return trajet;
 
-    this.bloquants++;
-    // Toujours décrémenté : la promesse se dénoue aussi quand la scène est
-    // quittée en cours de route, sans quoi le décor resterait sourd au retour.
+    const jeton = {};
+    this.attentes.add(jeton);
+    this.appliquerAttente();
+    // Toujours retiré : la promesse se dénoue aussi quand la scène est quittée
+    // en cours de route, sans quoi le décor resterait sourd au retour.
     return trajet.finally(() => {
-      this.bloquants--;
+      this.attentes.delete(jeton);
+      this.appliquerAttente();
     });
+  }
+
+  // Le joueur n'a rien à faire pendant qu'un objet traverse sous ses yeux : les
+  // zones ne répondent plus (`onZone`), l'inventaire non plus, et les marqueurs
+  // s'éteignent pour le dire. Seul le menu reste atteignable, et il fige la
+  // scène — voir `figerLeJeu()` dans main.ts.
+  private appliquerAttente() {
+    const attend = this.attentes.size > 0;
+    for (const marqueur of this.markers.values()) endormirMarqueur(marqueur, attend);
+    this.services.overlay.suspendreLInventaire(attend);
+  }
+
+  // La narration lève un drapeau, la scène joue le mouvement : c'est le même
+  // chemin que les autres effets (`# flag:`), et la scène reste la seule à
+  // savoir ce qui bouge chez elle.
+  //
+  // `pose` est le cas du drapeau DÉJÀ levé en entrant : l'objet est mis à son
+  // arrivée sans rien jouer. Sans cette distinction, le dinosaure s'écarterait
+  // une seconde fois à chaque retour dans la pièce.
+  //
+  // À appeler depuis `drawScenery()`.
+  protected auLeverDe(flag: string, effet: { pose: () => void; jouer: () => void }) {
+    const deja = gameState.flag(flag);
+    if (deja) effet.pose();
+    this.declencheurs.push({ flag, jouer: effet.jouer, fait: deja });
   }
 
   // Une boîte du plan est une emprise généreuse, et un élément qui change d'état
@@ -235,14 +279,15 @@ export abstract class PointClickScene extends Phaser.Scene {
       ancien.destroy();
     }
 
-    this.markers.set(
-      def.id,
-      estSortie(def)
-        ? // La flèche pointe vers l'extérieur du cadre : c'est ce qui dit
-          // « on sort par là » plutôt que « regarde ici ».
-          createExitMarker(this, cx, cy, cx < DESIGN_WIDTH / 2 ? -1 : 1)
-        : createHotspotMarker(this, cx, cy),
-    );
+    const marqueur = estSortie(def)
+      ? // La flèche pointe vers l'extérieur du cadre : c'est ce qui dit
+        // « on sort par là » plutôt que « regarde ici ».
+        createExitMarker(this, cx, cy, cx < DESIGN_WIDTH / 2 ? -1 : 1)
+      : createHotspotMarker(this, cx, cy);
+    // Un marqueur refait pendant un déplacement bloquant naîtrait éveillé : une
+    // emprise qui change en cours de trajet suffit à le refaire.
+    endormirMarqueur(marqueur, this.attentes.size > 0);
+    this.markers.set(def.id, marqueur);
   }
 
   // À appeler quand quelque chose change en dehors de `gameState` — l'arrivée
@@ -252,6 +297,30 @@ export abstract class PointClickScene extends Phaser.Scene {
     // poser sur la géométrie à jour.
     this.onStateChange();
     this.appliquerVisibilite();
+    // Les mouvements en dernier : ils se jouent sur un décor déjà à jour, et
+    // `fait` est levé avant l'appel, donc un effet qui change l'état ne se
+    // rappelle pas lui-même.
+    for (const declencheur of this.declencheurs) {
+      if (declencheur.fait || !gameState.flag(declencheur.flag)) continue;
+      declencheur.fait = true;
+      this.quandLaBoiteEstFermee(declencheur.jouer);
+    }
+  }
+
+  // Le drapeau est levé au milieu d'une tirade, et la boîte de dialogue occupe
+  // le bas du cadre : joué tout de suite, le mouvement se déroulerait derrière
+  // elle. On retarde donc le MOUVEMENT, jamais l'état — la narration a déjà pris
+  // ses décisions.
+  //
+  // Une horloge de scène et non un `setTimeout` : elle se met en pause avec le
+  // jeu, et meurt avec la scène plutôt que de réveiller la pièce qu'on a
+  // quittée.
+  private quandLaBoiteEstFermee(jouer: () => void) {
+    if (!this.services.dialogue.isRunning) {
+      jouer();
+      return;
+    }
+    this.time.delayedCall(120, () => this.quandLaBoiteEstFermee(jouer));
   }
 
   private appliquerVisibilite() {
@@ -276,7 +345,7 @@ export abstract class PointClickScene extends Phaser.Scene {
     if (dialogue.isRunning || overlay.occupeLeJoueur) return;
     // Un déplacement ordinaire laisse la scène jouable ; seul celui qui a
     // demandé le silence compte ici.
-    if (this.bloquants > 0) return;
+    if (this.attentes.size > 0) return;
     if (def.visibleIf && !def.visibleIf()) return;
 
     if (estSortie(def)) {

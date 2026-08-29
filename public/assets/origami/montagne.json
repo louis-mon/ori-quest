@@ -1,8 +1,8 @@
 {
   "name": "montagne",
   "source": "montagne.svg",
-  "vertexCount": 6,
-  "faceCount": 4,
-  "frameCount": 16,
-  "bakedAt": "2026-08-22T07:37:03.234Z"
+  "vertexCount": 8,
+  "faceCount": 6,
+  "frameCount": 24,
+  "bakedAt": "2026-08-28T13:47:09.660Z"
 }

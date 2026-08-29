@@ -7,6 +7,8 @@ import { PREFERENCE_GPU } from './gpu';
 
 import { PontScene } from './game/scenes/pont-scene';
 import { PorteScene } from './game/scenes/porte-scene';
+import { VillageScene } from './game/scenes/village-scene';
+import { EntreeScene } from './game/scenes/entree-scene';
 import { runCreasePuzzle } from './game/puzzle/crease-puzzle';
 import { PUZZLES } from './game/puzzle/puzzles';
 import { lanceurTutoriel } from './game/puzzle/tutoriel';
@@ -217,7 +219,27 @@ if (import.meta.env.DEV) {
   Object.assign(window, { game, etat: gameState, plier: playFold, donner });
 }
 
-new Menu(uiRoot, { onLayoutChange: syncStage });
+// Le menu reste atteignable pendant un déplacement bloquant, où plus rien
+// d'autre ne l'est : la scène s'arrête donc tant qu'il est ouvert, sinon l'objet
+// qu'on regardait traverser finit sa course derrière le panneau et le joueur
+// rouvre les yeux sur une pièce qui a changé sans lui.
+//
+// Une scène en pause ne se contente pas de suspendre ses tweens : Phaser coupe
+// aussi son plugin d'entrée, donc le décor ne répond plus non plus. Et on
+// interroge TOUTES les scènes, pas seulement les actives — une scène en pause
+// n'est justement plus « active », et personne ne la relancerait.
+function figerLeJeu(gele: boolean) {
+  for (const scene of game.scene.getScenes(false)) {
+    const cle = scene.scene.key;
+    if (gele) {
+      if (scene.scene.isActive()) game.scene.pause(cle);
+    } else if (scene.scene.isPaused()) {
+      game.scene.resume(cle);
+    }
+  }
+}
+
+new Menu(uiRoot, { onLayoutChange: syncStage, onGel: figerLeJeu });
 
 game.events.once(Phaser.Core.Events.READY, () => {
   gameState.load();
@@ -227,6 +249,8 @@ game.events.once(Phaser.Core.Events.READY, () => {
   // Troisième argument à false : les scènes ne démarrent pas d'elles-mêmes.
   game.scene.add('pont', PontScene, false);
   game.scene.add('porte', PorteScene, false);
+  game.scene.add('village', VillageScene, false);
+  game.scene.add('entree', EntreeScene, false);
 
   // La scène restaurée depuis la sauvegarde : repartir systématiquement de la
   // première renverrait le joueur en arrière à chaque retour dans le jeu.

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { creerMarqueur, preloadMarqueur } from './marqueur-papier';
+import { battre, creerMarqueur, preloadMarqueur } from './marqueur-papier';
 
 // La cocotte : la pajarita, l'oiseau traditionnel espagnol, pas la salière à
 // quatre volets. Sur écran tactile il n'y a pas de survol, donc rien n'indique
@@ -26,8 +26,7 @@ export function createHotspotMarker(
 ): Phaser.GameObjects.Container {
   const marker = creerMarqueur(scene, TEXTURE, x, y, HAUTEUR);
 
-  scene.tweens.add({
-    targets: marker,
+  battre(marker, {
     scale: { from: 0.72, to: 1 },
     alpha: { from: 0.4, to: 0.9 },
     angle: { from: -8, to: 8 },

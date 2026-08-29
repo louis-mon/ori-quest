@@ -11,11 +11,13 @@ import type { Box, Contour } from './layout';
 // téléporte pas.
 
 // Tout ce qui a une position et une emprise : un sprite, un modèle plié, un
-// conteneur. `Origin` est facultatif — un conteneur n'en a pas, et le repli
-// vaut le centre.
-export type Mobile = Phaser.GameObjects.Components.Transform &
-  Phaser.GameObjects.Components.GetBounds &
-  Partial<Phaser.GameObjects.Components.Origin>;
+// conteneur. On demande ici ce dont le déplacement se sert vraiment — poser une
+// position, mesurer une emprise — et non le composant `GetBounds` en entier : un
+// conteneur sait mesurer ses enfants sans porter le composant. `Origin` est
+// facultatif pour la même raison, et le repli vaut le centre.
+export type Mobile = Phaser.GameObjects.Components.Transform & {
+  getBounds(): Phaser.Geom.Rectangle;
+} & Partial<Phaser.GameObjects.Components.Origin>;
 
 export interface Position {
   x: number;

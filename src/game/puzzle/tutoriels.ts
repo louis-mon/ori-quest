@@ -69,11 +69,11 @@ const FEUILLE_VALLEE: Feuille = {
   traits: [{ pli: 'va', de: [1, 0.25], a: [0, 0.75] }],
 };
 
-// `content/origami/montagne.svg` : exactement le même carré et le même trait que
+// `content/origami/pli_montagne.svg` : exactement le même carré et le même trait que
 // la feuille du pli vallée, à la couleur près. C'est tout l'argument de la
 // leçon — « l'inverse du pli vallée » ne se démontre qu'à géométrie égale.
 const FEUILLE_MONTAGNE: Feuille = {
-  modele: 'montagne',
+  modele: 'pli_montagne',
   traits: [{ pli: 'mo', de: [1, 0.25], a: [0, 0.75] }],
 };
 

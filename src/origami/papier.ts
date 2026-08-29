@@ -7,7 +7,17 @@ import type { FoldAnimation } from './fold-file';
 // Les textures sont peintes à l'exécution plutôt que chargées en PNG, pour le
 // budget de 30 Mo du jeu.
 
-export type Papier = 'papier' | 'noir' | 'bois' | 'boisFonce' | 'feuille' | 'metal' | 'marron';
+export type Papier =
+  | 'papier'
+  | 'noir'
+  | 'bois'
+  | 'boisFonce'
+  | 'feuille'
+  | 'herbe'
+  | 'pierre'
+  | 'tachete'
+  | 'metal'
+  | 'marron';
 
 interface PapierModele {
   recto: Papier;
@@ -24,11 +34,20 @@ export const PAPIERS: Record<string, PapierModele> = {
   arbre: { recto: 'feuille', verso: 'boisFonce' },
   hache: { recto: 'metal', verso: 'marron', retourne: true },
   porte: { recto: 'noir', verso: 'boisFonce' },
+  // Chapitre 2. Les teintes viennent des fiches de scène, où elles décrivent le
+  // papier posé dans le décor : c'est la même matière avant et après le pliage.
+  montagne: { recto: 'pierre', verso: 'papier' },
+  herbe: { recto: 'herbe', verso: 'feuille' },
+  pot: { recto: 'papier', verso: 'pierre' },
+  chien: { recto: 'tachete', verso: 'papier' },
+  os: { recto: 'papier', verso: 'pierre' },
   // Les feuilles de démonstration des tutoriels. Un verso, sinon la feuille
   // pliée n'est qu'un aplat clair où le pli ne se lit qu'à l'ombre — et le même
   // pour les trois, pour qu'on reconnaisse la feuille sur laquelle on explique.
   vallee: { recto: 'papier', verso: 'bois' },
-  montagne: { recto: 'papier', verso: 'bois' },
+  // `pli_montagne` et non `montagne` : celle du village est un vrai relief, ce
+  // carré-ci n'est que le trait qui donne son nom au pli.
+  pli_montagne: { recto: 'papier', verso: 'bois' },
   bombe: { recto: 'papier', verso: 'bois' },
 };
 
@@ -189,6 +208,84 @@ const ASPECTS: Record<Papier, Aspect> = {
       }
       ctx.globalAlpha = 1;
       grain(ctx, 18);
+    },
+  },
+
+  // Vert plus clair que `feuille`, et strié dans le sens des brins : c'est le
+  // recto de la touffe, dont `feuille` fait le verso.
+  herbe: {
+    teinte: '#8fbf52',
+    specular: 0x2e3a20,
+    shininess: 20,
+    peindre: (ctx) => {
+      fond(ctx, ASPECTS.herbe.teinte);
+      ctx.globalAlpha = 0.5;
+      for (let i = 0; i < 260; i++) {
+        const x = Math.random() * TAILLE;
+        const y = Math.random() * TAILLE;
+        const h = 18 + Math.random() * 40;
+        ctx.strokeStyle = Math.random() > 0.5 ? '#a8d16b' : '#6a9a37';
+        ctx.lineWidth = 1 + Math.random() * 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(x + h * 0.2, y - h * 0.6, x + h * 0.5, y - h);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      grain(ctx, 16);
+    },
+  },
+
+  // Le gris de la montagne. Mat, contrairement au métal : un caillou qui brille
+  // se lit comme une lame.
+  pierre: {
+    teinte: '#b3aea4',
+    specular: 0x201e1b,
+    shininess: 6,
+    peindre: (ctx) => {
+      fond(ctx, ASPECTS.pierre.teinte);
+      ctx.globalAlpha = 0.35;
+      for (let i = 0; i < 700; i++) {
+        const x = Math.random() * TAILLE;
+        const y = Math.random() * TAILLE;
+        ctx.fillStyle = Math.random() > 0.5 ? '#cbc6bc' : '#8d8880';
+        ctx.beginPath();
+        ctx.arc(x, y, 1 + Math.random() * 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      grain(ctx, 14);
+    },
+  },
+
+  // Le papier du chien : des taches franches et espacées, pas un moucheté — à la
+  // taille d'une vignette d'inventaire, un grain fin redevient un aplat.
+  tachete: {
+    teinte: '#ece0c9',
+    specular: 0x1a1a1a,
+    shininess: 12,
+    peindre: (ctx) => {
+      fond(ctx, ASPECTS.tachete.teinte);
+      ctx.fillStyle = '#8a6a45';
+      ctx.globalAlpha = 0.8;
+      for (let i = 0; i < 26; i++) {
+        const x = Math.random() * TAILLE;
+        const y = Math.random() * TAILLE;
+        const r = 14 + Math.random() * 34;
+        ctx.beginPath();
+        ctx.ellipse(
+          x,
+          y,
+          r,
+          r * (0.55 + Math.random() * 0.6),
+          Math.random() * Math.PI,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      grain(ctx, 12);
     },
   },
 

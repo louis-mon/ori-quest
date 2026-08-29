@@ -1,0 +1,12 @@
+{
+  "//": "Découpage de l’énigme — écrit par decoupage.html (npm run dev), pas à la main.",
+  "grille": 8,
+  "pieces": [
+    { "points": [[0, 5], [8, 8], [0, 8]] },
+    { "points": [[0, 3], [8, 4], [8, 5], [0, 5]] },
+    { "points": [[8, 4], [0, 3], [0, 2], [4, 1]] },
+    { "points": [[0, 5], [8, 5], [8, 8]] },
+    { "points": [[8, 4], [4, 1], [8, 0]] },
+    { "points": [[8, 0], [0, 2], [0, 0]] }
+  ]
+}

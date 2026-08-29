@@ -9,9 +9,9 @@ Il peut se lancer de deux façon:
 - avec le bouton "?"
 - automatiquement dans les cas suivants, si il n'a jamais été lancé:
     - le puzzle du pont lance le tutoriel pli vallée.
-    - le tutoriel pli montagne est porté par les trois puzzles qui contiennent
-      un pli montagne — l'arbre, la porte et la hache — et c'est donc le premier
-      ouvert qui le lance, quel que soit l'ordre où le joueur les rencontre.
+    - le tutoriel pli montagne est porté par l'arbre et par la hache, qui
+      s'ouvrent dans n'importe quel ordre : c'est donc le premier ouvert des
+      deux qui le lance.
 
 
 En cas de lancement automatique, une question est posée pour éventuelement le skip

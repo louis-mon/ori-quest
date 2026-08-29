@@ -294,6 +294,16 @@ body {
   background: rgba(26, 23, 20, 0.7);
 }
 
+/* Le temps qu'un objet traverse la scène, la colonne s'éteint comme les
+   marqueurs : le décor ne répond plus, et une case encore vive promettrait la
+   seule chose qu'on pourrait encore toucher. `pointer-events` en plus de
+   l'opacité — une case grisée mais cliquable est pire qu'une case vive. */
+.inventory--suspendue {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
 /* Pas de `:empty { display: none }`, délibérément : quand la colonne s'effaçait,
    le premier objet faisait apparaître le contenant et son contenu du même geste,
    et le joueur n'apprenait jamais qu'il y a là un endroit où les choses se

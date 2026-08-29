@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000px" height="1000px" viewBox="0 0 1000 1000">
+  <style type="text/css">.mo {stroke:red;stroke-width:2} .va {stroke:blue;stroke-width:2} .fl {stroke:aqua;stroke-width:1} .bo {stroke:black;stroke-width:4}</style>
+  <line class="bo" x1="0.0" y1="234.633135" x2="0.0" y2="414.213562" />
+  <line class="bo" x1="585.786438" y1="1000.0" x2="765.366865" y2="1000.0" />
+  <line class="mo" x1="707.106781" y1="707.106781" x2="765.366865" y2="1000.0" />
+  <line class="va" x1="292.893219" y1="292.893219" x2="414.213562" y2="0.0" />
+  <line class="va" x1="0.0" y1="1000.0" x2="638.384327" y2="361.615673" />
+  <line class="bo" x1="0.0" y1="0.0" x2="0.0" y2="234.633135" />
+  <line class="mo" x1="0.0" y1="234.633135" x2="292.893219" y2="292.893219" />
+  <line class="va" x1="292.893219" y1="292.893219" x2="1000.0" y2="0.0" />
+  <line class="va" x1="585.786438" y1="1000.0" x2="707.106781" y2="707.106781" />
+  <line class="mo" x1="638.384327" y1="361.615673" x2="1000.0" y2="0.0" />
+  <line class="va" x1="0.0" y1="414.213562" x2="292.893219" y2="292.893219" />
+  <line class="mo" x1="292.893219" y1="292.893219" x2="638.384327" y2="361.615673" />
+  <line class="va" x1="0.0" y1="1000.0" x2="292.893219" y2="292.893219" />
+  <line class="va" x1="707.106781" y1="707.106781" x2="1000.0" y2="0.0" />
+  <line class="bo" x1="0.0" y1="1000.0" x2="585.786438" y2="1000.0" />
+  <line class="mo" x1="638.384327" y1="361.615673" x2="707.106781" y2="707.106781" />
+  <line class="va" x1="707.106781" y1="707.106781" x2="1000.0" y2="585.786438" />
+  <line class="bo" x1="414.213562" y1="0.0" x2="1000.0" y2="0.0" />
+  <line class="bo" x1="0.0" y1="0.0" x2="414.213562" y2="0.0" />
+  <line class="va" x1="0.0" y1="1000.0" x2="707.106781" y2="707.106781" />
+  <line class="bo" x1="1000.0" y1="585.786438" x2="1000.0" y2="1000.0" />
+  <line class="bo" x1="0.0" y1="414.213562" x2="0.0" y2="1000.0" />
+  <line class="bo" x1="765.366865" y1="1000.0" x2="1000.0" y2="1000.0" />
+  <line class="bo" x1="1000.0" y1="0.0" x2="1000.0" y2="585.786438" />
+</svg>

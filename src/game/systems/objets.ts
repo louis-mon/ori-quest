@@ -39,6 +39,38 @@ export const OBJETS: Record<string, Objet> = {
     // dessinée.
     dessin: 'bois',
   },
+
+  // Chapitre 2 — le village et l'entrée du château.
+  //
+  // À ÉCRIRE : noms et descriptions sont un premier jet, comme les répliques du
+  // chapitre (voir content/story.ink).
+  idee_chien: {
+    nom: 'Idée : le chien',
+    description: 'Une idée de comment plier Chouaf, le chien du pingouin.',
+    modele: 'chien',
+  },
+  idee_pot: {
+    nom: 'Idée : le pot',
+    description: 'Une idée de comment plier un pot à lait.',
+    modele: 'pot',
+  },
+  // `pot` puis `lait` partagent le modèle, et c'est exact : c'est le même pot,
+  // rempli entre-temps. Seul le nom du bandeau dit ce qui a changé.
+  pot: {
+    nom: 'Le pot',
+    description: 'Un joli pot à lait en papier. Vide, pour le moment.',
+    modele: 'pot',
+  },
+  lait: {
+    nom: 'Du lait',
+    description: 'Un pot de lait tout frais. Aucun chat ne résiste à ça.',
+    modele: 'pot',
+  },
+  os: {
+    nom: "L'os",
+    description: 'Un os en papier, de quoi occuper un chien un bon moment.',
+    modele: 'os',
+  },
 };
 
 // Une idée se dessine dans une bulle ; un objet, non.

@@ -61,6 +61,11 @@ function etapesHtml(): string {
 export interface MenuOptions {
   // Appelé après une entrée ou une sortie de plein écran.
   onLayoutChange: () => void;
+  // Appelé quand le menu s'ouvre et quand il se referme, fenêtres comprises. Le
+  // menu reste atteignable pendant un déplacement bloquant — c'est même la seule
+  // chose qui le soit —, donc il doit pouvoir arrêter la scène : sans ça, ce
+  // qu'on était en train de regarder finit sa course derrière le panneau.
+  onGel: (gele: boolean) => void;
 }
 
 export class Menu {
@@ -71,6 +76,10 @@ export class Menu {
   private etapes: HTMLElement;
   // Transparent, plein cadre : il absorbe les taps pendant que le menu est ouvert.
   private voile: HTMLElement;
+  // Panneau, confirmation et fenêtre des étapes : trois surfaces, un seul état.
+  // Le panneau se referme en ouvrant une fenêtre, et s'en tenir à lui relancerait
+  // la scène derrière la confirmation.
+  private gele = false;
 
   constructor(
     root: HTMLElement,
@@ -164,6 +173,13 @@ export class Menu {
     this.syncFullscreenLabel();
   }
 
+  private signalerGel() {
+    const ouvert = !this.panel.hidden || !this.confirm.hidden || !this.etapes.hidden;
+    if (ouvert === this.gele) return;
+    this.gele = ouvert;
+    this.options.onGel(ouvert);
+  }
+
   private async onAction(action?: string) {
     switch (action) {
       case 'fullscreen':
@@ -185,6 +201,7 @@ export class Menu {
         this.resetProgress();
         break;
     }
+    this.signalerGel();
   }
 
   // La liste est construite à l'ouverture : elle ne sert qu'à ce moment-là, et
@@ -210,6 +227,7 @@ export class Menu {
       liste.appendChild(bouton);
     }
     this.etapes.hidden = false;
+    this.signalerGel();
   }
 
   // Le rechargement complet n'est pas de la paresse : ink garde ses variables
@@ -231,12 +249,14 @@ export class Menu {
     this.panel.hidden = false;
     this.button.setAttribute('aria-expanded', 'true');
     this.syncFullscreenLabel();
+    this.signalerGel();
   }
 
   private close() {
     this.panel.hidden = true;
     this.voile.hidden = true;
     this.button.setAttribute('aria-expanded', 'false');
+    this.signalerGel();
   }
 
   private syncFullscreenLabel = () => {

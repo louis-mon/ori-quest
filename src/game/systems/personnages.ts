@@ -26,6 +26,16 @@ export const PERSONNAGES: Record<string, Personnage> = {
   // Sa vignette est le pliage que la scène du pont pose dans le décor : celui
   // qui parle et celui qu'on voit au bord du ravin doivent être le même.
   arbre: { nom: 'Le jeune arbre', portrait: 'assets/personnages/arbre.png' },
+  // Chapitre 2. Les noms sont ceux des fiches de scène : le joueur ne lit jamais
+  // « le pingouin » mais « Pingouin Glagla ».
+  pingouin: { nom: 'Pingouin Glagla', portrait: 'assets/personnages/pingouin.png' },
+  vache: { nom: 'Vache à Lait', portrait: 'assets/personnages/vache.png' },
+  chat: { nom: 'Petit Chat', portrait: 'assets/personnages/chat.png' },
+  diplodocus: { nom: 'Gros Diplo', portrait: 'assets/personnages/diplodocus.png' },
+  // Sans vignette : le modèle plié existe, la photo de l'artiste non — et un
+  // portrait de dialogue est une photo, pas un rendu (voir plus haut). Le
+  // registre l'accepte, le nom porte seul son identité en attendant.
+  chien: { nom: 'Chouaf' },
 };
 
 // Noms de rôle acceptés dans ink, à côté des identifiants d'espèce. Le jour où

@@ -106,6 +106,12 @@ la scène montrait autre chose. Si un modèle rend mal, c'est le crease pattern,
 l'angle (`src/origami/vue.ts`) ou le papier (`src/origami/papier.ts`) qu'on
 corrige.
 
+**Une scène dont le fond n'est pas encore peint** prend
+`dessinerDecorProvisoire()` (`decor-provisoire.ts`) : des aplats francs et une
+mention « décor provisoire » en clair à l'écran. Il tient la place sans prétendre
+au fond, et s'enlève en une ligne le jour où l'image arrive — les boîtes du plan,
+elles, ne bougent pas.
+
 Le terrain non plus n'est pas dessiné : sol, ravin et rempart sont l'image de
 l'artiste, désignée par un **calque image de classe `fond`** qui pointe le
 fichier de `public/` — les zones tactiles s'ajustent donc sur les pixels que le
@@ -153,6 +159,21 @@ de l'objet à l'écran, que la carte ne connaît pas. Et **un déplacement ne bl
 pas la scène** — le décor reste touchable pendant qu'un objet traverse, sauf
 `bloquant: true` pour ce qui doit être vu avant qu'on puisse agir.
 
+**Bloquant veut dire vraiment bloquant**, et l'état est **transitoire** : décor
+et inventaire cessent de répondre, et les marqueurs s'endorment — grisés,
+arrêtés sur une pose stable et non au milieu de leur battement, qu'on lirait
+comme un défaut d'affichage. Seul le menu reste atteignable, et il **fige la
+scène** (`figerLeJeu`, dans `main.ts`) : sans ça, ce qu'on regardait finit sa
+course derrière le panneau. Tout se relève à la fin du trajet **et au
+shutdown** — des attentes restées ouvertes rendraient la pièce sourde pour de
+bon.
+
+**C'est la narration qui déclenche, la scène qui joue** : `# flag:` lève le
+drapeau, `auLeverDe()` (`PointClickScene`) joue le mouvement. Un drapeau **déjà
+levé en arrivant** pose l'objet à son arrivée sans rien rejouer, sinon le
+dinosaure s'écarte à chaque retour dans la pièce. Et le mouvement attend que la
+boîte de dialogue se referme : l'état, lui, n'attend pas.
+
 **Le découpage des énigmes se dessine aussi, et ailleurs que dans le code.** Il
 vit dans `game-design/enigmes/<nom>.json`, se trace dans
 `http://localhost:5173/decoupage.html` (page de développement, hors build) et
@@ -199,7 +220,7 @@ resterait droit. Peint **sur la face de devant seulement** — des deux côtés,
 ressortait sur les rabats que le pliage retourne, là où le joueur n'avait rien vu
 dessiner.
 
-Ces feuilles ont un **verso** (`PAPIERS.vallee`, `montagne`, `bombe`), et le même
+Ces feuilles ont un **verso** (`PAPIERS.vallee`, `pli_montagne`, `bombe`), et le même
 pour les trois : sans lui le papier replié n'est qu'un aplat clair où le pli ne
 se lit qu'à l'ombre, et c'est le partage qui fait reconnaître *la feuille sur
 laquelle on explique* d'un tutoriel à l'autre.
@@ -267,6 +288,14 @@ vrai pour toujours, et le décor cesse de répondre aux taps.
 `globals.shouldChangeCreasePercent = true`, sinon le solveur tourne indéfiniment
 sur la valeur figée à l'initialisation des shaders et toutes les poses sortent
 identiques.
+
+**Un crease pattern ne supporte pas non plus deux écritures du même point.**
+ORIPA exporte `585.7864376268969` d'un bout de trait et `585.7864376269122` de
+l'autre, et des zéros en `5.55E-14` : le pot sortait à **440 sommets et 798
+faces** — exactement le symptôme du commentaire XML ci-dessous — au lieu de 18,
+et le solveur le froissait. Les coordonnées sont donc **arrondies à six
+décimales à l'intégration**, dans `content/origami/` comme dans
+`public/assets/enigmes/<nom>/solution.svg`, qui doivent rester identiques.
 
 **Un crease pattern ne supporte pas de commentaire XML.** Le même carré à une
 diagonale sortait à **440 sommets et 798 faces** avec un `<!-- … -->` glissé avant
