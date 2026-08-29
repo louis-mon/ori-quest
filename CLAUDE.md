@@ -83,6 +83,12 @@ prêt. `goto()` (`main.ts`) y lit qu'une destination n'est pas livrée et pose
 l'écran de fin (`src/ui/fin.ts`) au lieu de changer de scène — **sans l'écrire
 dans la sauvegarde**, qui doit rester sur une pièce que ce build sait rouvrir.
 
+**Le menu des points d'étape est livré lui aussi**, tant que la page itch.io est
+en Draft (`ETAPES_LIVREES`, dans `src/game/systems/etapes.ts`) : un testeur ne
+retraverse pas le chapitre pour en atteindre la fin. Il ne propose que les
+chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin avec
+les drapeaux du chapitre suivant levés.
+
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la
 suite. C'est le seul texte du jeu hors d'ink avec celui des tutoriels, et pour

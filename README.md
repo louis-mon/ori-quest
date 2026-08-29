@@ -134,10 +134,16 @@ quel fond charger et où le poser — voir
 
 ### Reprendre à un point précis du chapitre
 
-Le menu du jeu porte, **en développement seulement**, une liste « Reprendre à… »
-qui reconstitue un moment de la partie — pont posé, hache en main, bois en
-poche… Rejouer tout le chapitre pour vérifier une correction de fin coûte
-plusieurs minutes et une énigme ; ces entrées suppriment ce coût.
+Le menu du jeu porte une liste « Reprendre à… » qui reconstitue un moment de la
+partie — pont posé, hache en main, bois en poche… Rejouer tout le chapitre pour
+vérifier une correction de fin coûte plusieurs minutes et une énigme ; ces
+entrées suppriment ce coût.
+
+Elle est **dans le build publié tant que la page itch.io est en Draft** : ce
+qu'on y montre est un jeu qu'on fait essayer, et un testeur ne retraversera pas
+le chapitre entier pour en atteindre la fin. `ETAPES_LIVREES`
+([`src/game/systems/etapes.ts`](src/game/systems/etapes.ts)) est la ligne à
+repasser à `import.meta.env.DEV` le jour de la publication.
 
 Le menu ne porte **qu'une entrée par chapitre** ; elle ouvre une fenêtre avec
 les étapes de ce chapitre. Tout mettre à plat noyait les deux entrées qui
@@ -150,8 +156,14 @@ rapport à la précédente. Elles rechargent la page, comme « Recommencer » �
 récit ink garde ses propres variables dans son instance `Story`, que l'état de
 jeu ne touche pas.
 
-`import.meta.env.DEV` étant remplacé par une constante à la compilation, ce menu
-et son module disparaissent entièrement du build publié.
+`ETAPES_LIVREES` étant lu à la compilation, ce menu et son module disparaissent
+entièrement du bundle dès qu'il est faux — d'où le test répété dans le
+gestionnaire de clic, sans lequel `etapes` reste référencé et ne peut plus être
+élagué.
+
+Seuls les chapitres que le build embarque sont proposés
+(`chapitresAtteignables()`) : un point d'étape posé dans une scène absente
+renverrait le joueur au ravin, les drapeaux du chapitre suivant levés.
 
 ## Stack
 

@@ -1,9 +1,8 @@
+import { estLivree } from '../chapitres';
 import { gameState } from './state';
 
-// Points d'étape du chapitre, pour le développement.
-//
-// ⚠ Réservé à `import.meta.env.DEV` : rien de tout ceci n'entre dans le build
-// publié sur itch.io.
+// Points d'étape du chapitre : reconstituer un moment de la partie sans la
+// rejouer.
 //
 // Chaque étape est l'état COMPLET attendu à ce moment-là, pas un delta : on doit
 // pouvoir lire ce que le joueur a en poche sans remonter la liste.
@@ -19,6 +18,13 @@ export interface Chapitre {
   nom: string;
   etapes: Etape[];
 }
+
+// Livrés tant que la page itch.io est en Draft : ce qu'on y montre est un jeu
+// qu'on fait essayer, et personne ne retraverse une heure de récit pour vérifier
+// la fin. **Une ligne à repasser à `import.meta.env.DEV` le jour de la
+// publication** — la valeur étant lue à la compilation, le menu et cette liste
+// sortent alors entièrement du bundle.
+export const ETAPES_LIVREES = true;
 
 // Un chapitre par entrée de menu, ses étapes dans une fenêtre à part : à huit
 // étapes, le menu principal devenait une liste à faire défiler où plein écran et
@@ -314,6 +320,17 @@ export const CHAPITRES: Chapitre[] = [
     ],
   },
 ];
+
+// Ce que ce build sait rouvrir. Un point d'étape posé dans une scène absente de
+// la version ne mènerait nulle part : `main.ts` renverrait le joueur au ravin,
+// les drapeaux du chapitre suivant levés. Le chapitre vidé de ses étapes
+// disparaît avec elles.
+export function chapitresAtteignables(): Chapitre[] {
+  return CHAPITRES.map((chapitre) => ({
+    ...chapitre,
+    etapes: chapitre.etapes.filter((etape) => estLivree(etape.piece)),
+  })).filter((chapitre) => chapitre.etapes.length > 0);
+}
 
 // Le rechargement n'est pas une facilité : ink garde ses variables et ses
 // passages déjà lus dans son instance `Story`, que `gameState` ne touche pas. On

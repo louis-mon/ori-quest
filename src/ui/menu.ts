@@ -1,5 +1,5 @@
 import { gameState } from '../game/systems/state';
-import { allerA, CHAPITRES } from '../game/systems/etapes';
+import { allerA, chapitresAtteignables, ETAPES_LIVREES } from '../game/systems/etapes';
 
 // Menu du jeu : plein écran et remise à zéro de la progression.
 
@@ -47,15 +47,17 @@ async function toggleFullscreen(): Promise<void> {
   }
 }
 
-// `import.meta.env.DEV` est remplacé par une constante à la compilation : en
-// production le bloc, et avec lui le module `etapes`, disparaît du bundle.
+// `ETAPES_LIVREES` est une constante lue à la compilation : à `false`, le bloc et
+// avec lui le module `etapes` disparaissent du bundle.
 function etapesHtml(): string {
-  if (!import.meta.env.DEV) return '';
-  const items = CHAPITRES.map(
-    (chapitre, i) =>
-      `<button class="menu__item" data-action="chapitre" data-chapitre="${i}">${chapitre.nom}</button>`,
-  ).join('');
-  return `<p class="menu__label">Reprendre à… (dev)</p>${items}`;
+  if (!ETAPES_LIVREES) return '';
+  const items = chapitresAtteignables()
+    .map(
+      (chapitre, i) =>
+        `<button class="menu__item" data-action="chapitre" data-chapitre="${i}">${chapitre.nom}</button>`,
+    )
+    .join('');
+  return `<p class="menu__label">Reprendre à…</p>${items}`;
 }
 
 export interface MenuOptions {
@@ -143,10 +145,10 @@ export class Menu {
       item.addEventListener('pointerup', (e) => {
         e.stopPropagation();
         // Le test est ici AUSSI, et pas seulement autour du HTML : sans lui,
-        // `CHAPITRES` reste référencé depuis ce gestionnaire, `etapes` ne peut
-        // plus être élagué et la liste des points d'étape part dans le bundle
-        // publié. Vérifié — elle y était.
-        if (import.meta.env.DEV) {
+        // `etapes` reste référencé depuis ce gestionnaire, ne peut plus être
+        // élagué, et la liste des points d'étape part dans le bundle même quand
+        // `ETAPES_LIVREES` est faux. Vérifié — elle y était.
+        if (ETAPES_LIVREES) {
           const chapitre = item.dataset.chapitre;
           if (chapitre !== undefined) {
             this.ouvrirEtapes(Number(chapitre));
@@ -207,8 +209,8 @@ export class Menu {
   // La liste est construite à l'ouverture : elle ne sert qu'à ce moment-là, et
   // la reconstruire évite d'entretenir des écouteurs sur des boutons cachés.
   private ouvrirEtapes(index: number) {
-    if (!import.meta.env.DEV) return;
-    const chapitre = CHAPITRES[index];
+    if (!ETAPES_LIVREES) return;
+    const chapitre = chapitresAtteignables()[index];
     if (!chapitre) return;
 
     this.close();
