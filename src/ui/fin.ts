@@ -23,7 +23,7 @@ export function montrerFin(root: HTMLElement): void {
   el.setAttribute('aria-modal', 'true');
   el.innerHTML = `
     <p class="fin__titre">À suivre…</p>
-    <p class="fin__texte">Fin du chapitre 1. La suite est encore sur la table à plier.</p>
+    <p class="fin__texte">Fin du chapitre 1. La suite nécessite encore quelques plis...</p>
     <button class="fin__bouton" type="button">Recommencer</button>
   `;
   root.appendChild(el);
