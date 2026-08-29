@@ -5,17 +5,15 @@ import storyJson from './generated/story.json';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './game/config';
 import { PREFERENCE_GPU } from './gpu';
 
-import { PontScene } from './game/scenes/pont-scene';
-import { PorteScene } from './game/scenes/porte-scene';
-import { VillageScene } from './game/scenes/village-scene';
-import { EntreeScene } from './game/scenes/entree-scene';
+import { estLivree, scenesLivrees } from './game/chapitres';
 import { runCreasePuzzle } from './game/puzzle/crease-puzzle';
 import { PUZZLES } from './game/puzzle/puzzles';
 import { lanceurTutoriel } from './game/puzzle/tutoriel';
 import { DialogueRunner } from './game/systems/dialogue';
-import { gameState } from './game/systems/state';
+import { FIRST_ROOM, gameState } from './game/systems/state';
 import { OrigamiLayer } from './origami/origami-layer';
 import { pliageDe } from './origami/vue';
+import { montrerFin } from './ui/fin';
 import { Menu } from './ui/menu';
 import { Overlay } from './ui/overlay';
 
@@ -151,6 +149,14 @@ async function playPuzzle(name: string) {
 // Un seul chemin pour les deux façons de changer de scène — le tag `# goto:` et
 // la flèche — sinon l'une des deux oublie d'enregistrer la pièce courante.
 const goto = (room: string) => {
+  // Une destination absente de cette version termine la partie sur « À suivre… »
+  // (src/game/chapitres.ts). Et surtout sans `goTo()` : la sauvegarde doit rester
+  // sur une pièce que ce build sait rouvrir.
+  if (!estLivree(room)) {
+    finirLaPartie();
+    return;
+  }
+
   gameState.goTo(room);
 
   // `start` démarre la scène demandée mais n'arrête pas celle qu'on quitte : les
@@ -239,6 +245,15 @@ function figerLeJeu(gele: boolean) {
   }
 }
 
+// Fin de la version : le chapitre suivant n'est pas dans ce build. La scène est
+// gelée plutôt qu'arrêtée — une scène en pause reste dessinée, et le décor qu'on
+// vient de quitter fait un meilleur fond de fin qu'un cadre noir —, et l'écran
+// couvre le menu : il n'y a plus rien à reprendre, seulement à recommencer.
+function finirLaPartie() {
+  figerLeJeu(true);
+  montrerFin(uiRoot);
+}
+
 new Menu(uiRoot, { onLayoutChange: syncStage, onGel: figerLeJeu });
 
 game.events.once(Phaser.Core.Events.READY, () => {
@@ -247,14 +262,15 @@ game.events.once(Phaser.Core.Events.READY, () => {
   game.scale.on(Phaser.Scale.Events.RESIZE, syncStage);
 
   // Troisième argument à false : les scènes ne démarrent pas d'elles-mêmes.
-  game.scene.add('pont', PontScene, false);
-  game.scene.add('porte', PorteScene, false);
-  game.scene.add('village', VillageScene, false);
-  game.scene.add('entree', EntreeScene, false);
+  for (const [piece, Scene] of scenesLivrees()) game.scene.add(piece, Scene, false);
 
   // La scène restaurée depuis la sauvegarde : repartir systématiquement de la
-  // première renverrait le joueur en arrière à chaque retour dans le jeu.
-  game.scene.start(gameState.room, { overlay, dialogue, goto });
+  // première renverrait le joueur en arrière à chaque retour dans le jeu. Une
+  // sauvegarde peut toutefois nommer une pièce absente de ce build — une partie
+  // commencée sur une version de développement —, et démarrer une scène jamais
+  // enregistrée ne donne qu'un écran noir.
+  const piece = estLivree(gameState.room) ? gameState.room : FIRST_ROOM;
+  game.scene.start(piece, { overlay, dialogue, goto });
 });
 
 window.addEventListener('resize', syncStage);

@@ -52,15 +52,19 @@ trois — et il se tranchera alors sur le contenu de ce chapitre-là.
 
 ## Ce que ça implique techniquement
 
-Le chapitre 1 a ses deux scènes, le ravin et la porte, et la navigation
-fonctionne dans les deux sens.
+Le chapitre 1 a ses deux scènes, le ravin et la porte ; le chapitre 2, le village
+et l'entrée du château. La navigation fonctionne dans les deux sens à l'intérieur
+d'un chapitre, et franchir la porte mène du premier au second.
 
 **Les liaisons sont dans les plans**, pas dans un registre : une boîte `exit_<id>`
-dans le SVG, et la scène dit vers quelle pièce elle mène. Un registre de
-chapitres reste à écrire le jour où il faudra un point d'entrée par chapitre —
-et, avec lui, la remise à zéro de l'inventaire et des drapeaux au passage d'un
-chapitre au suivant. ⚠ Rien de tout ça n'existe encore : le jeu n'a qu'un
-chapitre.
+dans le SVG, et la scène dit vers quelle pièce elle mène. Le registre de
+chapitres, lui, existe (`src/game/chapitres.ts`), mais il ne dit encore que deux
+choses : quelles scènes chaque chapitre contient, et **jusqu'où va la version
+publiée**. Celle-ci s'arrête à la fin du chapitre 1, sur « À suivre… » — le
+chapitre 2 se joue en développement, mais son texte est un premier jet et ses
+décors sont provisoires. ⚠ Il reste à ce registre un point d'entrée par
+chapitre, et avec lui la remise à zéro de l'inventaire et des drapeaux au passage
+d'un chapitre au suivant : rien ne l'effectue aujourd'hui.
 
 **L'état de scène** passe par les drapeaux de `gameState`, sérialisés avec la
 sauvegarde : le joueur qui revient au ravin retrouve le pont posé.

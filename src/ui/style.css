@@ -688,6 +688,74 @@ body {
   min-width: 130px;
 }
 
+/* ---------- Fin provisoire ---------- */
+
+/* Au-dessus de tout ce qui vit dans #ui — le vol d'obtention et le menu
+   plafonnent à 8 —, sous l'invite de rotation (10) : le jeu peut se terminer
+   alors que le téléphone est déjà de travers. Le décor reste visible dessous,
+   la scène étant mise en pause et non arrêtée. */
+.fin {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(16px * var(--ui-scale));
+  padding: 16px;
+  background: rgba(16, 14, 12, 0.88);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.fin--visible {
+  opacity: 1;
+}
+
+.fin__titre {
+  margin: 0;
+  font-size: calc(38px * var(--ui-scale));
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.fin__texte {
+  max-width: calc(420px * var(--ui-scale));
+  margin: 0;
+  font-size: calc(15px * var(--ui-scale));
+  line-height: 1.5;
+  opacity: 0.75;
+}
+
+/* Le bouton du menu, sans en être un : c'est le seul geste possible de l'écran,
+   il porte donc le fond clair. */
+.fin__bouton {
+  min-height: 44px;
+  min-width: 160px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: calc(15px * var(--ui-scale));
+  cursor: pointer;
+}
+
+.fin__bouton:active {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fin {
+    transition-duration: 1ms;
+  }
+}
+
 /* ---------- Invite de rotation ---------- */
 
 #rotate-hint {

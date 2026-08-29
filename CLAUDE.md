@@ -29,6 +29,7 @@ npm run enigmes                  # découpages des énigmes -> src/generated/eni
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
+npm run itch                     # dist/ -> itch.io par butler (page laissée en Draft)
 npm run format                   # Prettier sur le code
 ```
 
@@ -73,6 +74,19 @@ version valide, l'erreur et son numéro de ligne allant au terminal.
 **Les scènes sont pilotées par des données.** Les hotspots sont une liste
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
+
+**Le jeu livré s'arrête à la fin du chapitre 1**, sur « À suivre… » : le chapitre
+2 se joue en développement, mais son texte est un premier jet et ses deux scènes
+sont encore sur décor provisoire. Ce que cette version embarque tient dans
+`src/game/chapitres.ts`, une ligne à changer le jour où le chapitre suivant est
+prêt. `goto()` (`main.ts`) y lit qu'une destination n'est pas livrée et pose
+l'écran de fin (`src/ui/fin.ts`) au lieu de changer de scène — **sans l'écrire
+dans la sauvegarde**, qui doit rester sur une pièce que ce build sait rouvrir.
+
+**La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
+de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la
+suite. C'est le seul texte du jeu hors d'ink avec celui des tutoriels, et pour
+une raison voisine : il parle de la version, pas de l'histoire.
 
 **Une idée est un objet d'inventaire comme un autre.** Même `# give:`, même
 condition `has_`, même liste ; seul l'affichage les distingue, à partir du
@@ -253,7 +267,9 @@ comportement livré.
 
 **Des couches à ne pas intervertir** : l'énigme à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la
-confirmation à 7, le vol d'obtention et son bandeau à 8. D'où le fait que `.tuto`
+confirmation à 7, le vol d'obtention et son bandeau à 8, l'écran de fin à 9 —
+au-dessus du menu, seul écran du jeu dans ce cas : la partie est finie, il n'y a
+plus rien à reprendre. D'où le fait que `.tuto`
 ne soit **pas positionné** : positionné, il ferait contexte d'empilement et ses
 enfants ne pourraient plus encadrer la boîte de dialogue.
 

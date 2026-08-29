@@ -28,6 +28,8 @@ le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 | `npm run enigmes` | découpages `game-design/enigmes/` -> `src/generated/enigmes.ts` |
 | `npm run check-puzzle [-- <nom>]` | un découpage a-t-il bien une solution unique ? |
 | `npm run bake -- <cp.svg>` | crease pattern -> animation `.origami` |
+| `npm run zip` | prépare `ori-quest-itch.zip` pour itch.io |
+| `npm run itch` | téléverse `dist/` sur itch.io avec butler |
 
 Pages de réglage, en développement uniquement (hors build) :
 
@@ -41,7 +43,6 @@ Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 `game-design/enigmes/<nom>.json`) par un point d'entrée du serveur de dev défini
 dans `vite.config.ts` — qui n'existe qu'en développement et ne garde que des
 nombres bornés.
-| `npm run zip` | prépare `ori-quest-itch.zip` pour itch.io |
 
 ### Intégrer un origami de l'artiste
 
@@ -282,6 +283,7 @@ src/
   main.ts                    bootstrap, syncStage, déblocage audio, sauvegarde
   game/
     config.ts                résolution logique, seuil tactile, palette
+    chapitres.ts             quelles scènes cette version embarque, où elle s'arrête
     scenes/pont-scene.ts     décor + hotspots
     puzzle/crease-puzzle.ts  minijeu de reconstitution (DOM)
     puzzle/decoupage.ts      pièces polygonales : boîtes, masques, détourage
@@ -302,6 +304,7 @@ src/
     vue.ts                   angle et lumière, partagés par tous les rendus
   ui/
     overlay.ts               dialogues, inventaire, menu de verbes (DOM)
+    fin.ts                   « À suivre… » quand le chapitre suivant n'est pas livré
     vignettes.ts             image d'un objet d'inventaire
     style.css
   dev/
@@ -313,7 +316,9 @@ tools/
   compile-ink.mjs            .ink -> .json
   import-decoupage.mjs       découpages -> src/generated/enigmes.ts
   lib/decoupage.mjs          pavage, unicité de la solution (partagé)
+  lib/dist-itch.mjs          ce que dist/ doit respecter pour itch.io (partagé)
   pack-itch.mjs              dist/ -> zip vérifié pour itch.io
+  publier-itch.mjs           dist/ -> itch.io par butler, page laissée en Draft
   pull-assets.mjs            dossier partagé de l'artiste -> assets-src/
 ```
 
@@ -366,14 +371,56 @@ npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 200
 
 ## Publier sur itch.io
 
+Ce qui part en ligne s'arrête **à la fin du chapitre 1**, sur « À suivre… » : le
+chapitre 2 se joue en développement, mais son texte est un premier jet et ses
+deux scènes tournent encore sur le décor provisoire. La frontière tient en une
+ligne de [`src/game/chapitres.ts`](src/game/chapitres.ts) — la narration, elle,
+ignore quels chapitres ont été compilés.
+
+### Une fois pour toutes
+
+1. Installer butler, le client officiel d'itch.io, et le rendre atteignable
+   depuis le PATH.
+2. `butler login` — ouvre le navigateur, garde la clé pour les fois d'après.
+3. Créer le projet sur itch.io — butler envoie des builds, il ne crée pas la
+   page.
+
+### À chaque version
+
 ```bash
-npm run build && npm run zip
+npm run build && npm run itch
 ```
 
-`pack-itch.mjs` vérifie qu'`index.html` est bien à la racine et qu'aucun chemin
-absolu ne traîne (itch.io sert depuis un sous-dossier arbitraire), puis affiche
-les cases à cocher côté itch.io. Laisser **SharedArrayBuffer décoché** : inutile
-ici, et son implémentation itch.io casse le chargement hors Chrome.
+La cible est écrite dans `publier-itch.mjs` (`louis-mon/ori-quest`, l'adresse du
+projet dans son URL) ; un argument ou `ITCH_CIBLE` la remplacent, pour un compte
+de test.
+
+Le build part sur le canal `html5` — itch.io lit `html` dans le nom du canal et
+marque le fichier comme jouable en navigateur — sous la version
+`<celle de package.json>+<commit>`, seul lien entre un build en ligne et l'état
+du dépôt qui l'a produit.
+
+**La page reste en Draft, et rien dans ces commandes ne peut l'en sortir** :
+butler ne dépose que des fichiers. Un jeu ne devient visible qu'au bouton
+« Publish » de son tableau de bord ; tant qu'il est en Draft, il ne s'ouvre que
+connecté avec le compte qui le possède.
+
+Restent les réglages qui ne sont pas dans le fichier envoyé, à faire une fois
+dans le tableau de bord (`npm run itch` les rappelle après chaque envoi) :
+fenêtre 1280 × 720, bouton plein écran, « Mobile friendly » en paysage, et
+**SharedArrayBuffer décoché** — inutile ici, et son implémentation itch.io casse
+le chargement hors Chrome.
+
+`npm run zip` reste la voie manuelle, pour téléverser depuis le navigateur. Les
+deux routes envoient le même `dist/` et le vérifient de la même façon
+(`tools/lib/dist-itch.mjs`) : `index.html` à la racine, aucun chemin absolu —
+itch.io sert le jeu depuis un sous-dossier arbitraire.
+
+### Voir le build avant de l'envoyer
+
+`npm run preview` sert `dist/` tel qu'il sera livré : délai anti-tap réel,
+chapitre 2 absent, fin sur « À suivre… ». Le serveur de dev ne montre aucune de
+ces trois choses.
 
 ## Orientation
 
@@ -390,6 +437,8 @@ pour que le plein écran parte dans le bon sens.
 - Les deux scènes du **chapitre 2** attendent leur fond peint : elles tournent
   sur `decor-provisoire.ts`, qui l'annonce à l'écran. Le remplacement est un
   calque image de classe `fond` dans la carte, rien à toucher dans le code.
+  C'est, avec le premier jet du texte, ce qui garde le chapitre hors du build
+  publié.
 - **Rien ne remet l'état à zéro entre deux chapitres**, alors que le game design
   le prévoit (voir [game-design/02-chapitres-et-scenes.md](game-design/02-chapitres-et-scenes.md)).
   Sans conséquence tant que les drapeaux d'un chapitre ne servent pas au suivant.
