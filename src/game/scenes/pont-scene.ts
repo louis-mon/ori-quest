@@ -166,11 +166,16 @@ export class PontScene extends PointClickScene {
     this.sheet = this.add.graphics();
     this.caler('feuille', dessinerFeuille(this.sheet, boxOf(PLAN, 'hs_feuille'), 'pont'));
 
-    // La feuille du vieil arbre, et l'arbre qu'elle devient une fois pliée.
-    const grande = boxOf(PLAN, 'hs_feuille_vieil_arbre');
+    // La feuille du vieil arbre, et l'arbre qu'elle devient une fois pliée. Deux
+    // boîtes et non une : une feuille tient dans la main, l'arbre qu'elle devient
+    // fait trois fois la hauteur du héros.
     this.feuilleArbre = this.add.graphics();
-    this.empriseFeuilleArbre = dessinerFeuille(this.feuilleArbre, grande, 'arbre');
-    this.vieilArbre = poserOrigami(this, 'arbre', grande, (emprise) => {
+    this.empriseFeuilleArbre = dessinerFeuille(
+      this.feuilleArbre,
+      boxOf(PLAN, 'hs_feuille_vieil_arbre'),
+      'arbre',
+    );
+    this.vieilArbre = poserOrigami(this, 'arbre', boxOf(PLAN, 'dec_vieil_arbre'), (emprise) => {
       this.empriseVieilArbre = emprise;
       this.refresh();
     });

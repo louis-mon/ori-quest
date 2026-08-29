@@ -13,7 +13,6 @@ const HISTOIRE = 'content';
 const LIMITES = {
   angle: 360,
   pliage: [0, 1],
-  echelle: [0.05, 20],
 } as const;
 
 // Écriture des poses d'origami depuis l'outil de réglage, qui tourne dans le
@@ -348,8 +347,7 @@ function rendreFichier(source: string, recu: unknown): string {
     if (angles.length !== 3) throw new Error(`${nom} : trois angles attendus`);
     const a = angles.map((v) => Math.round(nombre(v, -LIMITES.angle, LIMITES.angle, nom)));
     const pliage = nombre(p.pliage, ...LIMITES.pliage, `${nom}.pliage`);
-    const echelle = nombre(p.echelle, ...LIMITES.echelle, `${nom}.echelle`);
-    lignes.push(`  ${nom}: { angles: [${a.join(', ')}], pliage: ${pliage}, echelle: ${echelle} },`);
+    lignes.push(`  ${nom}: { angles: [${a.join(', ')}], pliage: ${pliage} },`);
   }
   if (lignes.length !== connus.size) throw new Error('il manque des modèles');
 

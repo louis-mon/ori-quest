@@ -139,6 +139,18 @@
                  "width":0,
                  "x":960,
                  "y":530
+                }, 
+                {
+                 "height":277,
+                 "id":12,
+                 "name":"montagne",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":545,
+                 "x":274,
+                 "y":227
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -147,7 +159,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":12,
+ "nextobjectid":13,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

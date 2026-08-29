@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import type { Box } from './layout';
 import { apercuOrigami } from '../../origami/apercu';
-import { echelleDe } from '../../origami/vue';
 
 // Le modèle lui-même, rendu depuis le `.origami` que le joueur vient de voir se
 // plier, pas une illustration qui lui ressemble.
@@ -59,10 +58,10 @@ export function poserOrigami(
         image.setTexture(nomTexture);
 
         // Le modèle tient entièrement dans la boîte, sans déformation : un
-        // origami étiré ne ressemble plus à du papier. Puis l'échelle propre au
-        // modèle (`POSES`), qui rattrape ce que l'ajustement ne sait pas faire —
-        // une silhouette longue et fine n'occupe qu'une fraction de son emprise.
-        const echelle = Math.min(box.w / canvas.width, box.h / canvas.height) * echelleDe(nom);
+        // origami étiré ne ressemble plus à du papier. Même ajustement que pour
+        // un sprite du décor (`placeSprite`), et sans facteur ajouté : la taille
+        // à l'écran est celle qu'on lit dans la carte, et nulle part ailleurs.
+        const echelle = Math.min(box.w / canvas.width, box.h / canvas.height);
         image.setScale(echelle);
 
         const w = canvas.width * echelle;

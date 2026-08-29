@@ -34,7 +34,8 @@ le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 Pages de réglage, en développement uniquement (hors build) :
 
 - `http://localhost:5173/orientation.html` — la pose de chaque modèle plié
-  (orientation à la souris, pliage final, taille dans le décor).
+  (orientation à la souris, pliage final). Pas sa taille : elle se dessine dans
+  Tiled, avec le reste de la géométrie de la scène.
 - `http://localhost:5173/decoupage.html` — le découpage des énigmes : on trace
   des coupes sur le crease pattern, d'un bord à l'autre d'une pièce, et l'outil
   dit après chaque coupe si la solution reste unique.

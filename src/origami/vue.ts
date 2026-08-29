@@ -52,19 +52,18 @@ export interface Pose {
   // Le bon arrêt varie par modèle : le pont est plat à 100 % et doit s'arrêter
   // bien avant, un plissé a besoin d'aller presque au bout pour prendre forme.
   pliage: number;
-  // Multiple de la taille par défaut, dans le décor seulement. Ne se déduit pas
-  // de la boîte du plan : le modèle y est ajusté sans déformation, donc une
-  // silhouette longue et fine n'occupe qu'une fraction de son emprise. Agrandir
-  // la boîte déplacerait aussi la feuille dépliée, qui partage cette emprise.
-  echelle: number;
 }
 
 // Rien dans un crease pattern ne dit où sera le manche une fois plié : ces
 // valeurs se règlent à l'œil dans orientation.html, dont le bouton
 // « Enregistrer » réécrit poses.ts. Ne pas les éditer à la main.
+//
+// La TAILLE dans le décor n'est pas ici : elle se dessine dans Tiled, où le
+// modèle est ajusté à sa boîte. Deux endroits pour un même réglage, c'est un
+// jour où l'un des deux change sans qu'on regarde l'autre.
 export { POSES } from './poses';
 
-const POSE_NEUTRE: Pose = { angles: [0, 0, 0], pliage: PLIAGE_DEFAUT, echelle: 1 };
+const POSE_NEUTRE: Pose = { angles: [0, 0, 0], pliage: PLIAGE_DEFAUT };
 
 export function poseDe(nom: string): Pose {
   return POSES[nom] ?? POSE_NEUTRE;
@@ -72,10 +71,6 @@ export function poseDe(nom: string): Pose {
 
 export function pliageDe(nom: string): number {
   return poseDe(nom).pliage;
-}
-
-export function echelleDe(nom: string): number {
-  return poseDe(nom).echelle;
 }
 
 export function quaternionDegres(

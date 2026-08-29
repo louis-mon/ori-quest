@@ -199,18 +199,21 @@ papier, à ~70° au-dessus de l'horizon, exactement la vue de pliage d'ORIPA. Le
 que c'est du papier posé, pas un dessin.
 
 **Chaque modèle a sa pose**, dans [`poses.ts`](../src/origami/poses.ts) — une
-orientation, un taux de pliage, et une taille dans le décor. Le pont basculé
-vers l'arrière pour qu'il enjambe au lieu d'être vu de dessus, l'arbre roulé
-jusqu'à ce que son tronc soit en bas, la porte droite. C'est l'objet qu'on
-tourne, pas la caméra : l'angle de vue est commun à tout le jeu, alors que la
-bonne façon de présenter un objet dépend de l'objet.
+orientation et un taux de pliage. Le pont basculé vers l'arrière pour qu'il
+enjambe au lieu d'être vu de dessus, l'arbre roulé jusqu'à ce que son tronc soit
+en bas, la porte droite. C'est l'objet qu'on tourne, pas la caméra : l'angle de
+vue est commun à tout le jeu, alors que la bonne façon de présenter un objet
+dépend de l'objet.
 
-L'**échelle** est là parce que la taille sur scène ne se déduit pas de la boîte
-du plan seule : le modèle y est ajusté sans déformation, donc une silhouette
-longue et fine n'occupe qu'une fraction de son emprise là où une silhouette
-carrée la remplit. Deux modèles logés dans des boîtes identiques n'ont donc pas
-la même présence. Elle n'agit que sur le **décor** — l'inventaire et le but de
-l'énigme ont leurs propres cases, l'animation son propre cadre.
+**La taille sur scène n'est pas une pose.** Elle se dessine dans Tiled, avec le
+reste de la géométrie : le modèle est ajusté à sa boîte sans déformation, comme
+un sprite du décor, et rien ne la multiplie ensuite. La pose a porté un facteur
+d'échelle, réglable dans l'outil d'orientation ; c'était deux endroits pour une
+seule taille, et le curseur n'agissait sur rien de ce que l'outil montrait — le
+pont a grossi de 60 % sans que personne ne touche au pont. La boîte du plan est
+donc l'emprise réelle du modèle plié, et un modèle qui succède à sa feuille en a
+une **à lui** : la feuille du vieil arbre tient dans la main, l'arbre fait trois
+fois la hauteur du héros.
 
 Ces valeurs ne se devinent pas — rien dans un crease pattern ne dit où tombera
 le manche. Elles se règlent à l'œil :
@@ -221,9 +224,9 @@ npm run dev
 
 puis `http://localhost:5173/orientation.html` : un modèle à la fois, **qu'on
 tourne à la souris**, plus les curseurs pour finir au degré près, le pliage
-final, la taille dans le décor et un zoom de confort. « Enregistrer » **écrit
-directement** `poses.ts` — c'est le serveur de développement qui s'en charge
-(voir `vite.config.ts`), et rien de tout ça n'existe dans le build.
+final et un zoom de confort. « Enregistrer » **écrit directement** `poses.ts` —
+c'est le serveur de développement qui s'en charge (voir `vite.config.ts`), et
+rien de tout ça n'existe dans le build.
 
 Trois détails d'ergonomie qui comptent, appris à l'usage : l'échelle du rendu
 **ne bouge jamais** quand on tourne (le cadrage du jeu serre sur la silhouette,

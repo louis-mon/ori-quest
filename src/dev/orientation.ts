@@ -13,6 +13,12 @@ import { POSES, quaternionDegres, repereVue, type Pose } from '../origami/vue';
 //
 // Le rendu passe par le même code que le jeu, donc ce qu'on voit est ce que le
 // décor montrera.
+//
+// On ne règle ICI que ce qui ne se voit nulle part ailleurs. La taille dans le
+// décor a eu son curseur, sans effet sur cet aperçu : elle se réglait donc à
+// l'aveugle, et un glissé involontaire sur le modèle affiché par défaut passait
+// inaperçu jusqu'à la partie — le pont a grossi de 60 % comme ça. Elle se
+// dessine désormais dans Tiled, à l'endroit où on la voit.
 
 type Angles = [number, number, number];
 
@@ -43,10 +49,8 @@ const apercu = document.getElementById('apercu')!;
 const sortie = document.getElementById('sortie')!;
 const curseursAngle = [...document.querySelectorAll<HTMLElement>('.curseur[data-axe]')];
 const curseurPliage = document.getElementById('pliage') as HTMLInputElement;
-const curseurEchelle = document.getElementById('echelle') as HTMLInputElement;
 const curseurZoom = document.getElementById('zoom') as HTMLInputElement;
 const valeurPliage = document.getElementById('valeur-pliage')!;
-const valeurEchelle = document.getElementById('valeur-echelle')!;
 const valeurZoom = document.getElementById('valeur-zoom')!;
 const statut = document.getElementById('statut')!;
 
@@ -131,8 +135,6 @@ function poserCurseurs() {
   });
   curseurPliage.value = String(pose.pliage);
   valeurPliage.textContent = `${Math.round(pose.pliage * 100)} %`;
-  curseurEchelle.value = String(pose.echelle);
-  valeurEchelle.textContent = `${pose.echelle.toFixed(2)}`;
   curseurZoom.value = String(zoom);
   valeurZoom.textContent = `${zoom.toFixed(2)}`;
 }
@@ -153,12 +155,6 @@ curseurPliage.addEventListener('input', () => {
   ecrireSortie();
   rafraichirApercu();
   rafraichirMiniature(courant);
-});
-
-curseurEchelle.addEventListener('input', () => {
-  reglages.get(courant)!.echelle = Number(curseurEchelle.value);
-  poserCurseurs();
-  ecrireSortie();
 });
 
 curseurZoom.addEventListener('input', () => {
@@ -296,7 +292,7 @@ function ecrireSortie() {
   const lignes = [...reglages]
     .map(([nom, pose]) => {
       const angles = pose.angles.map((a) => Math.round(a)).join(', ');
-      return `  ${nom}: { angles: [${angles}], pliage: ${pose.pliage}, echelle: ${pose.echelle} },`;
+      return `  ${nom}: { angles: [${angles}], pliage: ${pose.pliage} },`;
     })
     .join('\n');
   sortie.textContent = `export const POSES: Record<string, Pose> = {\n${lignes}\n};`;

@@ -23,7 +23,8 @@
           <strong>Glisse sur le modèle</strong> pour le tourner — horizontalement il pivote sur sa
           verticale d'écran, verticalement il bascule. Les curseurs sont là pour finir au degré
           près. Le modèle garde la même taille quoi qu'il arrive&nbsp;: c'est le zoom qui la change,
-          pas la rotation.
+          pas la rotation. Sa taille <em>dans le jeu</em> ne se règle pas ici mais dans Tiled, où le
+          modèle est ajusté à la boîte de sa scène.
         </p>
       </header>
 
@@ -60,22 +61,6 @@
               Le taux auquel le jeu montre ce modèle&nbsp;: fin de l'animation, décor, inventaire,
               but de l'énigme. Rarement 100&nbsp;%, où beaucoup de pliages redeviennent parfaitement
               plats.
-            </p>
-          </fieldset>
-
-          <fieldset>
-            <legend>Taille dans le décor</legend>
-            <label class="curseur">
-              <span>×</span>
-              <input id="echelle" type="range" min="0.2" max="4" step="0.05" /><output
-                id="valeur-echelle"
-              ></output>
-            </label>
-            <p class="note">
-              Multiplie la taille du modèle dans la scène, par-dessus l'ajustement à sa boîte de
-              plan. Nécessaire parce qu'une silhouette longue et fine n'occupe qu'une fraction de
-              son emprise là où une silhouette carrée la remplit. N'agit ni sur l'inventaire ni sur
-              l'animation. <strong>Se voit dans le jeu</strong>, pas dans cet aperçu.
             </p>
           </fieldset>
 

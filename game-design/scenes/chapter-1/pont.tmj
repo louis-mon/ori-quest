@@ -119,16 +119,16 @@
                  "y":330
                 }, 
                 {
-                 "height":223,
+                 "height":63,
                  "id":8,
                  "name":"pont",
                  "opacity":1,
                  "rotation":0,
                  "type":"decor",
                  "visible":true,
-                 "width":325,
-                 "x":478,
-                 "y":318
+                 "width":374,
+                 "x":454,
+                 "y":398
                 }, 
                 {
                  "height":290,
@@ -178,6 +178,18 @@
                  "width":0,
                  "x":349,
                  "y":331
+                }, 
+                {
+                 "height":206,
+                 "id":17,
+                 "name":"vieil_arbre",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":336,
+                 "x":812,
+                 "y":237
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -186,7 +198,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":17,
+ "nextobjectid":18,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
