@@ -55,11 +55,10 @@ passe le vide, quelle place occupe le pont une fois posé. L'unicité des noms e
 deux choses différentes au même endroit.
 
 Pour un origami, cette boîte **est** sa taille : le modèle y est ajusté sans
-déformation et rien ne le multiplie ensuite, donc ce qu'on dessine ici est ce
-qu'on verra. D'où deux boîtes quand un modèle succède à sa feuille — `montagne`
-en `decor` et `montagne` en `hotspot` au village, `vieil_arbre` et
-`feuille_vieil_arbre` au ravin : une feuille tient dans la main, l'arbre qu'elle
-devient fait trois fois la hauteur du héros.
+déformation et rien ne le multiplie ensuite. D'où deux boîtes quand un modèle
+succède à sa feuille — `vieil_arbre` et `feuille_vieil_arbre` au ravin,
+`montagne` en `decor` et en `hotspot` au village : la seconde étirerait la
+feuille avec le modèle.
 
 `marqueur` est la seule classe qui ne s'invente pas de nom : il **porte celui de
 la zone qu'il désigne**, et c'est ce nom qui les relie (plus bas).

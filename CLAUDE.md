@@ -339,19 +339,6 @@ la main disparaîtrait au réglage suivant. La caméra, elle, ne bouge pas : ell
 n'a **aucune composante en X**, faute de quoi l'image se cisaille et les modèles
 rectangulaires sortent de travers.
 
-**La taille d'un modèle dans le décor n'est pas là**, et elle y a été : `POSES`
-portait un facteur qui multipliait l'ajustement à la boîte du plan. Deux
-réglages pour une seule taille, dont un que l'aperçu de l'outil ne montrait
-pas — le curseur agissait à l'aveugle, sur le modèle sélectionné par défaut, et
-« Enregistrer » réécrivant le bloc entier, le pont a grossi de 60 % au milieu
-d'une session consacrée à d'autres modèles. La taille se dessine donc dans
-Tiled, comme celle des sprites : le modèle est ajusté à sa boîte sans
-déformation, et **rien ne la multiplie ensuite**. Conséquence à ne pas défaire :
-un modèle qui succède à sa feuille — le vieil arbre, la montagne — a sa
-**propre** boîte de classe `decor`, la feuille gardant la sienne ; une feuille
-tient dans la main, l'arbre qu'elle devient fait trois fois la hauteur du
-héros.
-
 **Un modèle peut finir retourné**, sans que le crease pattern le dise — ça se
 constate au rendu. Sans le drapeau `retourne` de `PAPIERS`
 (`src/origami/papier.ts`), la hache sortait en manche marron avec un éclat de

@@ -13,12 +13,6 @@ import { POSES, quaternionDegres, repereVue, type Pose } from '../origami/vue';
 //
 // Le rendu passe par le même code que le jeu, donc ce qu'on voit est ce que le
 // décor montrera.
-//
-// On ne règle ICI que ce qui ne se voit nulle part ailleurs. La taille dans le
-// décor a eu son curseur, sans effet sur cet aperçu : elle se réglait donc à
-// l'aveugle, et un glissé involontaire sur le modèle affiché par défaut passait
-// inaperçu jusqu'à la partie — le pont a grossi de 60 % comme ça. Elle se
-// dessine désormais dans Tiled, à l'endroit où on la voit.
 
 type Angles = [number, number, number];
 

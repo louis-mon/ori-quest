@@ -138,8 +138,7 @@ export class VillageScene extends PointClickScene {
     dessinerDecorProvisoire(this, { sol: SOL });
 
     // La montagne du pingouin, au fond : le papier d'abord, le relief ensuite.
-    // Deux boîtes, comme au vieil arbre — le relief déborde largement la feuille
-    // qu'on plie pour l'obtenir.
+    // Deux boîtes, comme au vieil arbre du ravin.
     this.feuilleMontagne = this.add.graphics();
     this.empriseFeuilleMontagne = dessinerFeuille(
       this.feuilleMontagne,

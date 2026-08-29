@@ -58,9 +58,7 @@ export function poserOrigami(
         image.setTexture(nomTexture);
 
         // Le modèle tient entièrement dans la boîte, sans déformation : un
-        // origami étiré ne ressemble plus à du papier. Même ajustement que pour
-        // un sprite du décor (`placeSprite`), et sans facteur ajouté : la taille
-        // à l'écran est celle qu'on lit dans la carte, et nulle part ailleurs.
+        // origami étiré ne ressemble plus à du papier.
         const echelle = Math.min(box.w / canvas.width, box.h / canvas.height);
         image.setScale(echelle);
 

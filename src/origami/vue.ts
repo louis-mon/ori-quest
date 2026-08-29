@@ -57,10 +57,6 @@ export interface Pose {
 // Rien dans un crease pattern ne dit où sera le manche une fois plié : ces
 // valeurs se règlent à l'œil dans orientation.html, dont le bouton
 // « Enregistrer » réécrit poses.ts. Ne pas les éditer à la main.
-//
-// La TAILLE dans le décor n'est pas ici : elle se dessine dans Tiled, où le
-// modèle est ajusté à sa boîte. Deux endroits pour un même réglage, c'est un
-// jour où l'un des deux change sans qu'on regarde l'autre.
 export { POSES } from './poses';
 
 const POSE_NEUTRE: Pose = { angles: [0, 0, 0], pliage: PLIAGE_DEFAUT };

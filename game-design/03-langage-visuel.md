@@ -205,15 +205,8 @@ en bas, la porte droite. C'est l'objet qu'on tourne, pas la caméra : l'angle de
 vue est commun à tout le jeu, alors que la bonne façon de présenter un objet
 dépend de l'objet.
 
-**La taille sur scène n'est pas une pose.** Elle se dessine dans Tiled, avec le
-reste de la géométrie : le modèle est ajusté à sa boîte sans déformation, comme
-un sprite du décor, et rien ne la multiplie ensuite. La pose a porté un facteur
-d'échelle, réglable dans l'outil d'orientation ; c'était deux endroits pour une
-seule taille, et le curseur n'agissait sur rien de ce que l'outil montrait — le
-pont a grossi de 60 % sans que personne ne touche au pont. La boîte du plan est
-donc l'emprise réelle du modèle plié, et un modèle qui succède à sa feuille en a
-une **à lui** : la feuille du vieil arbre tient dans la main, l'arbre fait trois
-fois la hauteur du héros.
+**La taille sur scène n'est pas une pose** : elle se dessine dans Tiled, avec le
+reste de la géométrie, et la boîte du plan est l'emprise du modèle plié.
 
 Ces valeurs ne se devinent pas — rien dans un crease pattern ne dit où tombera
 le manche. Elles se règlent à l'œil :
