@@ -29,6 +29,7 @@ npm run scenes                   # cartes Tiled des scènes -> src/generated/sce
 npm run enigmes                  # découpages des énigmes -> src/generated/enigmes.ts
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
 npm run check-story              # un menu de dialogue peut-il se vider ?
+npm run qa                       # non-régression, jouée dans un navigateur
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
 npm run itch                     # dist/ -> itch.io par butler (page laissée en Draft)
@@ -441,3 +442,26 @@ chargement hors Chrome.
 Le projet a un serveur de dev et un navigateur pilotable : **regarder le
 résultat** plutôt que de supposer qu'il marche. `npx tsc --noEmit` doit passer
 avant de considérer une tâche terminée.
+
+**`npm run qa` joue le jeu pour de vrai**, dans un Chromium piloté par
+Playwright : traversée du chapitre, quatre énigmes résolues au glisser-déposer,
+tutoriel, rotation, rechargement, perte de contexte WebGL. Il bâtit `dist/` et le
+sert lui-même — **sur le build livré, et c'est le propos** : le délai anti-tap
+réel, l'arrêt sur « À suivre… » et le menu réduit au chapitre livré n'existent
+que là, et c'est en production qu'on a trouvé les deux gels de cette session. Le
+dev répondrait « tout va bien » sur un jeu qui n'est pas celui qu'on publie.
+`BASE_URL=http://localhost:5173 npm run qa` pointe le serveur de dev quand on met
+au point un essai et qu'on veut des piles d'appels lisibles ; les essais qui
+parlent du build s'y sautent d'eux-mêmes. À passer avant `npm run itch`.
+
+**La console de la page est une assertion**, et pas un journal : chaque essai
+échoue si la page a crié quoi que ce soit. Les deux gels de cette session s'y
+lisaient — ou justement PAS, ce qui était tout le problème.
+
+Les gestes vivent dans `tools/lib/pilote.mjs`, les scénarios dans `tools/qa.mjs`.
+**Aucune coordonnée n'y est écrite** : `taperZone(page, scène, id)` lit le point
+dans le plan généré, comme le jeu — une zone déplacée dans Tiled déplace le tap
+du test avec elle.
+
+Pour chercher ce que la suite ne couvre pas encore, l'agent `qa-explorateur`
+(`.claude/agents/`) explore le build livré et rapporte ; il ne corrige rien.
