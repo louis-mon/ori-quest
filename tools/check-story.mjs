@@ -17,6 +17,10 @@
  * `# puzzle:` se branche sur ses deux issues. Les états de départ sont tirés
  * d'une graine fixe : un cul-de-sac trouvé aujourd'hui se retrouve demain.
  *
+ * `src/generated/story.json` étant généré et non versionné, le script npm
+ * recompile l'ink avant d'appeler celui-ci — sinon un dépôt fraîchement cloné
+ * échoue sur un fichier absent, ce qui n'apprend rien sur la narration.
+ *
  * Usage : npm run check-story [tirages]
  */
 import { readFileSync } from 'node:fs';
