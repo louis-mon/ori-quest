@@ -74,9 +74,24 @@ const POSE_MS = 2600;
 // un pliage se joue justement entre deux répliques.
 let pliageEnCours = false;
 
-async function couche(): Promise<OrigamiLayer> {
-  origamiLayer ??= await OrigamiLayer.create(origamiCanvas);
-  return origamiLayer;
+// Mémorisée EN PROMESSE, pas en objet : `x ??= await créer()` laisse passer deux
+// appels rapprochés — l'`await` rend la main avant l'affectation — et chacun
+// fabriquerait son contexte WebGL sur la même toile, dont l'un resterait
+// orphelin. `origamiLayer` reste à côté pour les appels synchrones (`hide()`).
+let couchePromesse: Promise<OrigamiLayer> | null = null;
+
+function couche(): Promise<OrigamiLayer> {
+  couchePromesse ??= OrigamiLayer.create(origamiCanvas)
+    .then((layer) => {
+      origamiLayer = layer;
+      return layer;
+    })
+    .catch((err) => {
+      // Une création ratée ne doit pas condamner les pliages suivants.
+      couchePromesse = null;
+      throw err;
+    });
+  return couchePromesse;
 }
 
 async function playFold(name: string) {
@@ -101,15 +116,24 @@ async function playFold(name: string) {
   }
 }
 
+// Un aperçu se demande, puis s'abandonne — la description refermée, un pliage
+// qui prend la couche. Le jeton dit si celui qu'on vient de charger est encore
+// celui qu'on attend : sans lui, le modèle se posait sur la scène APRÈS la
+// fermeture de la boîte, et son voile restait là.
+let apercuDemande = 0;
+
 overlay.brancherApercu({
   montrer(modele) {
     if (pliageEnCours) return;
+    const jeton = ++apercuDemande;
     void (async () => {
       try {
         const layer = await couche();
-        // La couche a pu être rendue à autre chose pendant le chargement.
-        if (pliageEnCours) return;
+        // Revérifié après CHAQUE attente : la couche est unique, et un pliage
+        // qui démarre entre-temps lui volerait sa pose.
+        if (pliageEnCours || jeton !== apercuDemande) return;
         await layer.load(modele);
+        if (pliageEnCours || jeton !== apercuDemande) return;
         layer.presenter(pliageDe(modele));
       } catch (err) {
         // Regarder un objet ne doit rien casser : sans modèle, il reste sa
@@ -119,6 +143,7 @@ overlay.brancherApercu({
     })();
   },
   cacher() {
+    apercuDemande++;
     if (!pliageEnCours) origamiLayer?.hide();
   },
 });
