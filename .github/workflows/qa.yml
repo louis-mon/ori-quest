@@ -1,0 +1,42 @@
+# Le jeu se rejoue à chaque poussée, sur le build qu'on publie.
+#
+# Les runners GitHub sont hébergés et gratuits pour un dépôt public : rien à
+# fournir. Le rendu WebGL y passe par SwiftShader — plus lent qu'une carte, mais
+# suffisant pour que les origamis se plient et que les aperçus sortent.
+name: QA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    # La traversée du chapitre prend quelques minutes ; au-delà, ce n'est plus
+    # de la lenteur, c'est un essai qui attend quelque chose qui n'arrivera pas.
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # `--with-deps` installe les bibliothèques système du navigateur, absentes
+      # d'un runner nu. Seul Chromium : le jeu ne cible pas les autres moteurs.
+      - run: npx playwright install --with-deps chromium
+
+      # Rapides, et ils cadrent les échecs : un cul-de-sac de narration ou un
+      # découpage sans solution unique se lisent mieux ici qu'au milieu d'une
+      # traversée.
+      - run: npm run check-story
+      - run: npm run check-puzzle
+
+      # Bâtit dist/ (typecheck compris), le sert et le joue.
+      - run: npm run qa

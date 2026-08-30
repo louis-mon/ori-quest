@@ -23,7 +23,12 @@
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import {
+  attendreLaFinDuPliage,
   attendreLePliage,
+  compteur,
+  DELAI_LIVRE,
+  DELAI_NUL,
+  reglerDelaiTap,
   avancer,
   choisir,
   deroulerDialogue,
@@ -141,7 +146,6 @@ essai(
     jouer: async () => {
       await taperZone(page(), 'porte', 'porte');
       await deroulerDialogue(page());
-      await pause(2000);
       await tutoriel(page(), false);
       await resoudreEnigme(page(), 'porte');
 
@@ -177,7 +181,6 @@ essai('redimensionnement', async (page, dire) => ({
   jouer: async () => {
     await taperZone(page(), 'porte', 'porte');
     await deroulerDialogue(page());
-    await pause(2000);
     await tutoriel(page(), false);
     dire("l'énigme est ouverte", (await etat(page())).enigme);
 
@@ -222,7 +225,6 @@ essai('rechargement', async (page, dire) => ({
   jouer: async () => {
     await taperZone(page(), 'porte', 'porte');
     await deroulerDialogue(page());
-    await pause(2000);
     await tutoriel(page(), false);
     dire("l'énigme est ouverte avant le rechargement", (await etat(page())).enigme);
 
@@ -340,12 +342,11 @@ essai(
 
       await taperZone(page(), 'porte', 'porte');
       await deroulerDialogue(page());
-      await pause(2000);
       await tutoriel(page(), false);
       await resoudreEnigme(page(), 'porte');
       await attendreLePliage(page());
       await deroulerDialogue(page());
-      await pause(8000);
+      await attendreLaFinDuPliage(page());
       await deroulerDialogue(page());
 
       await taperZone(page(), 'porte', 'village');
@@ -379,7 +380,7 @@ essai('traversee', async (page, dire) => ({
     await resoudreEnigme(p(), 'pont');
     await attendreLePliage(p());
     await deroulerDialogue(p());
-    await pause(8000);
+    await attendreLaFinDuPliage(p());
     await deroulerDialogue(p());
     await taperZone(p(), 'pont', 'pont_repare');
     dire('le pont posé est examinable', (await etat(p())).boite);
@@ -403,12 +404,11 @@ essai('traversee', async (page, dire) => ({
 
     await taperZone(p(), 'pont', 'feuille_vieil_arbre');
     await deroulerDialogue(p());
-    await pause(2000);
     await tutoriel(p(), false);
     await resoudreEnigme(p(), 'arbre');
     await attendreLePliage(p());
     await deroulerDialogue(p());
-    await pause(8000);
+    await attendreLaFinDuPliage(p());
     await deroulerDialogue(p());
 
     await taperZone(p(), 'pont', 'porte');
@@ -437,12 +437,11 @@ essai('traversee', async (page, dire) => ({
 
     await taperZone(p(), 'porte', 'feuille_hache');
     await deroulerDialogue(p());
-    await pause(2000);
     await tutoriel(p(), false);
     await resoudreEnigme(p(), 'hache');
     await attendreLePliage(p());
     await deroulerDialogue(p());
-    await pause(8000);
+    await attendreLaFinDuPliage(p());
     await deroulerDialogue(p());
     await pause(2000);
     dire('la hache entre en inventaire', (await etat(p())).inventaire.includes('hache'));
@@ -473,12 +472,11 @@ essai('traversee', async (page, dire) => ({
     await deroulerDialogue(p());
     await taperZone(p(), 'porte', 'porte');
     await deroulerDialogue(p());
-    await pause(2000);
     await tutoriel(p(), false);
     await resoudreEnigme(p(), 'porte');
     await attendreLePliage(p());
     await deroulerDialogue(p());
-    await pause(8000);
+    await attendreLaFinDuPliage(p());
     await deroulerDialogue(p());
     await taperZone(p(), 'porte', 'heros');
     dire('le décor répond au bout du chapitre', (await etat(p())).boite);
@@ -492,11 +490,22 @@ async function coin(page, [x, y]) {
 }
 
 // ------------------------------------------------------------------
-// Le serveur
+// La cible
 // ------------------------------------------------------------------
 
+function commande(cmd, args, env = {}) {
+  return new Promise((ok, ko) => {
+    const p = spawn(cmd, args, { cwd: RACINE, stdio: 'inherit', env: { ...process.env, ...env } });
+    p.on('exit', (c) => (c === 0 ? ok() : ko(new Error(`${cmd} ${args.join(' ')} → ${c}`))));
+  });
+}
+
 async function servir() {
-  if (process.env.BASE_URL) return { url: process.env.BASE_URL, livre: false, arreter: () => {} };
+  // Une cible déjà servie : le serveur de dev, quand on met un essai au point.
+  // Son délai anti-tap est nul, et les essais qui parlent du build s'y sautent.
+  if (process.env.BASE_URL) {
+    return { url: process.env.BASE_URL, livre: false, delai: DELAI_NUL, arreter: () => {} };
+  }
 
   if (!sansBuild) {
     console.log('· build de production…');
@@ -516,14 +525,12 @@ async function servir() {
     });
     serveur.on('exit', (c) => ko(new Error(`vite preview s'est arrêté (${c})`)));
   });
-  return { url: 'http://localhost:4173/', livre: true, arreter: () => serveur.kill() };
-}
-
-function commande(cmd, args) {
-  return new Promise((ok, ko) => {
-    const p = spawn(cmd, args, { cwd: RACINE, stdio: 'inherit' });
-    p.on('exit', (c) => (c === 0 ? ok() : ko(new Error(`${cmd} ${args.join(' ')} → ${c}`))));
-  });
+  return {
+    url: 'http://localhost:4173/',
+    livre: true,
+    delai: DELAI_LIVRE,
+    arreter: () => serveur.kill(),
+  };
 }
 
 // ------------------------------------------------------------------
@@ -531,12 +538,17 @@ function commande(cmd, args) {
 // ------------------------------------------------------------------
 
 const cible = await servir();
-console.log(`· cible : ${cible.url}${cible.livre ? ' (build livré)' : ' (hors build livré)'}\n`);
+// Le délai suit la CIBLE, pas l'essai : c'est le build qui décide s'il faut
+// attendre entre deux taps, et un test qui n'attendrait pas assez prendrait un
+// jeu qui l'ignore pour un jeu qui ne répond plus.
+reglerDelaiTap(cible.delai);
+console.log(`· ${cible.url}${cible.livre ? ' (build livré)' : ' (cible extérieure)'}\n`);
 
 const navigateur = await chromium.launch({ headless: !process.env.QA_VISIBLE });
 let total = 0;
 let ratees = 0;
 const echecs = [];
+const debutTour = Date.now();
 
 for (const { nom, fn, livre, attendu } of essais) {
   if (filtres.length && !filtres.includes(nom)) continue;
@@ -546,6 +558,8 @@ for (const { nom, fn, livre, attendu } of essais) {
   }
 
   console.log(`▸ ${nom}`);
+  const debut = Date.now();
+  const tapsAvant = compteur.taps;
   let courante = null;
   const dire = (quoi, ok, detail = '') => {
     total++;
@@ -573,12 +587,18 @@ for (const { nom, fn, livre, attendu } of essais) {
   const cris = attendu ? journal.filter((l) => !attendu.test(l)) : journal;
   dire('rien dans la console de la page', cris.length === 0, cris[0] ?? '');
   await contexte.close();
+  console.log(
+    `   … ${((Date.now() - debut) / 1000).toFixed(1)} s, ${compteur.taps - tapsAvant} taps`,
+  );
 }
 
 await navigateur.close();
 cible.arreter();
 
-console.log(`\n${total - ratees}/${total} vérifications passées`);
+console.log(
+  `\n${total - ratees}/${total} vérifications passées en ` +
+    `${((Date.now() - debutTour) / 1000).toFixed(0)} s (${compteur.taps} taps)`,
+);
 if (ratees) {
   console.log('\néchecs :');
   for (const e of echecs) console.log(`  ✗ ${e}`);

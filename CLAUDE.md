@@ -452,7 +452,16 @@ que là, et c'est en production qu'on a trouvé les deux gels de cette session. 
 dev répondrait « tout va bien » sur un jeu qui n'est pas celui qu'on publie.
 `BASE_URL=http://localhost:5173 npm run qa` pointe le serveur de dev quand on met
 au point un essai et qu'on veut des piles d'appels lisibles ; les essais qui
-parlent du build s'y sautent d'eux-mêmes. À passer avant `npm run itch`.
+parlent du build s'y sautent d'eux-mêmes, et le délai suit la cible.
+
+La suite tourne aussi à chaque poussée (`.github/workflows/qa.yml`), sur un
+runner GitHub — c'est là qu'elle a sa place, sa durée n'y coûtant rien. En local,
+on la lance avant `npm run itch`, ou par essai (`npm run qa -- renard`).
+
+**Attendre un événement, pas une durée.** Un `pause()` calé sur la durée d'un
+pliage fait passer un pliage qui ne finit jamais pour un pliage un peu long — et
+c'est exactement le bug qu'on cherche. `attendreLaFinDuPliage()` scrute l'état ;
+au passage, la suite y a gagné plus qu'en rognant sur le délai anti-tap.
 
 **La console de la page est une assertion**, et pas un journal : chaque essai
 échoue si la page a crié quoi que ce soit. Les deux gels de cette session s'y

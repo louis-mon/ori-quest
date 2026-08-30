@@ -17,9 +17,24 @@ export const RACINE = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 export const SAUVEGARDE = 'ori-quest.save.v1';
 
-// Au-delà du `DELAI_ANTI_TAP` du build livré (300 ms). Un tap plus rapproché
-// serait ignoré par le jeu, et le test croirait à un décor mort.
-export const DELAI_TAP = 380;
+// Ce qu'il faut attendre entre deux taps pour que le jeu les compte tous les
+// deux. Sur le build livré c'est `DELAI_ANTI_TAP` (300 ms) plus une marge ; sur
+// un build bâti avec `VITE_DELAI_TAP=0`, il n'y a rien à attendre.
+//
+// La distinction n'est pas une commodité : à 380 ms le tap, la traversée du
+// chapitre passe l'essentiel de son temps à ne rien faire, et une suite lente
+// finit par ne plus être lancée. Un seul essai a besoin du délai réel — celui
+// qui le teste.
+export const DELAI_LIVRE = 380;
+export const DELAI_NUL = 40;
+
+let delaiTap = DELAI_LIVRE;
+export const reglerDelaiTap = (ms) => {
+  delaiTap = ms;
+};
+
+// De quoi mesurer ce que l'attente coûte vraiment.
+export const compteur = { taps: 0 };
 
 export const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -134,9 +149,10 @@ export const etat = (page) =>
 // contextes, mais on passe quand même par sa boîte : un jour il sera letterboxé.
 export async function taper(page, x, y) {
   const cadre = await page.locator('#game canvas').boundingBox();
-  await pause(DELAI_TAP);
+  await pause(delaiTap);
+  compteur.taps++;
   await page.mouse.click(cadre.x + (x / 1280) * cadre.width, cadre.y + (y / 720) * cadre.height);
-  await pause(300);
+  await pause(250);
 }
 
 export const taperZone = (page, scene, id) => taper(page, ...pointDe(scene, id));
@@ -146,7 +162,8 @@ export const taperZone = (page, scene, id) => taper(page, ...pointDe(scene, id))
 // dialogue lent.
 export async function avancer(page) {
   const avant = (await etat(page)).texte;
-  await pause(DELAI_TAP);
+  await pause(delaiTap);
+  compteur.taps++;
   await page.mouse.click(640, 660);
   for (let i = 0; i < 30; i++) {
     const e = await etat(page);
@@ -169,9 +186,10 @@ export async function deroulerDialogue(page, max = 40) {
 export async function choisir(page, motif) {
   const bouton = page.locator('.dialogue__choices button', { hasText: motif });
   await bouton.first().waitFor({ timeout: 8000 });
-  await pause(DELAI_TAP);
+  await pause(delaiTap);
+  compteur.taps++;
   await bouton.first().click();
-  await pause(300);
+  await pause(250);
 }
 
 // ------------------------------------------------------------------
@@ -286,6 +304,17 @@ export async function tutoriel(page, entier) {
 export async function attendreLePliage(page, ms = 12_000) {
   for (let i = 0; i < ms / 100; i++) {
     if ((await etat(page)).origami) return true;
+    await pause(100);
+  }
+  return false;
+}
+
+// Et qu'elle s'éteigne. Un `pause()` calé sur la durée annoncée du pliage
+// obligerait à reprendre la marge à chaque réglage d'animation, et ferait
+// passer un pliage qui ne finit jamais pour un pliage un peu long.
+export async function attendreLaFinDuPliage(page, ms = 20_000) {
+  for (let i = 0; i < ms / 100; i++) {
+    if (!(await etat(page)).origami) return true;
     await pause(100);
   }
   return false;
