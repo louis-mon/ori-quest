@@ -362,7 +362,14 @@ Beaucoup de choses ont changé depuis mon départ...
 // « Partir » seul en piste ne servait qu'à fermer une boîte que `pump()` ferme
 // déjà quand il ne reste aucun choix. Compteur plutôt que liste de drapeaux :
 // une option ajoutée demain n'obligera pas à la recopier ici.
+//
+// ⚠ Le repli sans texte en dessous n'est pas décoratif, et ne pas le retirer :
+// ink refuse de s'arrêter sur un menu dont AUCUNE option n'est ouverte — il
+// lève « ran out of content », `pump()` ne voit jamais sa liste vide, et
+// l'exception laisse l'instance `Story` muette pour le reste de la partie. Le
+// cas arrive une fois par partie, quand le renard vient de tout dire.
 + { CHOICE_COUNT() > 0 } [Partir]
++ -> DONE
 - -> DONE
 
 // La grande feuille tendue dans l'embrasure, à la place du battant.
