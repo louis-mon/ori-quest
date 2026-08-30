@@ -105,6 +105,10 @@ export class OrigamiLayer {
       e.preventDefault();
       this.perdu = true;
       this.stop();
+      // Qui attendait la fin du pliage doit reprendre la main. Sans ça,
+      // `playFold()` (main.ts) reste suspendu, le récit avec lui, et TOUT le
+      // décor cesse de répondre — sans la moindre erreur en console.
+      this.settle();
       console.warn('[origami] contexte WebGL perdu');
     });
 
@@ -221,7 +225,11 @@ export class OrigamiLayer {
       const delta = Math.abs(this.target - this.fold);
       this.speed = delta > 0 && durationMs > 0 ? delta / durationMs : Infinity;
       this.onArrive = resolve;
-      if (this.speed === Infinity) {
+      // `perdu` compte autant que la distance nulle : sans boucle, personne ne
+      // viendra dénouer cette promesse, et le récit resterait suspendu sur un
+      // pliage qui ne finira jamais. Le modèle ne s'affiche plus, la partie
+      // continue — c'est le bon sens de la dégradation.
+      if (this.perdu || this.speed === Infinity) {
         this.fold = this.target;
         this.applyFold(this.fold);
         this.settle();
@@ -260,6 +268,10 @@ export class OrigamiLayer {
     this.visible = false;
     this.canvas.classList.remove('is-visible');
     this.stop();
+    // Une couche cachée n'ira pas au bout de son pliage : on rend la main
+    // plutôt que de laisser attendre. Sans effet dans le cas courant, où
+    // `hide()` suit une pose déjà atteinte.
+    this.settle();
   }
 
   private start() {
