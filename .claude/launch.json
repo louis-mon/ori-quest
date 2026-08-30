@@ -36,7 +36,7 @@
     },
     {
       "name": "ori-quest (build de production)",
-      "//": "Le build publié sur itch.io, servi par `vite preview` : délai anti-tap réel, chapitre 2 absent, fin sur « À suivre… ». Il sert ce qu'il y a dans dist/ — relancer `npm run build` avant. PATH et -C pour les mêmes raisons que les configurations voisines.",
+      "//": "Le build publié sur itch.io : délai anti-tap réel, chapitre 2 absent, fin sur « À suivre… ». `npm run prod` rebâtit dist/ avant de le servir — un `vite preview` seul sert le build précédent, et on croit tester une correction qui n'y est pas. PATH et -C pour les mêmes raisons que les configurations voisines.",
       "runtimeExecutable": "/usr/bin/env",
       "runtimeArgs": [
         "-C",
@@ -44,7 +44,7 @@
         "PATH=/Users/louismonestier/.nvm/versions/node/v24.19.0/bin:/usr/bin:/bin",
         "npm",
         "run",
-        "preview"
+        "prod"
       ],
       "port": 4173,
       "autoPort": true

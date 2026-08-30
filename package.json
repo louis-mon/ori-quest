@@ -7,6 +7,7 @@
     "dev": "npm run ink && npm run scenes && npm run enigmes && vite",
     "build": "npm run ink && npm run scenes && npm run enigmes && tsc --noEmit && vite build",
     "preview": "vite preview",
+    "prod": "npm run build && vite preview",
     "ink": "node tools/compile-ink.mjs",
     "scenes": "node tools/import-scene.mjs",
     "enigmes": "node tools/import-decoupage.mjs",

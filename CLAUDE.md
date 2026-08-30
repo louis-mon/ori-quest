@@ -24,6 +24,7 @@ sur un node antérieur — `nvm use` suffit.
 nvm use && npm install
 npm run dev                      # serveur de dev (suit ink + plans de scène)
 npm run build                    # typecheck + build de production
+npm run prod                     # build, puis le sert : le jeu tel que livré
 npm run scenes                   # cartes Tiled des scènes -> src/generated/scenes/
 npm run enigmes                  # découpages des énigmes -> src/generated/enigmes.ts
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
