@@ -511,26 +511,30 @@ async function servir() {
     console.log('· build de production…');
     await commande('npm', ['run', 'build']);
   }
+  const url = 'http://localhost:4173/';
   const serveur = spawn('npx', ['vite', 'preview', '--port', '4173', '--strictPort'], {
     cwd: RACINE,
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ['ignore', 'inherit', 'inherit'],
   });
-  await new Promise((ok, ko) => {
-    const minuteur = setTimeout(() => ko(new Error('vite preview ne démarre pas')), 30_000);
-    serveur.stdout.on('data', (b) => {
-      if (String(b).includes('localhost:4173')) {
-        clearTimeout(minuteur);
-        ok();
-      }
-    });
-    serveur.on('exit', (c) => ko(new Error(`vite preview s'est arrêté (${c})`)));
-  });
-  return {
-    url: 'http://localhost:4173/',
-    livre: true,
-    delai: DELAI_LIVRE,
-    arreter: () => serveur.kill(),
-  };
+
+  // On attend que le serveur RÉPONDE, plutôt que de guetter sa ligne de
+  // démarrage : celle-ci change de forme d'une version à l'autre et ne sort pas
+  // pareil hors d'un terminal — le premier tour de CI s'y était arrêté.
+  let mort = null;
+  serveur.on('exit', (c) => (mort = c));
+  const fin = Date.now() + 60_000;
+  for (;;) {
+    if (mort !== null) throw new Error(`vite preview s'est arrêté (${mort})`);
+    try {
+      if ((await fetch(url)).ok) break;
+    } catch {
+      // pas encore debout
+    }
+    if (Date.now() > fin) throw new Error('vite preview ne répond pas');
+    await pause(300);
+  }
+
+  return { url, livre: true, delai: DELAI_LIVRE, arreter: () => serveur.kill() };
 }
 
 // ------------------------------------------------------------------
