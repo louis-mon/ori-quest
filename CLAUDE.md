@@ -28,6 +28,7 @@ npm run prod                     # build, puis le sert : le jeu tel que livré
 npm run scenes                   # cartes Tiled des scènes -> src/generated/scenes/
 npm run enigmes                  # découpages des énigmes -> src/generated/enigmes.ts
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
+npm run check-story              # un menu de dialogue peut-il se vider ?
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
 npm run itch                     # dist/ -> itch.io par butler (page laissée en Draft)
@@ -392,6 +393,15 @@ précautions : effacer les deux variables avant de mesurer — sinon on mesure l
 plateau du calcul précédent et l'échelle rétrécit à chaque passage — et ne
 reposer que les pièces **encore dans le bac**, celles du plateau étant en
 pourcentages.
+
+**Un menu de dialogue dont toutes les options peuvent se fermer est un
+cul-de-sac.** ink n'y voit pas une liste vide — que `pump()` saurait traiter —
+mais « ran out of content », et l'instance `Story` reste en erreur : plus un
+hotspot ne répond, alors que les sorties, qui ne passent pas par la narration,
+continuent de marcher. Le renard l'a fait, une fois qu'il avait tout dit. Un
+**repli sans texte** (`+ -> DONE`) en dernière ligne du menu suffit ;
+`npm run check-story` les cherche, et `DialogueRunner.remettreDebout()` remet
+l'instance sur pied pour que la faute suivante ne coûte plus que son knot.
 
 **Hotspots qui se chevauchent** : la profondeur est assignée par surface
 croissante, sinon la grande zone avale les taps destinés au détail posé dessus.

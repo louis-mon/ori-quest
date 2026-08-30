@@ -1,7 +1,7 @@
 import { Story } from 'inkjs';
 import type { Overlay } from '../../ui/overlay';
 import { personnage, type Personnage } from './personnages';
-import { gameState } from './state';
+import { gameState, type SaveData } from './state';
 
 // Les effets de jeu passent par des tags ink :
 //
@@ -64,12 +64,25 @@ export class DialogueRunner {
   // Rémanent d'une ligne à l'autre. `null` = narration.
   private speaker: Personnage | null = null;
 
+  // Message d'ink pour le knot en cours, `null` s'il s'est bien passé. Voir
+  // `remettreDebout()`.
+  private panne: string | null = null;
+
+  // Le dernier état poussé à ink, gardé pour pouvoir le repousser après une
+  // remise à neuf de l'instance.
+  private etat: SaveData | null = null;
+
   constructor(
     storyJson: Record<string, unknown>,
     private overlay: Overlay,
     private fx: DialogueEffects,
   ) {
     this.story = new Story(storyJson);
+    // Sans gestionnaire, inkjs lève — et l'exception ne dit qu'« Ink had 1
+    // error », le détail n'existant que dans ce callback.
+    this.story.onError = (message) => {
+      this.panne = message;
+    };
     this.bindStateToInk();
   }
 
@@ -77,15 +90,38 @@ export class DialogueRunner {
   // directement dans la narration : `{ has_crease_pattern: ... }`.
   private bindStateToInk() {
     gameState.subscribe((state) => {
-      for (const name of Object.keys(this.story.variablesState as object)) {
-        if (name.startsWith('has_')) {
-          const item = name.slice(4);
-          this.story.variablesState[name] = state.inventory.includes(item);
-        } else if (name.startsWith('flag_')) {
-          this.story.variablesState[name] = state.flags[name.slice(5)] === true;
-        }
-      }
+      this.etat = state;
+      this.pousserEtat();
     });
+  }
+
+  private pousserEtat() {
+    const etat = this.etat;
+    if (!etat) return;
+    for (const name of Object.keys(this.story.variablesState as object)) {
+      if (name.startsWith('has_')) {
+        const item = name.slice(4);
+        this.story.variablesState[name] = etat.inventory.includes(item);
+      } else if (name.startsWith('flag_')) {
+        this.story.variablesState[name] = etat.flags[name.slice(5)] === true;
+      }
+    }
+  }
+
+  // Une `Story` qui a fauté ne se rattrape pas d'elle-même : elle reste dans son
+  // état d'erreur, et TOUS les knots suivants se terminent en silence — plus un
+  // hotspot ne répond, alors que les sorties, qui ne passent pas par ici,
+  // continuent de marcher. C'est le symptôme qu'avait le cul-de-sac du renard,
+  // et une faute de contenu ne doit pas coûter le reste de la partie.
+  //
+  // Repartir à neuf est sans perte : la progression vit dans `gameState`, qu'on
+  // repousse aussitôt. Ce que la remise à zéro efface — compteurs de visite,
+  // choix `*` déjà pris — n'est de toute façon pas sauvegardé (content/story.ink).
+  private remettreDebout() {
+    this.panne = null;
+    this.story.ResetErrors();
+    this.story.ResetState();
+    this.pousserEtat();
   }
 
   get isRunning() {
@@ -98,15 +134,19 @@ export class DialogueRunner {
     // Chaque dialogue s'ouvre sur la narration : un `# qui:` laissé par le
     // précédent ferait parler un personnage absent de la scène.
     this.speaker = null;
+    this.panne = null;
     try {
       this.story.ChoosePathString(knot);
       await this.pump();
+      // `onError` n'interrompt pas le déroulé : la panne se relit à la fin.
+      if (this.panne) throw new Error(this.panne);
     } catch (err) {
       console.error(`[ink] échec du knot "${knot}"`, err);
       await this.overlay.say('…');
     } finally {
       this.running = false;
       this.overlay.hideDialogue();
+      if (this.panne) this.remettreDebout();
     }
   }
 
@@ -114,6 +154,9 @@ export class DialogueRunner {
     for (;;) {
       while (this.story.canContinue) {
         const line = this.story.Continue()?.trim() ?? '';
+        // Une histoire en panne ne produit plus rien de sensé : insister
+        // ferait tourner cette boucle à vide.
+        if (this.panne) return;
         const tags = this.story.currentTags ?? [];
         // Le locuteur se lit à part et de façon synchrone : `say()` écrit dans
         // le DOM dès l'appel, `applyTags` est asynchrone. Passer `# qui:` par les
@@ -142,6 +185,7 @@ export class DialogueRunner {
         if (depense) await this.overlay.attendreUnTap();
       }
 
+      if (this.panne) return;
       const choices = this.story.currentChoices;
       if (choices.length === 0) return;
 

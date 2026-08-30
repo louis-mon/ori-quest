@@ -13,6 +13,7 @@
     "enigmes": "node tools/import-decoupage.mjs",
     "bake": "node tools/bake-origami.mjs",
     "check-puzzle": "node tools/check-puzzle.mjs",
+    "check-story": "node tools/check-story.mjs",
     "assets:pull": "node tools/pull-assets.mjs",
     "zip": "node tools/pack-itch.mjs",
     "itch": "node tools/publier-itch.mjs",
