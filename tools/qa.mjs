@@ -11,12 +11,12 @@
  *   npm run qa                       # bâtit dist/, le sert, joue tout
  *   npm run qa -- renard webgl       # seulement ces essais-là
  *   npm run qa -- --sans-build       # sur le dist/ déjà là
- *   BASE_URL=http://localhost:5173 npm run qa
+ *   npm run qa-local                 # sur le serveur de dev déjà lancé
  *
- * `BASE_URL` pointe une cible déjà servie — le serveur de dev, quand on met au
- * point un essai et qu'on veut des piles d'appels lisibles. Les essais marqués
- * `livre` s'y sautent au lieu d'échouer : ils parlent de ce que le build
- * embarque, pas du jeu.
+ * `qa-local` (`--local`) vise le `npm run dev` d'à côté : pas de build, des
+ * piles d'appels lisibles, et le délai anti-tap y est nul. Les essais marqués
+ * `livre` s'y sautent au lieu d'échouer — ils parlent de ce que le build
+ * embarque, pas du jeu. `BASE_URL` vise n'importe quelle autre cible servie.
  *
  * Playwright est en dépendance optionnelle (il sert déjà à `npm run bake`).
  */
@@ -58,6 +58,7 @@ try {
 
 const args = process.argv.slice(2);
 const sansBuild = args.includes('--sans-build');
+const local = args.includes('--local');
 const filtres = args.filter((a) => !a.startsWith('--'));
 
 const essais = [];
@@ -500,11 +501,29 @@ function commande(cmd, args, env = {}) {
   });
 }
 
+const repond = async (url) => {
+  try {
+    return (await fetch(url)).ok;
+  } catch {
+    return false;
+  }
+};
+
 async function servir() {
   // Une cible déjà servie : le serveur de dev, quand on met un essai au point.
   // Son délai anti-tap est nul, et les essais qui parlent du build s'y sautent.
-  if (process.env.BASE_URL) {
-    return { url: process.env.BASE_URL, livre: false, delai: DELAI_NUL, arreter: () => {} };
+  //
+  // `vite.config.ts` respecte `PORT`, donc on le respecte aussi : sans ça,
+  // `qa-local` viserait le 5173 pendant qu'un second serveur tourne ailleurs.
+  const exterieure =
+    process.env.BASE_URL ?? (local ? `http://localhost:${process.env.PORT || 5173}/` : null);
+  if (exterieure) {
+    if (!(await repond(exterieure))) {
+      // Sans ce mot, Playwright échoue sur un `net::ERR_CONNECTION_REFUSED` qui
+      // ne dit pas quoi lancer.
+      throw new Error(`${exterieure} ne répond pas — « npm run dev » dans un autre terminal ?`);
+    }
+    return { url: exterieure, livre: false, delai: DELAI_NUL, arreter: () => {} };
   }
 
   if (!sansBuild) {
@@ -525,11 +544,7 @@ async function servir() {
   const fin = Date.now() + 60_000;
   for (;;) {
     if (mort !== null) throw new Error(`vite preview s'est arrêté (${mort})`);
-    try {
-      if ((await fetch(url)).ok) break;
-    } catch {
-      // pas encore debout
-    }
+    if (await repond(url)) break;
     if (Date.now() > fin) throw new Error('vite preview ne répond pas');
     await pause(300);
   }
@@ -541,7 +556,15 @@ async function servir() {
 // Le tour
 // ------------------------------------------------------------------
 
-const cible = await servir();
+// Une cible injoignable est une erreur d'usage, pas un bug : on le dit en une
+// ligne plutôt qu'en pile d'appels.
+let cible;
+try {
+  cible = await servir();
+} catch (err) {
+  console.error(`✗ ${err.message}`);
+  process.exit(1);
+}
 // Le délai suit la CIBLE, pas l'essai : c'est le build qui décide s'il faut
 // attendre entre deux taps, et un test qui n'attendrait pas assez prendrait un
 // jeu qui l'ignore pour un jeu qui ne répond plus.

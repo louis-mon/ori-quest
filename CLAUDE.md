@@ -30,6 +30,7 @@ npm run enigmes                  # découpages des énigmes -> src/generated/eni
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
 npm run check-story              # un menu de dialogue peut-il se vider ?
 npm run qa                       # non-régression, jouée dans un navigateur
+npm run qa-local                 # la même, sur le `npm run dev` déjà lancé
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
 npm run itch                     # dist/ -> itch.io par butler (page laissée en Draft)
@@ -450,9 +451,10 @@ sert lui-même — **sur le build livré, et c'est le propos** : le délai anti-
 réel, l'arrêt sur « À suivre… » et le menu réduit au chapitre livré n'existent
 que là, et c'est en production qu'on a trouvé les deux gels de cette session. Le
 dev répondrait « tout va bien » sur un jeu qui n'est pas celui qu'on publie.
-`BASE_URL=http://localhost:5173 npm run qa` pointe le serveur de dev quand on met
-au point un essai et qu'on veut des piles d'appels lisibles ; les essais qui
-parlent du build s'y sautent d'eux-mêmes, et le délai suit la cible.
+`npm run qa-local` vise le `npm run dev` d'à côté, quand on met un essai au point
+et qu'on veut des piles d'appels lisibles : ni build ni attente, et les essais
+qui parlent du build s'y sautent d'eux-mêmes. Le délai anti-tap suit la cible, et
+`BASE_URL` vise n'importe quelle autre adresse déjà servie.
 
 La suite tourne aussi à chaque poussée (`.github/workflows/qa.yml`), sur un
 runner GitHub — c'est là qu'elle a sa place, sa durée n'y coûtant rien. En local,
