@@ -190,6 +190,18 @@
                  "width":336,
                  "x":812,
                  "y":237
+                }, 
+                {
+                 "height":52,
+                 "id":18,
+                 "name":"souche",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":52,
+                 "x":948,
+                 "y":380
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -198,7 +210,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":18,
+ "nextobjectid":19,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

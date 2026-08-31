@@ -37,6 +37,8 @@ Si on a l'idée de l'arbre, énigme pour le plier.
 
 Si plié et on a la hache, et que le jeune arbre nous l'a demandé, on peut le découper pour obtenir du bois.
 
+Découpé, il ne disparaît pas : il en reste la souche, là où il se tenait.
+
 ## Sortie
 
 A droite de l'écran, accessible si le pont est réparé, mène à la porte

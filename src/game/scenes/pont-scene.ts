@@ -25,6 +25,7 @@ import { dessinerFeuille } from './feuille';
 const PLAN = plan;
 
 const JEUNE_ARBRE = 'jeune-arbre';
+const SOUCHE = 'souche';
 
 // Une valeur par scène : deux ciels tirés de la même graine se ressembleraient
 // trait pour trait, et l'aller-retour le montrerait.
@@ -40,6 +41,7 @@ export class PontScene extends PointClickScene {
   private sheet!: Phaser.GameObjects.Graphics;
   private feuilleArbre!: Phaser.GameObjects.Graphics;
   private vieilArbre!: OrigamiDecor;
+  private souche!: Phaser.GameObjects.Image;
 
   // Emprise de la grande feuille à plat, et celle de l'arbre une fois plié.
   private empriseFeuilleArbre?: Box;
@@ -60,6 +62,7 @@ export class PontScene extends PointClickScene {
     preloadCiel(this);
     preloadFond(this, PLAN.fond);
     preloadSprite(this, JEUNE_ARBRE, 'assets/decor/jeune-arbre.png');
+    preloadSprite(this, SOUCHE, 'assets/decor/souche.png');
   }
 
   protected hotspots(): HotspotDef[] {
@@ -122,6 +125,7 @@ export class PontScene extends PointClickScene {
     const decoupe = gameState.flag('vieil_arbre_decoupe');
     this.feuilleArbre?.setVisible(!arbrePlie && !decoupe);
     this.vieilArbre?.montrer(arbrePlie && !decoupe);
+    this.souche?.setVisible(decoupe);
 
     // Le même hotspot désigne deux choses de tailles très différentes : une
     // feuille à plat, puis un arbre debout.
@@ -178,6 +182,12 @@ export class PontScene extends PointClickScene {
       this.empriseVieilArbre = emprise;
       this.refresh();
     });
+
+    // Ce qui reste une fois l'arbre découpé : sans elle, le vieil arbre
+    // disparaissait aussi complètement que le pont au début. Photographiée chez
+    // l'artiste et non rendue en 3D — aucun pliage du jeu ne produit une souche,
+    // il n'y a donc pas de modèle dont elle pourrait diverger.
+    this.souche = placeSprite(this, SOUCHE, boxOf(PLAN, 'dec_souche'));
 
     this.add
       .text(DESIGN_WIDTH / 2, 40, 'Le ravin', {
