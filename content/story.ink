@@ -460,7 +460,7 @@ Hâte de retourner à la maison ! Je suis quand même un peu inquiet de ce qui m
 === village_arrivee ===
 # qui: heros
 Me voici arrivé au village. C'est moins chaotique que ce que je craignais, il reste des habitants.
-Je vais surement pouvoir en apprendre plus sur ce qu'il se passe ici.
+Je vais sûrement pouvoir en apprendre plus sur ce qu'il se passe ici.
 # flag: village_vu
 -> DONE
 
@@ -536,7 +536,7 @@ Une grand feulle grise et blanche au fond du village. Je pourrais l'utiliser pou
 + [plier un bonhomme de neige]
     Un bonhomme de neige ? Mouais. Si c'est pour qu'il fonde et se plaigne encore plus que le pingouin, non merci.
 + [plier une montagne]
-    Ca va prendre de la place une montagne, mais au moins il aura autant de neige qu'il veut.
+    Ça va prendre de la place une montagne, mais au moins il aura autant de neige qu'il veut.
     -> village_montagne_enigme
 + [plier un éventail]
     Pingouin Glagla tiens à peine debout, il ne va pas faire grand chose avec cet éventail.
@@ -546,7 +546,7 @@ Une grand feulle grise et blanche au fond du village. Je pourrais l'utiliser pou
 
 === village_montagne_enigme ===
 # qui: heros
-Ca ne va pas être facile de plier un si grand papier, mais on va essayer.
+Ça ne va pas être facile de plier un si grand papier, mais on va essayer.
 -> village_montagne_lancement
 
 // Tag seul, sans texte : ink évalue en avance, donc une condition écrite à la
@@ -578,113 +578,112 @@ Glace et ombre à volonté pour Madame Glagla !
 //
 // ⚠ Ordre des branches : la plus avancée d'abord, sinon le pot resterait vide
 // pour toujours — `flag_vache_pot_su` couvrirait le cas où on le lui tend.
-// À ÉCRIRE
 === village_vache ===
 { flag_vache_faim: -> village_vache_revoir }
 # qui: heros
-Bonjour Vache à Lait ! Tu me reconnais ?
+Quel plaisir de te revoir Vache à Lait ! Tiens, c'est la première fois que je te vois et que tu n'es pas en train de brouter.
 # qui: vache
-Meuh. L'origamiste. Tu tombes mal, je n'ai rien à brouter.
+Meuh. T'en vois de l'herbe dans l'coin toi ?
 # qui: heros
-Rien du tout ?
+Ah, je me disais bien que c'était pas normal. Tu peux pas sortir du village ? Ça te changerait, elle est peut-être meilleure dehors.
 # qui: vache
-Regarde autour de toi. Plus un brin d'herbe dans ce village. Et une vache qui ne broute pas est une vache qui ne donne rien.
+Meeeeuuuh... La flemme, c'est trop loin, j'suis fatiguée. J'ai faim.
+# qui: heros
+Oh la la quelle feignasse cette Vache à Lait! Je vais peut-être pouvoir faire quelque chose.
 # flag: vache_faim
 -> DONE
 
-// À ÉCRIRE
 === village_vache_revoir ===
 {
   - has_pot:
     # qui: heros
-    Regarde ce que j'ai plié.
+    Et voilà un pot à lait tout neuf! Crôa crôa
     # qui: vache
-    Meuh ! Un vrai pot à lait. Approche, je te le remplis.
+    T'as bien mérité un peu de mon lait frais. Pose-le là'dsous et tire!
+    # qui: heros
+    Pouah! Y'a une sacrée odeur mais j'en connais un qui va être heureux. Merci!
     # qui: narrateur
-    La vache s'exécute avec application. Le pot est plein à ras bord. # drop: pot # give: lait
+    Le pot est plein à ras bord de bon lait frais. # drop: pot # give: lait
   - flag_herbe_pliee && not flag_vache_pot_su:
     # qui: vache
-    Meuh ! De l'herbe ! De la vraie !
-    # qui: narrateur
-    La touffe disparaît en trois bouchées. # flag: herbe_broutee
-    # qui: vache
-    Voilà qui change tout. Je te dois bien quelque chose : du lait, tant que tu veux.
+    Meuh ! D'la bonne herbe toute verte! Si appétissant!
     # qui: heros
-    Avec plaisir, mais je n'ai rien pour le porter.
-    # qui: vache
-    Tu es origamiste, non ? Un pot, ça se plie aussi.
+    Régale-toi ma bonne vache!
     # qui: narrateur
-    La grenouille retient la forme du pot. # flag: vache_pot_su # give: idee_pot
+    La Vache à Lait dévore la touffe d'herbe en quelques secondes. # flag: herbe_broutee
+    # qui: vache
+    Miam c'est d'la bonne herbe ça! J'te dois bien une faveur.
+    J'peux te donner un peu de mon bon lait frais, mais il te faudrait de quoi le transporter.
+    Il y avait des pots à lait avant ici.
+    # qui: heros
+    C'est gentil ça! Je vais voir si je peux trouver ça dans le coin.
+    # qui: narrateur
+    La grenouille retient l'idée du pot. # flag: vache_pot_su # give: idee_pot
   - flag_vache_pot_su:
     # qui: vache
-    Meuh. Reviens quand tu auras de quoi le porter.
+    Meuh. Reviens quand tu auras trouvé un pot à lait.
   - else:
     # qui: vache
-    Trouve-moi de l'herbe, et on reparlera de lait.
+    Où est ma bonne herbe verte ? Meuuuh
 }
 -> DONE
 
 
 // Le papier vert, près de la vache.
-// À ÉCRIRE
 === village_herbe ===
 { flag_herbe_pliee: -> village_herbe_pliee }
 { not flag_vache_faim:
     # qui: heros
-    Un papier vert clair et vert foncé, abandonné dans la poussière.
+    Un papier d'un vert végétal, abandonné dans la terre sèche.
     -> DONE
 }
 # qui: heros
-Vert clair, vert foncé... et une vache qui n'a plus rien à brouter.
-+ [plier une salade]
-    Une salade pour une vache. Elle me regarderait de travers, et elle aurait raison.
+Un papier d'un vert végétal, abandonné dans la terre sèche. Ça me serait sûrement utile.
++ [plier un lézard vert]
+    Ils seraient mignons ces petits lézards, mais ça ne résoudrait pas vraiment les problèmes des habitants.
 + [plier de l'herbe]
-    De l'herbe. Ce n'est pas très ambitieux, mais c'est exactement ce qu'on me demande.
+    Des brins d'herbe vont mettre un peu de vie sur cette place du village désolée, et vont ravir Mme Vache à Lait.
     -> village_herbe_enigme
-+ [plier un arbre]
-    J'en ai déjà plié un ce mois-ci. Et une vache ne broute pas les arbres.
++ [plier une fleur]
+    Ça serait joli, mais pas sûr que ça soit au goût de Mme la Vache à Lait.
 - -> DONE
 
-// À ÉCRIRE
 === village_herbe_enigme ===
 # qui: heros
-Un brin d'herbe est un pliage comme un autre.
+Ça devrait être simple à plier.
 -> village_herbe_lancement
 
 === village_herbe_lancement ===
 # puzzle: herbe # then: village_herbe_issue
 -> DONE
 
-// À ÉCRIRE
 === village_herbe_issue ===
 { flag_herbe_resolu:
     # qui: heros
-    Et que ça pousse. # origami: herbe # flag: herbe_pliee
-    Une belle touffe bien grasse. Vache à Lait va être contente.
+    Faisons quelques plis... # origami: herbe # flag: herbe_pliee
+    Un peu de verdure sur cette terre aride. Vache à Lait va se régaler.
   - else:
     # qui: heros
-    Même l'herbe me résiste, aujourd'hui.
+    L'herbe va devoir attendre un peu.
 }
 -> DONE
 
-// À ÉCRIRE
 === village_herbe_pliee ===
 # qui: heros
-Une touffe d'herbe de papier, qui n'attend qu'une vache.
+De la bonne herbe bien grasse.
 -> DONE
 
 
 // Le papier crème, qui deviendra le pot à lait. Pas de menu d'options ici :
 // l'idée vient de la vache, et elle est déjà précise.
-// À ÉCRIRE
 === village_pot ===
 { not has_idee_pot:
     # qui: heros
-    Un papier crème, épais, un peu raide. Je le garde en tête.
+    Un papier crème et épais. Je ne vois pas quoi en faire pour le moment.
     -> DONE
 }
 # qui: heros
-Épais, raide, imperméable. Exactement ce qu'il faut pour tenir du lait.
+Ce solide papier couleur crème serait parfait pour plier le pot à lait.
 -> village_pot_lancement
 
 === village_pot_lancement ===
@@ -695,11 +694,11 @@ Une touffe d'herbe de papier, qui n'attend qu'une vache.
 === village_pot_issue ===
 { flag_pot_resolu:
     # qui: heros
-    Un fond, quatre côtés, et surtout pas de trou. # origami: pot # flag: pot_plie # give: pot # drop: idee_pot
-    Reste à trouver quelqu'un pour le remplir.
+    C'est plié! # origami: pot # flag: pot_plie # give: pot # drop: idee_pot
+    Il ne reste plus qu'à le remplir.
   - else:
     # qui: heros
-    Il fuit de partout. Je recommencerai.
+    Je n'arrive pas à lui donner la bonne forme. On verra plus tard.
 }
 -> DONE
 
