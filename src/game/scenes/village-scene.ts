@@ -11,6 +11,7 @@ import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerDecorProvisoire } from './decor-provisoire';
 import { dessinerFeuille } from './feuille';
+import { semerHerbe, type SemisHerbe } from './pature';
 
 // Le village — première scène du chapitre 2.
 // Voir game-design/scenes/chapter-2/le-village.md.
@@ -29,6 +30,9 @@ const VACHE = 'vache';
 // Une valeur par scène — voir `semerNuages()`.
 const GRAINE_DU_CIEL = 8317;
 
+// Une valeur par semis — voir `semerHerbe()`.
+const GRAINE_DE_LA_PATURE = 6421;
+
 const SOL = boxOf(PLAN, 'dec_sol');
 
 export class VillageScene extends PointClickScene {
@@ -39,6 +43,7 @@ export class VillageScene extends PointClickScene {
   private montagne!: OrigamiDecor;
   private feuilleHerbe!: Phaser.GameObjects.Graphics;
   private herbe!: OrigamiDecor;
+  private pature!: SemisHerbe;
   private feuillePot!: Phaser.GameObjects.Graphics;
 
   // Le papier à plat et le relief plié n'occupent pas la même place dans leur
@@ -122,6 +127,8 @@ export class VillageScene extends PointClickScene {
     this.herbe?.montrer(herbePliee && !broutee);
     const touffe = herbePliee ? this.empriseHerbe : this.empriseFeuilleHerbe;
     if (touffe) this.caler('herbe', touffe);
+    // Le terrain s'en va avec la touffe : la vache broute tout.
+    this.pature?.montrer(!broutee);
 
     this.feuillePot?.setVisible(!gameState.flag('pot_plie'));
   }
@@ -156,6 +163,15 @@ export class VillageScene extends PointClickScene {
     this.herbe = poserOrigami(this, 'herbe', pature, (emprise) => {
       this.empriseHerbe = emprise;
       this.refresh();
+    });
+
+    // Le terrain reverdit autour d'elle : mêmes plis, en plus petit et en
+    // nombre. Semé avant la vache et le héros, qui doivent rester devant lui —
+    // la profondeur du décor, ici, est l'ordre de création.
+    this.pature = semerHerbe(this, boxOf(PLAN, 'dec_herbe'), GRAINE_DE_LA_PATURE);
+    this.auLeverDe('herbe_pliee', {
+      pose: () => this.pature.poser(),
+      jouer: () => this.pature.jouer(),
     });
 
     // Rien à poser pour le pot : une fois plié, il part dans l'inventaire.

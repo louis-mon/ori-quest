@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../config';
 import { placeSprite, preloadSprite } from './decor-sprite';
+import { alea } from './hasard';
 import type { Box } from './layout';
 
 // Le ciel des scènes d'extérieur : un dégradé peint au canvas, pas des bandes
@@ -191,16 +192,4 @@ function deriver(
       image.x = gauche + ((depart + glisse.p * parcours) % parcours);
     },
   });
-}
-
-// mulberry32 : `Math.random()` donnerait deux ciels différents pour deux visites
-// de la même scène.
-function alea(graine: number): () => number {
-  let a = graine >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
 }

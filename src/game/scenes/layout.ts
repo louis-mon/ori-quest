@@ -10,11 +10,14 @@ import type { PlanFond } from './fond';
 
 export type { Box, Contour, Marqueur };
 
-// Toujours une boîte, et le contour du test tactile quand elle a été tracée au
-// polygone.
-export interface PlanZone extends Box {
-  id: string;
+// Toujours une boîte, et le contour quand la zone a été tracée au polygone :
+// poser un élément se contente de l'emprise, semer DEDANS demande la forme.
+export interface PlanSurface extends Box {
   points?: Contour;
+}
+
+export interface PlanZone extends PlanSurface {
+  id: string;
   // Le point de l'objet `marqueur` qui porte le nom de cette zone. L'import l'y
   // rattache et vérifie qu'il tombe dedans ; la scène n'a rien à en dire.
   marqueur?: Marqueur;
@@ -30,7 +33,7 @@ export interface SceneLayout {
   readonly fond?: PlanFond;
   readonly hotspots: readonly PlanZone[];
   readonly exits: readonly PlanZone[];
-  readonly decor: { readonly [id: string]: Box };
+  readonly decor: { readonly [id: string]: PlanSurface };
   // Les trajets, dans l'ordre où ils ont été tracés : l'ordre des sommets EST le
   // sens de parcours, et le premier est la position de l'objet quand le
   // déplacement commence.
@@ -63,7 +66,7 @@ const dejaListe = new Set<string>();
 // Désigné par son rôle et son nom dans Tiled — `dec_sol`, `hs_feuille` : le code
 // parle le même vocabulaire que le plan. Un nom absent est une erreur de
 // compilation ; le repli ne sert qu'au plan pas encore regénéré.
-export function boxOf<L extends SceneLayout>(layout: L, ref: PlanRef<L>): Box {
+export function boxOf<L extends SceneLayout>(layout: L, ref: PlanRef<L>): PlanSurface {
   const [prefix, ...rest] = (ref as string).split('_');
   const id = rest.join('_');
   const found =

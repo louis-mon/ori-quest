@@ -420,7 +420,13 @@ function importScene(fichier, nom) {
     }
 
     if (role === 'decor') {
-      layout.decor[nomObjet] = box;
+      // Le contour quand le repère a été tracé au polygone : poser un élément se
+      // contente de son emprise, mais semer DEDANS demande sa forme — sur la
+      // boîte englobante, les coins reçoivent ce que la carte laissait hors du
+      // terrain.
+      layout.decor[nomObjet] = geo.points
+        ? { ...box, points: geo.points.map(([x, y]) => [Math.round(x), Math.round(y)]) }
+        : box;
       continue;
     }
     // Une zone plus petite que le pouce est élargie par touchRect(), ce qui peut
@@ -508,7 +514,10 @@ function importScene(fichier, nom) {
 
 const pointsLitteraux = (points) => `[${points.map(([x, y]) => `[${x}, ${y}]`).join(', ')}]`;
 
-const boiteLitterale = (b) => `{ x: ${b.x}, y: ${b.y}, w: ${b.w}, h: ${b.h} }`;
+const boiteLitterale = (b) => {
+  const box = `{ x: ${b.x}, y: ${b.y}, w: ${b.w}, h: ${b.h}`;
+  return b.points ? `${box}, points: ${pointsLitteraux(b.points)} }` : `${box} }`;
+};
 
 function zoneLitterale(z) {
   let out = `{ id: '${z.id}', x: ${z.x}, y: ${z.y}, w: ${z.w}, h: ${z.h}`;

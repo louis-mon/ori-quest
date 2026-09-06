@@ -71,7 +71,7 @@ généré, un accent ou une espace casserait le fichier.
 | Forme | Quand | Ce que le jeu en fait |
 | --- | --- | --- |
 | **rectangle** | le cas normal | une boîte, élargie à 88 px si elle est plus petite |
-| **polygone** (`P`) | quand la forme *est* le propos — une berge en biais | le contour sert au test tactile, tel quel |
+| **polygone** (`P`) | quand la forme *est* le propos — une berge en biais, un pré | le contour, tel quel : test tactile d'un `hotspot`, surface d'un `decor` |
 | **point** (`I`) | une ancre, une position d'apparition | une boîte de taille nulle ; le code en prend le centre |
 | **polyligne** (`L`) | un trajet, et lui seul — classe `chemin` | la suite de ses sommets, dans l'ordre du tracé |
 
@@ -79,6 +79,11 @@ Un polygone n'est **pas** élargi à la taille du pouce : l'élargir déplacerai
 son coin haut-gauche, donc le repère de son contour, et la forme touchée ne
 serait plus celle dessinée. Un polygone trop petit est signalé à l'import, c'est
 là qu'on le corrige.
+
+Un `decor` tracé au polygone garde son contour lui aussi. Poser un élément se
+contente de sa boîte, mais semer *dedans* demande la forme : les touffes de la
+pâture du village tombent dans le tracé, là où la boîte englobante en aurait mis
+dans ses coins, hors du terrain.
 
 Les ellipses et les objets tournés sont ramenés à leur boîte englobante, avec un
 avertissement : le jeu ne sait pas gérer une zone oblique.
