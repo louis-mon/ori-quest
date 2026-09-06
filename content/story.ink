@@ -506,9 +506,9 @@ Il délire, je vais trouver de quoi régler ça avant qu'il nous fasse une synco
     # qui: heros
     Heu je sais pas, à vrai dire j'ai un peu peur des chiens, je peux comprendre...
     # qui: pingouin
-    Ah je vois, c'est toi qui l'as séquestré ! Moi qui pensais que tu était un bon crapeau.
+    Ah je vois, c'est toi qui l'as séquestré ! Moi qui pensais que tu étais un bon crapaud.
     # qui: heros
-    Non mais on se calme, déjà je suis une grenouille pas un crapeau. Crôa crôa.
+    Non mais on se calme, déjà je suis une grenouille pas un crapaud. Crôa crôa.
     Je vais te le retrouver ton sac à puces, sinon tu vas nous refaire une scène.
     # qui: narrateur
     La grenouille retient la forme du chien : ça pourrait être utile. # flag: pingouin_chien_su # give: idee_chien
