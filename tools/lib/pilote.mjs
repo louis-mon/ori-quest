@@ -300,6 +300,19 @@ export async function tutoriel(page, entier) {
   throw new Error('le tutoriel ne se termine pas');
 }
 
+// Le récit d'arrivée n'est pas là au chargement : la scène monte, puis ink joue
+// son premier knot. Sur un runner froid, ça dépasse la pause d'ouverture — et
+// une pause plus longue ne ferait que déplacer le seuil, en ralentissant la
+// suite entière pour un cas qui n'arrive presque jamais. On attend donc la
+// boîte ; son absence au bout du compte reste un échec, et le vrai.
+export async function attendreLaBoite(page, ms = 8_000) {
+  for (let i = 0; i < ms / 100; i++) {
+    if ((await etat(page)).boite) return true;
+    await pause(100);
+  }
+  return false;
+}
+
 // Attend que la couche 3D s'allume — sans taper, sinon on manque la fenêtre.
 export async function attendreLePliage(page, ms = 12_000) {
   for (let i = 0; i < ms / 100; i++) {

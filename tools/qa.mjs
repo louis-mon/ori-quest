@@ -23,6 +23,7 @@
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import {
+  attendreLaBoite,
   attendreLaFinDuPliage,
   attendreLePliage,
   compteur,
@@ -276,6 +277,7 @@ essai(
   async (page, dire) => ({
     sauvegarde: AU_RAVIN,
     jouer: async () => {
+      await attendreLaBoite(page());
       const l1 = (await etat(page())).texte;
       await page().mouse.click(640, 660);
       await pause(60);
@@ -367,7 +369,7 @@ essai('traversee', async (page, dire) => ({
   sauvegarde: AU_RAVIN,
   jouer: async () => {
     const p = page;
-    dire("le dialogue d'arrivée se joue", (await etat(p())).boite);
+    dire("le dialogue d'arrivée se joue", await attendreLaBoite(p()));
     await deroulerDialogue(p());
 
     await taperZone(p(), 'pont', 'feuille');
