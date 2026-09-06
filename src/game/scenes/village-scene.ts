@@ -91,9 +91,6 @@ export class VillageScene extends PointClickScene {
       herbe: {
         label: 'Un papier vert',
         knots: { analyser: 'village_herbe' },
-        // La touffe pliée disparaît quand la vache la broute — c'est le seul
-        // moment où elle quitte le décor.
-        visibleIf: () => !gameState.flag('herbe_broutee'),
       },
       pot: {
         label: 'Un papier crème',
@@ -121,14 +118,13 @@ export class VillageScene extends PointClickScene {
     const emprise = montagnePliee ? this.empriseMontagne : this.empriseFeuilleMontagne;
     if (emprise) this.caler('montagne', emprise);
 
+    // La vache broute sans rien emporter : le pré reste, et la touffe avec lui.
+    // `herbe_broutee` ne dit plus que l'avancement du récit.
     const herbePliee = gameState.flag('herbe_pliee');
-    const broutee = gameState.flag('herbe_broutee');
-    this.feuilleHerbe?.setVisible(!herbePliee && !broutee);
-    this.herbe?.montrer(herbePliee && !broutee);
+    this.feuilleHerbe?.setVisible(!herbePliee);
+    this.herbe?.montrer(herbePliee);
     const touffe = herbePliee ? this.empriseHerbe : this.empriseFeuilleHerbe;
     if (touffe) this.caler('herbe', touffe);
-    // Le terrain s'en va avec la touffe : la vache broute tout.
-    this.pature?.montrer(!broutee);
 
     this.feuillePot?.setVisible(!gameState.flag('pot_plie'));
   }

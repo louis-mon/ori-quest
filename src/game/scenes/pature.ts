@@ -51,12 +51,6 @@ export interface SemisHerbe {
   poser(): void;
   // Il vient de se lever : les feuilles arrivent, puis se plient.
   jouer(): void;
-  // La vache broute, et le terrain s'en va avec la touffe du hotspot.
-  //
-  // ⚠ Ne déclenche aucun rendu, contrairement au `montrer()` d'un origami de
-  // décor : `onStateChange()` passe avant le déclencheur d'`auLeverDe()`, et un
-  // rendu lancé là poserait tout le semis d'un coup au lieu de le jouer.
-  montrer(visible: boolean): void;
 }
 
 interface Touffe {
@@ -98,7 +92,6 @@ export function semerHerbe(
   places.sort((a, b) => a.y - b.y);
 
   const touffes: Touffe[] = [];
-  let seme = false;
   let anime = false;
 
   places.forEach((place, rang) => {
@@ -122,19 +115,11 @@ export function semerHerbe(
 
   return {
     poser() {
-      seme = true;
       for (const { origami } of touffes) origami.montrer(true);
     },
     jouer() {
-      seme = true;
       anime = true;
       for (const { origami } of touffes) origami.montrer(true);
-    },
-    montrer(visible) {
-      for (const { origami, feuille } of touffes) {
-        origami.image.setVisible(visible && seme);
-        if (!visible) feuille.setVisible(false);
-      }
     },
   };
 }

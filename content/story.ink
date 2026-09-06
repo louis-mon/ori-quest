@@ -610,7 +610,7 @@ Oh la la quelle feignasse cette Vache à Lait ! Je vais peut-être pouvoir faire
     # qui: heros
     Régale-toi ma bonne vache !
     # qui: narrateur
-    La Vache à Lait dévore la touffe d'herbe en quelques secondes. # flag: herbe_broutee
+    La Vache à Lait déguste l'herbe d'un air ravi. # flag: herbe_broutee
     # qui: vache
     Miam c'est d'la bonne herbe ça ! J'te dois bien une faveur.
     J'peux te donner un peu de mon bon lait frais, mais il te faudrait de quoi le transporter.
