@@ -496,7 +496,7 @@ Il délire, je vais trouver de quoi régler ça avant qu'il nous fasse une synco
     # qui: pingouin
     Ahh ça fait plaisir cette neige et ce froid. Merci du fond du coeur.
     # qui: heros
-    Tu m'as fait peur dans cet état, content que tu sois revenu parmi nous!
+    Tu m'as fait peur dans cet état, content que tu sois revenu parmi nous !
     # qui: pingouin
     J'ai pas compris encore comment ma montagne a pu disparaître. D'ailleurs, mon petit Chouaf n'est plus là aussi.
     # qui: heros
@@ -506,7 +506,7 @@ Il délire, je vais trouver de quoi régler ça avant qu'il nous fasse une synco
     # qui: heros
     Heu je sais pas, à vrai dire j'ai un peu peur des chiens, je peux comprendre...
     # qui: pingouin
-    Ah je vois, c'est toi qui l'as séquestré! Moi qui pensais que tu était un bon crapeau.
+    Ah je vois, c'est toi qui l'as séquestré ! Moi qui pensais que tu était un bon crapeau.
     # qui: heros
     Non mais on se calme, déjà je suis une grenouille pas un crapeau. Crôa crôa.
     Je vais te le retrouver ton sac à puces, sinon tu vas nous refaire une scène.
@@ -589,7 +589,7 @@ Ah, je me disais bien que c'était pas normal. Tu peux pas sortir du village ? �
 # qui: vache
 Meeeeuuuh... La flemme, c'est trop loin, j'suis fatiguée. J'ai faim.
 # qui: heros
-Oh la la quelle feignasse cette Vache à Lait! Je vais peut-être pouvoir faire quelque chose.
+Oh la la quelle feignasse cette Vache à Lait ! Je vais peut-être pouvoir faire quelque chose.
 # flag: vache_faim
 -> DONE
 
@@ -597,26 +597,26 @@ Oh la la quelle feignasse cette Vache à Lait! Je vais peut-être pouvoir faire 
 {
   - has_pot:
     # qui: heros
-    Et voilà un pot à lait tout neuf! Crôa crôa
+    Et voilà un pot à lait tout neuf ! Crôa crôa
     # qui: vache
-    T'as bien mérité un peu de mon lait frais. Pose-le là'dsous et tire!
+    T'as bien mérité un peu de mon lait frais. Pose-le là'dsous et tire !
     # qui: heros
-    Pouah! Y'a une sacrée odeur mais j'en connais un qui va être heureux. Merci!
+    Pouah ! Y'a une sacrée odeur mais j'en connais un qui va être heureux. Merci !
     # qui: narrateur
     Le pot est plein à ras bord de bon lait frais. # drop: pot # give: lait
   - flag_herbe_pliee && not flag_vache_pot_su:
     # qui: vache
-    Meuh ! D'la bonne herbe toute verte! Si appétissant!
+    Meuh ! D'la bonne herbe toute verte ! Si appétissant !
     # qui: heros
-    Régale-toi ma bonne vache!
+    Régale-toi ma bonne vache !
     # qui: narrateur
     La Vache à Lait dévore la touffe d'herbe en quelques secondes. # flag: herbe_broutee
     # qui: vache
-    Miam c'est d'la bonne herbe ça! J'te dois bien une faveur.
+    Miam c'est d'la bonne herbe ça ! J'te dois bien une faveur.
     J'peux te donner un peu de mon bon lait frais, mais il te faudrait de quoi le transporter.
     Il y avait des pots à lait avant ici.
     # qui: heros
-    C'est gentil ça! Je vais voir si je peux trouver ça dans le coin.
+    C'est gentil ça ! Je vais voir si je peux trouver ça dans le coin.
     # qui: narrateur
     La grenouille retient l'idée du pot. # flag: vache_pot_su # give: idee_pot
   - flag_vache_pot_su:
@@ -690,11 +690,10 @@ Ce solide papier couleur crème serait parfait pour plier le pot à lait.
 # puzzle: pot # then: village_pot_issue
 -> DONE
 
-// À ÉCRIRE
 === village_pot_issue ===
 { flag_pot_resolu:
     # qui: heros
-    C'est plié! # origami: pot # flag: pot_plie # give: pot # drop: idee_pot
+    C'est plié ! # origami: pot # flag: pot_plie # give: pot # drop: idee_pot
     Il ne reste plus qu'à le remplir.
   - else:
     # qui: heros

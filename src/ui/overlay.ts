@@ -4,6 +4,7 @@ import { gameState } from '../game/systems/state';
 import { estIdee, objet } from '../game/systems/objets';
 import { mouvementReduit, placerBandeau, volVersLaCase } from './obtention';
 import { vignette } from './vignettes';
+import { typographier } from './typographie';
 
 // L'interface est du DOM posé au-dessus du canvas, pas des objets Phaser : le
 // texte reste net à toutes les densités et la mise en page s'itère en CSS.
@@ -175,7 +176,7 @@ export class Overlay {
     // de l'appel, pas un tick plus tard.
     this.dialogue.hidden = false;
     this.showSpeaker(qui);
-    this.dialogueText.textContent = text;
+    this.dialogueText.textContent = typographier(text);
     this.dialogueChoices.innerHTML = '';
     this.dialogueNext.hidden = false;
     return this.attendreUnTap();
@@ -255,7 +256,7 @@ export class Overlay {
       this.lignesEnCours++;
       options.forEach((label, i) => {
         const btn = document.createElement('button');
-        btn.textContent = label;
+        btn.textContent = typographier(label);
         btn.addEventListener('pointerup', (e) => {
           e.stopPropagation();
           if (performance.now() - debut < DELAI_ANTI_TAP) return;
@@ -312,7 +313,7 @@ export class Overlay {
   // Nomme l'objet dont on ouvre le menu de verbes, et rien d'autre : les
   // descriptions d'inventaire passent par la boîte de dialogue.
   showCaption(text: string, ms = 1600) {
-    this.caption.textContent = text;
+    this.caption.textContent = typographier(text);
     this.caption.classList.add('is-visible');
     clearTimeout(this.captionTimer);
     this.captionTimer = window.setTimeout(() => this.caption.classList.remove('is-visible'), ms);
@@ -487,7 +488,7 @@ export class Overlay {
   // Posé contre la case, et non au centre comme `showCaption` : un bandeau
   // centré nommerait l'objet en laissant ignorer où il est parti.
   private montrerBandeau(texte: string, cible: HTMLElement) {
-    this.obtenu.textContent = texte;
+    this.obtenu.textContent = typographier(texte);
     placerBandeau(this.obtenu, this.root, cible);
     this.obtenu.classList.add('is-visible');
     clearTimeout(this.obtenuTimer);
