@@ -710,32 +710,39 @@ Ce solide papier couleur crème serait parfait pour plier le pot à lait.
 // ================================================================
 
 // Joué automatiquement à la première arrivée dans la scène (EntreeScene.create).
-// À ÉCRIRE
 === entree_arrivee ===
 # qui: heros
-L'entrée du château ! Et... un dinosaure assis devant.
-Ce n'était pas là quand je suis parti, ça.
+Je peux voir d'ici l'entrée du chateau. Crôa Crôa
+Mais Gros Diplo a décidé d'asségier le château on dirait. Je devrais aller voir ce qui lui arrive.
+Et Petit Chat a l'air dans tout ses états, je devrais aller voir ça de plus près.
 # flag: entree_vue
 -> DONE
 
 
 // Le Petit Chat. Il veut du lait ; le lait obtenu, il raconte ce qui se passe au
 // château et fait tomber le papier suspendu.
-// À ÉCRIRE
 === entree_chat ===
 { flag_chat_lait: -> entree_chat_apres }
 { has_lait: -> entree_chat_lait }
 { flag_chat_vu:
     # qui: chat
-    Miaou. Du lait. S'il te plaît. Miaou.
+    Miaou. Si tu n'as pas de lait à me faire lapper,\ alors je te prie de décamper.
     -> DONE
 }
+# qui: héros
+Mais c'est notre Petit Chat adoré! Viens là que je te fasse un câlin.
 # qui: chat
-Miaou !
+Miaou ! Où sont mes laquais ! / Personne ici ne daigne me donner du lait.
+Il n'y a ici que de l'eau, / Et je ne puis pas revenir à ma demeure au Château.
+Ce Gros Diplo m'empêche de rentrer, / Il dit que c'est pour ma sécurité.
+Le Chat Mal Luné a perdu l'esprit, / Qu'est ce qui lui a pris ?
 # qui: heros
-Petit Chat ! Toi au moins tu n'as pas changé.
+Petit Chat ! Toujours aussi mignon, et toujours aussi insolent.
+Peux-tu me dire ce qu'il se passe ? Pourquoi le Gros Diplo ne veut pas te laisser entrer ?
 # qui: chat
-Miaou... j'ai faim... personne ne m'a rien donné depuis des jours... du lait... n'importe quoi... miaou...
+Miaou ! Du lait d'abord je t'en conjure! / Ou je commet un parjure.
+# qui: heros
+Il divague. Je ferais mieux de trouver du lait avant de me transformer en pâté pour chat.
 # flag: chat_vu
 -> DONE
 
@@ -743,28 +750,43 @@ Miaou... j'ai faim... personne ne m'a rien donné depuis des jours... du lait...
 // seuls, ink ne les émet qu'au `Continue()` suivant, donc au tap qui referme la
 // boîte. Le saut, lui, attend que la boîte se referme — c'est la scène qui s'en
 // charge (`quandLaBoiteEstFermee`), sinon il se jouerait derrière elle.
-// À ÉCRIRE
 === entree_chat_lait ===
 # qui: heros
-Tiens, Petit Chat. C'est Vache à Lait qui régale.
+Tiens mon Petit Chat. Du bon lait frais. Tu pourras remercier la Vache à Lait.
 # qui: narrateur
-Le pot est vide en quelques secondes. # drop: lait # flag: chat_lait
+Le Petit Chat lappe goûlument le pot à lait qui se retrouve vide en quelques secondes. # drop: lait # flag: chat_lait
+Il étends ses pattes et miaule de satisfaction.
 # qui: chat
-Miaou ! Merci ! Je te dois tout !
-Écoute... il faut que tu saches. Le Chat Mal Luné est entré dans le château, et il a commencé à déplier les origamis. Un par un. Il n'en restera bientôt plus rien.
+Maaw! Merci mon cher Maître Origamiste! / Sans toi je serais bien triste.
+Ici tout est sens dessous dessus. / Y'a-il vraiment une issue ?
 # qui: heros
-Déplier ? Mais c'est monstrueux.
+Calme-toi Petit Chat. Je comprends à moitié ce que tu dis. Enfin ça ne change pas vraiment d'avant.
+Raconte moi ce qui s'est passé au château.
 # qui: chat
-Aide-nous. Toi seul sais les remettre en état.
-Et pour commencer... ce papier, là-haut. Il te sera plus utile qu'à cette branche. Regarde ! # flag: os_tombe
+Quels terribles actes nous a infligés / Le Chat Mal Luné pour se venger
+Les petits oiseaux, les jolies fleurs / Dépliées, disparues, oh quelle douleur!
+# qui: heros
+C'est terrible! Pourquoi ferait-il une chose pareille ?
+# qui: chat
+Le Chat Mal Luné est mesquin / Aussi méchant et vil qu'un requin.
+Il va continuer à déplier / Tout ce que tu as jadis plié.
+Je dois de ce pas et de manière ferme. / Au Château y mettre un terme.
+# qui: heros
+Crôa Crôa. Je crois que tu ne me racontes pas tout.
+Encore une de vos disputes qui a mal tourné.
+Pour l'instant aides moi à revenir au château, on va essayer de régler ça.
+# qui: chat
+Au Château j'aimerais tant / Y revenir à temps.
+Ce papier accroché là haut / Peux-être est-ce ce qu'il nous faut.
+Voici ma modeste contribution / A ce que ce problème trouve une solution # flag: os_tombe
 -> DONE
 
-// À ÉCRIRE
 === entree_chat_apres ===
 # qui: chat
-Miaou. Ce lait, quand même. Le meilleur du village.
 { not flag_diplo_pousse:
-    Fais quelque chose pour ce gros tas, il me bouche la vue.
+    Hélas Gros Diplo n'a pas daigné se mouvoir. / J'aimerais ne plus le voir.
+  -else:
+    Allons de ce pas régler ça. \ Au Château rentrons fissa.
 }
 -> DONE
 

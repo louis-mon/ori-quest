@@ -209,6 +209,10 @@ body {
   margin: 0;
   font-size: calc(clamp(16px, 2.6vw, 19px) * var(--ui-scale));
   line-height: 1.5;
+  /* Les coupes de vers de `typographier()` arrivent en retours à la ligne ;
+     `pre-line` les respecte sans figer le reste, le texte continuant de se
+     replier tout seul quand le cadre rétrécit. */
+  white-space: pre-line;
 }
 
 /* Narration : ni nom ni vignette. L'italique dit « le jeu décrit » plutôt que
