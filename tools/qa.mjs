@@ -240,6 +240,63 @@ essai('rechargement', async (page, dire) => ({
   },
 }));
 
+// Une conversation interrompue par un rechargement doit pouvoir se rejouer en
+// ENTIER. Un knot pose ses tags au fil de ses répliques, et la moitié
+// enregistrée fermait les portes que l'autre moitié devait ouvrir : chez le
+// Petit Chat, le lait bu à la deuxième réplique et le papier de l'os décroché à
+// la dernière, dix taps plus loin. Le renard tient le même rôle au chapitre 1,
+// et lui est dans le build.
+//
+// Le point d'interruption est choisi APRÈS un tag posé sur une ligne de texte
+// (`# flag: porte_disparue`) : posé seul sur sa ligne, un tag n'est émis qu'au
+// `Continue()` suivant, qu'un menu de choix ne provoque pas — un essai coupé
+// plus tôt passerait sans rien éprouver.
+essai('interruption', async (page, dire) => ({
+  sauvegarde: etape('porte', ['pont_vu', 'pont_resolu', 'pont_plie', 'porte_vue']),
+  jouer: async () => {
+    await taperZone(page(), 'porte', 'renard');
+    await deroulerDialogue(page());
+    await choisir(page(), 'planté là');
+    const avant = await deroulerDialogue(page());
+    await pause(600);
+    dire("le renard a livré ce qu'il sait et rendu la parole", avant.choix.length > 0);
+    const ecrit = (await etat(page())).enregistres;
+    dire(
+      "rien de la conversation en cours n'est enregistré",
+      !ecrit.porte_disparue && !ecrit.renard_vu,
+      JSON.stringify(ecrit.porte_disparue ?? null),
+    );
+
+    await page().reload({ waitUntil: 'networkidle' });
+    await pause(2500);
+
+    await taperZone(page(), 'porte', 'renard');
+    await attendreLaBoite(page());
+    dire(
+      'le renard rejoue ses retrouvailles',
+      /origamiste royal de retour/.test((await etat(page())).texte),
+    );
+    const menu = await deroulerDialogue(page());
+    dire(
+      'et repropose la question déjà posée',
+      menu.choix.some((c) => /planté là/.test(c)),
+      menu.choix.join(' | '),
+    );
+
+    // Menée à son terme, elle est acquise : sans ça le correctif aurait
+    // simplement remplacé le blocage par un dialogue qui se répète. Le menu du
+    // renard fait partie du même knot, donc de la même transaction — c'est
+    // « Partir » qui referme la boîte, et elle seule qui écrit.
+    await choisir(page(), 'planté là');
+    await deroulerDialogue(page());
+    await choisir(page(), 'Partir');
+    await pause(900);
+    const fini = (await etat(page())).enregistres;
+    dire('la conversation menée au bout est enregistrée', fini.renard_vu === true);
+    dire("ce qu'elle a appris aussi", fini.porte_disparue === true);
+  },
+}));
+
 // Le jeu est verrouillé en paysage, et l'UI est calée sur le canvas à la main.
 essai('rotation', async (page, dire) => ({
   sauvegarde: DEVANT_LA_PORTE,

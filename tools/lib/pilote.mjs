@@ -102,8 +102,14 @@ export async function ouvrir(navigateur, url, { sauvegarde = null } = {}) {
   );
 
   if (sauvegarde) {
+    // Un état de DÉPART, pas un état imposé : `addInitScript` rejoue à chaque
+    // navigation, donc l'écraser à chaque fois réinjectait la sauvegarde du test
+    // par-dessus celle du jeu — un essai qui recharge la page ne vérifiait plus
+    // rien de ce que la partie avait enregistré.
     await page.addInitScript(
-      ([cle, save]) => localStorage.setItem(cle, JSON.stringify(save)),
+      ([cle, save]) => {
+        if (!localStorage.getItem(cle)) localStorage.setItem(cle, JSON.stringify(save));
+      },
       [SAUVEGARDE, sauvegarde],
     );
   }
@@ -127,19 +133,25 @@ export function etape(piece, drapeaux, objets = []) {
 // ------------------------------------------------------------------
 
 export const etat = (page) =>
-  page.evaluate(() => ({
-    boite: !document.querySelector('.dialogue')?.hidden,
-    texte: document.querySelector('.dialogue__text')?.textContent ?? '',
-    qui: document.querySelector('.dialogue__nom')?.textContent ?? '',
-    choix: [...document.querySelectorAll('.dialogue__choices button')].map((b) => b.textContent),
-    enigme: !!document.querySelector('.puzzle'),
-    tuto: !!document.querySelector('.tuto'),
-    fin: !!document.querySelector('.fin'),
-    menu: !document.querySelector('.menu__panel')?.hidden,
-    inventaire: [...document.querySelectorAll('.inventory__item')].map((e) => e.dataset.objet),
-    piece: JSON.parse(localStorage.getItem('ori-quest.save.v1') || '{}').room,
-    origami: !!document.querySelector('#origami-canvas')?.classList.contains('is-visible'),
-  }));
+  page.evaluate(() => {
+    const sauve = JSON.parse(localStorage.getItem('ori-quest.save.v1') || '{}');
+    return {
+      boite: !document.querySelector('.dialogue')?.hidden,
+      texte: document.querySelector('.dialogue__text')?.textContent ?? '',
+      qui: document.querySelector('.dialogue__nom')?.textContent ?? '',
+      choix: [...document.querySelectorAll('.dialogue__choices button')].map((b) => b.textContent),
+      enigme: !!document.querySelector('.puzzle'),
+      tuto: !!document.querySelector('.tuto'),
+      fin: !!document.querySelector('.fin'),
+      menu: !document.querySelector('.menu__panel')?.hidden,
+      inventaire: [...document.querySelectorAll('.inventory__item')].map((e) => e.dataset.objet),
+      piece: sauve.room,
+      // Ce qui est ÉCRIT sur le disque, et non ce que la partie en cours a en
+      // tête : une conversation interrompue ne doit rien y avoir laissé.
+      enregistres: sauve.flags ?? {},
+      origami: !!document.querySelector('#origami-canvas')?.classList.contains('is-visible'),
+    };
+  });
 
 // ------------------------------------------------------------------
 // Agir

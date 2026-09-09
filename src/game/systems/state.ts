@@ -71,6 +71,30 @@ class GameState {
     this.autosave();
   }
 
+  // Une conversation est une TRANSACTION : ce qu'un knot pose en chemin vit en
+  // mémoire, et n'atteint le disque qu'une fois ce knot terminé. Sans ça, un
+  // rechargement à mi-dialogue enregistrait une demi-conversation, et le Petit
+  // Chat en donne le cas exact : `chat_lait` tombe à sa deuxième réplique,
+  // `os_tombe` à sa dernière, dix répliques plus loin. Entre les deux, le lait
+  // est bu, le pot dépensé, et ni l'un ni l'autre ne se refait — le papier de
+  // l'os restait accroché trop haut pour toujours, et le chapitre 2 ne se
+  // finissait plus. Interrompue, une conversation n'a donc pas eu lieu : elle se
+  // rejoue en entier, énigme comprise, depuis un état que le joueur a déjà
+  // traversé.
+  private transactions = new Set<symbol>();
+
+  // Rend de quoi la refermer, à appeler quoi qu'il arrive.
+  ouvrirUneTransaction(): () => void {
+    const jeton = Symbol('conversation');
+    this.transactions.add(jeton);
+    // `delete` fait office de garde : une transaction refermée deux fois, ou
+    // balayée entre-temps par une remise à zéro, ne rouvre pas la porte à une
+    // écriture.
+    return () => {
+      if (this.transactions.delete(jeton) && this.transactions.size === 0) this.save();
+    };
+  }
+
   // `visibilitychange` et `pagehide` ne suffisaient pas : ils ne se déclenchent
   // pas quand l'onglet est tué sans passer en arrière-plan, et la progression de
   // la session était perdue. Un changement d'état est rare, donc écrire à chaque
@@ -84,6 +108,11 @@ class GameState {
 
   save() {
     clearTimeout(this.autosaveTimer);
+    // Le seul point d'écriture, donc le seul endroit où tenir la transaction :
+    // `pagehide` écrit au dernier moment utile, y compris au milieu d'un
+    // dialogue — et c'est précisément là qu'il ne faut pas. La sauvegarde d'avant
+    // la conversation reste en place ; on ne perd que la conversation.
+    if (this.transactions.size > 0) return;
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(this.data));
     } catch {
@@ -114,6 +143,9 @@ class GameState {
   // réenregistrer l'état courant pendant le rechargement qui suit, et
   // ressusciter la partie qu'on vient d'effacer.
   reset() {
+    // Une remise à zéro emporte la conversation en cours avec le reste, sinon
+    // le `save()` ci-dessous se heurterait à sa transaction ouverte.
+    this.transactions.clear();
     this.data = { room: FIRST_ROOM, flags: {}, inventory: [] };
     this.save();
     this.emit();

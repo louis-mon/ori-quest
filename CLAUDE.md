@@ -75,6 +75,21 @@ Le serveur de dev suit `content/story.ink` comme il suit les cartes :
 enregistrer recompile et recharge, et un ink cassé laisse en place la dernière
 version valide, l'erreur et son numéro de ligne allant au terminal.
 
+**Une conversation est une transaction.** Ce qu'un knot pose en chemin —
+drapeaux, inventaire, verdict d'énigme, pièce — vit en mémoire et n'atteint
+`localStorage` qu'à sa dernière réplique : `ouvrirUneTransaction()`
+(`src/game/systems/state.ts`), ouverte par `DialogueRunner.run()` et refermée
+dans son `finally`. Sans ça, un rechargement à mi-dialogue enregistre une
+conversation à moitié faite, et le Petit Chat en donne le cas exact :
+`chat_lait` tombe à sa deuxième réplique, `os_tombe` à sa dernière, dix
+répliques plus loin — entre les deux le lait est bu et le pot dépensé, aucun des
+deux ne se refait, et le papier de l'os reste accroché hors d'atteinte pour
+toujours. Interrompue, une conversation n'a donc pas eu lieu : elle se rejoue en
+entier, énigme comprise. C'est le bon prix — rejouer un dialogue coûte des taps,
+un état impossible coûte la partie. Ça suppose qu'aucun effet de jeu ne
+contourne `gameState` : c'est déjà la règle des tags ci-dessus, et c'est ici
+qu'elle se paie.
+
 **Les scènes sont pilotées par des données.** Les hotspots sont une liste
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
@@ -446,7 +461,8 @@ avant de considérer une tâche terminée.
 
 **`npm run qa` joue le jeu pour de vrai**, dans un Chromium piloté par
 Playwright : traversée du chapitre, quatre énigmes résolues au glisser-déposer,
-tutoriel, rotation, rechargement, perte de contexte WebGL. Il bâtit `dist/` et le
+tutoriel, rotation, rechargement — nu, puis en pleine conversation —, perte de
+contexte WebGL. Il bâtit `dist/` et le
 sert lui-même — **sur le build livré, et c'est le propos** : le délai anti-tap
 réel, l'arrêt sur « À suivre… » et le menu réduit au chapitre livré n'existent
 que là, et c'est en production qu'on a trouvé les deux gels de cette session. Le

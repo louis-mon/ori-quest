@@ -131,6 +131,12 @@ export class DialogueRunner {
   async run(knot: string): Promise<void> {
     if (this.running) return;
     this.running = true;
+    // Tout ce que ce knot pose — drapeaux, inventaire, verdict d'énigme, pièce —
+    // reste en mémoire jusqu'à sa dernière réplique. Un joueur qui recharge en
+    // cours de route doit pouvoir le rejouer en ENTIER, sans quoi la moitié
+    // enregistrée lui ferme les portes que l'autre moitié devait ouvrir. Ouverte
+    // après le garde ci-dessus : un `run()` refusé n'a rien à refermer.
+    const fermerLaTransaction = gameState.ouvrirUneTransaction();
     // Chaque dialogue s'ouvre sur la narration : un `# qui:` laissé par le
     // précédent ferait parler un personnage absent de la scène.
     this.speaker = null;
@@ -147,6 +153,10 @@ export class DialogueRunner {
       this.running = false;
       this.overlay.hideDialogue();
       if (this.panne) this.remettreDebout();
+      // En dernier, et dans le `finally` : une narration en panne a quand même
+      // pu poser la moitié de ses tags, et cette moitié-là est acquise — c'est
+      // le rechargement qu'on protège, pas le contenu fautif.
+      fermerLaTransaction();
     }
   }
 
