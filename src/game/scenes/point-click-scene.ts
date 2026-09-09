@@ -6,14 +6,16 @@ import {
   type Box,
   type ExitDef,
   type HotspotDef,
+  type Marqueur,
   type Verb,
 } from '../systems/hotspots';
 import { createHotspotMarker, preloadCocotte } from '../systems/hotspot-marker';
-import { endormirMarqueur } from '../systems/marqueur-papier';
+import { endormirMarqueur, escamoterMarqueur, estEscamote } from '../systems/marqueur-papier';
 import { createExitMarker, preloadFleche } from '../systems/exit-marker';
 import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
+import { empriseDe } from './decor-sprite';
 import { signalerNonCables, type SceneLayout } from './layout';
 import {
   deplacer as animerDeplacement,
@@ -50,6 +52,8 @@ export abstract class PointClickScene extends Phaser.Scene {
 
   // Quand elles diffèrent de la boîte du plan. Voir `caler()`.
   private emprises = new Map<string, Box>();
+  // Les zones attachées à un objet du décor. Voir `calerSur()`.
+  private porteurs = new Map<string, Porteur>();
   // Centre du marqueur déjà posé, pour ne le refaire que s'il a bougé.
   private centres = new Map<string, string>();
 
@@ -107,6 +111,7 @@ export abstract class PointClickScene extends Phaser.Scene {
       this.markers.clear();
       this.centres.clear();
       this.emprises.clear();
+      this.porteurs.clear();
       this.montees = [];
     });
 
@@ -134,23 +139,64 @@ export abstract class PointClickScene extends Phaser.Scene {
   // avant qu'on puisse agir.
   //
   // Le trajet part de la position courante de l'objet ; voir `deplacement.ts`.
+  //
+  // Les zones que l'objet porte (`calerSur()`) font le trajet avec lui : leur
+  // marqueur s'escamote au départ et revient à l'arrivée, sur l'emprise recalée.
   protected deplacer(
     objet: Mobile,
     destination: Destination,
     options: OptionsDeplacement = {},
   ): Promise<void> {
-    const trajet = animerDeplacement(this, objet, destination, options);
-    if (!options.bloquant) return trajet;
+    const portees = this.zonesPortees(objet);
+    const trajet = (async () => {
+      await this.escamoter(portees, true);
+      await animerDeplacement(this, objet, destination, options);
+      // Le trajet se dénoue aussi quand la scène est quittée en route, et le
+      // shutdown a tout vidé : il n'y a plus rien à recaler.
+      for (const id of portees) {
+        const porteur = this.porteurs.get(id);
+        if (porteur) this.caler(id, porteur.emprise());
+      }
+    })();
 
+    // La réapparition est hors de l'attente, et non dedans : le marqueur y est
+    // encore endormi, et on le verrait grandir en gris avant de reprendre ses
+    // couleurs.
+    return (options.bloquant ? this.enAttendant(trajet) : trajet).then(() =>
+      this.escamoter(portees, false),
+    );
+  }
+
+  // Le décor cesse de répondre le temps de la promesse. Toujours relevé : elle
+  // se dénoue aussi quand la scène est quittée en cours de route, sans quoi le
+  // décor resterait sourd au retour.
+  private enAttendant(trajet: Promise<void>): Promise<void> {
     const jeton = {};
     this.attentes.add(jeton);
     this.appliquerAttente();
-    // Toujours retiré : la promesse se dénoue aussi quand la scène est quittée
-    // en cours de route, sans quoi le décor resterait sourd au retour.
     return trajet.finally(() => {
       this.attentes.delete(jeton);
       this.appliquerAttente();
     });
+  }
+
+  private zonesPortees(objet: Mobile): string[] {
+    return [...this.porteurs].filter(([, porteur]) => porteur.objet === objet).map(([id]) => id);
+  }
+
+  // Le zoom des marqueurs concernés, et la zone avec : escamotée, elle ne répond
+  // plus — son objet est en route, et le tap tomberait sur la place qu'il vient
+  // de quitter.
+  private async escamoter(ids: string[], escamote: boolean) {
+    if (ids.length === 0) return;
+    const zooms = ids.map((id) => {
+      const marqueur = this.markers.get(id);
+      return marqueur ? escamoterMarqueur(marqueur, escamote) : Promise.resolve();
+    });
+    // L'état est posé avant le zoom : la zone se ferme au départ du marqueur,
+    // pas à la fin de son escamotage.
+    this.appliquerVisibilite();
+    await Promise.all(zooms);
   }
 
   // Le joueur n'a rien à faire pendant qu'un objet traverse sous ses yeux : les
@@ -189,6 +235,19 @@ export abstract class PointClickScene extends Phaser.Scene {
       this.appliquerGeometrie();
       this.appliquerVisibilite();
     }
+  }
+
+  // La même chose pour une zone portée par un objet qui peut se déplacer : elle
+  // le suit, `deplacer()` la reposant sur sa nouvelle emprise à chaque trajet.
+  // Sans ça, la cocotte du Petit Chat restait sur la place qu'il vient de
+  // quitter, et le tap avec elle.
+  //
+  // `emprise` pour ce qui se mesure mieux que par ses bornes — une feuille dont
+  // le tracé déborde du carré qu'elle occupe.
+  protected calerSur(id: string, objet: Mobile, emprise: () => Box = () => empriseDe(objet)) {
+    const ancre = emprise();
+    this.porteurs.set(id, { objet, emprise, ancre });
+    this.caler(id, ancre);
   }
 
   // L'emprise réelle si on la connaît, la boîte du plan sinon.
@@ -268,12 +327,15 @@ export abstract class PointClickScene extends Phaser.Scene {
   // Refait plutôt que déplacé : son battement est un tween qui pilote sa
   // position et le ramènerait à son ancien point au cycle suivant.
   private poserMarqueur(def: HotspotDef | ExitDef, box: Box) {
-    const [cx, cy] = def.marqueur ?? [box.x + box.w / 2, box.y + box.h / 2];
+    const [cx, cy] = this.pointDuMarqueur(def, box);
     const centre = `${Math.round(cx)}:${Math.round(cy)}`;
     if (this.centres.get(def.id) === centre) return;
     this.centres.set(def.id, centre);
 
     const ancien = this.markers.get(def.id);
+    // Une emprise qui change pendant un trajet refait le marqueur : né entier au
+    // milieu du vol, il annulerait l'escamotage en cours.
+    const escamote = ancien ? estEscamote(ancien) : false;
     if (ancien) {
       this.tweens.killTweensOf(ancien);
       ancien.destroy();
@@ -287,7 +349,22 @@ export abstract class PointClickScene extends Phaser.Scene {
     // Un marqueur refait pendant un déplacement bloquant naîtrait éveillé : une
     // emprise qui change en cours de trajet suffit à le refaire.
     endormirMarqueur(marqueur, this.attentes.size > 0);
+    if (escamote) void escamoterMarqueur(marqueur, true, 0);
     this.markers.set(def.id, marqueur);
+  }
+
+  // Le point de la carte est FIXE, et l'objet qui le porte a pu bouger : on le
+  // décale du même écart que son emprise. Sans porteur — le cas de presque
+  // toutes les zones — il vaut exactement ce que Tiled donne.
+  private pointDuMarqueur(def: HotspotDef | ExitDef, box: Box): Marqueur {
+    const centre: Marqueur = [box.x + box.w / 2, box.y + box.h / 2];
+    if (!def.marqueur) return centre;
+    const ancre = this.porteurs.get(def.id)?.ancre;
+    if (!ancre) return def.marqueur;
+    return [
+      def.marqueur[0] + centre[0] - (ancre.x + ancre.w / 2),
+      def.marqueur[1] + centre[1] - (ancre.y + ancre.h / 2),
+    ];
   }
 
   // À appeler quand quelque chose change en dehors de `gameState` — l'arrivée
@@ -326,11 +403,12 @@ export abstract class PointClickScene extends Phaser.Scene {
   private appliquerVisibilite() {
     for (const { def, zone } of this.montees) {
       const visible = def.visibleIf ? def.visibleIf() : true;
-      this.markers.get(def.id)?.setVisible(visible);
+      const marqueur = this.markers.get(def.id);
+      marqueur?.setVisible(visible);
       // `enabled` plutôt que `setInteractive()` : appelé sans argument, celui-ci
       // refabrique une zone d'écoute rectangulaire et efface donc le contour des
       // zones polygonales.
-      if (zone.input) zone.input.enabled = visible;
+      if (zone.input) zone.input.enabled = visible && !(marqueur && estEscamote(marqueur));
     }
   }
 
@@ -395,6 +473,14 @@ export abstract class PointClickScene extends Phaser.Scene {
       y: rect.top + (y / DESIGN_HEIGHT) * rect.height,
     };
   }
+}
+
+// Une zone et l'objet qui l'emmène. `ancre` est l'emprise du jour où elle lui a
+// été attachée : c'est l'écart à celle-ci qui déplace un marqueur tracé au point.
+interface Porteur {
+  objet: Mobile;
+  emprise: () => Box;
+  ancre: Box;
 }
 
 function estSortie(def: HotspotDef | ExitDef): def is ExitDef {

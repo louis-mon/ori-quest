@@ -38,7 +38,7 @@ const VITESSE_CHUTE = 520;
 const VITESSE_DIPLO = 170;
 // Un saut se mesure en durée, pas en vitesse : c'est son rythme qui le rend
 // lisible, et les deux sauts de la scène doivent avoir le même.
-const DUREE_SAUT = 620;
+const DUREE_SAUT = 1550;
 
 // Le dernier sommet d'un chemin, donc l'endroit où l'objet se retrouve une fois
 // le mouvement joué : c'est là qu'on le pose en revenant dans la pièce.
@@ -153,24 +153,28 @@ export class EntreeScene extends PointClickScene {
       'papier_chien',
       dessinerFeuille(this.feuilleChien, boxOf(PLAN, 'hs_papier_chien'), 'chien'),
     );
-    this.chouaf = poserOrigami(this, 'chien', boxOf(PLAN, 'hs_chouaf'), (emprise) => {
-      this.caler('chouaf', emprise);
+    this.chouaf = poserOrigami(this, 'chien', boxOf(PLAN, 'hs_chouaf'), () => {
+      // L'emprise n'arrive qu'avec le rendu du modèle, et c'est le même calcul
+      // que ses bornes : `calerSur` la reprendra à chaque saut.
+      this.calerSur('chouaf', this.chouaf.image);
       this.refresh();
     });
 
     // Le seul papier du jeu qui se déplace, d'où le conteneur : il pend d'abord
     // hors d'atteinte, et le Petit Chat le fait tomber.
     this.os = poserFeuille(this, boxOf(PLAN, 'hs_papier_os'), 'os');
-    this.caler('papier_os', this.os.emprise());
+    // Son emprise plutôt que les bornes du conteneur : le tracé des plis déborde
+    // du carré que la feuille occupe vraiment.
+    this.calerSur('papier_os', this.os.conteneur, this.os.emprise);
 
+    // Les trois qui bougent sont calés SUR leur objet : zone et cocotte font le
+    // trajet avec lui. La carte ne leur donne pas de `marqueur`, contrairement au
+    // renard du chapitre 1 — le centre de leur emprise tombe juste, et c'est un
+    // repère de moins à tenir à jour.
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));
-    this.caler('chat', empriseDe(this.chat));
-    // Pas de `marqueur` dans la carte pour lui, contrairement au renard du
-    // chapitre 1 : un marqueur est un point FIXE, et la cocotte serait restée
-    // sur la place vide qu'il vient de quitter. Elle suit donc le centre de son
-    // emprise, que `caler()` déplace avec lui.
+    this.calerSur('chat', this.chat);
     this.diplo = placeSprite(this, DIPLO, boxOf(PLAN, 'hs_diplo'));
-    this.caler('diplo', empriseDe(this.diplo));
+    this.calerSur('diplo', this.diplo);
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
     this.brancherLesMouvements();
@@ -209,7 +213,6 @@ export class EntreeScene extends PointClickScene {
             ease: 'Quad.easeIn',
             bloquant: true,
           });
-          this.caler('papier_os', this.os.emprise());
         })();
       },
     });
@@ -231,7 +234,6 @@ export class EntreeScene extends PointClickScene {
             vitesse: VITESSE_DIPLO,
             bloquant: true,
           });
-          this.caler('diplo', empriseDe(this.diplo));
         })();
       },
     });

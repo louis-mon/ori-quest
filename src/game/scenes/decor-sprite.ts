@@ -36,7 +36,10 @@ export function placeSprite(
 // Presque toujours plus petite que la boîte du plan, le sujet n'y remplissant
 // qu'une dimension. C'est elle, et pas la boîte, qui doit servir de zone
 // tactile : sinon on « analyse » le renard en tapant 70 px au-dessus de sa tête.
-export function empriseDe(image: Phaser.GameObjects.Image): Box {
-  const bornes = image.getBounds();
+//
+// Tout ce qui sait se mesurer, et pas seulement une image : `calerSur()` recale
+// aussi bien un conteneur qu'un modèle plié.
+export function empriseDe(objet: { getBounds(): Phaser.Geom.Rectangle }): Box {
+  const bornes = objet.getBounds();
   return { x: bornes.x, y: bornes.y, w: bornes.width, h: bornes.height };
 }
