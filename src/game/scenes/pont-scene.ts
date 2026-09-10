@@ -68,8 +68,7 @@ export class PontScene extends PointClickScene {
   protected hotspots(): HotspotDef[] {
     return hotspotsFrom(PLAN, {
       precipice: {
-        label: 'Le précipice',
-        knots: { analyser: 'pont_precipice' },
+        knot: 'pont_precipice',
         // Le vide ne s'examine que tant qu'il barre la route : une fois le pont
         // posé, `pont_precipice` ferait dire au héros qu'il ne voit aucune trace
         // de pont alors qu'il en a un sous les yeux.
@@ -77,27 +76,22 @@ export class PontScene extends PointClickScene {
       },
       // Rien à examiner avant le pliage : le pont n'est pas cassé, il a disparu.
       pont_repare: {
-        label: 'Le pont',
-        knots: { analyser: 'pont_pont' },
+        knot: 'pont_pont',
         visibleIf: () => gameState.flag('pont_plie'),
       },
       feuille: {
-        label: 'Feuille de papier',
-        knots: { analyser: 'pont_feuille' },
+        knot: 'pont_feuille',
         // Une fois pliée, la feuille est devenue le pont : plus rien à examiner.
         visibleIf: () => !gameState.flag('pont_plie'),
       },
       heros: {
-        label: 'Moi',
-        knots: { analyser: 'heros' },
+        knot: 'heros',
       },
       arbre: {
-        label: 'Le jeune arbre',
-        knots: { analyser: 'pont_arbre' },
+        knot: 'pont_arbre',
       },
       feuille_vieil_arbre: {
-        label: 'Une grande feuille',
-        knots: { analyser: 'pont_feuille_vieil_arbre' },
+        knot: 'pont_feuille_vieil_arbre',
         // Sur la rive d'en face, donc inatteignable tant que le pont n'est pas
         // posé. Une fois découpée, elle est devenue du bois.
         visibleIf: () => gameState.flag('pont_plie') && !gameState.flag('vieil_arbre_decoupe'),
@@ -108,7 +102,6 @@ export class PontScene extends PointClickScene {
   protected exits(): ExitDef[] {
     return exitsFrom(PLAN, {
       porte: {
-        label: 'Vers la porte',
         room: 'porte',
         // Sans le pont, la flèche promettrait un passage qui n'existe pas.
         visibleIf: () => gameState.flag('pont_plie'),

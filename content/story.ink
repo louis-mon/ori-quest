@@ -25,8 +25,8 @@
 // drapeau doit donc y revenir par `# then:`, pas par un divert `->`.
 //
 // ⚠ `TODO` est un mot-clé d'ink : une ligne qui commence par TODO est avalée
-// par le compilateur, avec les tags qu'elle porte. D'où « À ÉCRIRE », que
-// `grep -n "À ÉCRIRE" content/story.ink` liste.
+// par le compilateur, avec les tags qu'elle porte. D'où « A ECRIRE », que
+// `grep -n "A ECRIRE" content/story.ink` liste.
 
 
 // Chapitre 1 — le pont
@@ -451,10 +451,6 @@ Hâte de retourner à la maison ! Je suis quand même un peu inquiet de ce qui m
 // Chapitre 2 — Le village
 // Voir game-design/scenes/chapter-2/le-village.md
 //
-// ⚠ Tout le texte du chapitre 2 est un PREMIER JET : il tient la structure, les
-// conditions et l'enchaînement, pas la voix. Chaque knot à reprendre porte un
-// « À ÉCRIRE » ; `grep -n "À ÉCRIRE" content/story.ink` les liste, et la marque
-// s'enlève une fois les répliques réécrites.
 // ================================================================
 
 === village_arrivee ===
@@ -705,8 +701,6 @@ Ce solide papier couleur crème serait parfait pour plier le pot à lait.
 // ================================================================
 // Chapitre 2 — L'entrée du château
 // Voir game-design/scenes/chapter-2/entree-chateau.md
-//
-// ⚠ Premier jet, comme le village : voir la note en tête du chapitre.
 // ================================================================
 
 // Joué automatiquement à la première arrivée dans la scène (EntreeScene.create).
@@ -784,7 +778,7 @@ Voici ma modeste contribution / A ce que ce problème trouve une solution # flag
 === entree_chat_apres ===
 # qui: chat
 { not flag_diplo_pousse:
-    Hélas Gros Diplo n'a pas daigné se mouvoir. / J'aimerais ne plus le voir.
+    Hélas Gros Diplo n'a pas daigné se mouvoir. / J'aimerais tellement ne plus le voir.
   -else:
     Allons de ce pas régler ça. \ Au Château rentrons fissa.
 }
@@ -792,135 +786,154 @@ Voici ma modeste contribution / A ce que ce problème trouve une solution # flag
 
 
 // Le papier tacheté : Chouaf en puissance.
-// À ÉCRIRE
 === entree_papier_chien ===
 { not has_idee_chien:
     # qui: heros
-    Un papier plein de taches brunes. Il a l'air d'attendre quelqu'un.
+    Ce papier est tout doux et parsemé de tâches brunes. Je ne sais pas quoi en faire pour le moment.
     -> DONE
 }
 # qui: heros
-Des taches partout, deux coins qui tombent comme des oreilles... Chouaf, c'est toi.
+Ce papier est tout doux et parsemé de tâches brunes. Ca doit être Chouaf!
 -> entree_chien_lancement
 
 === entree_chien_lancement ===
 # puzzle: chien # then: entree_chien_issue
 -> DONE
 
-// À ÉCRIRE
 === entree_chien_issue ===
 { flag_chien_resolu:
     # qui: heros
-    Reviens parmi nous, Chouaf. # origami: chien # flag: chien_plie # drop: idee_chien
+    Un dernier pli pour le museau... # origami: chien # flag: chien_plie # drop: idee_chien
     # qui: chien
-    Wouaf !
+    Chouaf Chouaf!
   - else:
     # qui: heros
-    Ça ne ressemble à rien. Un chien mérite mieux que ça.
+    Euh il est un peu mutant ce chien... Je devrais reprendre de zero.
 }
 -> DONE
 
 
 // Le papier de l'os. Suspendu à l'arrivée, il ne tombe qu'après le lait ; et il
 // ne se plie qu'une fois Chouaf debout, sinon l'os n'aurait personne à occuper.
-// À ÉCRIRE
 === entree_papier_os ===
 { not flag_os_tombe:
     # qui: heros
-    Un papier blanc, accroché beaucoup trop haut pour moi. Une grenouille saute, mais pas jusque-là.
+    Un papier blanc est accroché là haut. Même moi je ne saute pas assez haut pour le décrocher.
     -> DONE
 }
 { flag_os_plie: -> DONE }
 { not flag_chien_plie:
     # qui: heros
-    Un papier blanc, dur, un peu jauni. Il me fait penser à quelque chose, mais quoi ?
+    C'est un papier blanc un peu abimé. Et il y a... de la bave ?? Pouah!
     -> DONE
 }
 # qui: heros
-Blanc, dur, jauni... et un chien qui tourne autour depuis tout à l'heure.
-+ [plier une gamelle]
-    Une gamelle vide n'a jamais fait la joie de personne.
+C'est un papier blanc un peu abimé. Et il y a... de la bave ?? Pouah!
+Il a l'air de beaucoup intéresser Chouaf.
++ [plier une laisse]
+    Le pauvre, je ne vais pas l'attacher. Et pour être honnête, je ne saurais même pas comment m'y prendre sans y perdre une patte.
 + [plier un os]
-    Un os. Il n'y a pas plus simple, et pas plus efficace.
+    Un jouet pour Chouaf ? Pourquoi pas.
     -> entree_os_lancement
-+ [plier un bâton]
-    Un bâton, ça se lance et ça se perd. Je n'ai pas le temps de jouer toute la journée.
++ [plier une gamelle]
+    Je n'ai pas de quoi la remplir. Et je ne suis pas aussi tordu que Renard Futé pour lui faire cette mauvaise blague.
 - -> DONE
 
 === entree_os_lancement ===
 # puzzle: os # then: entree_os_issue
 -> DONE
 
-// À ÉCRIRE
 === entree_os_issue ===
 { flag_os_resolu:
     # qui: heros
-    Voilà de quoi se faire un ami. # origami: os # flag: os_plie # give: os
+    Un nouveau joujou pour le toutou. # origami: os # flag: os_plie # give: os
   - else:
     # qui: heros
-    On dirait plutôt un caillou. Je recommencerai.
+    Peux-être un os qui a été réduit en bouillie avec un peu d'imagination... Non, ça ne doit pas être ça.
 }
 -> DONE
 
 
 // Chouaf. Sans os il s'ennuie ; avec, il fait le travail que la grenouille ne
 // pourrait pas faire.
-// À ÉCRIRE
 === entree_chouaf ===
 {
   - flag_diplo_pousse:
     # qui: chien
-    Wouaf ! Wouaf !
+    Chouaf ! Ouaf Ouaf !
     # qui: heros
-    Oui, tu as été très courageux. Va donc retrouver Pingouin Glagla, il ne parle que de toi.
+    Bon chien. Non ne t'approche pas trop.
+    Pingouin Glagla te cherche partout, va donc étaler ta bave là bas.
   - has_os:
-    # qui: heros
-    Chouaf ! Regarde ce que j'ai pour toi.
-    # qui: chien
-    WOUAF !
     # qui: narrateur
-    Le chien bondit vers l'os en aboyant à réveiller tout le village. # drop: os # flag: diplo_pousse
+    Je vais essayer de ne pas me faire mordre...
+    # qui: heros
+    Bon chien ? Chouaf ? Regarde ce que j'ai apporté pour toi !
+    # qui: chien
+    WOUAF ! OUAF OUAF OUAF !
+    # qui: narrateur
+    Je lance l'os vers Gros Diplo en m'excusant intérieurement.
+    Le chien est tout excité et saute partout. # drop: os # flag: diplo_pousse
+    Mon plan machiavélique fonctionne et Gros Diplo s'éloigne de cette boule de dents surexcitée.
   - else:
     # qui: chien
-    Wouaf...
+    Chouaf ?
+    # qui: narrateur
+    Il n'a pas l'air si terrible, je pourrais même me servir de lui pour arriver à mes fins...
+    Faisons attention quand même.
     # qui: heros
-    Tu as l'air de t'ennuyer, mon vieux. Il te faudrait de quoi t'occuper.
+    Tu veux jouer c'est ça ? Attends, je vais trouver quelque chose qui va beaucoup te plaire !
+    # qui: chien
+    Ouaf Ouaf!
 }
 -> DONE
 
 
 // Gros Diplo. Il n'est pas méchant, il est de garde — et il a le sommeil léger.
-// À ÉCRIRE
 === entree_diplo ===
 { flag_diplo_pousse: -> entree_diplo_pousse }
 { flag_diplo_su:
     # qui: diplodocus
-    Personne ne passe. C'est comme ça.
+    QU'EST CE QUE TU FAIT LÀ ? TU N'AS PAS COMPRIS ? C'EST DANGEUREUX ICI!
+    # qui: heros
+    Ok ça va pas la peine de me crier dessus...
     -> DONE
 }
 # qui: heros
-Bonjour... monsieur ? Vous êtes assis devant chez moi.
+Gros Diplo ? Je crois que tu m'empêche de rentrer chez moi.
+Ca t'ennuierais de te pousser un peu ?
 # qui: diplodocus
-Je sais.
+OH, L'ORIGAMISTE. JE CROIS PAS QUE CA SOIT POSSIBLE, NON.
+# qui: narrateur
+J'avais oublié qu'il parle un peu fort celui là. Je vais devenir sourd. 
 # qui: heros
-Vous comptez y rester longtemps ?
+Mais je veux rentrer! Et tu me fais mal aux tympans!
 # qui: diplodocus
-Le temps qu'il faudra. Le Chat Mal Luné est là-dedans, et tant que je bouche l'entrée, il ne sort pas.
+C'EST POUR TA SECURITÉ. DESOLÉ, JE NE PEUX PAS PARLER MOINS FORT.
 # qui: heros
-Et personne n'entre non plus.
+Ma sécurité ? Tout le village est devenu fou, je vais être plus en sécurité chez moi je crois.
+Allez pousse toi un peu mon Gros Diplo.
 # qui: diplodocus
-C'est le principe d'un bouchon.
+LE CHAT MAL LUNÉ EST A L'INTERIEUR, JE NE PEUX PAS LE FAIRE SORTIR.
+ET JE DOIS EMPÊCHER QUIQUNQUE DE L'APPROCHER.
+# qui: heros
+Qu'est ce qu'il a fait encore le Chat Mal Luné ? C'est en lien avec tout les objets dépliés ?
+# qui: diplodocus
+J'EN SAIS RIEN MOI. LA REINE LE LIBOU DES BOIS JOLIS M'AS DIT DE LE TENIR À L'ÉCART DU VILLAGE.
+J'OBEIS. ALLEZ, DU BALAI.
+# qui: narrateur
+Faut que je trouve un moyen de l'éloigner, il est têtu comme une mule géante. Et il me casse les tympans.
 # flag: diplo_su
 -> DONE
 
-// À ÉCRIRE
 === entree_diplo_pousse ===
 # qui: diplodocus
-Ce chien. Cet aboiement. J'en ai encore les écailles qui tremblent.
+PARDON MA REINE! MAUDIT CHIEN, J'AI FAILLI À MON DEVOIR.
 # qui: heros
-Toutes mes excuses. Je peux entrer, du coup ?
+C'est vrai qu'il peut être terrifiant ce Chouaf.
+Sur ce, j'ai des choses à régler au château.
 # qui: diplodocus
-Fais donc. Mais si tu croises le Chat Mal Luné, tu ne m'as jamais vu.
+NON! NE T'APPROCHE PAS DU CHAT MAL LUNÉ!
 -> DONE
 
 
@@ -928,11 +941,10 @@ Fais donc. Mais si tu croises le Chat Mal Luné, tu ne m'as jamais vu.
 //
 // ⚠ Pas de `# goto:` : le chapitre 3 n'existe pas. Le jour où il existera, ce
 // knot est le seul endroit à modifier.
-// À ÉCRIRE
 === entree_fin_chapitre ===
 # qui: heros
-Bon. Un chat mal luné, un château plein d'amis dépliés, et moi.
-Crôa crôa. On a vu pire.
+Il est temps de retrouver Sa Majesté Le Libou Des Bois Jolis et de confronter le Chat Mal Luné.
+J'appréhende un peu...
 -> DONE
 
 

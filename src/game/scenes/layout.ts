@@ -54,7 +54,7 @@ export type CheminId<L extends SceneLayout> = keyof L['chemins'] & string;
 // Ce que la scène ajoute à la géométrie : le sens.
 type DuPlan = 'id' | 'x' | 'y' | 'w' | 'h' | 'points' | 'marqueur';
 export type HotspotContent = Omit<HotspotDef, DuPlan>;
-export type ExitContent = Omit<ExitDef, DuPlan>;
+export type ExitContent = Omit<ExitDef, DuPlan | 'sortie'>;
 
 const EMPTY: Box = { x: 0, y: 0, w: 0, h: 0 };
 const AUCUN_CHEMIN: Contour = [];
@@ -101,7 +101,7 @@ export function exitsFrom<L extends SceneLayout>(
   layout: L,
   content: Partial<Record<Ids<L['exits']>, ExitContent>>,
 ): ExitDef[] {
-  return croiser(layout.exits, content);
+  return croiser(layout.exits, content).map((exit) => ({ ...exit, sortie: true }));
 }
 
 function croiser<T extends object>(

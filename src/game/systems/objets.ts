@@ -41,9 +41,6 @@ export const OBJETS: Record<string, Objet> = {
   },
 
   // Chapitre 2 — le village et l'entrée du château.
-  //
-  // À ÉCRIRE : noms et descriptions sont un premier jet, comme les répliques du
-  // chapitre (voir content/story.ink).
   idee_chien: {
     nom: 'Idée : le chien',
     description: 'Une idée de comment plier Chouaf, le chien du pingouin.',
@@ -58,17 +55,17 @@ export const OBJETS: Record<string, Objet> = {
   // rempli entre-temps. Seul le nom du bandeau dit ce qui a changé.
   pot: {
     nom: 'Le pot',
-    description: 'Un joli pot à lait en papier. Vide, pour le moment.',
+    description: 'Un pot à lait vide. Il serait plus utile rempli',
     modele: 'pot',
   },
   lait: {
     nom: 'Du lait',
-    description: 'Un pot de lait tout frais. Aucun chat ne résiste à ça.',
+    description: 'Un pot de lait tout frais. Attention à ne pas le renverser',
     modele: 'pot',
   },
   os: {
     nom: "L'os",
-    description: 'Un os en papier, de quoi occuper un chien un bon moment.',
+    description: 'Un os un peu abîmé et tout baveux. Pouah!',
     modele: 'os',
   },
 };

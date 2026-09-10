@@ -34,10 +34,10 @@ sans double-clic, sans glisser-déposer.
 
 ## Statut
 
-Ces documents décrivent la cible. L'implémentation couvre aujourd'hui le
-chapitre 1 — deux scènes, la navigation, l'inventaire, le minijeu et l'animation
-de pliage — sur un récit encore largement « À ÉCRIRE ». Les écarts sont signalés
-par **⚠ pas encore implémenté**.
+Ces documents décrivent la cible. L'implémentation couvre aujourd'hui les deux
+chapitres — quatre scènes, la navigation, l'inventaire, le minijeu et l'animation
+de pliage —, le second sur décor provisoire et hors du build publié. Les écarts
+sont signalés par **⚠ pas encore implémenté**.
 
 Les questions non tranchées sont marquées **❓ à décider** — ce sont des
 décisions qui attendent, pas des oublis. Il n'en reste aucune : le mauvais choix

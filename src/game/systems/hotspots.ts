@@ -1,14 +1,5 @@
 import { MIN_TOUCH_SIZE } from '../config';
 
-// Le seul verbe du jeu : analyser. Ni objet à combiner ni serrure où insérer une
-// clé (game-design/04-interface.md). Le type reste une union plutôt qu'une
-// chaîne : le menu contextuel sait s'ouvrir si un élément en propose deux.
-export type Verb = 'analyser';
-
-export const VERB_LABELS: Record<Verb, string> = {
-  analyser: 'Analyser',
-};
-
 // En coordonnées logiques, tel que le plan Tiled le donne.
 export interface Box {
   x: number;
@@ -28,12 +19,12 @@ export type Marqueur = readonly [number, number];
 
 export interface HotspotDef extends Box {
   id: string;
-  label: string;
   // Contour tactile, quand la zone a été tracée au polygone.
   points?: Contour;
   marqueur?: Marqueur;
-  // Verbe -> knot ink. L'ordre définit celui des boutons.
-  knots: Partial<Record<Verb, string>>;
+  // Le knot ink que le tap joue. Une zone ne fait que ça : analyser est le seul
+  // verbe du jeu (game-design/04-interface.md).
+  knot: string;
   // Le hotspot n'existe que si ce prédicat est vrai.
   visibleIf?: () => boolean;
 }
@@ -43,10 +34,10 @@ export interface HotspotDef extends Box {
 // d'abord raconter quelque chose, la narration enchaînant avec `# goto:`.
 export interface ExitDef extends Box {
   id: string;
-  // PAS montré au joueur : une légende affichée pendant la transition se lisait
-  // sur la scène d'arrivée. Il reste la seule phrase française d'une sortie qui
-  // passe par un knot, là où `room` ne dit rien.
-  label: string;
+  // Posé par `exitsFrom()`, jamais par la scène. Un hotspot et une sortie
+  // portent tous deux un `knot` : sans ce marqueur, rien ne les distingue une
+  // fois les deux listes mélangées pour le montage.
+  sortie: true;
   points?: Contour;
   marqueur?: Marqueur;
   // Scène de destination.
@@ -54,10 +45,6 @@ export interface ExitDef extends Box {
   // Knot à jouer au lieu de partir directement.
   knot?: string;
   visibleIf?: () => boolean;
-}
-
-export function verbsOf(def: HotspotDef): Verb[] {
-  return (Object.keys(def.knots) as Verb[]).filter((v) => def.knots[v]);
 }
 
 // Élargit autour du centre. Le visuel n'est pas modifié, seule la zone de

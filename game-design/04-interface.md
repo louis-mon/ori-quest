@@ -14,22 +14,25 @@ combiner, ni serrure où insérer une clé — donc pas de second verbe à propo
 
 Un menu à une seule entrée est un tap de trop.
 
-### Ce que ça coûte de l'enlever
+### Enlevé pour de bon
 
-**Rien.** Le comportement est déjà piloté par les données :
+**✅ Fait**, et jusqu'au bout : le triplet `look / take / use` hérité du point &
+click classique a d'abord laissé place à un verbe unique, `analyser`, puis le
+mécanisme entier est parti. Une zone porte un `knot`, le tap le joue.
 
-> [`point-click-scene.ts`](../src/game/scenes/point-click-scene.ts) — si un
-> hotspot n'expose qu'un seul verbe, l'action se déclenche directement et
-> **aucun menu ne s'ouvre**.
+La version intermédiaire gardait la machinerie en sommeil — un type `Verb` à un
+membre, un menu qui savait s'ouvrir « le jour où un élément proposerait deux
+verbes ». Ce jour n'est pas venu, et ce qui restait n'était plus atteignable :
+avec un seul verbe, la branche qui ouvrait le menu ne s'exécutait jamais. Elle
+tirait derrière elle une **étiquette nommant l'objet touché**, écrite pour chaque
+zone des quatre scènes — du texte que personne n'a jamais lu à l'écran. Ce qu'il
+faut pour le rétablir est dans git ; le garder en place coûtait plus cher que le
+réécrire.
 
-Il suffit donc de ne déclarer qu'un verbe par hotspot. Le menu ne réapparaîtra
-que le jour où un élément en proposera réellement deux — ce qui reste possible
-sans rien réécrire.
-
-**✅ Fait** : le verbe unique s'appelle `analyser`, et le triplet
-`look / take / use` hérité du point & click classique a disparu. Le type reste
-une union à un membre — le menu contextuel sait toujours s'ouvrir le jour où un
-élément en proposera deux.
+**Une sortie ne s'annonce pas non plus.** Nommer la destination avait été
+essayé : l'étiquette tenait 1,6 s, le fondu 0,26, et elle finissait par-dessus la
+scène d'arrivée à nommer la pièce qu'on venait de quitter. La flèche et le fondu
+suffisent.
 
 ## L'inventaire : oui, et une idée en est un objet
 

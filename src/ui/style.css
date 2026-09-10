@@ -92,51 +92,6 @@ body {
   pointer-events: auto;
 }
 
-/* ---------- Menu de verbes ---------- */
-
-.verb-menu {
-  position: absolute;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 14px;
-  background: rgba(26, 23, 20, 0.92);
-  box-shadow: 0 8px 24px var(--shadow);
-  transform: translate(-50%, -100%);
-  animation: pop 140ms ease-out;
-}
-
-.verb-menu[hidden] {
-  display: none;
-}
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -95%) scale(0.92);
-  }
-}
-
-.verb-menu button {
-  min-height: 44px;
-  min-width: 88px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 10px;
-  background: var(--paper);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.verb-menu button:active {
-  background: var(--accent);
-  color: var(--paper);
-}
-
 /* ---------- Boîte de dialogue ---------- */
 
 .dialogue {
@@ -1330,28 +1285,4 @@ body {
 
 .tuto__confirm[hidden] {
   display: none;
-}
-
-/* ---------- Étiquette de survol / focus ---------- */
-
-.caption {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 180px);
-  transform: translateX(-50%);
-  /* Deux ou trois mots en pratique — le nom de l'objet dont on ouvre le menu.
-     La largeur maximale reste : un libellé long traverserait tout le cadre. */
-  max-width: min(70%, 560px);
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(26, 23, 20, 0.8);
-  font-size: 15px;
-  text-align: center;
-  text-wrap: balance;
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.caption.is-visible {
-  opacity: 1;
 }

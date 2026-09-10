@@ -48,23 +48,19 @@ export class PorteScene extends PointClickScene {
   protected hotspots(): HotspotDef[] {
     return hotspotsFrom(PLAN, {
       heros: {
-        label: 'Moi',
-        knots: { analyser: 'heros' },
+        knot: 'heros',
       },
       renard: {
-        label: 'Le renard',
-        knots: { analyser: 'porte_renard' },
+        knot: 'porte_renard',
       },
       porte: {
-        label: 'La porte',
-        knots: { analyser: 'porte_porte' },
+        knot: 'porte_porte',
         // Une fois pliée, la porte est un passage : c'est `exit_village`, posé
         // au même endroit, qui prend le relais.
         visibleIf: () => !gameState.flag('porte_plie'),
       },
       feuille_hache: {
-        label: 'Un papier métallisé',
-        knots: { analyser: 'porte_feuille_hache' },
+        knot: 'porte_feuille_hache',
         // C'est le PLIAGE qui la fait disparaître, pas la possession de la
         // hache : celle-ci se dépense en découpant le vieil arbre, et une
         // condition sur l'inventaire ferait revenir la feuille à ce moment-là.
@@ -76,11 +72,9 @@ export class PorteScene extends PointClickScene {
   protected exits(): ExitDef[] {
     return exitsFrom(PLAN, {
       pont: {
-        label: 'Vers le ravin',
         room: 'pont',
       },
       village: {
-        label: 'Entrer dans le village',
         // Passe par la narration : franchir la porte termine le chapitre, et
         // c'est au récit de le dire avant que la scène ne change.
         knot: 'porte_fin_chapitre',

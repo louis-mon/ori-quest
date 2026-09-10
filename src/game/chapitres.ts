@@ -31,10 +31,9 @@ const CHAPITRES: Chapitre[] = [
   },
 ];
 
-// Le chapitre 2 se joue de bout en bout, mais son texte est un premier jet (les
-// « À ÉCRIRE » de content/story.ink) et ses deux scènes attendent leur fond
-// peint : il reste au développement, et le build publié sur itch.io s'arrête à
-// la fin du chapitre 1.
+// Le chapitre 2 se joue de bout en bout et son texte est écrit, mais ses deux
+// scènes attendent leur fond peint : il reste au développement, et le build
+// publié sur itch.io s'arrête à la fin du chapitre 1.
 //
 // Une seule ligne à changer le jour où il est prêt — et rien à toucher dans la
 // narration, qui ignore quels chapitres ont été compilés.

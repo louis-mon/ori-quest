@@ -95,8 +95,8 @@ d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
 
 **Le jeu livré s'arrête à la fin du chapitre 1**, sur « À suivre… » : le chapitre
-2 se joue en développement, mais son texte est un premier jet et ses deux scènes
-sont encore sur décor provisoire. Ce que cette version embarque tient dans
+2 se joue en développement et son texte est écrit, mais ses deux scènes sont
+encore sur décor provisoire. Ce que cette version embarque tient dans
 `src/game/chapitres.ts`, une ligne à changer le jour où le chapitre suivant est
 prêt. `goto()` (`main.ts`) y lit qu'une destination n'est pas livrée et pose
 l'écran de fin (`src/ui/fin.ts`) au lieu de changer de scène — **sans l'écrire

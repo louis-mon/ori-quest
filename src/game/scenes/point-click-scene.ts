@@ -1,13 +1,11 @@
 import Phaser from 'phaser';
-import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../config';
+import { DESIGN_WIDTH } from '../config';
 import {
   touchRect,
-  verbsOf,
   type Box,
   type ExitDef,
   type HotspotDef,
   type Marqueur,
-  type Verb,
 } from '../systems/hotspots';
 import { createHotspotMarker, preloadCocotte } from '../systems/hotspot-marker';
 import { endormirMarqueur, escamoterMarqueur, estEscamote } from '../systems/marqueur-papier';
@@ -200,8 +198,8 @@ export abstract class PointClickScene extends Phaser.Scene {
   }
 
   // Le joueur n'a rien à faire pendant qu'un objet traverse sous ses yeux : les
-  // zones ne répondent plus (`onZone`), l'inventaire non plus, et les marqueurs
-  // s'éteignent pour le dire. Seul le menu reste atteignable, et il fige la
+  // zones ne répondent plus (`repondAuTap`), l'inventaire non plus, et les
+  // marqueurs s'éteignent pour le dire. Seul le menu reste atteignable, et il fige la
   // scène — voir `figerLeJeu()` dans main.ts.
   private appliquerAttente() {
     const attend = this.attentes.size > 0;
@@ -273,29 +271,31 @@ export abstract class PointClickScene extends Phaser.Scene {
     this.centres.clear();
     this.montees = [];
 
-    for (const def of [...this.hotspots(), ...this.exits()] as (HotspotDef | ExitDef)[]) {
-      const rect = this.rectDe(def);
-      const zone = this.add.zone(rect.x, rect.y, rect.w, rect.h).setOrigin(0);
-
-      if (def.points) {
-        // Le contour est en coordonnées du jeu, la zone d'écoute en coordonnées
-        // locales. Le décalage reste juste tant que la zone ne bouge pas, ce que
-        // `rectDe()` garantit pour un polygone.
-        const contour = new Phaser.Geom.Polygon(
-          def.points.flatMap(([x, y]) => [x - rect.x, y - rect.y]),
-        );
-        zone.setInteractive(contour, Phaser.Geom.Polygon.Contains);
-        if (zone.input) zone.input.cursor = 'pointer';
-      } else {
-        zone.setInteractive({ useHandCursor: true });
-      }
-
-      zone.on('pointerup', (pointer: Phaser.Input.Pointer) => this.onZone(def, pointer));
-      this.montees.push({ def, zone });
-    }
+    for (const def of [...this.hotspots(), ...this.exits()]) this.monterZone(def);
 
     this.appliquerGeometrie();
     this.refresh();
+  }
+
+  private monterZone(def: HotspotDef | ExitDef) {
+    const rect = this.rectDe(def);
+    const zone = this.add.zone(rect.x, rect.y, rect.w, rect.h).setOrigin(0);
+
+    if (def.points) {
+      // Le contour est en coordonnées du jeu, la zone d'écoute en coordonnées
+      // locales. Le décalage reste juste tant que la zone ne bouge pas, ce que
+      // `rectDe()` garantit pour un polygone.
+      const contour = new Phaser.Geom.Polygon(
+        def.points.flatMap(([x, y]) => [x - rect.x, y - rect.y]),
+      );
+      zone.setInteractive(contour, Phaser.Geom.Polygon.Contains);
+      if (zone.input) zone.input.cursor = 'pointer';
+    } else {
+      zone.setInteractive({ useHandCursor: true });
+    }
+
+    zone.on('pointerup', () => ('sortie' in def ? this.onSortie(def) : this.onHotspot(def)));
+    this.montees.push({ def, zone });
   }
 
   // Les zones se chevauchent, et Phaser départage par profondeur : priorité à la
@@ -341,11 +341,12 @@ export abstract class PointClickScene extends Phaser.Scene {
       ancien.destroy();
     }
 
-    const marqueur = estSortie(def)
-      ? // La flèche pointe vers l'extérieur du cadre : c'est ce qui dit
-        // « on sort par là » plutôt que « regarde ici ».
-        createExitMarker(this, cx, cy, cx < DESIGN_WIDTH / 2 ? -1 : 1)
-      : createHotspotMarker(this, cx, cy);
+    const marqueur =
+      'sortie' in def
+        ? // La flèche pointe vers l'extérieur du cadre : c'est ce qui dit
+          // « on sort par là » plutôt que « regarde ici ».
+          createExitMarker(this, cx, cy, cx < DESIGN_WIDTH / 2 ? -1 : 1)
+        : createHotspotMarker(this, cx, cy);
     // Un marqueur refait pendant un déplacement bloquant naîtrait éveillé : une
     // emprise qui change en cours de trajet suffit à le refaire.
     endormirMarqueur(marqueur, this.attentes.size > 0);
@@ -415,45 +416,28 @@ export abstract class PointClickScene extends Phaser.Scene {
   // Point d'accroche pour le décor qui dépend de l'état (un pont posé…).
   protected onStateChange() {}
 
-  private onZone(def: HotspotDef | ExitDef, pointer: Phaser.Input.Pointer) {
+  private onHotspot(def: HotspotDef) {
+    if (!this.repondAuTap(def)) return;
+    void this.services.dialogue.run(def.knot);
+  }
+
+  private onSortie(def: ExitDef) {
+    if (!this.repondAuTap(def)) return;
+    if (def.knot) void this.services.dialogue.run(def.knot);
+    else if (def.room) this.quitter(def.room);
+  }
+
+  private repondAuTap(def: HotspotDef | ExitDef): boolean {
     const { overlay, dialogue } = this.services;
     // Les deux conditions ne font pas doublon : `isRunning` couvre les instants
     // où le moteur de narration travaille boîte fermée — une animation de
     // pliage, un changement de scène — sans qu'aucune réplique n'attende de tap.
-    if (dialogue.isRunning || overlay.occupeLeJoueur) return;
+    if (dialogue.isRunning || overlay.occupeLeJoueur) return false;
     // Un déplacement ordinaire laisse la scène jouable ; seul celui qui a
     // demandé le silence compte ici.
-    if (this.attentes.size > 0) return;
-    if (def.visibleIf && !def.visibleIf()) return;
-
-    if (estSortie(def)) {
-      // Pas d'annonce de la destination : la légende tenait 1,6 s quand le fondu
-      // en dure 0,26, donc elle finissait par-dessus la scène d'arrivée à nommer
-      // la pièce qu'on venait de quitter. La flèche et le fondu suffisent.
-      if (def.knot) void dialogue.run(def.knot);
-      else if (def.room) this.quitter(def.room);
-      return;
-    }
-
-    const verbs = verbsOf(def);
-    if (verbs.length === 0) return;
-
-    const run = (verb: Verb) => {
-      const knot = def.knots[verb];
-      if (knot) void dialogue.run(knot);
-    };
-
-    // Un menu à une entrée est un tap de trop (game-design/04-interface.md).
-    if (verbs.length === 1) {
-      run(verbs[0]);
-      return;
-    }
-
-    overlay.showCaption(def.label);
-    const screen = this.toScreen(pointer.worldX, pointer.worldY);
-    overlay.showVerbs(screen.x, screen.y, verbs, (verb) => {
-      if (verb) run(verb);
-    });
+    if (this.attentes.size > 0) return false;
+    if (def.visibleIf && !def.visibleIf()) return false;
+    return true;
   }
 
   // Le fondu n'est pas décoratif : sans lui, la scène suivante apparaît avec ses
@@ -464,15 +448,6 @@ export abstract class PointClickScene extends Phaser.Scene {
     cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.services.goto(room));
     cam.fadeOut(FONDU, 0, 0, 0);
   }
-
-  // Coordonnées du jeu -> pixels CSS de la page, pour l'overlay DOM.
-  private toScreen(x: number, y: number) {
-    const rect = this.game.canvas.getBoundingClientRect();
-    return {
-      x: rect.left + (x / DESIGN_WIDTH) * rect.width,
-      y: rect.top + (y / DESIGN_HEIGHT) * rect.height,
-    };
-  }
 }
 
 // Une zone et l'objet qui l'emmène. `ancre` est l'emprise du jour où elle lui a
@@ -481,8 +456,4 @@ interface Porteur {
   objet: Mobile;
   emprise: () => Box;
   ancre: Box;
-}
-
-function estSortie(def: HotspotDef | ExitDef): def is ExitDef {
-  return !('knots' in def);
 }

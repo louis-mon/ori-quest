@@ -66,35 +66,27 @@ export class VillageScene extends PointClickScene {
     preloadSprite(this, VACHE, 'assets/decor/vache.png');
   }
 
-  // À ÉCRIRE : les libellés des trois papiers sont un premier jet — ils nomment
-  // ce qu'on va toucher, et c'est la seule phrase française d'un hotspot.
   protected hotspots(): HotspotDef[] {
     return hotspotsFrom(PLAN, {
       heros: {
-        label: 'Moi',
-        knots: { analyser: 'heros' },
+        knot: 'heros',
       },
       pingouin: {
-        label: 'Pingouin Glagla',
-        knots: { analyser: 'village_pingouin' },
+        knot: 'village_pingouin',
       },
       vache: {
-        label: 'Vache à Lait',
-        knots: { analyser: 'village_vache' },
+        knot: 'village_vache',
       },
       // Le papier gris, puis la montagne qu'il devient : une seule zone, et
       // c'est la narration qui sait laquelle des deux on regarde.
       montagne: {
-        label: 'Un papier gris',
-        knots: { analyser: 'village_montagne' },
+        knot: 'village_montagne',
       },
       herbe: {
-        label: 'Un papier vert',
-        knots: { analyser: 'village_herbe' },
+        knot: 'village_herbe',
       },
       pot: {
-        label: 'Un papier crème',
-        knots: { analyser: 'village_pot' },
+        knot: 'village_pot',
         // Sur le PLIAGE et non sur la possession du pot : celui-ci se dépense en
         // le donnant au Petit Chat, et la feuille reviendrait à ce moment-là.
         visibleIf: () => !gameState.flag('pot_plie'),
@@ -105,7 +97,6 @@ export class VillageScene extends PointClickScene {
   protected exits(): ExitDef[] {
     return exitsFrom(PLAN, {
       entree: {
-        label: "Vers l'entrée du château",
         room: 'entree',
       },
     });

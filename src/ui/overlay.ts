@@ -1,5 +1,4 @@
 import type { Personnage } from '../game/systems/personnages';
-import { VERB_LABELS, type Verb } from '../game/systems/hotspots';
 import { gameState } from '../game/systems/state';
 import { estIdee, objet } from '../game/systems/objets';
 import { mouvementReduit, placerBandeau, volVersLaCase } from './obtention';
@@ -47,7 +46,6 @@ export interface ApercuOrigami {
 
 export class Overlay {
   private root: HTMLElement;
-  private verbMenu: HTMLElement;
   private dialogue: HTMLElement;
   private dialoguePortrait: HTMLImageElement;
   private dialogueNom: HTMLElement;
@@ -55,8 +53,6 @@ export class Overlay {
   private dialogueChoices: HTMLElement;
   private dialogueNext: HTMLButtonElement;
   private inventory: HTMLElement;
-  private caption: HTMLElement;
-  private captionTimer = 0;
   private obtenu: HTMLElement;
   private obtenuTimer = 0;
 
@@ -84,8 +80,6 @@ export class Overlay {
     root.innerHTML = `
       <div class="inventory"></div>
       <div class="obtenu"></div>
-      <div class="caption"></div>
-      <div class="verb-menu" hidden></div>
       <div class="dialogue" hidden>
         <img class="dialogue__portrait" alt="" hidden>
         <div class="dialogue__bulle">
@@ -96,7 +90,6 @@ export class Overlay {
         <button class="dialogue__next" aria-label="Continuer" hidden>▶</button>
       </div>
     `;
-    this.verbMenu = root.querySelector('.verb-menu')!;
     this.dialogue = root.querySelector('.dialogue')!;
     this.dialoguePortrait = root.querySelector('.dialogue__portrait')!;
     this.dialogueNom = root.querySelector('.dialogue__nom')!;
@@ -104,7 +97,6 @@ export class Overlay {
     this.dialogueChoices = root.querySelector('.dialogue__choices')!;
     this.dialogueNext = root.querySelector('.dialogue__next')!;
     this.inventory = root.querySelector('.inventory')!;
-    this.caption = root.querySelector('.caption')!;
     this.obtenu = root.querySelector('.obtenu')!;
 
     // Une vignette absente ne doit pas laisser d'icône cassée : le nom porte
@@ -118,53 +110,6 @@ export class Overlay {
 
   brancherApercu(apercu: ApercuOrigami) {
     this.apercu = apercu;
-  }
-
-  // ---------- Menu de verbes ----------
-
-  // Remplace le survol du point & click classique, qui n'existe pas au tactile.
-  showVerbs(screenX: number, screenY: number, verbs: Verb[], onPick: (verb: Verb | null) => void) {
-    this.verbMenu.innerHTML = '';
-    for (const verb of verbs) {
-      const btn = document.createElement('button');
-      btn.textContent = VERB_LABELS[verb];
-      btn.addEventListener('pointerup', (e) => {
-        e.stopPropagation();
-        this.hideVerbs();
-        onPick(verb);
-      });
-      this.verbMenu.appendChild(btn);
-    }
-    this.verbMenu.hidden = false;
-
-    // Les coordonnées reçues sont en pixels page, l'overlay est positionné
-    // relativement à #stage : d'où la soustraction de son origine.
-    const stage = this.root.getBoundingClientRect();
-    const menu = this.verbMenu.getBoundingClientRect();
-    const margin = 12;
-    const x = Math.min(
-      Math.max(screenX - stage.left, menu.width / 2 + margin),
-      stage.width - menu.width / 2 - margin,
-    );
-    const y = Math.max(screenY - stage.top - 12, menu.height + margin);
-    this.verbMenu.style.left = `${x}px`;
-    this.verbMenu.style.top = `${y}px`;
-
-    const dismiss = () => {
-      this.hideVerbs();
-      onPick(null);
-    };
-    // Différé d'un tick : sans ça, le pointerup en cours fermerait le menu
-    // aussitôt ouvert.
-    setTimeout(() => window.addEventListener('pointerup', dismiss, { once: true }), 0);
-  }
-
-  hideVerbs() {
-    this.verbMenu.hidden = true;
-  }
-
-  get verbsVisible() {
-    return !this.verbMenu.hidden;
   }
 
   // ---------- Dialogue ----------
@@ -204,7 +149,7 @@ export class Overlay {
       };
       const advance = (e: Event) => {
         // Propagation arrêtée même quand le tap est ignoré : avalé ici, il ne
-        // doit pas non plus aller fermer un menu de verbes derrière.
+        // doit pas repartir déclencher ce qui se trouve derrière la boîte.
         e.stopPropagation();
         if (performance.now() - debut < DELAI_ANTI_TAP) return;
         finir();
@@ -232,16 +177,12 @@ export class Overlay {
     this.dialogue.classList.toggle('dialogue--devant', devant);
   }
 
-  get dialogueOccupe() {
-    return this.lignesEnCours > 0;
-  }
-
   // LA question que le décor doit poser avant de réagir à un tap. La poser en
-  // trois morceaux laissait forcément un chemin en oublier un : lire la
+  // plusieurs morceaux laissait forcément un chemin en oublier un : lire la
   // description d'un objet n'empêchait alors ni d'analyser un hotspot ni de
   // changer de scène, et la boîte partait avec la pièce qu'on quittait.
   get occupeLeJoueur() {
-    return this.dialogueOccupe || this.verbsVisible;
+    return this.lignesEnCours > 0;
   }
 
   choose(options: string[]): Promise<number> {
@@ -309,15 +250,6 @@ export class Overlay {
   }
 
   // ---------- Divers ----------
-
-  // Nomme l'objet dont on ouvre le menu de verbes, et rien d'autre : les
-  // descriptions d'inventaire passent par la boîte de dialogue.
-  showCaption(text: string, ms = 1600) {
-    this.caption.textContent = typographier(text);
-    this.caption.classList.add('is-visible');
-    clearTimeout(this.captionTimer);
-    this.captionTimer = window.setTimeout(() => this.caption.classList.remove('is-visible'), ms);
-  }
 
   // Une vignette de 42 px dit ce qu'on possède, pas ce que c'est : l'épaisseur,
   // le dos et les plis d'un origami ne survivent pas à une case d'inventaire.
@@ -408,7 +340,7 @@ export class Overlay {
       e.stopPropagation();
       // Pas pendant une réplique : la boîte est prise, et le joueur retrouverait
       // cette description à la place de ce qu'il lisait.
-      if (this.dialogueOccupe || this.inventaireSuspendu) return;
+      if (this.occupeLeJoueur || this.inventaireSuspendu) return;
       void this.examiner(id);
     });
     return el;
@@ -485,8 +417,8 @@ export class Overlay {
     this.montrerBandeau(annonceDe(id), el);
   }
 
-  // Posé contre la case, et non au centre comme `showCaption` : un bandeau
-  // centré nommerait l'objet en laissant ignorer où il est parti.
+  // Posé contre la case, et non au centre de l'écran : un bandeau centré
+  // nommerait l'objet en laissant ignorer où il est parti.
   private montrerBandeau(texte: string, cible: HTMLElement) {
     this.obtenu.textContent = typographier(texte);
     placerBandeau(this.obtenu, this.root, cible);

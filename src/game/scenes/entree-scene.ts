@@ -70,38 +70,30 @@ export class EntreeScene extends PointClickScene {
     preloadSprite(this, DIPLO, 'assets/decor/diplodocus.png');
   }
 
-  // À ÉCRIRE : les libellés des deux papiers sont un premier jet, comme ceux du
-  // village.
   protected hotspots(): HotspotDef[] {
     return hotspotsFrom(PLAN, {
       heros: {
-        label: 'Moi',
-        knots: { analyser: 'heros' },
+        knot: 'heros',
       },
       chat: {
-        label: 'Petit Chat',
-        knots: { analyser: 'entree_chat' },
+        knot: 'entree_chat',
       },
       diplo: {
-        label: 'Gros Diplo',
-        knots: { analyser: 'entree_diplo' },
+        knot: 'entree_diplo',
       },
       papier_chien: {
-        label: 'Un papier tacheté',
-        knots: { analyser: 'entree_papier_chien' },
+        knot: 'entree_papier_chien',
         visibleIf: () => !gameState.flag('chien_plie'),
       },
       // Chouaf n'existe qu'une fois plié : avant, il n'y a qu'un papier.
       chouaf: {
-        label: 'Chouaf',
-        knots: { analyser: 'entree_chouaf' },
+        knot: 'entree_chouaf',
         visibleIf: () => gameState.flag('chien_plie'),
       },
       // Examinable dès l'arrivée, alors qu'il pend hors d'atteinte : c'est en le
       // regardant qu'on apprend qu'il faudra de l'aide pour l'attraper.
       papier_os: {
-        label: 'Un papier suspendu',
-        knots: { analyser: 'entree_papier_os' },
+        knot: 'entree_papier_os',
         visibleIf: () => !gameState.flag('os_plie'),
       },
     });
@@ -110,11 +102,9 @@ export class EntreeScene extends PointClickScene {
   protected exits(): ExitDef[] {
     return exitsFrom(PLAN, {
       village: {
-        label: 'Vers le village',
         room: 'village',
       },
       chateau: {
-        label: 'Entrer dans le château',
         // Passe par la narration : franchir la porte termine le chapitre, et
         // c'est au récit de le dire avant que la scène ne change.
         knot: 'entree_fin_chapitre',
