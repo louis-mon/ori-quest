@@ -85,6 +85,14 @@ class GameState {
 
   // Rend de quoi la refermer, à appeler quoi qu'il arrive.
   ouvrirUneTransaction(): () => void {
+    // Une transaction ne retient QUE ce que sa conversation pose. Ce qui la
+    // précède lui est antérieur, et acquis : le pas qui vient d'amener le joueur
+    // dans la pièce, par exemple — un tap sur un hotspot posé là où était la
+    // flèche ouvre un dialogue dans la seconde qui suit l'arrivée, et le
+    // `goTo()` attendait encore son écriture différée. Elle serait restée en
+    // attente jusqu'à la fin du dialogue, et perdue si le joueur rechargeait
+    // pendant : il rouvrait la pièce d'où il venait de sortir.
+    this.save();
     const jeton = Symbol('conversation');
     this.transactions.add(jeton);
     // `delete` fait office de garde : une transaction refermée deux fois, ou

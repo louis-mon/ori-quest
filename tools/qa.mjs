@@ -294,6 +294,25 @@ essai('interruption', async (page, dire) => ({
     const fini = (await etat(page())).enregistres;
     dire('la conversation menée au bout est enregistrée', fini.renard_vu === true);
     dire("ce qu'elle a appris aussi", fini.porte_disparue === true);
+
+    // Une transaction ne retient QUE ce que sa conversation pose : le pas qui
+    // vient d'amener le joueur là lui est antérieur, et acquis. Au ravin, le
+    // hotspot du héros occupe la place où était la flèche — un second tap au
+    // même point, tombé entre l'arrivée et l'écriture différée du `goTo()`,
+    // ouvre un dialogue pendant que le changement de pièce attend encore. Le
+    // martelage l'a attrapé en CI, où le runner est assez lent pour qu'un clic
+    // passe ; ici la fenêtre est visée, pas espérée.
+    const [x, y] = await coin(page(), pointDe('porte', 'pont'));
+    await page().mouse.click(x, y);
+    await pause(300);
+    await page().mouse.click(x, y);
+    await attendreLaBoite(page());
+    const arrive = await etat(page());
+    dire(
+      'le pas qui précède la conversation est enregistré',
+      arrive.piece === 'pont',
+      arrive.piece,
+    );
   },
 }));
 
