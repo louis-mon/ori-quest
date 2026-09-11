@@ -5,7 +5,7 @@ import storyJson from './generated/story.json';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from './game/config';
 import { PREFERENCE_GPU } from './gpu';
 
-import { estLivree, scenesLivrees } from './game/chapitres';
+import { estLivree, scenesLivrees, sortDeLaTraversee } from './game/chapitres';
 import { runCreasePuzzle } from './game/puzzle/crease-puzzle';
 import { PUZZLES } from './game/puzzle/puzzles';
 import { lanceurTutoriel } from './game/puzzle/tutoriel';
@@ -174,10 +174,12 @@ async function playPuzzle(name: string) {
 // Un seul chemin pour les deux façons de changer de scène — le tag `# goto:` et
 // la flèche — sinon l'une des deux oublie d'enregistrer la pièce courante.
 const goto = (room: string) => {
-  // Une destination absente de cette version termine la partie sur « À suivre… »
+  // Deux façons de finir ici plutôt que de changer de scène : une destination
+  // que ce build ne contient pas — le chapitre 3 n'existe pas —, et une qui sort
+  // de la traversée livrée, le village n'étant atteignable que par le menu
   // (src/game/chapitres.ts). Et surtout sans `goTo()` : la sauvegarde doit rester
   // sur une pièce que ce build sait rouvrir.
-  if (!estLivree(room)) {
+  if (!estLivree(room) || sortDeLaTraversee(gameState.room, room)) {
     finirLaPartie();
     return;
   }

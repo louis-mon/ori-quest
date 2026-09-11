@@ -56,6 +56,9 @@ export class EntreeScene extends PointClickScene {
   private feuilleChien!: Phaser.GameObjects.Graphics;
   private chouaf!: OrigamiDecor;
   private os!: FeuilleMobile;
+  // Gros Diplo est assis sur le passage : la flèche ne s'allume qu'une fois
+  // qu'il s'en est écarté pour de bon. Voir `exits()`.
+  private passageDegage = false;
 
   constructor() {
     // Même raison qu'au chapitre 1 : c'est main.ts qui décide de la scène à
@@ -109,7 +112,12 @@ export class EntreeScene extends PointClickScene {
         // c'est au récit de le dire avant que la scène ne change.
         knot: 'entree_fin_chapitre',
         // Le passage existe depuis le début, mais Gros Diplo est assis dessus.
-        visibleIf: () => gameState.flag('diplo_pousse'),
+        //
+        // ⚠ Pas `flag('diplo_pousse')` : `refresh()` applique la visibilité AVANT
+        // de lancer les mouvements qu'un drapeau déclenche. La flèche s'allumait
+        // donc à la dernière réplique, le dinosaure encore en travers du trou,
+        // et on voyait la sortie apparaître à travers lui.
+        visibleIf: () => this.passageDegage,
       },
     });
   }
@@ -183,6 +191,11 @@ export class EntreeScene extends PointClickScene {
   // bloquants : ils changent ce qu'on peut faire ensuite, et le joueur doit les
   // avoir vus avant de retoucher au décor.
   private brancherLesMouvements() {
+    // Phaser réutilise l'instance d'un passage à l'autre : sans cette remise à
+    // zéro, la flèche resterait allumée en revenant dans une partie où le
+    // dinosaure n'a pas encore bougé.
+    this.passageDegage = false;
+
     const chute = cheminOf(PLAN, 'chute_os');
     this.auLeverDe('os_tombe', {
       pose: () => {
@@ -212,6 +225,8 @@ export class EntreeScene extends PointClickScene {
       pose: () => {
         this.diplo.setPosition(arrivee(fuite).x, arrivee(fuite).y);
         this.caler('diplo', empriseDe(this.diplo));
+        // Déjà écarté en arrivant : le passage est libre tout de suite.
+        this.passageDegage = true;
       },
       jouer: () => {
         void (async () => {
@@ -224,6 +239,17 @@ export class EntreeScene extends PointClickScene {
             vitesse: VITESSE_DIPLO,
             bloquant: true,
           });
+          // Un trajet se dénoue aussi quand la scène est quittée en route — le
+          // menu reste atteignable pendant un mouvement bloquant. Le décor est
+          // alors détruit, et `passageDegage` n'a pas à être levé : on repassera
+          // par `pose()` en revenant.
+          if (!this.scene.isActive()) return;
+          this.passageDegage = true;
+          this.refresh();
+          // Et c'est seulement là que le héros commente ce qu'on vient de voir.
+          // Cette réplique vivait à la suite du `# flag:`, donc avant le trajet :
+          // elle annonçait un dinosaure encore en travers du passage.
+          void this.services.dialogue.run('entree_diplo_ecarte');
         })();
       },
     });

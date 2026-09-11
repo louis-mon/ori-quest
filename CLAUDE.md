@@ -94,19 +94,26 @@ qu'elle se paie.
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
 
-**Le jeu livré s'arrête à la fin du chapitre 1**, sur « À suivre… » : le chapitre
-2 se joue en développement et son texte est écrit, mais ses deux scènes sont
-encore sur décor provisoire. Ce que cette version embarque tient dans
-`src/game/chapitres.ts`, une ligne à changer le jour où le chapitre suivant est
-prêt. `goto()` (`main.ts`) y lit qu'une destination n'est pas livrée et pose
-l'écran de fin (`src/ui/fin.ts`) au lieu de changer de scène — **sans l'écrire
-dans la sauvegarde**, qui doit rester sur une pièce que ce build sait rouvrir.
+**Le build embarque les deux chapitres, la traversée s'arrête au premier.**
+C'étaient deux façons de dire la même chose tant que le chapitre 2 restait
+dehors ; `src/game/chapitres.ts` les sépare depuis qu'on veut le faire essayer
+sans le raccorder — ses deux scènes sont encore sur décor provisoire, et un
+joueur du récit n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce que
+la version contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller.
+
+`goto()` (`main.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour les deux raisons :
+destination absente du build, ou franchissement hors traversée — **sans l'écrire
+dans la sauvegarde**, qui doit rester sur une pièce que ce build sait rouvrir. Le
+test porte sur le franchissement et non sur la seule destination : le village est
+hors traversée, mais y revenir depuis l'entrée du château est un déplacement
+interne au chapitre 2, et finir la partie là-dessus enfermerait le testeur.
 
 **Le menu des points d'étape est livré lui aussi**, tant que la page itch.io est
 en Draft (`ETAPES_LIVREES`, dans `src/game/systems/etapes.ts`) : un testeur ne
 retraverse pas le chapitre pour en atteindre la fin. Il ne propose que les
 chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin avec
-les drapeaux du chapitre suivant levés.
+les drapeaux du chapitre suivant levés. C'est par lui, et par lui seul, qu'on
+atteint le chapitre 2.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la

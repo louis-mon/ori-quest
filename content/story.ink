@@ -874,7 +874,6 @@ Il a l'air de beaucoup intéresser Chouaf.
     # qui: narrateur
     Je lance l'os vers Gros Diplo en m'excusant intérieurement.
     Chouaf est tout excité et saute partout. # drop: os # flag: diplo_pousse
-    Mon plan machiavélique fonctionne, et Gros Diplo s'éloigne de cette boule de dents surexcitée.
   - else:
     # qui: chien
     Chouaf ?
@@ -886,6 +885,18 @@ Il a l'air de beaucoup intéresser Chouaf.
     # qui: chien
     Ouaf Ouaf !
 }
+-> DONE
+
+
+// Ce que le héros pense une fois le dinosaure parti pour de bon.
+//
+// ⚠ Ce knot est hors de la tirade de Chouaf, et c'est tout son intérêt : le
+// mouvement ne se joue qu'une fois la boîte de dialogue refermée (`auLeverDe`),
+// donc une réplique laissée à la suite du `# flag:` annonçait un dinosaure
+// encore assis sur le passage. C'est `EntreeScene` qui lance celle-ci, à la fin
+// du trajet. Elle ne pose aucun état : interrompue, elle ne coûte qu'elle-même.
+=== entree_diplo_ecarte ===
+Mon plan machiavélique fonctionne, et Gros Diplo s'éloigne de cette boule de dents surexcitée.
 -> DONE
 
 

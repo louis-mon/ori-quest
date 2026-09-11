@@ -9,12 +9,12 @@
  * bien » sur un jeu qui n'est pas celui qu'on publie.
  *
  *   npm run qa                       # bâtit dist/, le sert, joue tout
- *   npm run qa -- renard webgl       # seulement ces essais-là
+ *   npm run qa -- renard webgl       # seulement ces tests-là
  *   npm run qa -- --sans-build       # sur le dist/ déjà là
  *   npm run qa-local                 # sur le serveur de dev déjà lancé
  *
  * `qa-local` (`--local`) vise le `npm run dev` d'à côté : pas de build, des
- * piles d'appels lisibles, et le délai anti-tap y est nul. Les essais marqués
+ * piles d'appels lisibles, et le délai anti-tap y est nul. Les tests marqués
  * `livre` s'y sautent au lieu d'échouer — ils parlent de ce que le build
  * embarque, pas du jeu. `BASE_URL` vise n'importe quelle autre cible servie.
  *
@@ -62,12 +62,12 @@ const sansBuild = args.includes('--sans-build');
 const local = args.includes('--local');
 const filtres = args.filter((a) => !a.startsWith('--'));
 
-const essais = [];
-// `attendu` : ce que l'essai provoque LUI-MÊME en console et qu'on ne compte pas
-// comme régression. Déclaré essai par essai, jamais globalement — un filtre trop
+const tests = [];
+// `attendu` : ce que le test provoque LUI-MÊME en console et qu'on ne compte pas
+// comme régression. Déclaré test par test, jamais globalement — un filtre trop
 // large rendrait la console muette, alors que c'est elle qui voit les gels.
-const essai = (nom, fn, { livre = false, attendu = null } = {}) =>
-  essais.push({ nom, fn, livre, attendu });
+const test = (nom, fn, { livre = false, attendu = null } = {}) =>
+  tests.push({ nom, fn, livre, attendu });
 
 // Un état de départ complet, comme un point d'étape.
 const AU_RAVIN = null;
@@ -75,6 +75,35 @@ const DEVANT_LA_PORTE = etape(
   'porte',
   ['pont_vu', 'pont_resolu', 'pont_plie', 'porte_vue', 'porte_disparue', 'renard_vu'],
   [],
+);
+// Chapitre 2, juste avant que Chouaf ne fasse fuir Gros Diplo : le même état que
+// le point d'étape « Chouaf plié, l'os en main » (src/game/systems/etapes.ts).
+const CHOUAF_ET_OS = etape(
+  'entree',
+  [
+    'village_vu',
+    'pingouin_chaud',
+    'montagne_resolu',
+    'montagne_pliee',
+    'pingouin_chien_su',
+    'vache_faim',
+    'herbe_resolu',
+    'herbe_pliee',
+    'herbe_broutee',
+    'vache_pot_su',
+    'pot_resolu',
+    'pot_plie',
+    'entree_vue',
+    'chat_vu',
+    'chat_lait',
+    'os_tombe',
+    'diplo_su',
+    'chien_resolu',
+    'chien_plie',
+    'os_resolu',
+    'os_plie',
+  ],
+  ['os'],
 );
 const BOIS_EN_POCHE = etape(
   'porte',
@@ -98,13 +127,13 @@ const BOIS_EN_POCHE = etape(
 );
 
 // ------------------------------------------------------------------
-// Les essais
+// Les tests
 // ------------------------------------------------------------------
 
 // La régression qui a coûté une session : un menu de dialogue vidé de toutes ses
 // options faisait dérailler ink, et l'instance restait muette — plus un hotspot
 // ne répondait, alors que les sorties marchaient encore.
-essai('renard', async (page, dire) => {
+test('renard', async (page, dire) => {
   const depart = etape('porte', [
     'pont_vu',
     'pont_resolu',
@@ -141,7 +170,7 @@ essai('renard', async (page, dire) => {
 
 // Un contexte WebGL perdu pendant un pliage laissait `playTo()` sans réponse :
 // le récit restait suspendu sur sa réplique, définitivement et en silence.
-essai(
+test(
   'webgl',
   async (page, dire) => ({
     sauvegarde: BOIS_EN_POCHE,
@@ -178,7 +207,7 @@ essai(
 
 // Sur itch.io le plein écran est un bouton du SITE : il tombe pendant qu'une
 // énigme est ouverte, et `eparpiller()` doit se rejouer.
-essai('redimensionnement', async (page, dire) => ({
+test('redimensionnement', async (page, dire) => ({
   sauvegarde: BOIS_EN_POCHE,
   jouer: async () => {
     await taperZone(page(), 'porte', 'porte');
@@ -222,7 +251,7 @@ essai('redimensionnement', async (page, dire) => ({
 }));
 
 // Un rechargement ne doit ni perdre la pièce ni laisser une énigme fantôme.
-essai('rechargement', async (page, dire) => ({
+test('rechargement', async (page, dire) => ({
   sauvegarde: BOIS_EN_POCHE,
   jouer: async () => {
     await taperZone(page(), 'porte', 'porte');
@@ -249,9 +278,9 @@ essai('rechargement', async (page, dire) => ({
 //
 // Le point d'interruption est choisi APRÈS un tag posé sur une ligne de texte
 // (`# flag: porte_disparue`) : posé seul sur sa ligne, un tag n'est émis qu'au
-// `Continue()` suivant, qu'un menu de choix ne provoque pas — un essai coupé
+// `Continue()` suivant, qu'un menu de choix ne provoque pas — un test coupé
 // plus tôt passerait sans rien éprouver.
-essai('interruption', async (page, dire) => ({
+test('interruption', async (page, dire) => ({
   sauvegarde: etape('porte', ['pont_vu', 'pont_resolu', 'pont_plie', 'porte_vue']),
   jouer: async () => {
     await taperZone(page(), 'porte', 'renard');
@@ -317,7 +346,7 @@ essai('interruption', async (page, dire) => ({
 }));
 
 // Le jeu est verrouillé en paysage, et l'UI est calée sur le canvas à la main.
-essai('rotation', async (page, dire) => ({
+test('rotation', async (page, dire) => ({
   sauvegarde: DEVANT_LA_PORTE,
   jouer: async () => {
     await page().setViewportSize({ width: 720, height: 1280 });
@@ -348,7 +377,7 @@ essai('rotation', async (page, dire) => ({
 
 // Deux contacts rapprochés ne doivent dépenser qu'une réplique — et le délai ne
 // doit pas non plus avaler le tap volontaire d'un lecteur rapide.
-essai(
+test(
   'anti-tap',
   async (page, dire) => ({
     sauvegarde: AU_RAVIN,
@@ -369,7 +398,7 @@ essai(
 );
 
 // Le décor martelé ne doit ni empiler les dialogues ni rester sourd.
-essai('martelage', async (page, dire) => ({
+test('martelage', async (page, dire) => ({
   sauvegarde: DEVANT_LA_PORTE,
   jouer: async () => {
     for (let i = 0; i < 6; i++) {
@@ -393,7 +422,7 @@ essai('martelage', async (page, dire) => ({
 
 // Une sauvegarde née d'un build de développement nomme une pièce que celui-ci
 // n'embarque pas : elle doit retomber sur une scène jouable, pas sur du noir.
-essai(
+test(
   'sauvegarde-etrangere',
   async (page, dire) => ({
     sauvegarde: etape('village', ['village_vu', 'pont_plie', 'porte_plie'], ['idee_chien']),
@@ -406,8 +435,10 @@ essai(
   { livre: true },
 );
 
-// Ce que le build embarque, et lui seul.
-essai(
+// Ce que le build embarque, et jusqu'où il laisse aller. Les deux ne coïncident
+// plus : le chapitre 2 est dans le bundle et le menu y mène, mais la traversée
+// s'arrête toujours au bout du premier.
+test(
   'fin-de-chapitre',
   async (page, dire) => ({
     sauvegarde: BOIS_EN_POCHE,
@@ -415,7 +446,7 @@ essai(
       await page().locator('.menu__button').click();
       await pause(600);
       const chapitres = await page().locator('.menu__panel [data-action="chapitre"]').count();
-      dire('le menu ne propose que le chapitre livré', chapitres === 1, `${chapitres} chapitre(s)`);
+      dire('le menu propose les deux chapitres embarqués', chapitres === 2, `${chapitres} chapitre(s)`);
       await page().locator('.menu__voile').click();
       await pause(600);
 
@@ -439,9 +470,60 @@ essai(
   { livre: true },
 );
 
-// La traversée complète : le seul essai qui éprouve les quatre énigmes, le
+// Le chapitre 2, atteignable depuis que le build l'embarque. Il garde l'ordre de
+// la scène de Gros Diplo : le mouvement se joue une fois la boîte refermée, donc
+// tout ce qui le commente doit venir APRÈS lui. La réplique du plan
+// machiavélique vivait dans la tirade de Chouaf et annonçait un dinosaure encore
+// assis sur le passage ; la flèche de sortie s'allumait au même moment.
+//
+// Rien ici n'attend une durée : la fin du trajet se lit à la réouverture de la
+// boîte, qui est justement ce qu'on vérifie.
+test(
+  'chapitre-2',
+  async (page, dire) => ({
+    sauvegarde: CHOUAF_ET_OS,
+    jouer: async () => {
+      await taperZone(page(), 'entree', 'chouaf');
+      await attendreLaBoite(page());
+
+      // Réplique par réplique, et non `deroulerDialogue` : celui-ci avale tout
+      // jusqu'à la fermeture, et une ligne arrivée trop tôt y serait
+      // indiscernable d'une ligne arrivée au bon moment. C'est pourtant toute la
+      // régression qu'on garde ici.
+      const tirade = [];
+      for (let i = 0; i < 20; i++) {
+        const e = await etat(page());
+        if (!e.boite) break;
+        tirade.push(e.texte);
+        await avancer(page());
+      }
+      dire(
+        'la tirade ne commente pas un mouvement qui n’a pas eu lieu',
+        !tirade.some((ligne) => ligne.includes('machiavélique')),
+        tirade.at(-1),
+      );
+
+      // Le drapeau est posé : le dinosaure part maintenant, et l'écran doit être
+      // rendu au décor le temps qu'on le voie.
+      dire('la tirade se referme avant le mouvement', !(await etat(page())).boite);
+
+      dire('le mouvement rend la parole au récit', await attendreLaBoite(page()));
+      const apres = (await etat(page())).texte;
+      dire('et la réplique du plan arrive après lui', apres.includes('machiavélique'), apres);
+      await deroulerDialogue(page());
+
+      // La sortie n'existait pas avant : `passageDegage` ne se lève qu'au bout du
+      // trajet, donc un tap qui porte prouve que la flèche s'est allumée.
+      await taperZone(page(), 'entree', 'chateau');
+      dire('le passage vers le château est ouvert', (await etat(page())).boite);
+    },
+  }),
+  { livre: true },
+);
+
+// La traversée complète : le seul test qui éprouve les quatre énigmes, le
 // tutoriel joué en entier, les pliages, l'inventaire et les deux scènes.
-essai('traversee', async (page, dire) => ({
+test('traversee', async (page, dire) => ({
   sauvegarde: AU_RAVIN,
   jouer: async () => {
     const p = page;
@@ -588,8 +670,8 @@ const repond = async (url) => {
 };
 
 async function servir() {
-  // Une cible déjà servie : le serveur de dev, quand on met un essai au point.
-  // Son délai anti-tap est nul, et les essais qui parlent du build s'y sautent.
+  // Une cible déjà servie : le serveur de dev, quand on met un test au point.
+  // Son délai anti-tap est nul, et les tests qui parlent du build s'y sautent.
   //
   // `vite.config.ts` respecte `PORT`, donc on le respecte aussi : sans ça,
   // `qa-local` viserait le 5173 pendant qu'un second serveur tourne ailleurs.
@@ -643,7 +725,7 @@ try {
   console.error(`✗ ${err.message}`);
   process.exit(1);
 }
-// Le délai suit la CIBLE, pas l'essai : c'est le build qui décide s'il faut
+// Le délai suit la CIBLE, pas le test : c'est le build qui décide s'il faut
 // attendre entre deux taps, et un test qui n'attendrait pas assez prendrait un
 // jeu qui l'ignore pour un jeu qui ne répond plus.
 reglerDelaiTap(cible.delai);
@@ -655,7 +737,7 @@ let ratees = 0;
 const echecs = [];
 const debutTour = Date.now();
 
-for (const { nom, fn, livre, attendu } of essais) {
+for (const { nom, fn, livre, attendu } of tests) {
   if (filtres.length && !filtres.includes(nom)) continue;
   if (livre && !cible.livre) {
     console.log(`~ ${nom} — sauté : parle du build livré, et la cible n'en est pas un`);
