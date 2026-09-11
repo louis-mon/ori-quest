@@ -3,7 +3,12 @@ import { gameState } from '../game/systems/state';
 import { estIdee, objet } from '../game/systems/objets';
 import { mouvementReduit, placerBandeau, volVersLaCase } from './obtention';
 import { vignette } from './vignettes';
+import { urlApercuOrigami } from '../origami/apercu';
 import { typographier } from './typographie';
+
+// Le portrait s'affiche à ~56 px ; les photos du registre font 160 px de côté, et
+// un modèle rendu n'a pas de raison d'être plus fin.
+const TAILLE_PORTRAIT = 160;
 
 // L'interface est du DOM posé au-dessus du canvas, pas des objets Phaser : le
 // texte reste net à toutes les densités et la mise en page s'itère en CSS.
@@ -48,6 +53,8 @@ export class Overlay {
   private root: HTMLElement;
   private dialogue: HTMLElement;
   private dialoguePortrait: HTMLImageElement;
+  // Numéro de la dernière demande de portrait ; voir `poserPortrait()`.
+  private portraitDemande = 0;
   private dialogueNom: HTMLElement;
   private dialogueText: HTMLElement;
   private dialogueChoices: HTMLElement;
@@ -228,13 +235,41 @@ export class Overlay {
     this.dialogueNom.textContent = qui?.nom ?? '';
     this.dialogueNom.style.color = qui?.couleur ?? '';
 
-    const portrait = qui?.portrait ?? '';
-    this.dialoguePortrait.hidden = !portrait;
-    // Ne pas réaffecter `src` à l'identique : le navigateur relancerait un
-    // chargement et la vignette clignoterait à chaque ligne du personnage.
-    if (portrait && !this.dialoguePortrait.src.endsWith(portrait)) {
-      this.dialoguePortrait.src = portrait;
+    this.poserPortrait(qui);
+  }
+
+  // Une photo se pose tout de suite ; un modèle demande un rendu, donc un
+  // aller-retour. D'où le jeton : deux répliques de locuteurs différents qui
+  // s'enchaînent ne doivent pas voir la réponse de la première se poser sur la
+  // seconde. Et la vignette reste cachée le temps du rendu plutôt que de garder
+  // celle du locuteur précédent, qui serait un contresens.
+  private poserPortrait(qui: Personnage | null) {
+    const jeton = ++this.portraitDemande;
+
+    if (qui?.portrait) {
+      this.dialoguePortrait.hidden = false;
+      // Ne pas réaffecter `src` à l'identique : le navigateur relancerait un
+      // chargement et la vignette clignoterait à chaque ligne du personnage.
+      if (!this.dialoguePortrait.src.endsWith(qui.portrait)) {
+        this.dialoguePortrait.src = qui.portrait;
+      }
+      return;
     }
+
+    this.dialoguePortrait.hidden = true;
+    if (!qui?.modele) return;
+
+    void urlApercuOrigami(qui.modele, { taille: TAILLE_PORTRAIT }).then(
+      (url) => {
+        if (jeton !== this.portraitDemande) return;
+        this.dialoguePortrait.hidden = false;
+        if (this.dialoguePortrait.src !== url) this.dialoguePortrait.src = url;
+      },
+      (err) => {
+        // Le nom porte seul l'identité du locuteur : le dialogue reste jouable.
+        console.error(`[personnage] portrait de "${qui.modele}" impossible`, err);
+      },
+    );
   }
 
   // Pendant qu'un objet traverse la scène, le décor ne répond plus aux taps et

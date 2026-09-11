@@ -9,6 +9,10 @@ export interface Personnage {
   nom: string;
   // Chemin relatif : itch.io sert le jeu depuis un sous-dossier.
   portrait?: string;
+  // Pour qui EST un pliage du jeu : c'est le `.origami` qu'on montre, rendu au
+  // vol comme l'inventaire et le but de l'énigme le font déjà. Un `portrait`
+  // l'emporte, le jour où l'artiste en photographie un.
+  modele?: string;
   // Par défaut l'accent du jeu.
   couleur?: string;
 }
@@ -32,10 +36,12 @@ export const PERSONNAGES: Record<string, Personnage> = {
   vache: { nom: 'Vache à Lait', portrait: 'assets/personnages/vache.png' },
   chat: { nom: 'Petit Chat', portrait: 'assets/personnages/chat.png' },
   diplodocus: { nom: 'Gros Diplo', portrait: 'assets/personnages/diplodocus.png' },
-  // Sans vignette : le modèle plié existe, la photo de l'artiste non — et un
-  // portrait de dialogue est une photo, pas un rendu (voir plus haut). Le
-  // registre l'accepte, le nom porte seul son identité en attendant.
-  chien: { nom: 'Chouaf' },
+  // Le seul personnage que le joueur plie lui-même, et donc le seul rendu :
+  // « rien de ce qui se plie n'est dessiné » vaut ici comme ailleurs, et son
+  // portrait doit être le pliage qui sort de l'énigme, pas une photo qui
+  // finirait par en différer. Les huit autres sont photographiés parce
+  // qu'aucun n'est un pliage.
+  chien: { nom: 'Chouaf', modele: 'chien' },
 };
 
 // Noms de rôle acceptés dans ink, à côté des identifiants d'espèce. Le jour où
