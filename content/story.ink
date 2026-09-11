@@ -188,7 +188,7 @@ Oh quel gâchis, on aurait pu en faire de belles armoires...
 # qui: arbre
 Oui quelle tristesse... Snif
 # qui: narrateur
-La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: arbre_parle # give: idee_arbre
+Mémorisons la forme de l'arbre : ça pourrait être utile. # flag: arbre_parle # give: idee_arbre
 -> DONE
 
 // Visites suivantes. La demande n'a de sens qu'une fois le père replié ET la
@@ -221,7 +221,7 @@ La grenouille retient la forme de l'arbre : ça pourrait être utile. # flag: ar
     # flag: arbre_demande
   - flag_arbre_plie:
     # qui: arbre
-    Merci, Maître origamiste, d'avoir restauré le pont et feu mon vieux père.
+    Merci, Maître Origamiste, d'avoir restauré le pont et feu mon vieux père.
     Les voyageurs qui se retrouvaient bloqués ici cesseront de m'importuner, et l'ombre de mon père m'évitera les coups de soleil.
   - else:
     # qui: arbre
@@ -286,7 +286,7 @@ Je suis un peu ému à l'idée de transformer en planches ce respectable voisin 
 // pendant qu'on lit qu'il est abattu.
 + [découper le vieil arbre]
     # qui: narrateur
-    La hache travaille et notre vaillante grenouille est épuisée. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête ! # give: bois # drop: hache # flag: vieil_arbre_decoupe
+    La hache travaille vaillamment et je me retrouve épuisé. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête ! # give: bois # drop: hache # flag: vieil_arbre_decoupe
 + [le laisser debout]
     Je n'ai pas le coeur à faire ça pour l'instant...
 - -> DONE
@@ -466,16 +466,16 @@ Je vais sûrement pouvoir en apprendre plus sur ce qu'il se passe ici.
 === village_pingouin ===
 { flag_pingouin_chaud: -> village_pingouin_revoir }
 # qui: heros
-Salut Pingouin Glagla ! Tu n'as pas l'air dans ton assiette, qu'est ce qu'il t'arrive ?
+Salut Pingouin Glagla ! Tu n'as pas l'air dans ton assiette, qu'est-ce qui t'arrive ?
 On dirait que tu vas nous faire un malaise.
 # qui: pingouin
 J'ai chaud... trop chaud...
 # qui: heros
-Oh je voie ça, tu sues à grosses gouttes mon pauvre. Désolé le réchauffement climatique tout ça...
+Oh, je vois ça, tu sues à grosses gouttes, ma pauvre. Désolé, le réchauffement climatique et tout ça...
 # qui: pingouin
 Ma neige... disparue... Mon délicat plumage... tout sec... Mon maquillage... tout coulé de partout...
 # qui: heros
-Il délire, je vais trouver de quoi régler ça avant qu'il nous fasse une syncope.
+Elle délire, je vais trouver de quoi régler ça avant qu'elle nous fasse une syncope.
 # flag: pingouin_chaud
 -> DONE
 
@@ -487,27 +487,27 @@ Il délire, je vais trouver de quoi régler ça avant qu'il nous fasse une synco
   - flag_pingouin_chien_su:
     # qui: pingouin
     Je respire mieux avec mes neiges éternelles. Mais mon petit Chouaf me manque, il devait être devant le château.
-    Oh que lui est il arrivé ? Aide moi je t'en conjure !
+    Oh, que lui est-il arrivé ? Aide-moi, je t'en conjure !
   - flag_montagne_pliee:
     # qui: pingouin
-    Ahh ça fait plaisir cette neige et ce froid. Merci du fond du coeur.
+    Ahh, ça fait plaisir cette neige et ce froid. Merci du fond du coeur.
     # qui: heros
-    Tu m'as fait peur dans cet état, content que tu sois revenu parmi nous !
+    Tu m'as fait peur dans cet état, content que tu sois revenue parmi nous !
     # qui: pingouin
-    J'ai pas compris encore comment ma montagne a pu disparaître. D'ailleurs, mon petit Chouaf n'est plus là aussi.
+    J'ai toujours pas compris comment ma montagne a pu disparaître. D'ailleurs, mon petit Chouaf n'est plus là non plus.
     # qui: heros
-    C'est qui ça Chouaf ?
+    C'est qui ça, Chouaf ?
     # qui: pingouin
-    Mon petit chien adoré. Il aboie un peu trop et ça effraie les autres villageois, mais c'est pas une raison pour le kidnapper non ?
+    Mon petit chien adoré. Il aboie un peu trop et ça effraie les autres villageois, mais c'est pas une raison pour le kidnapper, non ?
     # qui: heros
-    Heu je sais pas, à vrai dire j'ai un peu peur des chiens, je peux comprendre...
+    Euh, je sais pas, à vrai dire j'ai un peu peur des chiens, je peux comprendre...
     # qui: pingouin
-    Ah je vois, c'est toi qui l'as séquestré ! Moi qui pensais que tu étais un bon crapaud.
+    Ah, je vois, c'est toi qui l'as séquestré ! Moi qui pensais que tu étais un bon crapaud.
     # qui: heros
-    Non mais on se calme, déjà je suis une grenouille pas un crapaud. Crôa crôa.
-    Je vais te le retrouver ton sac à puces, sinon tu vas nous refaire une scène.
+    Non mais on se calme, déjà je suis une grenouille, pas un crapaud. Crôa crôa.
+    Je vais te le retrouver, ton sac à puces, sinon tu vas nous refaire une scène.
     # qui: narrateur
-    La grenouille retient la forme du chien : ça pourrait être utile. # flag: pingouin_chien_su # give: idee_chien
+    Mémorisons la forme du chien : ça pourrait être utile. # flag: pingouin_chien_su # give: idee_chien
   - else:
     # qui: pingouin
     Chaud... De la neige, de la glace, de l'ombre...
@@ -522,21 +522,21 @@ Il délire, je vais trouver de quoi régler ça avant qu'il nous fasse une synco
 { flag_montagne_pliee: -> village_montagne_pliee }
 { not flag_pingouin_chaud:
     # qui: heros
-    Une grand feulle grise et blanche au fond du village. Je ne vois pas à quoi elle pourrait servir.
+    Une grande feuille grise et blanche au fond du village. Je ne vois pas à quoi elle pourrait servir.
     -> DONE
 }
 # qui: heros
-Une grand feulle grise et blanche au fond du village. Je pourrais l'utiliser pour aider le pingouin ?
+Une grande feuille grise et blanche au fond du village. Je pourrais l'utiliser pour aider Pingouin Glagla ?
 + [plier un frigo]
-    Un frigo aurait pu être une bonne idée, mais il ne m'a pas demandé un cerceuil, en plus y'a pas de prise.
+    Un frigo aurait pu être une bonne idée, mais elle ne m'a pas demandé un cercueil, et en plus y'a pas de prise.
 + [plier un bonhomme de neige]
     Un bonhomme de neige ? Mouais. Si c'est pour qu'il fonde et se plaigne encore plus que le pingouin, non merci.
 + [plier une montagne]
-    Ça va prendre de la place une montagne, mais au moins il aura autant de neige qu'il veut.
+    Ça va prendre de la place, une montagne, mais au moins elle aura autant de neige qu'elle veut.
     -> village_montagne_enigme
 + [plier un éventail]
-    Pingouin Glagla tiens à peine debout, il ne va pas faire grand chose avec cet éventail.
-    Et j'ai autre chose à faire que de rester là à l'eventer.
+    Pingouin Glagla tient à peine debout, elle ne va pas faire grand-chose avec cet éventail.
+    Et j'ai autre chose à faire que de rester là à l'éventer.
 // Gather obligatoire : le `-> DONE` du knot ne rattrape pas les branches.
 - -> DONE
 
@@ -564,7 +564,7 @@ Une grand feulle grise et blanche au fond du village. Je pourrais l'utiliser pou
 
 === village_montagne_pliee ===
 # qui: heros
-Une montage enneigée. Je ne sais pas trop comment j'ai pu le faire finir dans le village...
+Une montagne enneigée. Je ne sais pas trop comment j'ai pu la faire tenir dans le village...
 Glace et ombre à volonté pour Madame Glagla !
 -> DONE
 
@@ -577,15 +577,15 @@ Glace et ombre à volonté pour Madame Glagla !
 === village_vache ===
 { flag_vache_faim: -> village_vache_revoir }
 # qui: heros
-Quel plaisir de te revoir Vache à Lait ! Tiens, c'est la première fois que je te vois et que tu n'es pas en train de brouter.
+Quel plaisir de te revoir, Vache à Lait ! Tiens, c'est la première fois que je te vois et que tu n'es pas en train de brouter.
 # qui: vache
-Meuh. T'en vois de l'herbe dans l'coin toi ?
+Meuh. T'en vois de l'herbe dans l'coin, toi ?
 # qui: heros
 Ah, je me disais bien que c'était pas normal. Tu peux pas sortir du village ? Ça te changerait, elle est peut-être meilleure dehors.
 # qui: vache
 Meeeeuuuh... La flemme, c'est trop loin, j'suis fatiguée. J'ai faim.
 # qui: heros
-Oh la la quelle feignasse cette Vache à Lait ! Je vais peut-être pouvoir faire quelque chose.
+Oh là là, quelle feignasse, cette Vache à Lait ! Je vais peut-être pouvoir faire quelque chose.
 # flag: vache_faim
 -> DONE
 
@@ -595,26 +595,26 @@ Oh la la quelle feignasse cette Vache à Lait ! Je vais peut-être pouvoir faire
     # qui: heros
     Et voilà un pot à lait tout neuf ! Crôa crôa
     # qui: vache
-    T'as bien mérité un peu de mon lait frais. Pose-le là'dsous et tire !
+    T'as bien mérité un peu de mon lait frais. Pose-le là-d'ssous et tire !
     # qui: heros
-    Pouah ! Y'a une sacrée odeur mais j'en connais un qui va être heureux. Merci !
+    Pouah ! Y'a une sacrée odeur, mais j'en connais un qui va être heureux. Merci !
     # qui: narrateur
     Le pot est plein à ras bord de bon lait frais. # drop: pot # give: lait
   - flag_herbe_pliee && not flag_vache_pot_su:
     # qui: vache
-    Meuh ! D'la bonne herbe toute verte ! Si appétissant !
+    Meuh ! D'la bonne herbe toute verte ! Si appétissante !
     # qui: heros
-    Régale-toi ma bonne vache !
+    Régale-toi, ma bonne vache !
     # qui: narrateur
     La Vache à Lait déguste l'herbe d'un air ravi. # flag: herbe_broutee
     # qui: vache
-    Miam c'est d'la bonne herbe ça ! J'te dois bien une faveur.
+    Miam, c'est d'la bonne herbe, ça ! J'te dois bien une faveur.
     J'peux te donner un peu de mon bon lait frais, mais il te faudrait de quoi le transporter.
-    Il y avait des pots à lait avant ici.
+    Y'avait des pots à lait par ici, avant.
     # qui: heros
-    C'est gentil ça ! Je vais voir si je peux trouver ça dans le coin.
+    C'est gentil, ça ! Je vais voir ce que je peux trouver dans le coin.
     # qui: narrateur
-    La grenouille retient l'idée du pot. # flag: vache_pot_su # give: idee_pot
+    Mémorisons la forme du pot à lait : ça pourrait être utile. # flag: vache_pot_su # give: idee_pot
   - flag_vache_pot_su:
     # qui: vache
     Meuh. Reviens quand tu auras trouvé un pot à lait.
@@ -636,12 +636,12 @@ Oh la la quelle feignasse cette Vache à Lait ! Je vais peut-être pouvoir faire
 # qui: heros
 Un papier d'un vert végétal, abandonné dans la terre sèche. Ça me serait sûrement utile.
 + [plier un lézard vert]
-    Ils seraient mignons ces petits lézards, mais ça ne résoudrait pas vraiment les problèmes des habitants.
+    Ils seraient mignons, ces petits lézards, mais ça ne résoudrait pas vraiment les problèmes des habitants.
 + [plier de l'herbe]
-    Des brins d'herbe vont mettre un peu de vie sur cette place du village désolée, et vont ravir Mme Vache à Lait.
+    Des brins d'herbe vont mettre un peu de vie sur cette place désolée, et ravir Vache à Lait.
     -> village_herbe_enigme
 + [plier une fleur]
-    Ça serait joli, mais pas sûr que ça soit au goût de Mme la Vache à Lait.
+    Ça serait joli, mais pas sûr que ça soit au goût de Vache à Lait.
 - -> DONE
 
 === village_herbe_enigme ===
@@ -675,7 +675,7 @@ De la bonne herbe bien grasse.
 === village_pot ===
 { not has_idee_pot:
     # qui: heros
-    Un papier crème et épais. Je ne vois pas quoi en faire pour le moment.
+    Un papier crème et épais. Je ne sais pas quoi en faire pour le moment.
     -> DONE
 }
 # qui: heros
@@ -706,9 +706,9 @@ Ce solide papier couleur crème serait parfait pour plier le pot à lait.
 // Joué automatiquement à la première arrivée dans la scène (EntreeScene.create).
 === entree_arrivee ===
 # qui: heros
-Je peux voir d'ici l'entrée du chateau. Crôa Crôa
-Mais Gros Diplo a décidé d'asségier le château on dirait. Je devrais aller voir ce qui lui arrive.
-Et Petit Chat a l'air dans tout ses états, je devrais aller voir ça de plus près.
+Je peux voir d'ici l'entrée du château. Crôa crôa
+Mais Gros Diplo a décidé d'assiéger le château, on dirait. Je devrais aller voir ce qui lui arrive.
+Et Petit Chat a l'air dans tous ses états. Il faut que j'aille voir ça de plus près.
 # flag: entree_vue
 -> DONE
 
@@ -720,21 +720,21 @@ Et Petit Chat a l'air dans tout ses états, je devrais aller voir ça de plus pr
 { has_lait: -> entree_chat_lait }
 { flag_chat_vu:
     # qui: chat
-    Miaou. Si tu n'as pas de lait à me faire lapper,\ alors je te prie de décamper.
+    Miaou. Si tu n'as pas de lait à me faire laper, / Alors je te prie de décamper.
     -> DONE
 }
-# qui: héros
-Mais c'est notre Petit Chat adoré! Viens là que je te fasse un câlin.
+# qui: heros
+Mais c'est notre Petit Chat adoré ! Viens là que je te fasse un câlin.
 # qui: chat
-Miaou ! Où sont mes laquais ! / Personne ici ne daigne me donner du lait.
-Il n'y a ici que de l'eau, / Et je ne puis pas revenir à ma demeure au Château.
+Miaou ! Où sont mes laquais ? / Personne ici ne daigne me donner du lait.
+Il n'y a ici que de l'eau, / Et je ne puis regagner ma demeure au Château.
 Ce Gros Diplo m'empêche de rentrer, / Il dit que c'est pour ma sécurité.
-Le Chat Mal Luné a perdu l'esprit, / Qu'est ce qui lui a pris ?
+Le Chat Mal Luné a perdu l'esprit, / Qu'est-ce qui lui a pris ?
 # qui: heros
 Petit Chat ! Toujours aussi mignon, et toujours aussi insolent.
-Peux-tu me dire ce qu'il se passe ? Pourquoi le Gros Diplo ne veut pas te laisser entrer ?
+Peux-tu me dire ce qu'il se passe ? Pourquoi Gros Diplo ne veut pas te laisser entrer ?
 # qui: chat
-Miaou ! Du lait d'abord je t'en conjure! / Ou je commet un parjure.
+Miaou ! Du lait d'abord, je t'en conjure ! / Ou je commets un parjure.
 # qui: heros
 Il divague. Je ferais mieux de trouver du lait avant de me transformer en pâté pour chat.
 # flag: chat_vu
@@ -746,41 +746,41 @@ Il divague. Je ferais mieux de trouver du lait avant de me transformer en pâté
 // charge (`quandLaBoiteEstFermee`), sinon il se jouerait derrière elle.
 === entree_chat_lait ===
 # qui: heros
-Tiens mon Petit Chat. Du bon lait frais. Tu pourras remercier la Vache à Lait.
+Tiens, mon Petit Chat. Du bon lait frais. Tu pourras remercier la Vache à Lait.
 # qui: narrateur
-Le Petit Chat lappe goûlument le pot à lait qui se retrouve vide en quelques secondes. # drop: lait # flag: chat_lait
-Il étends ses pattes et miaule de satisfaction.
+Le Petit Chat lape goulûment le lait ; le pot se retrouve vide en quelques secondes. # drop: lait # flag: chat_lait
+Il étend ses pattes et miaule de satisfaction.
 # qui: chat
-Maaw! Merci mon cher Maître Origamiste! / Sans toi je serais bien triste.
-Ici tout est sens dessous dessus. / Y'a-il vraiment une issue ?
+Maaw ! Merci, mon cher Maître Origamiste ! / Sans toi je serais bien triste.
+Ici hélas rien ne va plus. / Pourra-t-on trouver le salut ?
 # qui: heros
-Calme-toi Petit Chat. Je comprends à moitié ce que tu dis. Enfin ça ne change pas vraiment d'avant.
-Raconte moi ce qui s'est passé au château.
+Calme-toi, Petit Chat. Je comprends à moitié ce que tu dis. Enfin, ça ne change pas vraiment d'avant.
+Raconte-moi ce qui s'est passé au château.
 # qui: chat
-Quels terribles actes nous a infligés / Le Chat Mal Luné pour se venger
-Les petits oiseaux, les jolies fleurs / Dépliées, disparues, oh quelle douleur!
+Quels terribles actes nous a infligés / Le Chat Mal Luné pour se venger !
+Les petits oiseaux, les jolies fleurs / Dépliés, disparus, oh quelle douleur !
 # qui: heros
-C'est terrible! Pourquoi ferait-il une chose pareille ?
+C'est terrible ! Pourquoi ferait-il une chose pareille ?
 # qui: chat
 Le Chat Mal Luné est mesquin / Aussi méchant et vil qu'un requin.
 Il va continuer à déplier / Tout ce que tu as jadis plié.
-Je dois de ce pas et de manière ferme. / Au Château y mettre un terme.
+Je dois de ce pas et de manière ferme / Au Château y mettre un terme.
 # qui: heros
-Crôa Crôa. Je crois que tu ne me racontes pas tout.
+Crôa crôa. Je crois que tu ne me racontes pas tout.
 Encore une de vos disputes qui a mal tourné.
-Pour l'instant aides moi à revenir au château, on va essayer de régler ça.
+Pour l'instant, aide-moi à revenir au château, on va essayer de régler ça.
 # qui: chat
 Au Château j'aimerais tant / Y revenir à temps.
-Ce papier accroché là haut / Peux-être est-ce ce qu'il nous faut.
-Voici ma modeste contribution / A ce que ce problème trouve une solution # flag: os_tombe
+Ce papier accroché là-haut / Peut-être est-ce ce qu'il nous faut.
+Voici ma modeste contribution / À ce que ce problème trouve une solution. # flag: os_tombe
 -> DONE
 
 === entree_chat_apres ===
 # qui: chat
 { not flag_diplo_pousse:
-    Hélas Gros Diplo n'a pas daigné se mouvoir. / J'aimerais tellement ne plus le voir.
-  -else:
-    Allons de ce pas régler ça. \ Au Château rentrons fissa.
+    Hélas, Gros Diplo n'a pas daigné se mouvoir. / J'aimerais tellement ne plus le voir.
+  - else:
+    Allons de ce pas régler ça. / Au Château rentrons fissa.
 }
 -> DONE
 
@@ -789,11 +789,11 @@ Voici ma modeste contribution / A ce que ce problème trouve une solution # flag
 === entree_papier_chien ===
 { not has_idee_chien:
     # qui: heros
-    Ce papier est tout doux et parsemé de tâches brunes. Je ne sais pas quoi en faire pour le moment.
+    Ce papier est tout doux et parsemé de taches brunes. Je ne sais pas quoi en faire pour le moment.
     -> DONE
 }
 # qui: heros
-Ce papier est tout doux et parsemé de tâches brunes. Ca doit être Chouaf!
+Ce papier est tout doux et parsemé de taches brunes. Ça doit être Chouaf !
 -> entree_chien_lancement
 
 === entree_chien_lancement ===
@@ -805,10 +805,10 @@ Ce papier est tout doux et parsemé de tâches brunes. Ca doit être Chouaf!
     # qui: heros
     Un dernier pli pour le museau... # origami: chien # flag: chien_plie # drop: idee_chien
     # qui: chien
-    Chouaf Chouaf!
+    Chouaf Chouaf !
   - else:
     # qui: heros
-    Euh il est un peu mutant ce chien... Je devrais reprendre de zero.
+    Euh, il est un peu mutant, ce chien... Je devrais repartir de zéro.
 }
 -> DONE
 
@@ -818,17 +818,17 @@ Ce papier est tout doux et parsemé de tâches brunes. Ca doit être Chouaf!
 === entree_papier_os ===
 { not flag_os_tombe:
     # qui: heros
-    Un papier blanc est accroché là haut. Même moi je ne saute pas assez haut pour le décrocher.
+    Un papier blanc est accroché là-haut. Même moi, je ne saute pas assez haut pour le décrocher.
     -> DONE
 }
 { flag_os_plie: -> DONE }
 { not flag_chien_plie:
     # qui: heros
-    C'est un papier blanc un peu abimé. Et il y a... de la bave ?? Pouah!
+    C'est un papier blanc un peu abîmé. Et il y a... de la bave ? Pouah !
     -> DONE
 }
 # qui: heros
-C'est un papier blanc un peu abimé. Et il y a... de la bave ?? Pouah!
+C'est un papier blanc un peu abîmé. Et il y a... de la bave ? Pouah !
 Il a l'air de beaucoup intéresser Chouaf.
 + [plier une laisse]
     Le pauvre, je ne vais pas l'attacher. Et pour être honnête, je ne saurais même pas comment m'y prendre sans y perdre une patte.
@@ -836,7 +836,7 @@ Il a l'air de beaucoup intéresser Chouaf.
     Un jouet pour Chouaf ? Pourquoi pas.
     -> entree_os_lancement
 + [plier une gamelle]
-    Je n'ai pas de quoi la remplir. Et je ne suis pas aussi tordu que Renard Futé pour lui faire cette mauvaise blague.
+    Je n'ai pas de quoi la remplir. Et je ne suis pas aussi tordu que le Renard Futé pour lui faire cette mauvaise blague.
 - -> DONE
 
 === entree_os_lancement ===
@@ -849,7 +849,7 @@ Il a l'air de beaucoup intéresser Chouaf.
     Un nouveau joujou pour le toutou. # origami: os # flag: os_plie # give: os
   - else:
     # qui: heros
-    Peux-être un os qui a été réduit en bouillie avec un peu d'imagination... Non, ça ne doit pas être ça.
+    Avec un peu d'imagination, peut-être un os réduit en bouillie... Non, ça ne doit pas être ça.
 }
 -> DONE
 
@@ -862,8 +862,8 @@ Il a l'air de beaucoup intéresser Chouaf.
     # qui: chien
     Chouaf ! Ouaf Ouaf !
     # qui: heros
-    Bon chien. Non ne t'approche pas trop.
-    Pingouin Glagla te cherche partout, va donc étaler ta bave là bas.
+    Bon chien. Non, ne t'approche pas trop.
+    Pingouin Glagla te cherche partout, va donc étaler ta bave là-bas.
   - has_os:
     # qui: narrateur
     Je vais essayer de ne pas me faire mordre...
@@ -873,8 +873,8 @@ Il a l'air de beaucoup intéresser Chouaf.
     WOUAF ! OUAF OUAF OUAF !
     # qui: narrateur
     Je lance l'os vers Gros Diplo en m'excusant intérieurement.
-    Le chien est tout excité et saute partout. # drop: os # flag: diplo_pousse
-    Mon plan machiavélique fonctionne et Gros Diplo s'éloigne de cette boule de dents surexcitée.
+    Chouaf est tout excité et saute partout. # drop: os # flag: diplo_pousse
+    Mon plan machiavélique fonctionne, et Gros Diplo s'éloigne de cette boule de dents surexcitée.
   - else:
     # qui: chien
     Chouaf ?
@@ -882,9 +882,9 @@ Il a l'air de beaucoup intéresser Chouaf.
     Il n'a pas l'air si terrible, je pourrais même me servir de lui pour arriver à mes fins...
     Faisons attention quand même.
     # qui: heros
-    Tu veux jouer c'est ça ? Attends, je vais trouver quelque chose qui va beaucoup te plaire !
+    Tu veux jouer, c'est ça ? Attends, je vais trouver quelque chose qui va beaucoup te plaire !
     # qui: chien
-    Ouaf Ouaf!
+    Ouaf Ouaf !
 }
 -> DONE
 
@@ -894,46 +894,46 @@ Il a l'air de beaucoup intéresser Chouaf.
 { flag_diplo_pousse: -> entree_diplo_pousse }
 { flag_diplo_su:
     # qui: diplodocus
-    QU'EST CE QUE TU FAIT LÀ ? TU N'AS PAS COMPRIS ? C'EST DANGEUREUX ICI!
+    QU'EST-CE QUE TU FAIS LÀ ? TU N'AS PAS COMPRIS ? C'EST DANGEREUX ICI !
     # qui: heros
-    Ok ça va pas la peine de me crier dessus...
+    Ok, ça va, pas la peine de me crier dessus...
     -> DONE
 }
 # qui: heros
-Gros Diplo ? Je crois que tu m'empêche de rentrer chez moi.
-Ca t'ennuierais de te pousser un peu ?
+Gros Diplo ? Je crois que tu m'empêches de rentrer chez moi.
+Ça t'ennuierait de te pousser un peu ?
 # qui: diplodocus
-OH, L'ORIGAMISTE. JE CROIS PAS QUE CA SOIT POSSIBLE, NON.
+OH, L'ORIGAMISTE. JE CROIS PAS QUE ÇA SOIT POSSIBLE, NON.
 # qui: narrateur
-J'avais oublié qu'il parle un peu fort celui là. Je vais devenir sourd. 
+J'avais oublié qu'il parlait un peu fort, celui-là. Je vais devenir sourd.
 # qui: heros
-Mais je veux rentrer! Et tu me fais mal aux tympans!
+Mais je veux rentrer ! Et tu me fais mal aux tympans !
 # qui: diplodocus
-C'EST POUR TA SECURITÉ. DESOLÉ, JE NE PEUX PAS PARLER MOINS FORT.
+C'EST POUR TA SÉCURITÉ. DÉSOLÉ, JE NE PEUX PAS PARLER MOINS FORT.
 # qui: heros
-Ma sécurité ? Tout le village est devenu fou, je vais être plus en sécurité chez moi je crois.
-Allez pousse toi un peu mon Gros Diplo.
+Ma sécurité ? Tout le village est devenu fou, je vais être plus en sécurité chez moi, je crois.
+Allez, pousse-toi un peu, mon Gros Diplo.
 # qui: diplodocus
-LE CHAT MAL LUNÉ EST A L'INTERIEUR, JE NE PEUX PAS LE FAIRE SORTIR.
-ET JE DOIS EMPÊCHER QUIQUNQUE DE L'APPROCHER.
+LE CHAT MAL LUNÉ EST À L'INTÉRIEUR, JE NE PEUX PAS LE FAIRE SORTIR.
+ET JE DOIS EMPÊCHER QUICONQUE DE L'APPROCHER.
 # qui: heros
-Qu'est ce qu'il a fait encore le Chat Mal Luné ? C'est en lien avec tout les objets dépliés ?
+Qu'est-ce qu'il a fait encore, le Chat Mal Luné ? C'est en lien avec tous les objets dépliés ?
 # qui: diplodocus
-J'EN SAIS RIEN MOI. LA REINE LE LIBOU DES BOIS JOLIS M'AS DIT DE LE TENIR À L'ÉCART DU VILLAGE.
-J'OBEIS. ALLEZ, DU BALAI.
+J'EN SAIS RIEN, MOI. SA MAJESTÉ LE LIBOU DES BOIS JOLIS M'A DIT DE LE TENIR À L'ÉCART DU VILLAGE.
+J'OBÉIS. ALLEZ, DU BALAI.
 # qui: narrateur
-Faut que je trouve un moyen de l'éloigner, il est têtu comme une mule géante. Et il me casse les tympans.
+Faut que je trouve un moyen de l'éloigner, il est têtu comme une mule géante. Et je suis en train de devenir sourd.
 # flag: diplo_su
 -> DONE
 
 === entree_diplo_pousse ===
 # qui: diplodocus
-PARDON MA REINE! MAUDIT CHIEN, J'AI FAILLI À MON DEVOIR.
+PARDON, MA REINE ! MAUDIT CHIEN, J'AI FAILLI À MON DEVOIR.
 # qui: heros
-C'est vrai qu'il peut être terrifiant ce Chouaf.
+C'est vrai qu'il peut être terrifiant, ce Chouaf.
 Sur ce, j'ai des choses à régler au château.
 # qui: diplodocus
-NON! NE T'APPROCHE PAS DU CHAT MAL LUNÉ!
+NON ! NE T'APPROCHE PAS DU CHAT MAL LUNÉ !
 -> DONE
 
 
@@ -957,5 +957,5 @@ J'appréhende un peu...
 === heros ===
 # qui: heros
 Je reviens d'un long voyage à l'étranger et je suis épuisé. Hâte de retrouver le confort du château !
-Je suis l'origamiste royal de Sa Majesté Le Libou des Bois Jolis.
+Je suis l'origamiste royal de Sa Majesté Le Libou Des Bois Jolis.
 -> DONE

@@ -6,11 +6,11 @@ Le héros rencontre le pingouin et la vache.
 
 ## Pingouin
 
-Nom dans le jeu: Pingouin Glagla
+Nom dans le jeu: Pingouin Glagla. Personnage féminin.
 
-Il a trop chaud.
+Elle a trop chaud.
 
-Si la montagne est pliée, dialogue pour parler de son ami chien disparu => idée du chien
+Si la montagne est pliée, dialogue pour parler de son chien disparu => idée du chien
 
 ## Papier de montagne
 
