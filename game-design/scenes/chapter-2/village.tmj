@@ -68,16 +68,16 @@
                  "y":535
                 }, 
                 {
-                 "height":180,
+                 "height":235.09684993152,
                  "id":6,
                  "name":"vache",
                  "opacity":1,
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
-                 "width":270,
+                 "width":311.32263744864,
                  "x":840,
-                 "y":450
+                 "y":394.90315006848
                 }, 
                 {
                  "height":190,
