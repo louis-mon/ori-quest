@@ -93,6 +93,7 @@ const CHOUAF_ET_OS = etape(
     'vache_pot_su',
     'pot_resolu',
     'pot_plie',
+    'vache_traite',
     'entree_vue',
     'chat_vu',
     'chat_lait',

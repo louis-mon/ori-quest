@@ -23,6 +23,8 @@ Si on sait que le pingouin a trop chaud, un dialogue avec des options permet de 
 Nom dans le jeu: Vache à Lait
 
 Elle n'a plus d'herbe. Si l'herbe est pliée, elle donne l'idée du pot à lait.
+Le pot rempli, elle n'a plus rien à donner et le dit : sans ça elle réclamait
+encore le pot qu'elle venait de remplir.
 
 ## Papier herbe
 

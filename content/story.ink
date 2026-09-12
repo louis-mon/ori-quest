@@ -83,6 +83,9 @@ VAR flag_pot_resolu = false
 VAR flag_pot_plie = false
 VAR has_pot = false
 VAR has_lait = false
+// La vache traite n'a plus rien à donner : sans ce drapeau elle réclamerait le
+// pot qu'elle vient de remplir.
+VAR flag_vache_traite = false
 
 // Chapitre 2 — l'entrée du château. Deux drapeaux y déclenchent un mouvement de
 // décor (`auLeverDe` dans src/game/scenes/entree-scene.ts) : `os_tombe` fait
@@ -569,11 +572,12 @@ Glace et ombre à volonté pour Madame Glagla !
 -> DONE
 
 
-// La vache. Trois états : elle a faim, elle a brouté et donne l'idée du pot,
-// puis elle remplit le pot qu'on lui apporte.
+// La vache. Quatre états : elle a faim, elle a brouté et donne l'idée du pot,
+// elle remplit le pot qu'on lui apporte, puis elle n'a plus rien à donner.
 //
 // ⚠ Ordre des branches : la plus avancée d'abord, sinon le pot resterait vide
-// pour toujours — `flag_vache_pot_su` couvrirait le cas où on le lui tend.
+// pour toujours — `flag_vache_pot_su` couvrirait le cas où on le lui tend, et
+// il reste levé une fois la vache traite.
 === village_vache ===
 { flag_vache_faim: -> village_vache_revoir }
 # qui: heros
@@ -599,7 +603,7 @@ Oh là là, quelle feignasse, cette Vache à Lait ! Je vais peut-être pouvoir f
     # qui: heros
     Pouah ! Y'a une sacrée odeur, mais j'en connais un qui va être heureux. Merci !
     # qui: narrateur
-    Le pot est plein à ras bord de bon lait frais. # drop: pot # give: lait
+    Le pot est plein à ras bord de bon lait frais. # drop: pot # give: lait # flag: vache_traite
   - flag_herbe_pliee && not flag_vache_pot_su:
     # qui: vache
     Meuh ! D'la bonne herbe toute verte ! Si appétissante !
@@ -615,6 +619,11 @@ Oh là là, quelle feignasse, cette Vache à Lait ! Je vais peut-être pouvoir f
     C'est gentil, ça ! Je vais voir ce que je peux trouver dans le coin.
     # qui: narrateur
     Mémorisons la forme du pot à lait : ça pourrait être utile. # flag: vache_pot_su # give: idee_pot
+  - flag_vache_traite:
+    # qui: vache
+    Meuh... J'ai plus une goutte pour aujourd'hui. Mais avec c'te bonne herbe, j'me r'ferai.
+    # qui: heros
+    Repose-toi bien, Vache à Lait. Crôa crôa
   - flag_vache_pot_su:
     # qui: vache
     Meuh. Reviens quand tu auras trouvé un pot à lait.
