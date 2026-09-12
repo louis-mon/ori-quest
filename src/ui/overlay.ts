@@ -29,6 +29,16 @@ const DELAI_ANTI_TAP = Number.isFinite(delaiDemande) ? delaiDemande : import.met
 // inaperçu — même vignette, même place, aucun mouvement.
 const DEPART_MS = 220;
 
+// Le texte s'écrit caractère par caractère. Au playtest, des joueurs restaient
+// devant une boîte posée d'un coup sans comprendre qu'elle attendait d'eux :
+// rien n'y bougeait, elle passait pour un élément de décor. Un texte qui
+// s'écrit est la seule chose en mouvement à l'écran, et le regard y va.
+//
+// 20 c/s est plus lent qu'une lecture ordinaire, et c'est voulu tant que la
+// vitesse se règle : le premier tap termine la ligne, donc un lecteur rapide
+// n'attend jamais plus que le geste qu'il ferait de toute façon.
+const CARACTERES_PAR_SECONDE = 20;
+
 const BANDEAU_MS = 2000;
 
 function nomDe(id: string): string {
@@ -56,7 +66,8 @@ export class Overlay {
   // Numéro de la dernière demande de portrait ; voir `poserPortrait()`.
   private portraitDemande = 0;
   private dialogueNom: HTMLElement;
-  private dialogueText: HTMLElement;
+  private dialogueVu: HTMLElement;
+  private dialogueReste: HTMLElement;
   private dialogueChoices: HTMLElement;
   private dialogueNext: HTMLButtonElement;
   private inventory: HTMLElement;
@@ -71,6 +82,11 @@ export class Overlay {
   // l'inventaire en pleine réplique écrasait le texte et laissait deux écouteurs
   // sur le tap suivant.
   private lignesEnCours = 0;
+
+  // La réplique entière, dont `dialogueVu` ne montre encore qu'un préfixe, et
+  // l'image en attente tant qu'elle s'écrit. Voir `defiler()`.
+  private texteEnCours = '';
+  private imageDefilement = 0;
 
   // De quoi résoudre la réplique en attente sans tap. Voir `interrompre()`.
   private terminerLigne: (() => void) | null = null;
@@ -91,7 +107,9 @@ export class Overlay {
         <img class="dialogue__portrait" alt="" hidden>
         <div class="dialogue__bulle">
           <p class="dialogue__nom" hidden></p>
-          <p class="dialogue__text"></p>
+          <!-- Les deux moitiés se touchent : en pre-line, un retour à la ligne
+               entre elles s'afficherait comme tel. Voir defiler(). -->
+          <p class="dialogue__text"><span class="dialogue__vu"></span><span class="dialogue__reste"></span></p>
           <div class="dialogue__choices"></div>
         </div>
         <button class="dialogue__next" aria-label="Continuer" hidden>▶</button>
@@ -100,7 +118,8 @@ export class Overlay {
     this.dialogue = root.querySelector('.dialogue')!;
     this.dialoguePortrait = root.querySelector('.dialogue__portrait')!;
     this.dialogueNom = root.querySelector('.dialogue__nom')!;
-    this.dialogueText = root.querySelector('.dialogue__text')!;
+    this.dialogueVu = root.querySelector('.dialogue__vu')!;
+    this.dialogueReste = root.querySelector('.dialogue__reste')!;
     this.dialogueChoices = root.querySelector('.dialogue__choices')!;
     this.dialogueNext = root.querySelector('.dialogue__next')!;
     this.inventory = root.querySelector('.inventory')!;
@@ -128,7 +147,7 @@ export class Overlay {
     // de l'appel, pas un tick plus tard.
     this.dialogue.hidden = false;
     this.showSpeaker(qui);
-    this.dialogueText.textContent = typographier(text);
+    this.defiler(typographier(text));
     this.dialogueChoices.innerHTML = '';
     this.dialogueNext.hidden = false;
     return this.attendreUnTap();
@@ -142,14 +161,18 @@ export class Overlay {
   // cible où poser le doigt.
   attendreUnTap(): Promise<void> {
     if (this.dialogue.hidden) return Promise.resolve();
-    const debut = performance.now();
+    // Rouvert quand un tap achève le défilement : ce tap-là compte pour un
+    // contact neuf, le rebond qui le suit ne doit pas emporter la réplique.
+    let ouvert = performance.now();
     return new Promise((resolve) => {
       this.lignesEnCours++;
       let fait = false;
+      const rendreLesTaps = this.surveillerAilleurs(() => ouvert);
       const finir = () => {
         if (fait) return;
         fait = true;
         this.dialogue.removeEventListener('pointerup', advance);
+        rendreLesTaps();
         if (this.terminerLigne === finir) this.terminerLigne = null;
         this.lignesEnCours--;
         resolve();
@@ -158,7 +181,15 @@ export class Overlay {
         // Propagation arrêtée même quand le tap est ignoré : avalé ici, il ne
         // doit pas repartir déclencher ce qui se trouve derrière la boîte.
         e.stopPropagation();
-        if (performance.now() - debut < DELAI_ANTI_TAP) return;
+        if (performance.now() - ouvert < DELAI_ANTI_TAP) return;
+        // Sur un texte qui s'écrit, le tap l'achève au lieu d'avancer : le
+        // joueur pressé lit d'un coup, et personne ne saute une réplique pour
+        // avoir voulu la lire plus vite.
+        if (this.defile) {
+          this.toutMontrer();
+          ouvert = performance.now();
+          return;
+        }
         finir();
       };
       this.dialogue.addEventListener('pointerup', advance);
@@ -201,13 +232,18 @@ export class Overlay {
       this.dialogue.hidden = false;
       this.dialogueNext.hidden = true;
       this.dialogueChoices.innerHTML = '';
+      // Le menu s'ouvre sur une réplique déjà payée d'un tap : ce qu'il en
+      // reste à écrire s'écrirait sous les options, pendant qu'on les lit.
+      this.toutMontrer();
       this.lignesEnCours++;
+      const rendreLesTaps = this.surveillerAilleurs(() => debut);
       options.forEach((label, i) => {
         const btn = document.createElement('button');
         btn.textContent = typographier(label);
         btn.addEventListener('pointerup', (e) => {
           e.stopPropagation();
           if (performance.now() - debut < DELAI_ANTI_TAP) return;
+          rendreLesTaps();
           this.dialogueChoices.innerHTML = '';
           this.lignesEnCours--;
           resolve(i);
@@ -220,11 +256,89 @@ export class Overlay {
   hideDialogue() {
     this.dialogue.hidden = true;
     this.dialogueChoices.innerHTML = '';
+    this.dialogue.classList.remove('dialogue--appel');
     // Le texte part avec le reste : un knot qui ouvre directement des choix
     // rouvrait la boîte sur la dernière ligne du dialogue précédent, attribuée à
     // personne puisque le locuteur, lui, était rendu.
-    this.dialogueText.textContent = '';
+    this.defiler('');
     this.showSpeaker(null);
+  }
+
+  // ---------- Le texte qui s'écrit ----------
+
+  // Ce qui reste à écrire est déjà dans le DOM, seulement invisible : la boîte a
+  // dès la première lettre la taille qu'elle aura à la fin. Écrit dans un seul
+  // nœud qui grandit, le texte se recouperait à chaque mot et remonterait sous
+  // le doigt, la boîte étant calée par le bas.
+  private defiler(texte: string) {
+    this.texteEnCours = texte;
+    cancelAnimationFrame(this.imageDefilement);
+    this.imageDefilement = 0;
+
+    if (!texte || mouvementReduit()) {
+      this.toutMontrer();
+      return;
+    }
+
+    this.dialogueVu.textContent = '';
+    this.dialogueReste.textContent = texte;
+    this.dialogue.classList.add('dialogue--defile');
+
+    // Le compte se refait sur l'horloge à chaque frame, et ne s'incrémente pas :
+    // une frame sautée doit rattraper deux caractères, pas ralentir la réplique.
+    const debut = performance.now();
+    const frame = () => {
+      const n = Math.floor(((performance.now() - debut) * CARACTERES_PAR_SECONDE) / 1000);
+      if (n >= texte.length) {
+        this.toutMontrer();
+        return;
+      }
+      this.dialogueVu.textContent = texte.slice(0, n);
+      this.dialogueReste.textContent = texte.slice(n);
+      this.imageDefilement = requestAnimationFrame(frame);
+    };
+    this.imageDefilement = requestAnimationFrame(frame);
+  }
+
+  private get defile() {
+    return this.imageDefilement !== 0;
+  }
+
+  private toutMontrer() {
+    cancelAnimationFrame(this.imageDefilement);
+    this.imageDefilement = 0;
+    this.dialogueVu.textContent = this.texteEnCours;
+    this.dialogueReste.textContent = '';
+    this.dialogue.classList.remove('dialogue--defile');
+  }
+
+  // ---------- « C'est ici qu'il faut taper » ----------
+
+  // Un tap qui tombe hors de la boîte pendant qu'elle attend : le joueur a bien
+  // compris qu'il fallait taper, pas où. Rien ne peut lui répondre — le décor
+  // est sourd tant qu'une réplique est en cours —, alors la boîte se signale.
+  //
+  // Seuls les taps du décor arrivent jusqu'ici : `uiRoot` arrête tout ce qui
+  // naît dans l'interface (`main.ts`), inventaire et menu compris, qui eux ont
+  // répondu au joueur.
+  private surveillerAilleurs(ouvert: () => number): () => void {
+    const ailleurs = (e: Event) => {
+      if (this.dialogue.contains(e.target as Node)) return;
+      // Le rebond du tap qui a ouvert la réplique tombe ici : c'est celui du
+      // hotspot qui a lancé la conversation, il n'a rien manqué.
+      if (performance.now() - ouvert() < DELAI_ANTI_TAP) return;
+      this.attirerLAttention();
+    };
+    window.addEventListener('pointerup', ailleurs);
+    return () => window.removeEventListener('pointerup', ailleurs);
+  }
+
+  private attirerLAttention() {
+    // Retirée, style recalculé, remise : sans le recalcul entre les deux,
+    // l'animation ne repart pas au tap suivant.
+    this.dialogue.classList.remove('dialogue--appel');
+    void this.dialogue.offsetWidth;
+    this.dialogue.classList.add('dialogue--appel');
   }
 
   // Sans locuteur, la boîte repasse en narration : la différence entre

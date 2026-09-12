@@ -137,7 +137,10 @@ export const etat = (page) =>
     const sauve = JSON.parse(localStorage.getItem('ori-quest.save.v1') || '{}');
     return {
       boite: !document.querySelector('.dialogue')?.hidden,
+      // La réplique ENTIÈRE, même à moitié écrite : ce qui reste est dans le
+      // DOM, seulement invisible.
       texte: document.querySelector('.dialogue__text')?.textContent ?? '',
+      defile: !!document.querySelector('.dialogue--defile'),
       qui: document.querySelector('.dialogue__nom')?.textContent ?? '',
       choix: [...document.querySelectorAll('.dialogue__choices button')].map((b) => b.textContent),
       enigme: !!document.querySelector('.puzzle'),
@@ -172,15 +175,27 @@ export const taperZone = (page, scene, id) => taper(page, ...pointDe(scene, id))
 // Avance d'une réplique et attend que le texte change vraiment : un `pause()`
 // fixe suffirait aujourd'hui, mais ferait passer un dialogue gelé pour un
 // dialogue lent.
+//
+// Deux taps au plus : le texte s'écrit caractère par caractère, et le premier
+// tap l'achève au lieu d'avancer — c'est le geste du joueur pressé, et c'est
+// celui qu'on veut jouer. Un seul suffit sur une réplique courte, finie d'écrire
+// avant que le doigt arrive. On ne DÉCIDE pas lequel des deux cas on est en
+// train de jouer : on tape, on regarde, et on retape si la réplique est encore
+// là — sinon un texte qui finit de s'écrire pendant l'attente se ferait sauter
+// une réplique.
 export async function avancer(page) {
   const avant = (await etat(page)).texte;
-  await pause(delaiTap);
-  compteur.taps++;
-  await page.mouse.click(640, 660);
-  for (let i = 0; i < 30; i++) {
-    const e = await etat(page);
-    if (!e.boite || e.texte !== avant || e.choix.length) return e;
-    await pause(100);
+  for (let reste = 2; reste > 0; reste--) {
+    await pause(delaiTap);
+    compteur.taps++;
+    await page.mouse.click(640, 660);
+    for (let i = 0; i < 30; i++) {
+      const e = await etat(page);
+      if (!e.boite || e.texte !== avant || e.choix.length) return e;
+      // Le tap a fini d'écrire la réplique : c'est au suivant de l'emporter.
+      if (!e.defile && reste > 1) break;
+      await pause(100);
+    }
   }
   return etat(page);
 }

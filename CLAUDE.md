@@ -297,6 +297,25 @@ une branche que personne n'a lue. Le délai est **nul en développement** ;
 `VITE_DELAI_TAP=300 npm run dev` le rallume, `npm run preview` donne le
 comportement livré.
 
+**La boîte se signale, parce qu'on ne la voyait pas.** Au playtest, des joueurs
+restaient devant une réplique sans comprendre qu'il fallait la toucher : ils
+tapaient le décor, qui est sourd tant qu'une réplique attend. Trois signes, tous
+dans `overlay.ts` et sa CSS — le texte **s'écrit** (`defiler()`,
+`CARACTERES_PAR_SECONDE`), la flèche **glisse** vers la droite au lieu de
+clignoter, et un tap tombé **hors de la boîte** la fait virer au doré
+**en entier** (`surveillerAilleurs()`) — le liseré seul ne se voyait pas. Ce tap-là n'a aucune autre réponse possible, autant
+qu'il enseigne. Pourquoi pas « taper n'importe où fait avancer », qui supprimerait
+le problème : parce que la surface des taps accidentels deviendrait l'écran
+entier, et qu'une réplique sautée ne se rejoue pas — c'est déjà ce que
+`DELAI_ANTI_TAP` protège.
+
+Deux pièges dans le texte qui s'écrit. **Ce qui reste à écrire est dans le DOM**,
+en `visibility: hidden` : écrit dans un seul nœud qui grandit, le texte se
+recouperait à chaque mot et remonterait sous le doigt, la boîte étant calée par
+le bas. Et **achever l'écriture d'un tap rouvre le délai anti-tap**, sinon le
+rebond de ce tap emporte la réplique qu'il vient tout juste d'afficher — la seule
+que personne n'aurait lue. `npm run qa -- anti-tap` tient les deux.
+
 **Des couches à ne pas intervertir** : l'énigme à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la
 confirmation à 7, le vol d'obtention et son bandeau à 8, l'écran de fin à 9 —

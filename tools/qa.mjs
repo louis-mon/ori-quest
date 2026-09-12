@@ -384,6 +384,20 @@ test(
     jouer: async () => {
       await attendreLaBoite(page());
       const l1 = (await etat(page())).texte;
+      // Le tap qui achève l'écriture rouvre le délai : sinon le rebond
+      // emporterait la réplique qu'il vient tout juste de finir d'écrire — la
+      // seule que personne n'aurait lue.
+      dire('la première réplique s’écrit encore', (await etat(page())).defile);
+      await page().mouse.click(640, 660);
+      await pause(60);
+      await page().mouse.click(640, 660);
+      await pause(600);
+      const e = await etat(page());
+      dire('un rebond n’emporte pas la réplique qu’il vient d’écrire', e.texte === l1);
+      dire('la réplique est écrite en entier', !e.defile);
+
+      // Le double contact d'origine : réplique écrite, les deux taps tombent
+      // sur une attente prête à avancer.
       await page().mouse.click(640, 660);
       await pause(60);
       await page().mouse.click(640, 660);

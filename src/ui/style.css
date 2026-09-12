@@ -6,6 +6,14 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   /* Convention ORIPA, dans la palette du jeu : montagne = accent, vallée = bleu. */
   --fold-valley: #4a6fa5;
+  /* L'appel de la boîte de dialogue. Ni l'accent, qui dit « un personnage
+     parle », ni le papier : une couleur que le jeu ne sert qu'à ça. Le fond est
+     le même doré rabattu au tiers de sa clarté — la boîte vire franchement, et
+     le texte en papier garde de quoi se lire dessus. */
+  --or: #e8b64c;
+  --or-halo: rgba(232, 182, 76, 0.45);
+  --or-fond: #7d5c16;
+  --dialogue-fond: rgba(26, 23, 20, 0.94);
 }
 
 * {
@@ -102,7 +110,7 @@ body {
   width: min(680px, calc(100% - 32px));
   padding: calc(18px * var(--ui-scale)) calc(20px * var(--ui-scale));
   border-radius: 16px;
-  background: rgba(26, 23, 20, 0.94);
+  background: var(--dialogue-fond);
   box-shadow: 0 10px 30px var(--shadow);
   /* Pas de `backdrop-filter` : invisible derrière un fond opaque à 94 %, et
      recalculé à chaque frame puisque le décor dessous ne s'arrête jamais de
@@ -170,6 +178,14 @@ body {
   white-space: pre-line;
 }
 
+/* Ce qui n'est pas encore écrit occupe sa place sans se voir : la boîte ne
+   grandit pas sous le doigt et les lignes ne se recoupent pas à chaque mot.
+   `visibility` et non `opacity` — le texte reste absent aussi pour la
+   sélection et pour un lecteur d'écran. */
+.dialogue__reste {
+  visibility: hidden;
+}
+
 /* Narration : ni nom ni vignette. L'italique dit « le jeu décrit » plutôt que
    « quelqu'un parle », et se voit avant d'être lu. */
 .dialogue--narration .dialogue__text {
@@ -220,16 +236,82 @@ body {
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  animation: blink 1.4s ease-in-out infinite;
+  animation: invite 2s ease-in-out infinite;
 }
 
 .dialogue__next[hidden] {
   display: none;
 }
 
+/* Le clignotement d'avant disait « je suis là » ; la translation dit « ça
+   continue par ici ». Vers la DROITE, jamais vers le texte : la flèche est le
+   dernier élément de la boîte, elle glisse dans la marge et ne recouvre rien.
+   Lente à l'aller, vive au retour — c'est l'aller qu'on suit du regard. */
+@keyframes invite {
+  0%,
+  10% {
+    transform: translateX(0);
+  }
+  70% {
+    transform: translateX(calc(10px * var(--ui-scale)));
+  }
+  80%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Le joueur a tapé ailleurs : la boîte se montre, une fois, sans rien changer
+   de ce qui est écrit. **Le fond entier vire au doré**, pas seulement son
+   contour : un liseré sur une boîte sombre, au bas d'un décor chargé, passait
+   inaperçu — c'est la surface qui se voit, pas la ligne.
+   Un seul temps, franc : montée vive, tenue, retour lent. Deux battements sur
+   toute la surface se liraient comme un défaut d'affichage.
+   Le `translateX` du centrage est répété à chaque étape, sinon l'animation le
+   perd et la boîte saute d'une demi-largeur. */
+.dialogue--appel {
+  animation: dialogue-appel 1s ease-out;
+}
+
+@keyframes dialogue-appel {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    background: var(--dialogue-fond);
+    box-shadow: 0 10px 30px var(--shadow);
+  }
+  12%,
+  50% {
+    transform: translateX(-50%) scale(1.03);
+    background: var(--or-fond);
+    box-shadow:
+      0 10px 30px var(--shadow),
+      0 0 0 2px var(--or),
+      0 0 26px var(--or-halo);
+  }
+}
+
 @keyframes blink {
   50% {
     opacity: 0.4;
+  }
+}
+
+/* Le clignotement reprend la main : une opacité n'est pas un mouvement, et
+   sans invite du tout la boîte redevient ce décor muet qu'on cherche à éviter.
+   Le texte, lui, s'écrit d'un coup — `mouvementReduit()`, dans overlay.ts.
+   L'appel, faute de battement, reste posé jusqu'à la fin de la réplique. */
+@media (prefers-reduced-motion: reduce) {
+  .dialogue__next {
+    animation: blink 1.4s ease-in-out infinite;
+  }
+
+  .dialogue--appel {
+    animation: none;
+    background: var(--or-fond);
+    box-shadow:
+      0 10px 30px var(--shadow),
+      0 0 0 2px var(--or);
   }
 }
 

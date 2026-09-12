@@ -249,6 +249,59 @@ dessinée, dans [`vignettes.ts`](../src/ui/vignettes.ts).
 La vignette reste contenue (42 px à l'échelle 1) : la colonne s'allonge d'une
 case par objet, et le bord gauche est aussi celui de la flèche de sortie.
 
+## La boîte de dialogue attend un tap, et elle le dit
+
+**Tranché après un playtest.** Des joueurs restaient devant une réplique sans
+comprendre que la suite tenait à un tap sur la boîte. Ils tapaient le décor — le
+personnage à qui ils parlaient, surtout — et rien ne leur répondait : tant qu'une
+réplique attend, le décor est sourd (voir *Ce qui est au premier plan est
+exclusif*, plus bas). Un tap sans effet est la pire des réponses, il ne dit même
+pas où taper.
+
+Le diagnostic est le même que pour l'inventaire, et il tient en trois mots :
+**rien ne bougeait.** Texte posé d'un coup, flèche qui clignote dans un coin —
+ça se lit comme un panneau, pas comme une question.
+
+Trois signes, du plus discret au plus insistant.
+
+**1. Le texte s'écrit, caractère par caractère.** Une vingtaine par seconde
+(`CARACTERES_PAR_SECONDE`, dans [`overlay.ts`](../src/ui/overlay.ts)), et **un
+tap l'achève d'un coup** : la vitesse n'est jamais une taxe sur le lecteur
+rapide, et le geste qu'on lui demande d'apprendre est précisément celui qui l'en
+libère. Le mouvement se produit là où le regard est déjà posé, et il désigne la
+boîte comme la chose vivante de l'écran.
+
+Ce qui reste à écrire occupe déjà sa place, invisible. Sinon la boîte grandit mot
+après mot et le texte remonte sous le doigt pendant qu'on le lit.
+
+**2. La flèche glisse au lieu de clignoter.** Lentement vers la droite, retour
+vif, et elle recommence. Vers la droite parce que c'est le sens de la lecture et
+celui de la suite ; jamais vers le texte, qu'elle recouvrirait. Le clignotement
+disait « je suis là », la translation dit « ça continue par ici ».
+
+**3. Un tap tombé à côté rallume la boîte** — **toute la boîte**, qui vire au
+doré le temps d'un battement, pas seulement son contour. Un liseré avait été
+essayé d'abord : au bas d'un décor chargé, sur une boîte déjà sombre, il ne se
+voyait quasiment pas. C'est la surface qui se remarque, pas la ligne. Doré parce
+que le jeu ne se sert de cette couleur qu'ici — l'accent terracotta veut déjà
+dire « quelqu'un parle » —, et rabattu assez pour que le texte en papier reste
+lisible pendant la seconde où il passe. C'est la seule réponse possible à ce
+tap-là, qui ne peut rien déclencher d'autre : autant qu'il enseigne.
+
+Un seul temps, franc — montée vive, tenue, retour lent. Deux battements sur
+toute la surface se liraient comme un défaut d'affichage.
+
+**Ce qui a été écarté : faire avancer le dialogue au tap n'importe où.** C'est le
+standard du visual novel sur téléphone, et ça supprimerait le problème au lieu de
+l'enseigner. Le prix est trop haut : la surface des taps accidentels devient
+l'écran entier, alors qu'une réplique sautée ne se rejoue pas — c'est déjà ce
+contre quoi le délai anti-tap protège. Mieux vaut un tap perdu qui apprend la
+boîte qu'une réplique perdue qui n'apprend rien.
+
+Le mouvement réduit (`prefers-reduced-motion`) reprend le clignotement, pose le
+texte d'un coup et laisse le doré posé, sans battement : les trois signes se
+dégradent, aucun ne disparaît.
+
 ## Qui parle : nom + vignette
 
 Les dialogues avec les PNJ demandent de savoir qui parle sans avoir à le
@@ -296,7 +349,7 @@ du nom) vit dans `src/game/systems/personnages.ts` ; voir l'en-tête de
 
 | Élément | Statut |
 | --- | --- |
-| Boîte de dialogue + choix | ✅ garder tel quel |
+| Boîte de dialogue + choix | ✅ le texte s'écrit, un tap à côté la rallume |
 | En-tête de locuteur (nom + vignette) | ✅ implémenté |
 | Marqueur cocotte sur les hotspots | ✅ garder |
 | Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |
