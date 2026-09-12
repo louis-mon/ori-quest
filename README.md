@@ -116,11 +116,15 @@ cp assets-src/graphisme_origami/background/bg_ravin.webp \
   public/assets/decor/fond-pont.webp
 cp assets-src/graphisme_origami/background/bg_la_porte.webp \
   public/assets/decor/fond-porte.webp
+cp assets-src/graphisme_origami/background/bg_village.webp \
+  public/assets/decor/fond-village.webp
+cp assets-src/graphisme_origami/background/bg_entree_chateau.webp \
+  public/assets/decor/fond-entree.webp
 ```
 
 Ils sont **renommés à l'intégration**, sur l'identifiant de la scène et non sur
-le nom de la zone : `pont` et `porte` sont ce que disent les knots d'ink, les
-sauvegardes et les plans. Le joueur, lui, lit « Le ravin ».
+le nom de la zone : `pont`, `porte`, `village` et `entree` sont ce que disent les
+knots d'ink, les sauvegardes et les plans. Le joueur, lui, lit « Le ravin ».
 
 Le WebP est gardé tel quel — 33 Ko contre 550 Ko pour le même dessin en PNG, et
 il porte sa couche alpha : le fond est **transparent au-dessus de l'horizon**,
@@ -385,8 +389,8 @@ npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 200
 ## Publier sur itch.io
 
 Ce qui part en ligne s'arrête **à la fin du chapitre 1**, sur « À suivre… » : le
-chapitre 2 se joue en développement et son texte est écrit, mais ses deux scènes
-tournent encore sur le décor provisoire. La frontière tient en une
+chapitre 2 se joue en développement et son texte est écrit, mais les objets de
+ses deux scènes ne sont pas encore calés sur leur fond. La frontière tient en une
 ligne de [`src/game/chapitres.ts`](src/game/chapitres.ts) — la narration, elle,
 ignore quels chapitres ont été compilés.
 
@@ -447,10 +451,11 @@ pour que le plein écran parte dans le bon sens.
 
 ## Points ouverts
 
-- Les deux scènes du **chapitre 2** attendent leur fond peint : elles tournent
-  sur `decor-provisoire.ts`, qui l'annonce à l'écran. Le remplacement est un
-  calque image de classe `fond` dans la carte, rien à toucher dans le code.
-  C'est ce qui garde le chapitre hors du build publié — son texte, lui, est
+- Les deux scènes du **chapitre 2** ont leur fond peint, mais **leurs objets ne
+  sont pas encore calés dessus** : zones, repères et chemins sont restés là où
+  le décor provisoire les avait mis. Le recalage est un passage dans Tiled, rien
+  à toucher dans le code. C'est ce qui garde le chapitre hors de la traversée
+  livrée (`DERNIER_TRAVERSE`, `src/game/chapitres.ts`) — son texte, lui, est
   écrit.
 - **Rien ne remet l'état à zéro entre deux chapitres**, alors que le game design
   le prévoit (voir [game-design/02-chapitres-et-scenes.md](game-design/02-chapitres-et-scenes.md)).

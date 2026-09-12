@@ -97,9 +97,10 @@ toucher à la logique.
 **Le build embarque les deux chapitres, la traversée s'arrête au premier.**
 C'étaient deux façons de dire la même chose tant que le chapitre 2 restait
 dehors ; `src/game/chapitres.ts` les sépare depuis qu'on veut le faire essayer
-sans le raccorder — ses deux scènes sont encore sur décor provisoire, et un
-joueur du récit n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce que
-la version contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller.
+sans le raccorder — les objets de ses deux scènes ne sont pas encore calés sur
+leur fond, et un joueur du récit n'a rien à y faire, alors qu'un testeur si.
+`LIVRES` dit ce que la version contient, `DERNIER_TRAVERSE` jusqu'où elle laisse
+aller.
 
 `goto()` (`main.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour les deux raisons :
 destination absente du build, ou franchissement hors traversée — **sans l'écrire

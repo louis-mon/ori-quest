@@ -9,7 +9,7 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
-import { dessinerDecorProvisoire } from './decor-provisoire';
+import { dessinerFond, preloadFond } from './fond';
 import { dessinerFeuille, poserFeuille, type FeuilleMobile } from './feuille';
 
 // L'entrée du château — seconde scène du chapitre 2.
@@ -19,9 +19,6 @@ import { dessinerFeuille, poserFeuille, type FeuilleMobile } from './feuille';
 // l'os, Chouaf saute pour effrayer Gros Diplo, qui s'écarte. Les trajets sont
 // tracés dans la carte (classe `chemin`), la scène ne dit que la vitesse et le
 // fait qu'on doit les regarder — `bloquant: true`.
-//
-// ⚠ Le fond n'est pas encore peint : rempart et sol viennent de
-// `decor-provisoire.ts`, et un calque image de classe `fond` les remplacera.
 
 const PLAN = plan;
 
@@ -69,6 +66,7 @@ export class EntreeScene extends PointClickScene {
   protected preloadAssets() {
     preloadHeros(this);
     preloadCiel(this);
+    preloadFond(this, PLAN.fond);
     preloadSprite(this, CHAT, 'assets/decor/chat.png');
     preloadSprite(this, DIPLO, 'assets/decor/diplodocus.png');
   }
@@ -138,13 +136,10 @@ export class EntreeScene extends PointClickScene {
   protected drawScenery() {
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
+
     // Le passage est un trou dans le rempart, pas un battant : la porte du
     // château est plus loin, et ce chapitre ne la montre pas.
-    dessinerDecorProvisoire(this, {
-      sol: SOL,
-      masses: [boxOf(PLAN, 'dec_rempart')],
-      creux: [boxOf(PLAN, 'exit_chateau')],
-    });
+    dessinerFond(this, PLAN.fond);
 
     this.feuilleChien = this.add.graphics();
     this.caler(

@@ -9,7 +9,7 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
-import { dessinerDecorProvisoire } from './decor-provisoire';
+import { dessinerFond, preloadFond } from './fond';
 import { dessinerFeuille } from './feuille';
 import { semerHerbe, type SemisHerbe } from './pature';
 
@@ -18,9 +18,6 @@ import { semerHerbe, type SemisHerbe } from './pature';
 //
 // La géométrie est lue dans game-design/scenes/chapter-2/village.tmj ; ce
 // fichier ne décide que du sens.
-//
-// ⚠ Le fond n'est pas encore peint : le sol vient de `decor-provisoire.ts`, et
-// c'est un calque image de classe `fond` dans la carte qui le remplacera.
 
 const PLAN = plan;
 
@@ -62,6 +59,7 @@ export class VillageScene extends PointClickScene {
   protected preloadAssets() {
     preloadHeros(this);
     preloadCiel(this);
+    preloadFond(this, PLAN.fond);
     preloadSprite(this, PINGOUIN, 'assets/decor/pingouin.png');
     preloadSprite(this, VACHE, 'assets/decor/vache.png');
   }
@@ -129,7 +127,8 @@ export class VillageScene extends PointClickScene {
     // regarde en venant de la porte.
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
-    dessinerDecorProvisoire(this, { sol: SOL });
+
+    dessinerFond(this, PLAN.fond);
 
     // La montagne du pingouin, au fond : le papier d'abord, le relief ensuite.
     // Deux boîtes, comme au vieil arbre du ravin.

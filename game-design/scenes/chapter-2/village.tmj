@@ -3,6 +3,20 @@
  "infinite":false,
  "layers":[
         {
+         "class":"fond",
+         "id":3,
+         "image":"..\/..\/..\/public\/assets\/decor\/fond-village.webp",
+         "imageheight":720,
+         "imagewidth":1280,
+         "locked":true,
+         "name":"fond",
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "draworder":"topdown",
          "id":2,
          "name":"plan",
@@ -88,8 +102,8 @@
                  "type":"exit",
                  "visible":true,
                  "width":96,
-                 "x":1160,
-                 "y":400
+                 "x":1161,
+                 "y":323
                 }, 
                 {
                  "height":250,
@@ -124,8 +138,8 @@
                  "type":"decor",
                  "visible":true,
                  "width":132,
-                 "x":1010,
-                 "y":70
+                 "x":1020,
+                 "y":50
                 }, 
                 {
                  "height":0,
@@ -149,7 +163,7 @@
                  "type":"decor",
                  "visible":true,
                  "width":545,
-                 "x":274,
+                 "x":259,
                  "y":227
                 }, 
                 {
@@ -195,7 +209,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
+ "nextlayerid":4,
  "nextobjectid":14,
  "orientation":"orthogonal",
  "renderorder":"right-down",

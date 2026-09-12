@@ -38,9 +38,10 @@ const CHAPITRES: Chapitre[] = [
 const LIVRES = CHAPITRES;
 
 // Mais la traversée, elle, s'arrête toujours à la fin du chapitre 1 : franchir
-// la porte pose « À suivre… » au lieu d'ouvrir le village. Les décors du
-// chapitre 2 sont encore provisoires — on veut bien qu'on aille l'essayer, pas
-// qu'un joueur du récit y débarque sans l'avoir demandé.
+// la porte pose « À suivre… » au lieu d'ouvrir le village. Le chapitre 2 a son
+// fond peint, mais ses objets ne sont pas encore calés dessus — on veut bien
+// qu'on aille l'essayer, pas qu'un joueur du récit y débarque sans l'avoir
+// demandé.
 //
 // Index du dernier chapitre relié au suivant. La narration, elle, ignore tout de
 // ce réglage : son knot de fin de chapitre se joue en entier de toute façon.
