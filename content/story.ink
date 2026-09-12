@@ -621,9 +621,8 @@ Oh là là, quelle feignasse, cette Vache à Lait ! Je vais peut-être pouvoir f
     Mémorisons la forme du pot à lait : ça pourrait être utile. # flag: vache_pot_su # give: idee_pot
   - flag_vache_traite:
     # qui: vache
-    Meuh... J'ai plus une goutte pour aujourd'hui. Mais avec c'te bonne herbe, j'me r'ferai.
-    # qui: heros
-    Repose-toi bien, Vache à Lait. Crôa crôa
+    Meuh... J'espère qu'tu vas t'régaler avec mon bon lait frais.
+    Moi j'chuis contente avec tout'cette herbe.
   - flag_vache_pot_su:
     # qui: vache
     Meuh. Reviens quand tu auras trouvé un pot à lait.
