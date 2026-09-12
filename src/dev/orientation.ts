@@ -30,7 +30,13 @@ const reglages = new Map<string, Pose>(
   ]),
 );
 
-let courant = [...reglages.keys()][0];
+// Le modèle en cours traverse le rechargement, comme le message de confirmation
+// ci-dessous : enregistrer réécrit le fichier d'où l'outil tire son état, Vite
+// recharge dans la foulée, et on retombait sur le premier de la liste alors
+// qu'on est en train d'en régler un autre.
+const MEMOIRE_MODELE = 'orientation-modele';
+const memorise = sessionStorage.getItem(MEMOIRE_MODELE);
+let courant = memorise && reglages.has(memorise) ? memorise : [...reglages.keys()][0];
 
 // Le cadre stable est calé sur le rayon du modèle, donc sur sa plus grande
 // dimension : un modèle allongé y flotte au milieu de beaucoup de vide. Partir
@@ -107,6 +113,7 @@ for (const nom of reglages.keys()) {
 
 function choisir(nom: string) {
   courant = nom;
+  sessionStorage.setItem(MEMOIRE_MODELE, nom);
   for (const b of liste.querySelectorAll<HTMLElement>('[data-modele]')) {
     b.classList.toggle('is-actif', b.dataset.modele === nom);
   }
@@ -294,3 +301,6 @@ function ecrireSortie() {
 
 choisir(courant);
 ecrireSortie();
+
+// La liste défile : un modèle repris en bas de colonne serait hors de vue.
+liste.querySelector('.is-actif')?.scrollIntoView({ block: 'nearest' });
