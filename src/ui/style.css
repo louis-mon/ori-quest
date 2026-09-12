@@ -966,7 +966,7 @@ body {
   position: absolute;
 }
 
-/* Position pilotée par le script (fixed + `transform`, centré sous le doigt).
+/* Position pilotée par le script (fixed + `transform`, suivant le point pris).
    `will-change` est ici et non sur `.puzzle__piece` : une couche de composition
    par pièce, en permanence, coûterait sa texture en mémoire vidéo pour rien. */
 .puzzle__piece.is-dragging {

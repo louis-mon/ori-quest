@@ -252,6 +252,10 @@ export async function runCreasePuzzle(
       recalculDemande = requestAnimationFrame(() => {
         recalculDemande = 0;
         if (finished) return;
+        // Un vol en cours finirait à `transform: none` sur des pixels qui ne
+        // sont plus les siens : la pièce se poserait à côté de sa nouvelle
+        // place.
+        for (const { el: piece } of pieces) annulerRetour(piece);
         trayLayout = eparpiller(el, tray, board, pieces, grille, graine(def.svg));
       });
     };
@@ -270,17 +274,55 @@ export async function runCreasePuzzle(
     // taille de plateau, qu'il faut défaire, sinon elle revient trop grande ; et
     // elle est réinsérée en fin de bac, donc au-dessus des autres, ce qui la
     // rend attrapable même si elle en recouvre une.
-    function toTray(piece: HTMLElement) {
+    //
+    // `depuis` est sa place à l'écran avant qu'on la repose : elle rejoint la
+    // sienne en glissant, parce qu'une pièce qui change de place en sautant se
+    // perd de vue et qu'on cherche ensuite laquelle a bougé.
+    function poserAuBac(piece: HTMLElement, x: number, y: number, depuis: DOMRect, bac: DOMRect) {
       placed.delete(piece);
 
       const pose = trayLayout.pose.get(piece);
       if (pose) {
         piece.style.width = `${pose.w}px`;
         piece.style.height = `${pose.h}px`;
-        piece.style.left = `${pose.x}px`;
-        piece.style.top = `${pose.y}px`;
       }
+      piece.style.left = `${x}px`;
+      piece.style.top = `${y}px`;
       tray.appendChild(piece);
+
+      voler(piece, depuis.left - (bac.left + x), depuis.top - (bac.top + y));
+    }
+
+    // Chassée du plateau par une pièce posée dessus. Personne ne l'a lâchée
+    // quelque part : elle retourne à sa place du vrac, faute d'en avoir une
+    // autre.
+    function chasserDuPlateau(piece: HTMLElement) {
+      // Lus avant d'écrire quoi que ce soit : ce sont les deux seules mesures
+      // du retour, et les prendre après forcerait un recalcul de mise en page.
+      const depuis = piece.getBoundingClientRect();
+      const bac = tray.getBoundingClientRect();
+      const pose = trayLayout.pose.get(piece);
+      poserAuBac(piece, pose?.x ?? 0, pose?.y ?? 0, depuis, bac);
+    }
+
+    // Relâchée hors du plateau, une pièce reste là où le joueur l'a laissée : la
+    // renvoyer à sa place du vrac défaisait le rangement qu'il venait de faire,
+    // et le tas du premier jour n'a rien de plus juste que le sien. Hors du bac,
+    // en revanche, elle y rentre : il n'y a là que le titre, la légende et les
+    // deux boutons, qu'une pièce posée dessus rendrait difficiles à toucher.
+    function rendreAuBac(piece: HTMLElement, depuis: DOMRect) {
+      const bac = tray.getBoundingClientRect();
+      const pose = trayLayout.pose.get(piece);
+      const w = pose?.w ?? depuis.width;
+      const h = pose?.h ?? depuis.height;
+
+      poserAuBac(
+        piece,
+        clamp(depuis.left - bac.left, 0, Math.max(0, bac.width - w)),
+        clamp(depuis.top - bac.top, 0, Math.max(0, bac.height - h)),
+        depuis,
+        bac,
+      );
     }
 
     // Dégage au passage ce que la pièce recouvrirait.
@@ -288,7 +330,7 @@ export async function runCreasePuzzle(
       const { masque: m } = pieceOf(piece);
       for (const [other, at] of placed) {
         if (other === piece) continue;
-        if (chevauchent(m, anchor, pieceOf(other).masque, at)) toTray(other);
+        if (chevauchent(m, anchor, pieceOf(other).masque, at)) chasserDuPlateau(other);
       }
 
       placed.set(piece, anchor);
@@ -309,7 +351,7 @@ export async function runCreasePuzzle(
       const onBoard = x >= b.left && x <= b.right && y >= b.top && y <= b.bottom;
 
       if (!onBoard) {
-        toTray(piece);
+        rendreAuBac(piece, rect);
         return;
       }
 
@@ -333,7 +375,9 @@ export async function runCreasePuzzle(
     function poserEnSolution(piece: HTMLElement): Promise<void> {
       const forme = pieceOf(piece).boite;
       const b = board.getBoundingClientRect();
+      // Lue avant l'annulation : en vol, la pièce part de là où elle est vue.
       const depart = piece.getBoundingClientRect();
+      annulerRetour(piece);
 
       piece.classList.add('is-dragging');
       piece.style.position = 'fixed';
@@ -661,6 +705,45 @@ async function loadPattern(url: string) {
   };
 }
 
+// Le retour d'une pièce au bac, joué plutôt que sauté. N'anime que `transform`,
+// donc composé par le navigateur : ni détourage ni ombres ne sont repeints, et
+// c'est le même coût que le glisser lui-même.
+//
+// L'API Web Animations plutôt qu'une transition CSS, pour `cancel()` : une
+// animation l'emporte sur le style en ligne, donc une pièce rattrapée en vol
+// resterait sourde au glisser tant que le vol tourne. Retenu par pièce, parce
+// que c'est `pointerdown` qui doit pouvoir l'interrompre.
+const RETOUR_MS = 200;
+const retours = new WeakMap<HTMLElement, Animation>();
+
+function voler(piece: HTMLElement, dx: number, dy: number) {
+  annulerRetour(piece);
+  // Sous le pixel, le vol ne se verrait pas et coûterait sa couche de
+  // composition : c'est le cas courant, celui d'une pièce lâchée dans le bac.
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+
+  const vol = piece.animate(
+    [{ transform: `translate3d(${dx}px, ${dy}px, 0)` }, { transform: 'translate3d(0, 0, 0)' }],
+    { duration: RETOUR_MS, easing: 'ease-out' },
+  );
+  retours.set(piece, vol);
+
+  // `onfinish`/`oncancel` et non la promesse `finished`, que `cancel()` rejette
+  // et que personne n'attendrait.
+  const oublier = () => {
+    if (retours.get(piece) === vol) retours.delete(piece);
+  };
+  vol.onfinish = oublier;
+  vol.oncancel = oublier;
+}
+
+function annulerRetour(piece: HTMLElement) {
+  const vol = retours.get(piece);
+  if (!vol) return;
+  retours.delete(piece);
+  vol.cancel();
+}
+
 // `setPointerCapture` redirige tous les événements du pointeur vers la pièce
 // jusqu'au relâchement : un doigt qui sort du cadre ne laisse pas de pièce
 // orpheline. Elle passe en `position: fixed` le temps du glisser, échappant au
@@ -683,6 +766,9 @@ function makeDraggable(
   let dragging = false;
   let width = 0;
   let height = 0;
+  // Où le doigt a pris la pièce, depuis son coin, à sa taille de plateau.
+  let priseX = 0;
+  let priseY = 0;
 
   // Un `pointercancel` doit pouvoir rendre ces styles : les retirer renverrait
   // la pièce en `auto`, donc dans le coin de son conteneur, alors qu'elle reste
@@ -690,7 +776,7 @@ function makeDraggable(
   let avant: Partial<Record<'position' | 'width' | 'height' | 'left' | 'top', string>> = {};
 
   const moveTo = (x: number, y: number) => {
-    piece.style.transform = `translate3d(${x - width / 2}px, ${y - height / 2}px, 0)`;
+    piece.style.transform = `translate3d(${x - priseX}px, ${y - priseY}px, 0)`;
   };
 
   piece.addEventListener('pointerdown', (e) => {
@@ -705,9 +791,24 @@ function makeDraggable(
       top: piece.style.top,
     };
 
+    // Lue avant d'annuler le vol : une pièce rattrapée en route se prend là où
+    // elle est vue, pas là où elle allait.
+    const depart = piece.getBoundingClientRect();
+    annulerRetour(piece);
+
     const b = board.getBoundingClientRect();
     width = (forme.w / grille) * b.width;
     height = (forme.h / grille) * b.height;
+
+    // La pièce ne se recentre pas sous le doigt : elle garde le point de papier
+    // qu'on vient de prendre. Recentrée, elle sautait au contact — d'autant plus
+    // loin qu'elle est large —, et le joueur perdait de vue le bout qu'il
+    // visait. Le point est retenu en part de sa boîte et non en pixels : bac et
+    // plateau peuvent ne pas être tout à fait à la même échelle, et c'est le
+    // papier pris qui doit rester sous le doigt.
+    priseX = depart.width > 0 ? ((e.clientX - depart.left) / depart.width) * width : width / 2;
+    priseY = depart.height > 0 ? ((e.clientY - depart.top) / depart.height) * height : height / 2;
+
     // `transform` porte la position, donc l'origine doit être neutre : sans ça
     // la pièce garderait le décalage qu'elle avait dans le bac.
     piece.style.position = 'fixed';
@@ -736,7 +837,7 @@ function makeDraggable(
     piece.style.removeProperty('transform');
 
     if (dropped) {
-      // `place()` ou `toTray()` va la reposer : on leur rend une ardoise propre.
+      // `place()` ou `rendreAuBac()` va la reposer : on leur rend une ardoise propre.
       for (const prop of ['position', 'width', 'height', 'left', 'top'] as const) {
         piece.style.removeProperty(prop);
       }

@@ -273,15 +273,18 @@ export async function resoudreEnigme(page, nom) {
     if (!cadre || !plateau) throw new Error(`énigme « ${nom} » : pièce ${i} introuvable`);
 
     const [px, py] = prise(points);
-    // Le glisser centre la pièce sous le doigt : on vise le centre de sa case.
+    // Le glisser garde sous le doigt le point de papier qu'il a pris : on vise
+    // donc la place de CE point-là sur le plateau, et non le centre de la case.
+    // Les coupes sont tracées dans la grille du motif, où une pièce est déjà
+    // à sa place : le point pris et sa destination ont les mêmes coordonnées.
     await page.mouse.move(
       cadre.x + ((px - b.x) / b.w) * cadre.width,
       cadre.y + ((py - b.y) / b.h) * cadre.height,
     );
     await page.mouse.down();
     await page.mouse.move(
-      plateau.x + ((b.x + b.w / 2) / d.grille) * plateau.width,
-      plateau.y + ((b.y + b.h / 2) / d.grille) * plateau.height,
+      plateau.x + (px / d.grille) * plateau.width,
+      plateau.y + (py / d.grille) * plateau.height,
       { steps: 10 },
     );
     await page.mouse.up();
