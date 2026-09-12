@@ -9,9 +9,12 @@
 //   par construction (voir `couper.ts`) ;
 // - rien ne se pose ailleurs que sur la grille d'ancrage, sans quoi une pièce ne
 //   pourrait pas se caler sur le plateau du jeu ;
-// - une coupe traverse une pièce à la fois, celle survolée au premier clic — la
-//   position réelle du pointeur tranche, pas le point calé, sinon un point posé
-//   sur une frontière serait ambigu.
+// - une coupe traverse une pièce à la fois, et part du bord de celle-là — ce
+//   bord étant aussi bien une rive du carré qu'une coupe déjà tracée, une pièce
+//   peut très bien ne toucher aucun bord du papier. Laquelle on fend se décide
+//   au deuxième point : un départ posé sur une coupe existante est sur le bord
+//   des deux pièces qu'elle sépare, et le pixel survolé au premier clic en
+//   choisirait une au hasard, pour l'annoncer un clic trop tard.
 //
 // Le fichier écrit, `game-design/enigmes/<nom>.json`, fait foi comme la carte
 // Tiled fait foi pour la géométrie d'une scène.
@@ -54,9 +57,14 @@ const historique: Point[][][] = [];
 // de l'image, que le navigateur affiche sans nous en dire les points.
 let plis: Segment[] = [];
 
-// Coupe en cours de tracé, et la pièce qu'elle fend.
+// Coupe en cours de tracé, la pièce qu'elle fend, et celles qui pourraient
+// encore l'être : tant que le trait n'a qu'un point, toutes celles dont le bord
+// passe par ce point, la survolée en tête.
 let trait: Point[] = [];
 let pieceCoupee = -1;
+let candidats: number[] = [];
+
+const enJeu = () => (trait.length === 1 ? candidats : pieceCoupee >= 0 ? [pieceCoupee] : []);
 
 // Pièce survolée et intersection visée, recalculées à chaque mouvement.
 let survol = -1;
@@ -142,6 +150,7 @@ function memoriser() {
 function annulerCoupe() {
   trait = [];
   pieceCoupee = -1;
+  candidats = [];
 }
 
 // ---------------------------------------------------------------------------
@@ -172,10 +181,15 @@ function rendre() {
 
   // Mis en avant selon ce qu'on peut en faire à cet instant : les bords de la
   // pièce survolée tant qu'aucune coupe n'est commencée, puis tout l'intérieur
-  // de la pièce coupée une fois le trait entamé.
-  const cible = pieceCoupee >= 0 ? pieces[pieceCoupee] : survol >= 0 ? pieces[survol] : null;
+  // des pièces encore en jeu une fois le trait entamé.
+  const fendues = enJeu();
+  const cibles = fendues.length
+    ? fendues.map((i) => pieces[i])
+    : survol >= 0
+      ? [pieces[survol]]
+      : [];
   const visable = (x: number, y: number) =>
-    !!cible && (surLeBord(cible, x, y) || (trait.length > 0 && pointDans(cible, x, y)));
+    cibles.some((c) => surLeBord(c, x, y) || (trait.length > 0 && pointDans(c, x, y)));
 
   const points: string[] = [];
   for (let y = 0; y <= grille; y++) {
@@ -196,7 +210,7 @@ function rendre() {
       const classes = [
         'piece',
         i === survol ? 'piece--survol' : '',
-        i === pieceCoupee ? 'piece--coupee' : '',
+        fendues.includes(i) ? 'piece--coupee' : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -209,7 +223,7 @@ function rendre() {
       const d = chemin(p);
       return (
         `<path class="bord-halo" d="${d}" />` +
-        `<path class="bord${i === pieceCoupee ? ' bord--coupee' : ''}" d="${d}" />`
+        `<path class="bord${fendues.includes(i) ? ' bord--coupee' : ''}" d="${d}" />`
       );
     })
     .join('');
@@ -409,10 +423,30 @@ plan.addEventListener('pointerdown', (e) => {
     }
     survol = cible;
     pieceCoupee = cible;
+    const voisines = pieces
+      .map((_, i) => i)
+      .filter((i) => i !== cible && surLeBord(pieces[i], ...cale));
+    candidats = [cible, ...voisines];
     trait = [cale];
-    dire(`Coupe de la pièce ${cible} en cours…`);
+    dire(
+      candidats.length > 1
+        ? 'Coupe en cours — le point suivant dira quelle pièce est fendue.'
+        : `Coupe de la pièce ${cible} en cours…`,
+    );
     rappeler();
     return rendre();
+  }
+
+  // Le deuxième point choisit la pièce : celle où il entre, ou celle qu'il
+  // traverse d'un bord à l'autre. Tant qu'il n'est pas posé, les autres restent
+  // en jeu — un point repris au Retour arrière rouvre donc le choix.
+  if (trait.length === 1 && candidats.length > 1) {
+    const choisi =
+      candidats.find((i) => pointDans(pieces[i], ...cale)) ??
+      candidats.find(
+        (i) => surLeBord(pieces[i], ...cale) && couper(pieces[i], [trait[0], cale]).ok,
+      );
+    if (choisi !== undefined) pieceCoupee = choisi;
   }
 
   const forme = pieces[pieceCoupee];
