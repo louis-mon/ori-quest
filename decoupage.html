@@ -48,14 +48,16 @@
             </p>
           </fieldset>
 
-          <fieldset>
-            <legend>Pièces</legend>
+          <!-- Une div et non un fieldset, seule de son espèce ici : voir `.pieces`
+               dans la CSS. Sa légende est donc refaite à la main. -->
+          <div class="pieces">
+            <p class="titre">Pièces</p>
             <ul id="inventaire" class="inventaire"></ul>
             <p class="note">
               Une pièce de moins d'une cellule est presque toujours trop petite pour être attrapée
               au doigt une fois le bac à l'échelle du téléphone.
             </p>
-          </fieldset>
+          </div>
 
           <div class="actions">
             <button id="annuler" type="button">Annuler la coupe (⌘Z)</button>

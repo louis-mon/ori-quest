@@ -89,7 +89,10 @@ main {
   gap: 16px;
   min-width: 0;
   min-height: 0;
-  overflow-y: auto;
+  /* La colonne ne défile pas : le pied de page — nom du fichier et
+     enregistrement — reste au bas de l'écran quoi qu'il arrive. Ce qui défile
+     est plus bas, et le plus tard possible. */
+  overflow: hidden;
 }
 
 h1 {
@@ -117,6 +120,11 @@ h2 {
   gap: 20px;
   align-items: flex-start;
   flex-wrap: wrap;
+  /* Elle prend la hauteur qui reste. Le repli sur un défilement ne sert que
+     dans une fenêtre trop étroite, où les réglages passent sous le plan. */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 #plan {
@@ -243,6 +251,47 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* Pas plus haut que la scène : au-delà, c'est la liste des pièces qui cède. */
+  max-height: 100%;
+}
+
+/* Le seul bloc qui grandit sans fin — un découpage à quinze pièces poussait les
+   boutons hors de l'écran, et il fallait faire défiler la page pour annuler une
+   coupe. Sa liste défile donc pour elle, et ce qui est en dessous ne bouge plus.
+   C'est aussi le seul bloc du panneau qui ne soit pas un `fieldset` : la boîte
+   de contenu d'un `fieldset` est anonyme et ne transmet pas sa hauteur, si bien
+   qu'un enfant contraint déborde au lieu de se réduire — en flex comme en
+   grille. D'où la légende refaite à la main juste en dessous. */
+.pieces {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--carte);
+}
+
+/* Posée sur la bordure du haut, comme une vraie légende. Sa couleur est diluée
+   plutôt que son opacité : à travers un bloc translucide, la bordure qu'il doit
+   masquer reparaîtrait. */
+.pieces .titre {
+  align-self: flex-start;
+  margin: -12px 0 6px -6px;
+  padding: 0 6px;
+  background: var(--carte);
+  color: rgba(242, 236, 225, 0.6);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Le plancher compte autant que le plafond : sans lui, une fenêtre un peu basse
+   réduisait la liste à rien du tout et il ne restait que sa note. */
+.pieces .inventaire {
+  min-height: 4.5em;
+  overflow-y: auto;
 }
 
 fieldset {
@@ -338,6 +387,16 @@ button:disabled {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+/* Elles restent au bas de la vue même quand le panneau déborde et défile, ce
+   qui arrive encore sur une fenêtre basse ou étroite. C'était tout le problème :
+   une coupe à annuler, et le bouton hors de l'écran. */
+.reglages .actions {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: 2px;
+  background: var(--fond);
 }
 
 button {
