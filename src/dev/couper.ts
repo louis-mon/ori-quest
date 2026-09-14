@@ -14,15 +14,18 @@
 // - boucle refermée à l'intérieur : le reste a un **trou**, et une pièce cesse
 //   d'être un anneau.
 //
-// Les deux se dessinent et ne se découpent pas — le jeu pose du papier, et un
-// papier pincé tombe en deux, un papier troué n'a pas de liste de sommets. Ce
-// sont donc des états de travail, que l'éditeur signale et que l'enregistrement
-// refuse (`polygoneSimple`, dans `tools/lib/decoupage.mjs`). Ils se résolvent
-// par d'autres coupes : un pincement en séparant ses deux lobes sans repasser
-// par lui, un trou en le fondant dans le contour — ce qui demande deux coupes,
-// la première réunissant les deux anneaux en un seul fendu dans la longueur, la
-// seconde le tranchant pour de bon. C'est le prix de pouvoir dessiner la pièce
-// qu'on veut d'un geste, au lieu de la déduire de l'ordre des coupes.
+// Les deux se résolvent par d'autres coupes : un pincement en séparant ses deux
+// lobes sans repasser par lui, un trou en le fondant dans le contour — ce qui
+// demande deux coupes, la première réunissant les deux anneaux en un seul fendu
+// dans la longueur, la seconde le tranchant pour de bon. C'est le prix de
+// pouvoir dessiner la pièce qu'on veut d'un geste, au lieu de la déduire de
+// l'ordre des coupes.
+//
+// Les deux ne pèsent pas le même poids. **Le trou ne s'enregistre pas** : le
+// fichier n'a qu'une liste de sommets par pièce, il ne sait pas l'écrire. **Le
+// pincement, lui, n'est qu'un avertissement** — le jeu joue très bien une pièce
+// qui ne tient que par un point, c'est le papier qui s'y déchirerait
+// (`polygoneSimple`, dans `tools/lib/decoupage.mjs`).
 //
 // Tout est entier — les extrémités sur un anneau, les points du milieu
 // strictement à l'intérieur —, donc aucune tolérance numérique n'entre dans le

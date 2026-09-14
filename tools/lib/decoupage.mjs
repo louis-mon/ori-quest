@@ -121,11 +121,16 @@ export function masque(points, grille) {
 
 // Un polygone simple : des sommets tous distincts, et des arêtes qui ne se
 // rencontrent qu'aux sommets qu'elles partagent. L'éditeur sait en produire
-// d'autres depuis qu'une coupe peut se refermer sur son point de départ — ce qui
-// reste est alors **pincé** en ce point, deux lobes qui ne tiennent que par lui.
-// Ça se dessine, ça ne se découpe pas : le jeu pose du papier, et un papier
-// pincé tombe en deux. C'est donc un état de travail, refusé ici, à
-// l'enregistrement comme à l'import.
+// d'autres depuis qu'une coupe peut se refermer sur son point de départ : le
+// contour de ce qui reste repasse alors par ce point, où le papier n'a plus
+// aucune largeur — un *pinch point*.
+//
+// Le jeu n'en souffre pas : il dessine la pièce par son tracé, l'attrape par le
+// même, et le remplissage `nonzero` peint tout ce qui est enfermé. Ce qui
+// souffre, c'est la vraisemblance : une vraie feuille découpée comme ça se
+// déchirerait au premier doigt. D'où un **avertissement** et non un refus,
+// comme pour une pièce minuscule ou une solution ambiguë — c'est à l'auteur de
+// trancher.
 export function polygoneSimple(points) {
   if (points.length < 3 || aire(points) <= 0) return false;
 
@@ -149,9 +154,23 @@ export function polygoneSimple(points) {
   return true;
 }
 
-// Les pièces qui n'en sont pas, par leur rang dans le découpage.
-export function pincees({ pieces }) {
-  return pieces.flatMap((points, i) => (polygoneSimple(points) ? [] : [i]));
+// Les endroits où une pièce ne tient que par un point, avec le sommet fautif
+// quand il y en a un — c'est ce qui permet de le montrer sur le plan plutôt que
+// de laisser chercher.
+export function ruptures({ pieces }) {
+  return pieces.flatMap((points, piece) => {
+    if (polygoneSimple(points)) return [];
+    return [{ piece, point: sommetRepete(points) }];
+  });
+}
+
+function sommetRepete(points) {
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      if (points[i][0] === points[j][0] && points[i][1] === points[j][1]) return points[i];
+    }
+  }
+  return null;
 }
 
 const vectoriel = (o, p, q) => (p[0] - o[0]) * (q[1] - o[1]) - (p[1] - o[1]) * (q[0] - o[0]);
@@ -380,23 +399,26 @@ export function chercherSolutions(
 // Un seul calcul pour l'import, l'outil en ligne de commande et l'éditeur, sans
 // quoi celui-ci finirait par afficher autre chose que ce que le jeu vérifie.
 export function analyser(decoupage, fichierMotif, { bords = false } = {}) {
-  // Avant le pavage : une pièce pincée le pave très bien, l'aire d'une fente
-  // étant nulle. C'est la pièce elle-même qui n'existe pas.
-  const pinces = pincees(decoupage);
-  if (pinces.length) return { etat: 'pincee', pincees: pinces };
+  // Les ruptures accompagnent le verdict au lieu de l'interrompre : une pièce
+  // qui ne tient que par un point pave le carré comme une autre, l'aire d'une
+  // fente étant nulle, et le jeu la joue. C'est un avertissement.
+  const ruptes = ruptures(decoupage);
 
   const pavage = verifierPavage(decoupage);
-  if (pavage.doubles.length) return { etat: 'superposition', pavage };
-  if (pavage.trous.length) return { etat: 'trou', pavage };
-  if (!existsSync(fichierMotif)) return { etat: 'sans-motif', pavage };
+  if (pavage.doubles.length) return { etat: 'superposition', pavage, ruptures: ruptes };
+  if (pavage.trous.length) return { etat: 'trou', pavage, ruptures: ruptes };
+  if (!existsSync(fichierMotif)) return { etat: 'sans-motif', pavage, ruptures: ruptes };
 
   const segments = lireMotif(fichierMotif, decoupage.grille, bords);
   const { solutions, interrompu } = chercherSolutions(decoupage, segments);
-  if (interrompu) return { etat: 'trop-long', traits: segments.length, pavage };
+  if (interrompu) {
+    return { etat: 'trop-long', traits: segments.length, pavage, ruptures: ruptes };
+  }
   return {
     etat: solutions.length === 1 ? 'unique' : 'multiple',
     solutions,
     traits: segments.length,
     pavage,
+    ruptures: ruptes,
   };
 }

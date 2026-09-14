@@ -365,13 +365,23 @@ legend {
 }
 
 .inventaire .petite,
-.inventaire .pincee {
+.inventaire .alerte {
   color: var(--accent);
 }
 
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Le point par lequel une pièce ne tient qu'à elle-même. Un cercle ouvert : le
+   sommet fautif se voit au milieu. */
+.rupture {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 
 .pastille {

@@ -8,9 +8,9 @@
 //   première pièce et chaque trait en fend une en deux, donc le pavage reste
 //   exact (voir `couper.ts`). Une coupe qui se referme sur son point de départ
 //   détache en un geste la pièce qu'elle entoure, mais laisse le reste **pincé**
-//   en ce point, ou **troué** si le départ était à l'intérieur. Ce sont les deux
-//   seuls états que le découpage ne sait pas rendre au jeu : le verdict les dit
-//   pendant qu'on travaille, et l'enregistrement les refuse ;
+//   en ce point, ou **troué** si le départ était à l'intérieur. Le verdict dit
+//   les deux pendant qu'on travaille ; seul le trou bloque l'enregistrement, le
+//   fichier n'ayant qu'un contour par pièce ;
 // - rien ne se pose ailleurs que sur la grille d'ancrage, sans quoi une pièce ne
 //   pourrait pas se caler sur le plateau du jeu ;
 // - une coupe traverse une pièce à la fois, et part d'un de ses points — un
@@ -73,14 +73,20 @@ const enJeu = () => (trait.length === 1 ? candidats : pieceCoupee >= 0 ? [pieceC
 // Les pièces que le dernier verdict a dites pincées. C'est de l'affichage, pas
 // la garde : le verdict arrive après coup, et c'est le serveur qui refuse
 // d'écrire un découpage pincé.
-let pincees: number[] = [];
+// Les pièces qui ne tiennent que par un point, avec ce point : le dernier
+// verdict les a nommées, et c'est lui qui fait foi. Un avertissement, pas une
+// faute — le jeu les joue (voir `polygoneSimple`, dans
+// `tools/lib/decoupage.mjs`).
+let ruptures: { piece: number; point: Point | null }[] = [];
 
 // Les pièces trouées, elles, se voient d'ici : une pièce trouée a plus d'un
 // anneau. C'est même le seul verdict que l'éditeur rend seul — une pièce trouée
 // ne s'envoie pas, le fichier n'ayant qu'une liste de sommets par pièce.
 const troues = () => pieces.flatMap((p, i) => (p.length > 1 ? [i] : []));
 
-const VERROU = 'Une pièce pincée ou trouée n’est pas une pièce : il reste à la fendre.';
+// Seul un trou verrouille l'enregistrement, et pour une raison de format : le
+// fichier n'a qu'une liste de sommets par pièce, il ne sait pas l'écrire.
+const VERROU = 'Une pièce trouée ne s’écrit pas : le fichier n’a qu’un contour par pièce.';
 
 function verrouiller(bloque: boolean) {
   enregistrer.disabled = bloque;
@@ -119,7 +125,7 @@ function charger(nom: string) {
   historique.length = 0;
   annulerCoupe();
   oublierLeSurvol();
-  pincees = [];
+  ruptures = [];
   verrouiller(false);
   modifie = false;
   location.hash = nom;
@@ -277,6 +283,13 @@ function rendre() {
         .join('')
     : '';
 
+  // Le point par lequel une pièce ne tient qu'à elle-même : on le montre, sinon
+  // il se cherche à l'œil sur un plan à quinze pièces.
+  const cassures = ruptures
+    .filter((r) => r.point)
+    .map((r) => `<circle class="rupture" cx="${r.point![0]}" cy="${r.point![1]}" r="${px(9)}" />`)
+    .join('');
+
   const curseur = vise
     ? `<circle class="curseur" cx="${vise[0]}" cy="${vise[1]}" r="${px(6)}" />`
     : '';
@@ -289,6 +302,7 @@ function rendre() {
     bords +
     points.join('') +
     coupe +
+    cassures +
     curseur;
 
   dessinerInventaire();
@@ -377,35 +391,48 @@ async function interroger() {
 interface Verdict {
   etat: string;
   dispositions: number;
-  pincees?: number[];
+  ruptures?: { piece: number; point: Point | null }[];
 }
 
 function afficherVerdict(r: Verdict) {
-  pincees = r.pincees ?? [];
-  verrouiller(pincees.length > 0);
-  dessinerInventaire();
+  ruptures = r.ruptures ?? [];
+  rendre();
 
-  if (r.etat === 'pincee') {
-    ecrireVerdict(
-      `⚠ Pièce(s) ${pincees.join(', ')} pincée(s) : une boucle a détaché son morceau, et ce qui ` +
-        'reste ne tient plus que par un point. À fendre avant d’enregistrer.',
-      'attention',
-    );
-  } else if (r.etat === 'unique') {
-    ecrireVerdict('✓ Solution unique — aucune autre disposition ne donne la même image.', 'ok');
-  } else if (r.etat === 'multiple') {
-    ecrireVerdict(
+  const [texte, etat] = verdictDUnicite(r);
+
+  // L'avertissement passe devant le verdict sans le remplacer : il n'empêche
+  // rien, c'est à l'auteur de décider s'il garde une pièce que le papier ne
+  // supporterait pas.
+  if (!ruptures.length) return ecrireVerdict(texte, etat);
+  const ou = ruptures
+    .map(({ piece, point }) => `${piece}${point ? ` en (${point[0]}, ${point[1]})` : ''}`)
+    .join(', ');
+  ecrireVerdict(
+    `⚠ Pièce ${ou} : son contour y repasse une seconde fois, donc le papier n’y a plus aucune ` +
+      `largeur (pinch point). Le jeu la joue telle quelle ; une vraie feuille s’y déchirerait. ` +
+      texte,
+    'attention',
+  );
+}
+
+function verdictDUnicite(r: Verdict): [string, 'ok' | 'attention' | 'attente'] {
+  if (r.etat === 'unique') {
+    return ['✓ Solution unique — aucune autre disposition ne donne la même image.', 'ok'];
+  }
+  if (r.etat === 'multiple') {
+    return [
       `⚠ ${r.dispositions} dispositions donnent la même image : le joueur peut en trouver ` +
         'une que la validation refusera.',
       'attention',
-    );
-  } else if (r.etat === 'trop-long') {
-    ecrireVerdict('Trop de dispositions à énumérer : unicité indécise.', 'attente');
-  } else if (r.etat === 'sans-motif') {
-    ecrireVerdict('Crease pattern introuvable : unicité non vérifiée.', 'attente');
-  } else {
-    ecrireVerdict('⚠ Le découpage ne pave pas le carré.', 'attention');
+    ];
   }
+  if (r.etat === 'trop-long') {
+    return ['Trop de dispositions à énumérer : unicité indécise.', 'attente'];
+  }
+  if (r.etat === 'sans-motif') {
+    return ['Crease pattern introuvable : unicité non vérifiée.', 'attente'];
+  }
+  return ['⚠ Le découpage ne pave pas le carré.', 'attention'];
 }
 
 const message = (err: unknown) => (err instanceof Error ? err.message : String(err));
@@ -421,8 +448,8 @@ function dessinerInventaire() {
       const b = boite(p[0]);
       const a = p.reduce((reste, anneau, r) => reste + (r ? -aire(anneau) : aire(anneau)), 0);
       const troue = p.length > 1;
-      const pincee = pincees.includes(i);
-      const classes = [a < 1 ? 'petite' : '', pincee || troue ? 'pincee' : '']
+      const rupture = ruptures.some((r) => r.piece === i);
+      const classes = [a < 1 ? 'petite' : '', rupture || troue ? 'alerte' : '']
         .filter(Boolean)
         .join(' ');
       const sommets = p.reduce((n, anneau) => n + anneau.length, 0);
@@ -430,7 +457,7 @@ function dessinerInventaire() {
         `<li${classes ? ` class="${classes}"` : ''}>` +
         `<span class="pastille" style="--teinte: ${(i * 137.5) % 360}"></span>` +
         `(${b.x}, ${b.y}) ${b.w}×${b.h} — ${sommets} sommets, ${arrondi(a)} cellules` +
-        `${troue ? ' — trouée' : pincee ? ' — pincée' : ''}</li>`
+        `${troue ? ' — trouée' : rupture ? ' — pinch point' : ''}</li>`
       );
     })
     .join('');
