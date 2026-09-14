@@ -5,27 +5,28 @@
 // Trois choix, dont tout le reste découle :
 //
 // - on trace des coupes, on ne dessine pas des pièces : le carré entier est la
-//   première pièce et chaque trait en fend une en deux, donc le pavage est exact
-//   par construction (voir `couper.ts`). Une coupe refermée sur son point de
-//   départ détache la pièce qu'elle entoure et laisse le reste **pincé** en ce
-//   point : c'est le seul état que le découpage ne sait pas rendre au jeu, et le
-//   verdict le dit pendant qu'on travaille, l'enregistrement le refusant ;
+//   première pièce et chaque trait en fend une en deux, donc le pavage reste
+//   exact (voir `couper.ts`). Une coupe qui se referme sur son point de départ
+//   détache en un geste la pièce qu'elle entoure, mais laisse le reste **pincé**
+//   en ce point, ou **troué** si le départ était à l'intérieur. Ce sont les deux
+//   seuls états que le découpage ne sait pas rendre au jeu : le verdict les dit
+//   pendant qu'on travaille, et l'enregistrement les refuse ;
 // - rien ne se pose ailleurs que sur la grille d'ancrage, sans quoi une pièce ne
 //   pourrait pas se caler sur le plateau du jeu ;
-// - une coupe traverse une pièce à la fois, et part du bord de celle-là — ce
-//   bord étant aussi bien une rive du carré qu'une coupe déjà tracée, une pièce
-//   peut très bien ne toucher aucun bord du papier. Laquelle on fend se décide
-//   au deuxième point : un départ posé sur une coupe existante est sur le bord
-//   des deux pièces qu'elle sépare, et le pixel survolé au premier clic en
-//   choisirait une au hasard, pour l'annoncer un clic trop tard.
+// - une coupe traverse une pièce à la fois, et part d'un de ses points — un
+//   bord, qui est aussi bien une rive du carré qu'une coupe déjà tracée, ou
+//   n'importe où pour une boucle. Laquelle on fend se décide au deuxième point :
+//   un départ posé sur une coupe existante est sur le bord des deux pièces
+//   qu'elle sépare, et le pixel survolé au premier clic en choisirait une au
+//   hasard, pour l'annoncer un clic trop tard.
 //
 // Le fichier écrit, `game-design/enigmes/<nom>.json`, fait foi comme la carte
 // Tiled fait foi pour la géométrie d'une scène.
 
 import './decoupage.css';
 import { DECOUPAGES } from '../generated/enigmes';
-import { aire, boite, pointDans, surLeBord, type Point } from '../game/puzzle/decoupage';
-import { couper, longeUnPli, type Segment } from './couper';
+import { aire, boite, type Point } from '../game/puzzle/decoupage';
+import { anneauDe, couper, dansLaPiece, longeUnPli, type Morceau, type Segment } from './couper';
 
 // Côté de la zone de dessin quand la page n'est pas encore mesurée.
 const COTE = 640;
@@ -51,10 +52,10 @@ const DECOUPES = DECOUPAGES as Record<
 let enigme = ENIGMES[0];
 // Grille par défaut d'une énigme encore vierge.
 let grille = 4;
-let pieces: Point[][] = [];
+let pieces: Morceau[] = [];
 
 // Pile d'annulation : l'état complet avant chaque coupe.
-const historique: Point[][][] = [];
+const historique: Morceau[][] = [];
 
 // En unités de grille : une coupe n'a pas le droit de les suivre. Chargés à part
 // de l'image, que le navigateur affiche sans nous en dire les points.
@@ -73,6 +74,20 @@ const enJeu = () => (trait.length === 1 ? candidats : pieceCoupee >= 0 ? [pieceC
 // la garde : le verdict arrive après coup, et c'est le serveur qui refuse
 // d'écrire un découpage pincé.
 let pincees: number[] = [];
+
+// Les pièces trouées, elles, se voient d'ici : une pièce trouée a plus d'un
+// anneau. C'est même le seul verdict que l'éditeur rend seul — une pièce trouée
+// ne s'envoie pas, le fichier n'ayant qu'une liste de sommets par pièce.
+const troues = () => pieces.flatMap((p, i) => (p.length > 1 ? [i] : []));
+
+const VERROU = 'Une pièce pincée ou trouée n’est pas une pièce : il reste à la fendre.';
+
+function verrouiller(bloque: boolean) {
+  enregistrer.disabled = bloque;
+  enregistrer.title = bloque ? VERROU : '';
+}
+
+const memePoint = (a: Point, b: Point) => a[0] === b[0] && a[1] === b[1];
 
 // Pièce survolée et intersection visée, recalculées à chaque mouvement.
 let survol = -1;
@@ -98,9 +113,14 @@ function charger(nom: string) {
   enigme = nom;
   const source = DECOUPES[nom];
   grille = source?.grille ?? 4;
-  pieces = source ? source.pieces.map((p) => p.points.map(([x, y]) => [x, y] as Point)) : [carre()];
+  pieces = source
+    ? source.pieces.map((p) => [p.points.map(([x, y]) => [x, y] as Point)])
+    : [carre()];
   historique.length = 0;
   annulerCoupe();
+  oublierLeSurvol();
+  pincees = [];
+  verrouiller(false);
   modifie = false;
   location.hash = nom;
   champGrille.value = String(grille);
@@ -142,17 +162,19 @@ async function chargerPlis(nom: string) {
 }
 
 // Le point de départ de tout découpage.
-function carre(): Point[] {
+function carre(): Morceau {
   return [
-    [0, 0],
-    [grille, 0],
-    [grille, grille],
-    [0, grille],
+    [
+      [0, 0],
+      [grille, 0],
+      [grille, grille],
+      [0, grille],
+    ],
   ];
 }
 
 function memoriser() {
-  historique.push(pieces.map((p) => p.map((q) => [...q] as Point)));
+  historique.push(pieces.map((p) => p.map((a) => a.map((q) => [...q] as Point))));
   modifie = true;
 }
 
@@ -160,6 +182,13 @@ function annulerCoupe() {
   trait = [];
   pieceCoupee = -1;
   candidats = [];
+}
+
+// Les pièces changent en bloc — chargement, annulation, retour au carré — et le
+// survol désignait l'une des anciennes par son rang. Gardé, il fait rendre une
+// pièce qui n'existe plus : le pointeur est de toute façon sur un bouton.
+function oublierLeSurvol() {
+  survol = -1;
 }
 
 // ---------------------------------------------------------------------------
@@ -197,8 +226,10 @@ function rendre() {
     : survol >= 0
       ? [pieces[survol]]
       : [];
+  // Un point est visable s'il est sur un bord de la pièce ou dedans : une coupe
+  // part maintenant d'où on veut, à condition d'y revenir.
   const visable = (x: number, y: number) =>
-    cibles.some((c) => surLeBord(c, x, y) || (trait.length > 0 && pointDans(c, x, y)));
+    cibles.some((c) => anneauDe(c, [x, y]) >= 0 || dansLaPiece(c, [x, y]));
 
   const points: string[] = [];
   for (let y = 0; y <= grille; y++) {
@@ -263,7 +294,10 @@ function rendre() {
   dessinerInventaire();
 }
 
-const chemin = (p: readonly Point[]) => `M${p.map(([x, y]) => `${x} ${y}`).join(' L')} Z`;
+// Tous les anneaux dans un seul chemin : le trou se creuse à la règle pair-impair
+// (`fill-rule`, dans la CSS), comme le masque du jeu.
+const chemin = (piece: Morceau) =>
+  piece.map((a) => `M${a.map(([x, y]) => `${x} ${y}`).join(' L')} Z`).join(' ');
 
 // ---------------------------------------------------------------------------
 // Unicité de la solution
@@ -285,6 +319,18 @@ const RELANCE_MAX = 10_000;
 function verifierUnicite(delai = DELAI, relance = 1000, silencieux = false) {
   window.clearTimeout(minuteur);
   const jeton = ++enVol;
+
+  const trous = troues();
+  if (trous.length) {
+    verrouiller(true);
+    dessinerInventaire();
+    ecrireVerdict(
+      `⚠ Pièce(s) ${trous.join(', ')} trouée(s) : la boucle a détaché son morceau et laissé sa ` +
+        'forme en creux. À rejoindre au bord avant d’enregistrer — il y faut deux coupes.',
+      'attention',
+    );
+    return;
+  }
   // Une relance ne remet pas le panneau à « … » : l'explication qu'on vient
   // d'écrire disparaîtrait aussitôt, sans jamais être lue.
   if (!silencieux) ecrireVerdict('…', 'attente');
@@ -314,11 +360,14 @@ function verifierUnicite(delai = DELAI, relance = 1000, silencieux = false) {
   }, delai);
 }
 
+// Le contour seul : on n'arrive ici qu'une fois les trous refermés.
+const pourLeServeur = () => pieces.map((p) => ({ points: p[0] }));
+
 async function interroger() {
   const reponse = await fetch('/__unicite', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enigme, grille, pieces: pieces.map((points) => ({ points })) }),
+    body: JSON.stringify({ enigme, grille, pieces: pourLeServeur() }),
   });
   const rapport = await reponse.json();
   if (!reponse.ok || !rapport.ok) throw new Error(rapport.erreur ?? reponse.statusText);
@@ -333,10 +382,7 @@ interface Verdict {
 
 function afficherVerdict(r: Verdict) {
   pincees = r.pincees ?? [];
-  enregistrer.disabled = pincees.length > 0;
-  enregistrer.title = enregistrer.disabled
-    ? 'Une pièce pincée n’est pas une pièce : il reste à la fendre.'
-    : '';
+  verrouiller(pincees.length > 0);
   dessinerInventaire();
 
   if (r.etat === 'pincee') {
@@ -372,15 +418,19 @@ function ecrireVerdict(texte: string, etat: 'ok' | 'attention' | 'attente') {
 function dessinerInventaire() {
   inventaire.innerHTML = pieces
     .map((p, i) => {
-      const b = boite(p);
-      const a = aire(p);
+      const b = boite(p[0]);
+      const a = p.reduce((reste, anneau, r) => reste + (r ? -aire(anneau) : aire(anneau)), 0);
+      const troue = p.length > 1;
       const pincee = pincees.includes(i);
-      const classes = [a < 1 ? 'petite' : '', pincee ? 'pincee' : ''].filter(Boolean).join(' ');
+      const classes = [a < 1 ? 'petite' : '', pincee || troue ? 'pincee' : '']
+        .filter(Boolean)
+        .join(' ');
+      const sommets = p.reduce((n, anneau) => n + anneau.length, 0);
       return (
         `<li${classes ? ` class="${classes}"` : ''}>` +
         `<span class="pastille" style="--teinte: ${(i * 137.5) % 360}"></span>` +
-        `(${b.x}, ${b.y}) ${b.w}×${b.h} — ${p.length} sommets, ${arrondi(a)} cellules` +
-        `${pincee ? ' — pincée' : ''}</li>`
+        `(${b.x}, ${b.y}) ${b.w}×${b.h} — ${sommets} sommets, ${arrondi(a)} cellules` +
+        `${troue ? ' — trouée' : pincee ? ' — pincée' : ''}</li>`
       );
     })
     .join('');
@@ -404,7 +454,7 @@ function dire(texte: string, erreur = false) {
 function rappeler() {
   aide.textContent = trait.length
     ? 'Clique les points du milieu, puis un point du bord pour finir — ou le point de départ pour refermer la pièce. Échap annule, Retour arrière retire le dernier point.'
-    : 'Clique un point du bord d’une pièce pour commencer une coupe.';
+    : 'Clique un point d’une pièce pour commencer une coupe : sur un bord pour la traverser, n’importe où pour dessiner une pièce d’un seul trait.';
 }
 
 // ---------------------------------------------------------------------------
@@ -430,7 +480,7 @@ plan.addEventListener('pointermove', (e) => {
   vise = cale;
   // La pièce se décide sur la position réelle du pointeur : le point calé,
   // souvent sur une frontière, appartiendrait à deux pièces à la fois.
-  if (!trait.length) survol = pieces.findIndex((p) => pointDans(p, ...brut));
+  if (!trait.length) survol = pieces.findIndex((p) => dansLaPiece(p, brut));
   rendre();
 });
 
@@ -447,16 +497,16 @@ plan.addEventListener('pointerdown', (e) => {
   if (!trait.length) {
     // La pièce se relit sur le clic lui-même : un tap n'est précédé d'aucun
     // déplacement, et le survol serait resté à ce qu'il était.
-    const cible = pieces.findIndex((p) => pointDans(p, ...brut));
+    const cible = pieces.findIndex((p) => dansLaPiece(p, brut));
     if (cible < 0) return dire('Commence dans une pièce.', true);
-    if (!surLeBord(pieces[cible], ...cale)) {
-      return dire('Une coupe part du bord de la pièce, pas de son intérieur.', true);
+    if (!dansLaPiece(pieces[cible], cale) && anneauDe(pieces[cible], cale) < 0) {
+      return dire('Ce point est hors de la pièce.', true);
     }
     survol = cible;
     pieceCoupee = cible;
     const voisines = pieces
       .map((_, i) => i)
-      .filter((i) => i !== cible && surLeBord(pieces[i], ...cale));
+      .filter((i) => i !== cible && anneauDe(pieces[i], cale) >= 0);
     candidats = [cible, ...voisines];
     trait = [cale];
     dire(
@@ -473,9 +523,9 @@ plan.addEventListener('pointerdown', (e) => {
   // en jeu — un point repris au Retour arrière rouvre donc le choix.
   if (trait.length === 1 && candidats.length > 1) {
     const choisi =
-      candidats.find((i) => pointDans(pieces[i], ...cale)) ??
+      candidats.find((i) => dansLaPiece(pieces[i], cale)) ??
       candidats.find(
-        (i) => surLeBord(pieces[i], ...cale) && couper(pieces[i], [trait[0], cale]).ok,
+        (i) => anneauDe(pieces[i], cale) >= 0 && couper(pieces[i], [trait[0], cale]).ok,
       );
     if (choisi !== undefined) pieceCoupee = choisi;
   }
@@ -493,9 +543,14 @@ plan.addEventListener('pointerdown', (e) => {
     );
   }
 
-  if (surLeBord(forme, ...cale)) return terminer([...trait, cale]);
+  // Refermer sur le point de départ finit la coupe, où qu'il soit ; sinon il
+  // faut un bord. Une coupe partie du dedans n'a donc qu'une façon de finir.
+  const depart = trait[0];
+  if (memePoint(cale, depart) || anneauDe(forme, cale) >= 0) {
+    return terminer([...trait, cale]);
+  }
 
-  if (!pointDans(forme, ...cale)) {
+  if (!dansLaPiece(forme, cale)) {
     return dire('Ce point est hors de la pièce coupée.', true);
   }
   trait.push(cale);
@@ -555,6 +610,7 @@ function annuler() {
   if (!avant) return dire('Rien à annuler.');
   pieces = avant;
   annulerCoupe();
+  oublierLeSurvol();
   dire(`${pieces.length} pièces.`);
   rendre();
   verifierUnicite();
@@ -567,6 +623,7 @@ document.getElementById('recommencer')!.addEventListener('click', () => {
   memoriser();
   pieces = [carre()];
   annulerCoupe();
+  oublierLeSurvol();
   dire('Carré entier.');
   rendre();
   verifierUnicite();
@@ -583,8 +640,14 @@ champGrille.addEventListener('change', () => {
   }
 
   const facteur = n / grille;
-  const converties = pieces.map((p) => p.map(([x, y]) => [x * facteur, y * facteur] as Point));
-  if (converties.some((p) => p.some(([x, y]) => !Number.isInteger(x) || !Number.isInteger(y)))) {
+  const converties = pieces.map((p) =>
+    p.map((a) => a.map(([x, y]) => [x * facteur, y * facteur] as Point)),
+  );
+  if (
+    converties.some((p) =>
+      p.some((a) => a.some(([x, y]) => !Number.isInteger(x) || !Number.isInteger(y))),
+    )
+  ) {
     champGrille.value = String(grille);
     return dire(`Une grille de ${n} ne retomberait pas sur les coupes déjà tracées.`, true);
   }
@@ -611,7 +674,7 @@ enregistrer.addEventListener('click', async () => {
       body: JSON.stringify({
         enigme,
         grille,
-        pieces: pieces.map((points) => ({ points })),
+        pieces: pourLeServeur(),
       }),
     });
     const resultat = await reponse.json();

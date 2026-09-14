@@ -3,18 +3,32 @@
 // Dessiner les pièces une à une demanderait de faire coïncider à la main les
 // arêtes partagées.
 //
-// Une coupe va d'un point du bord de la pièce à un autre, ou **se referme sur
-// son point de départ** : la boucle détache alors le morceau qu'elle entoure, et
-// ce qui reste est **pincé** en ce point — deux lobes qui ne tiennent que par
-// lui. Le pincement est un état de travail, pas un découpage : `polygoneSimple`
-// (`tools/lib/decoupage.mjs`) le refuse à l'enregistrement, et on le résout par
-// d'autres coupes. C'est le prix de pouvoir dessiner une pièce d'un geste au
-// lieu de la déduire de l'ordre des coupes.
+// Une coupe part d'un point du bord d'une pièce et va sur un autre, ou **se
+// referme sur son point de départ** — départ qui peut alors être n'importe où,
+// y compris en plein milieu du papier. La boucle détache le morceau qu'elle
+// entoure ; ce qui reste garde sa forme en creux, et c'est là que le découpage
+// cesse d'être exact par construction :
 //
-// Tout est entier — les extrémités sur le bord, les points du milieu strictement
-// à l'intérieur —, donc aucune tolérance numérique n'entre dans le découpage, et
-// tout sommet se cale sur la grille d'ancrage. En contrepartie, une coupe en biais ne se reprend qu'aux points de
-// grille qu'elle traverse : une diagonale de (0,0) à (3,2) n'en croise aucun.
+// - boucle refermée sur le bord de la pièce : le reste est **pincé** en ce
+//   point, deux lobes qui ne tiennent que par lui ;
+// - boucle refermée à l'intérieur : le reste a un **trou**, et une pièce cesse
+//   d'être un anneau.
+//
+// Les deux se dessinent et ne se découpent pas — le jeu pose du papier, et un
+// papier pincé tombe en deux, un papier troué n'a pas de liste de sommets. Ce
+// sont donc des états de travail, que l'éditeur signale et que l'enregistrement
+// refuse (`polygoneSimple`, dans `tools/lib/decoupage.mjs`). Ils se résolvent
+// par d'autres coupes : un pincement en séparant ses deux lobes sans repasser
+// par lui, un trou en le fondant dans le contour — ce qui demande deux coupes,
+// la première réunissant les deux anneaux en un seul fendu dans la longueur, la
+// seconde le tranchant pour de bon. C'est le prix de pouvoir dessiner la pièce
+// qu'on veut d'un geste, au lieu de la déduire de l'ordre des coupes.
+//
+// Tout est entier — les extrémités sur un anneau, les points du milieu
+// strictement à l'intérieur —, donc aucune tolérance numérique n'entre dans le
+// découpage, et tout sommet se cale sur la grille d'ancrage. En contrepartie,
+// une coupe en biais ne se reprend qu'aux points de grille qu'elle traverse :
+// une diagonale de (0,0) à (3,2) n'en croise aucun.
 
 import {
   aire,
@@ -26,7 +40,13 @@ import {
   type Point,
 } from '../game/puzzle/decoupage';
 
-export type Resultat = { ok: true; pieces: [Point[], Point[]] } | { ok: false; erreur: string };
+// Le contour d'abord, les trous ensuite. Le contour tourne dans un sens, les
+// trous dans l'autre (`ranger`) : les recollages s'appuient dessus, fusionner
+// deux anneaux tournés pareil ajouterait leurs aires au lieu de les retrancher.
+export type Morceau = Point[][];
+export type Piece = readonly (readonly Point[])[];
+
+export type Resultat = { ok: true; pieces: Morceau[] } | { ok: false; erreur: string };
 
 // Un trait du crease pattern, en unités de grille.
 export interface Segment {
@@ -68,25 +88,45 @@ export function longeUnPli(plis: readonly Segment[], a: Point, b: Point): boolea
   return false;
 }
 
-// Le trait va d'un bord à l'autre de la pièce, ou revient à son point de départ.
-export function couper(piece: readonly Point[], trait: readonly Point[]): Resultat {
+// Sur quel anneau de la pièce le point se trouve-t-il, s'il est sur l'un d'eux ?
+export function anneauDe(piece: Piece, p: Point): number {
+  return piece.findIndex((anneau) => surLeBord(anneau, ...p));
+}
+
+// Strictement dans le papier : dans le contour, hors des trous, et sur aucun
+// anneau. La parité répond aux deux premiers d'un coup.
+export function dansLaPiece(piece: Piece, p: Point): boolean {
+  if (anneauDe(piece, p) >= 0) return false;
+  return piece.filter((anneau) => pointDans(anneau, ...p)).length % 2 === 1;
+}
+
+export function couper(brute: Piece, trait: readonly Point[]): Resultat {
   if (trait.length < 2) return non('Une coupe demande au moins deux points.');
+  const piece = ranger(brute.map((anneau) => anneau.map((p) => [...p] as Point)));
 
   const debut = trait[0];
   const fin = trait[trait.length - 1];
   const ferme = memePoint(debut, fin);
-  if (!surLeBord(piece, ...debut)) return non('La coupe doit partir du bord de la pièce.');
-  if (!surLeBord(piece, ...fin)) return non('La coupe doit finir sur le bord de la pièce.');
+  const milieux = trait.slice(1, -1);
   if (ferme && trait.length < 4) return non('Une boucle demande au moins trois sommets.');
 
-  const milieux = trait.slice(1, -1);
+  const rDebut = anneauDe(piece, debut);
+  const rFin = anneauDe(piece, fin);
+  // Une coupe ouverte partie du dedans ne sépare rien : c'est une fente, et la
+  // pièce reste d'un seul tenant. Partir de n'importe où suppose donc de revenir
+  // à son point de départ.
+  if (rDebut < 0 || rFin < 0) {
+    if (!ferme) return non('Une coupe va d’un bord à l’autre, ou revient à son point de départ.');
+    if (!dansLaPiece(piece, debut)) return non('Le départ est hors de la pièce.');
+  }
+
   for (const p of milieux) {
-    if (surLeBord(piece, ...p) || !pointDans(piece, ...p)) {
+    if (!dansLaPiece(piece, p)) {
       return non('Les points du milieu doivent être strictement dans la pièce.');
     }
   }
-  // Un sommet repris en chemin pincerait le morceau détaché, et une seule
-  // sorte de pincement se répare : celle qu'on a voulue.
+  // Un sommet repris en chemin pincerait le morceau détaché, et une seule sorte
+  // de pincement se répare : celle qu'on a voulue.
   for (let i = 0; i < milieux.length; i++) {
     for (let j = i + 1; j < milieux.length; j++) {
       if (memePoint(milieux[i], milieux[j])) return non('La coupe repasse par un de ses sommets.');
@@ -99,61 +139,157 @@ export function couper(piece: readonly Point[], trait: readonly Point[]): Result
   }
   if (seCroise(trait)) return non('La coupe se recoupe elle-même.');
 
-  // Les extrémités deviennent des sommets de la pièce : le reste n'est plus
-  // qu'un parcours du contour, d'une extrémité à l'autre, dans les deux sens.
-  // Une boucle n'a qu'une extrémité : la poser deux fois la dédoublerait sur son
-  // arête, et le contour porterait un pincement que personne n'a coupé.
-  const contour = inserer(piece, ferme ? [debut] : [debut, fin]);
-  const tourne = sens(contour);
-  const a = occurrence(contour, debut, trait[1], tourne);
-  const b = occurrence(contour, fin, trait[trait.length - 2], tourne);
-  if (a < 0 || b < 0) return non('Coupe impossible à recoller au contour.');
+  const morceaux =
+    rDebut < 0
+      ? creuser(piece, trait)
+      : rDebut === rFin
+        ? fendreUnAnneau(piece, rDebut, trait, ferme)
+        : fusionner(piece, rDebut, rFin, trait);
 
-  // Ce n'est pas d'être fermée qui décide, c'est de revenir au même endroit du
-  // contour. Une boucle partie d'un pincement et revenue par l'autre côté a ses
-  // deux bouts au même point et à deux places distinctes du contour : elle
-  // fend la pièce en deux comme n'importe quelle coupe — c'est même ainsi, et
-  // seulement ainsi, qu'un pincement se défait.
-  const [gauche, droite] =
-    a === b
-      ? fendreEnBoucle(contour, a, trait, tourne)
-      : [
-          normaliser([...trait, ...parcourir(contour, b, a)]),
-          normaliser([...[...trait].reverse(), ...parcourir(contour, a, b)]),
-        ];
-
-  if (!gauche || !droite) return non('Cette coupe ne laisse pas deux morceaux.');
-  if (!recouvrent(piece, gauche, droite)) return non('Coupe impossible à recoller au contour.');
-  return { ok: true, pieces: [gauche, droite] };
-}
-
-// La boucle détache le morceau qu'elle entoure ; le reste garde tout son
-// contour, puis fait le tour du creux **à l'envers** — dans le même sens, son
-// aire s'ajouterait au lieu de se retrancher — et repasse ainsi par le point de
-// départ, qui est le pincement.
-function fendreEnBoucle(
-  contour: readonly Point[],
-  a: number,
-  trait: readonly Point[],
-  tourne: number,
-): [Point[] | null, Point[] | null] {
-  const boucle = trait.slice(0, -1);
-  const creux = sens(boucle) === tourne ? [boucle[0], ...boucle.slice(1).reverse()] : boucle;
-  return [normaliser(boucle), normaliser([contour[a], ...parcourir(contour, a, a), ...creux])];
+  if (!morceaux) return non('Coupe impossible à recoller au contour.');
+  if (!recouvrent(piece, morceaux)) return non('Coupe impossible à recoller au contour.');
+  return { ok: true, pieces: morceaux };
 }
 
 const non = (erreur: string): Resultat => ({ ok: false, erreur });
 
-// Le filet : les deux morceaux recouvrent-ils la pièce exactement ? Un contour
-// mal recollé reste un polygone plausible à l'œil, et son aire au lacet peut
-// même tomber juste, les allers et les retours se compensant. Le masque, lui, ne
-// se laisse pas faire — et c'est celui du jeu, donc c'est la bonne question.
-// Aucun morceau ne dépasse le cadre de la pièce : tous leurs sommets en
-// viennent.
-function recouvrent(piece: readonly Point[], ...morceaux: readonly Point[][]): boolean {
-  const cadre = boite(piece);
-  const tout = masque(piece);
-  const parts = morceaux.map((p) => ({ bits: masque(p), coin: boite(p) }));
+// ---------------------------------------------------------------------------
+// Les trois recollages
+// ---------------------------------------------------------------------------
+
+// La boucle intérieure ne touche aucun anneau : elle détache ce qu'elle entoure
+// et laisse un trou de la même forme. C'est le seul cas où une pièce en gagne
+// un — et les trous qu'elle englobe partent avec le morceau.
+function creuser(piece: Morceau, trait: readonly Point[]): Morceau[] | null {
+  const boucle = normaliser(trait.slice(0, -1));
+  if (!boucle) return null;
+  const [dedans, dehors] = partager(piece.slice(1), boucle);
+  return [ranger([boucle, ...dedans]), ranger([piece[0], ...dehors, boucle])];
+}
+
+// Les deux bouts sur le même anneau. L'issue dépend de s'ils tombent au même
+// endroit du contour ou à deux endroits, et de si l'anneau est le contour ou un
+// trou.
+function fendreUnAnneau(
+  piece: Morceau,
+  r: number,
+  trait: readonly Point[],
+  ferme: boolean,
+): Morceau[] | null {
+  const debut = trait[0];
+  const fin = trait[trait.length - 1];
+  // Une boucle n'a qu'une extrémité : la poser deux fois la dédoublerait sur son
+  // arête, et le contour porterait un pincement que personne n'a coupé.
+  const contour = inserer(piece[r], ferme ? [debut] : [debut, fin]);
+  // Le papier est dedans pour le contour, dehors pour un trou.
+  const cote = r === 0 ? sens(contour) : -sens(contour);
+  const a = occurrence(contour, debut, trait[1], cote);
+  const b = occurrence(contour, fin, trait[trait.length - 2], cote);
+  if (a < 0 || b < 0) return null;
+
+  const trous = piece.filter((_, i) => i > 0 && i !== r);
+
+  // Ce n'est pas d'être fermée qui décide, c'est de revenir au même endroit du
+  // contour. Une boucle partie d'un pincement et revenue par l'autre côté a ses
+  // deux bouts au même point et à deux places distinctes : elle fend la pièce
+  // comme n'importe quelle coupe — c'est même ainsi, et seulement ainsi, qu'un
+  // pincement se défait.
+  if (a === b) {
+    const boucle = normaliser(trait.slice(0, -1));
+    if (!boucle) return null;
+    // Le morceau détaché tourne dans un sens, la forme en creux qu'il laisse
+    // dans l'autre : sur le contour son aire se retranche, dans un trou elle
+    // s'ajoute.
+    const vise = r === 0 ? -sens(contour) : sens(contour);
+    const creux = sens(boucle) === vise ? boucle : retourner(boucle);
+    const pince = normaliser([contour[a], ...parcourir(contour, a, a), ...creux]);
+    if (!pince) return null;
+
+    const [dedans, dehors] = partager(trous, boucle);
+    return [
+      ranger([boucle, ...dedans]),
+      ranger(r === 0 ? [pince, ...dehors] : [piece[0], ...dehors, pince]),
+    ];
+  }
+
+  const un = normaliser([...trait, ...parcourir(contour, b, a)]);
+  const deux = normaliser([...[...trait].reverse(), ...parcourir(contour, a, b)]);
+  if (!un || !deux) return null;
+
+  if (r === 0) {
+    const [dansUn, dansDeux] = partager(trous, un);
+    return [ranger([un, ...dansUn]), ranger([deux, ...dansDeux])];
+  }
+
+  // Une coupe partie d'un trou et qui y revient détache une lentille de papier
+  // entre elle et le bord du trou ; le trou avale la lentille, donc des deux
+  // anneaux c'est le plus grand qui reste un trou.
+  const [lentille, creux] = aire(un) <= aire(deux) ? [un, deux] : [deux, un];
+  const [dedans, dehors] = partager(trous, lentille);
+  return [ranger([lentille, ...dedans]), ranger([piece[0], ...dehors, creux])];
+}
+
+// Les deux bouts sur deux anneaux différents : la coupe ne sépare rien, elle les
+// réunit en un seul, parcouru en passant deux fois par elle. Le papier y est
+// fendu dans la longueur — ce n'est pas encore un découpage, mais c'est la seule
+// façon de faire disparaître un trou, et une coupe de plus tranche l'anneau
+// obtenu.
+function fusionner(
+  piece: Morceau,
+  rA: number,
+  rB: number,
+  trait: readonly Point[],
+): Morceau[] | null {
+  const debut = trait[0];
+  const fin = trait[trait.length - 1];
+  const A = inserer(piece[rA], [debut]);
+  const B = inserer(piece[rB], [fin]);
+  const a = occurrence(A, debut, trait[1], rA === 0 ? sens(A) : -sens(A));
+  const b = occurrence(B, fin, trait[trait.length - 2], rB === 0 ? sens(B) : -sens(B));
+  if (a < 0 || b < 0) return null;
+
+  const milieux = trait.slice(1, -1);
+  const pont = normaliser([
+    ...tour(A, a),
+    debut,
+    ...milieux,
+    ...tour(B, b),
+    fin,
+    ...[...milieux].reverse(),
+  ]);
+  if (!pont) return null;
+
+  // Le rôle du nouvel anneau se lit sur les deux qu'il remplace : un contour
+  // fondu avec un trou reste le contour, deux trous fondus restent un trou.
+  const autres = piece.filter((_, i) => i !== rA && i !== rB);
+  return [ranger(rA === 0 || rB === 0 ? [pont, ...autres] : [...autres, pont])];
+}
+
+// Chaque trou suit l'anneau qui le contient. Aucun ne touche la coupe — c'est
+// vérifié —, donc un seul de ses sommets suffit à trancher.
+function partager(trous: Morceau, contour: Point[]): [Morceau, Morceau] {
+  const dedans: Morceau = [];
+  const dehors: Morceau = [];
+  for (const trou of trous) (pointDans(contour, ...trou[0]) ? dedans : dehors).push(trou);
+  return [dedans, dehors];
+}
+
+// Le contour dans un sens, les trous dans l'autre.
+function ranger(anneaux: Morceau): Morceau {
+  return anneaux.map((anneau, i) =>
+    sens(anneau) === (i === 0 ? 1 : -1) ? anneau : [...anneau].reverse(),
+  );
+}
+
+// Le filet : les morceaux recouvrent-ils la pièce exactement ? Un contour mal
+// recollé reste un polygone plausible à l'œil, et son aire au lacet peut même
+// tomber juste, les allers et les retours se compensant. Le masque, lui, ne se
+// laisse pas faire — et c'est celui du jeu, donc c'est la bonne question. Aucun
+// morceau ne dépasse le cadre de la pièce : tous leurs sommets en viennent.
+function recouvrent(piece: Morceau, morceaux: Morceau[]): boolean {
+  const cadre = boite(piece[0]);
+  const tout = masque(...piece);
+  const parts = morceaux.map((m) => ({ bits: masque(...m), coin: boite(m[0]) }));
 
   for (let j = 0; j < tout.rows; j++) {
     for (let i = 0; i < tout.cols; i++) {
@@ -170,6 +306,10 @@ function recouvrent(piece: readonly Point[], ...morceaux: readonly Point[][]): b
   return true;
 }
 
+// ---------------------------------------------------------------------------
+// Géométrie
+// ---------------------------------------------------------------------------
+
 const memePoint = (a: Point, b: Point) => a[0] === b[0] && a[1] === b[1];
 
 // Produit vectoriel (a-o) x (b-o). Son signe dit de quel côté tombe b.
@@ -178,8 +318,17 @@ const croix = (o: Point, a: Point, b: Point) =>
 
 const signe = (n: number) => (n > 0 ? 1 : n < 0 ? -1 : 0);
 
+// Le même cycle, à l'envers, en gardant son premier sommet en tête.
+const retourner = (anneau: readonly Point[]): Point[] => [anneau[0], ...anneau.slice(1).reverse()];
+
+// L'anneau entier, à partir de ce sommet.
+const tour = (anneau: readonly Point[], k: number): Point[] => [
+  anneau[k],
+  ...parcourir(anneau, k, k),
+];
+
 // Aire signée : seul son signe sert, pour savoir dans quel sens tourne un
-// contour. Un anneau pincé la donne juste, la fente n'ayant pas d'aire.
+// anneau. Un anneau pincé la donne juste, la fente n'ayant pas d'aire.
 function sens(points: readonly Point[]): number {
   let somme = 0;
   for (let i = 0; i < points.length; i++) {
@@ -236,34 +385,37 @@ function dansLeSecteur(
 }
 
 // Trois façons de sortir de la pièce : traverser une arête, la longer, ou passer
-// par l'extérieur d'une pièce concave — d'où le test du milieu.
-function verifierSegment(piece: readonly Point[], a: Point, b: Point): string | null {
+// par l'extérieur d'une pièce concave — d'où le test du milieu. Les trous
+// comptent comme des bords : on ne coupe pas à travers un trou.
+function verifierSegment(piece: Piece, a: Point, b: Point): string | null {
   if (memePoint(a, b)) return 'Deux points de coupe confondus.';
 
-  for (let i = 0, j = piece.length - 1; i < piece.length; j = i++) {
-    const c = piece[j];
-    const d = piece[i];
-    if (traverse(a, b, c, d)) return 'La coupe sort de la pièce.';
-    if (longe(a, b, c, d)) return 'La coupe longe un bord au lieu de le franchir.';
-  }
+  for (const anneau of piece) {
+    for (let i = 0, j = anneau.length - 1; i < anneau.length; j = i++) {
+      const c = anneau[j];
+      const d = anneau[i];
+      if (traverse(a, b, c, d)) return 'La coupe sort de la pièce.';
+      if (longe(a, b, c, d)) return 'La coupe longe un bord au lieu de le franchir.';
+    }
 
-  // Un sommet de la pièce en plein milieu du segment : la coupe y touche le bord
-  // sans le franchir, et ni `traverse` ni le milieu ci-dessous ne le voient — un
-  // point n'est du mauvais côté de rien. Le morceau détaché s'y pincerait, à un
-  // endroit que personne n'a dessiné.
-  for (const sommet of piece) {
-    if (
-      !memePoint(sommet, a) &&
-      !memePoint(sommet, b) &&
-      croix(a, b, sommet) === 0 &&
-      entre(a, b, sommet)
-    ) {
-      return 'La coupe touche le bord de la pièce en chemin.';
+    // Un sommet de la pièce en plein milieu du segment : la coupe y touche le
+    // bord sans le franchir, et ni `traverse` ni le milieu ci-dessous ne le
+    // voient — un point n'est du mauvais côté de rien. Le morceau détaché s'y
+    // pincerait, à un endroit que personne n'a dessiné.
+    for (const sommet of anneau) {
+      if (
+        !memePoint(sommet, a) &&
+        !memePoint(sommet, b) &&
+        croix(a, b, sommet) === 0 &&
+        entre(a, b, sommet)
+      ) {
+        return 'La coupe touche le bord de la pièce en chemin.';
+      }
     }
   }
 
   const milieu: Point = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  if (!pointDans(piece, ...milieu) && !surLeBord(piece, ...milieu)) {
+  if (!dansLaPiece(piece, milieu) && anneauDe(piece, milieu) < 0) {
     return 'La coupe passe hors de la pièce.';
   }
   return null;
@@ -312,11 +464,11 @@ function seTouchent(a: Point, b: Point, c: Point, d: Point): boolean {
 }
 
 // À leur place sur l'arête qui les porte.
-function inserer(piece: readonly Point[], points: readonly Point[]): Point[] {
+function inserer(anneau: readonly Point[], points: readonly Point[]): Point[] {
   const contour: Point[] = [];
-  for (let i = 0; i < piece.length; i++) {
-    const a = piece[i];
-    const b = piece[(i + 1) % piece.length];
+  for (let i = 0; i < anneau.length; i++) {
+    const a = anneau[i];
+    const b = anneau[(i + 1) % anneau.length];
     contour.push(a);
     const surCetteArete = points
       .filter((p) => !memePoint(p, a) && !memePoint(p, b) && croix(a, b, p) === 0 && entre(a, b, p))

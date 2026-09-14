@@ -99,8 +99,11 @@ export function pointDans(points: readonly Point[], x: number, y: number): boole
   return dedans;
 }
 
-export function masque(points: readonly Point[]): Masque {
-  const b = boite(points);
+// Le contour d'abord, ses trous ensuite — le jeu n'en passe jamais qu'un, mais
+// l'éditeur de découpage travaille sur des pièces trouées le temps de fendre le
+// reste, et la parité règle les deux cas d'un coup.
+export function masque(...anneaux: readonly (readonly Point[])[]): Masque {
+  const b = boite(anneaux[0]);
   const cols = b.w * SOUS;
   const rows = b.h * SOUS;
   const bits = new Uint8Array(cols * rows);
@@ -108,7 +111,7 @@ export function masque(points: readonly Point[]): Masque {
     const y = b.y + (j + DECALAGE_Y) / SOUS;
     for (let i = 0; i < cols; i++) {
       const x = b.x + (i + DECALAGE_X) / SOUS;
-      if (pointDans(points, x, y)) bits[j * cols + i] = 1;
+      if (anneaux.filter((a) => pointDans(a, x, y)).length % 2 === 1) bits[j * cols + i] = 1;
     }
   }
   return { cols, rows, bits };
