@@ -65,6 +65,11 @@ function verifier(nom, decoupage) {
   if (rapport.etat === 'trou') {
     throw new Error(`carré non couvert (${rapport.pavage.trous.length} sous-cellules)`);
   }
+  // Un travail laissé en plan dans l'éditeur : la boucle a détaché son morceau,
+  // le reste tient encore par un point.
+  if (rapport.etat === 'pincee') {
+    throw new Error(`pièce(s) ${rapport.pincees.join(', ')} pincée(s) — il reste à les fendre`);
+  }
 
   // Une pièce minuscule est injouable au doigt bien avant d'être ambiguë : le
   // seuil tactile se mesure à l'écran, mais moins d'une cellule ne passe jamais.

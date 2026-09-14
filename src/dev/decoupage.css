@@ -314,8 +314,14 @@ legend {
   padding: 2px 0;
 }
 
-.inventaire .petite {
+.inventaire .petite,
+.inventaire .pincee {
   color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .pastille {

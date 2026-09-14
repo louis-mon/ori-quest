@@ -152,9 +152,15 @@ function enregistrerDecoupage(): Plugin {
           // pas l'éditeur qui parle.
           if (corps.length > 64_000) req.destroy();
         });
-        req.on('end', () => {
+        req.on('end', async () => {
           try {
             const decoupage = lireCorpsDecoupage(JSON.parse(corps));
+            // Le dernier verrou : une pièce pincée se dessine et ne se découpe
+            // pas, et l'éditeur peut en porter en cours de travail.
+            const pinces = await piecesPincees(decoupage);
+            if (pinces.length) {
+              throw new Error(`pièce(s) ${pinces.join(', ')} pincée(s) — il reste à les fendre`);
+            }
             writeFileSync(decoupage.fichier, rendreDecoupage(decoupage));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true }));
@@ -279,19 +285,27 @@ function rendreDecoupage(corps: CorpsDecoupage): string {
   ].join('\n');
 }
 
+async function piecesPincees(corps: CorpsDecoupage): Promise<number[]> {
+  const { pincees } = (await bibliotheque()) as {
+    pincees: (decoupage: { pieces: number[][][] }) => number[];
+  };
+  return pincees({ pieces: corps.pieces });
+}
+
 // Le calcul est celui de `tools/lib/decoupage.mjs`, et c'est tout l'intérêt :
 // l'éditeur affiche exactement ce que vérifiera l'import.
 //
 // L'import passe par une URL calculée : un chemin littéral serait embarqué dans
 // la configuration au moment où Vite la compile, alors qu'on veut le module Node
 // tel qu'il est sur le disque.
+const bibliotheque = () =>
+  import(/* @vite-ignore */ pathToFileURL(resolve('tools/lib/decoupage.mjs')).href);
 async function analyserDecoupage(corps: CorpsDecoupage): Promise<unknown> {
-  const url = pathToFileURL(resolve('tools/lib/decoupage.mjs')).href;
-  const { analyser } = (await import(/* @vite-ignore */ url)) as {
+  const { analyser } = (await bibliotheque()) as {
     analyser: (
       decoupage: { grille: number; pieces: number[][][] },
       motif: string,
-    ) => { etat: string; solutions?: unknown[]; traits?: number };
+    ) => { etat: string; solutions?: unknown[]; traits?: number; pincees?: number[] };
   };
 
   const rapport = analyser(
@@ -302,6 +316,7 @@ async function analyserDecoupage(corps: CorpsDecoupage): Promise<unknown> {
     etat: rapport.etat,
     dispositions: rapport.solutions?.length ?? 0,
     traits: rapport.traits ?? 0,
+    pincees: rapport.pincees ?? [],
   };
 }
 

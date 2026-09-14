@@ -6,7 +6,10 @@
 //
 // - on trace des coupes, on ne dessine pas des pièces : le carré entier est la
 //   première pièce et chaque trait en fend une en deux, donc le pavage est exact
-//   par construction (voir `couper.ts`) ;
+//   par construction (voir `couper.ts`). Une coupe refermée sur son point de
+//   départ détache la pièce qu'elle entoure et laisse le reste **pincé** en ce
+//   point : c'est le seul état que le découpage ne sait pas rendre au jeu, et le
+//   verdict le dit pendant qu'on travaille, l'enregistrement le refusant ;
 // - rien ne se pose ailleurs que sur la grille d'ancrage, sans quoi une pièce ne
 //   pourrait pas se caler sur le plateau du jeu ;
 // - une coupe traverse une pièce à la fois, et part du bord de celle-là — ce
@@ -66,6 +69,11 @@ let candidats: number[] = [];
 
 const enJeu = () => (trait.length === 1 ? candidats : pieceCoupee >= 0 ? [pieceCoupee] : []);
 
+// Les pièces que le dernier verdict a dites pincées. C'est de l'affichage, pas
+// la garde : le verdict arrive après coup, et c'est le serveur qui refuse
+// d'écrire un découpage pincé.
+let pincees: number[] = [];
+
 // Pièce survolée et intersection visée, recalculées à chaque mouvement.
 let survol = -1;
 let vise: Point | null = null;
@@ -78,6 +86,7 @@ const statut = document.getElementById('statut')!;
 const aide = document.getElementById('aide')!;
 const inventaire = document.getElementById('inventaire')!;
 const champGrille = document.getElementById('grille') as HTMLInputElement;
+const enregistrer = document.getElementById('enregistrer') as HTMLButtonElement;
 const verdict = document.getElementById('verdict')!;
 const fichier = document.getElementById('fichier')!;
 
@@ -313,11 +322,30 @@ async function interroger() {
   });
   const rapport = await reponse.json();
   if (!reponse.ok || !rapport.ok) throw new Error(rapport.erreur ?? reponse.statusText);
-  return rapport as { etat: string; dispositions: number };
+  return rapport as Verdict;
 }
 
-function afficherVerdict(r: { etat: string; dispositions: number }) {
-  if (r.etat === 'unique') {
+interface Verdict {
+  etat: string;
+  dispositions: number;
+  pincees?: number[];
+}
+
+function afficherVerdict(r: Verdict) {
+  pincees = r.pincees ?? [];
+  enregistrer.disabled = pincees.length > 0;
+  enregistrer.title = enregistrer.disabled
+    ? 'Une pièce pincée n’est pas une pièce : il reste à la fendre.'
+    : '';
+  dessinerInventaire();
+
+  if (r.etat === 'pincee') {
+    ecrireVerdict(
+      `⚠ Pièce(s) ${pincees.join(', ')} pincée(s) : une boucle a détaché son morceau, et ce qui ` +
+        'reste ne tient plus que par un point. À fendre avant d’enregistrer.',
+      'attention',
+    );
+  } else if (r.etat === 'unique') {
     ecrireVerdict('✓ Solution unique — aucune autre disposition ne donne la même image.', 'ok');
   } else if (r.etat === 'multiple') {
     ecrireVerdict(
@@ -346,10 +374,13 @@ function dessinerInventaire() {
     .map((p, i) => {
       const b = boite(p);
       const a = aire(p);
-      const petite = a < 1 ? ' class="petite"' : '';
+      const pincee = pincees.includes(i);
+      const classes = [a < 1 ? 'petite' : '', pincee ? 'pincee' : ''].filter(Boolean).join(' ');
       return (
-        `<li${petite}><span class="pastille" style="--teinte: ${(i * 137.5) % 360}"></span>` +
-        `(${b.x}, ${b.y}) ${b.w}×${b.h} — ${p.length} sommets, ${arrondi(a)} cellules</li>`
+        `<li${classes ? ` class="${classes}"` : ''}>` +
+        `<span class="pastille" style="--teinte: ${(i * 137.5) % 360}"></span>` +
+        `(${b.x}, ${b.y}) ${b.w}×${b.h} — ${p.length} sommets, ${arrondi(a)} cellules` +
+        `${pincee ? ' — pincée' : ''}</li>`
       );
     })
     .join('');
@@ -372,7 +403,7 @@ function dire(texte: string, erreur = false) {
 
 function rappeler() {
   aide.textContent = trait.length
-    ? 'Clique les points du milieu, puis un point du bord pour finir. Échap annule, Retour arrière retire le dernier point.'
+    ? 'Clique les points du milieu, puis un point du bord pour finir — ou le point de départ pour refermer la pièce. Échap annule, Retour arrière retire le dernier point.'
     : 'Clique un point du bord d’une pièce pour commencer une coupe.';
 }
 
@@ -571,7 +602,7 @@ champGrille.addEventListener('change', () => {
 // `poses.ts` : le point d'entrée n'existe qu'en dev et ne garde que des entiers
 // bornés. Vite recharge la page dans la foulée, d'où le message qui traverse le
 // rechargement par `sessionStorage`.
-document.getElementById('enregistrer')!.addEventListener('click', async () => {
+enregistrer.addEventListener('click', async () => {
   dire('Enregistrement…');
   try {
     const reponse = await fetch('/__decoupage', {

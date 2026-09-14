@@ -116,6 +116,71 @@ export function masque(points, grille) {
 }
 
 // ---------------------------------------------------------------------------
+// Forme des pièces
+// ---------------------------------------------------------------------------
+
+// Un polygone simple : des sommets tous distincts, et des arêtes qui ne se
+// rencontrent qu'aux sommets qu'elles partagent. L'éditeur sait en produire
+// d'autres depuis qu'une coupe peut se refermer sur son point de départ — ce qui
+// reste est alors **pincé** en ce point, deux lobes qui ne tiennent que par lui.
+// Ça se dessine, ça ne se découpe pas : le jeu pose du papier, et un papier
+// pincé tombe en deux. C'est donc un état de travail, refusé ici, à
+// l'enregistrement comme à l'import.
+export function polygoneSimple(points) {
+  if (points.length < 3 || aire(points) <= 0) return false;
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      if (points[i][0] === points[j][0] && points[i][1] === points[j][1]) return false;
+    }
+  }
+
+  const n = points.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const [a, b] = [points[i], points[(i + 1) % n]];
+      const [c, d] = [points[j], points[(j + 1) % n]];
+      // Deux arêtes voisines partagent un sommet par construction ; il ne leur
+      // reste qu'à ne pas se superposer, ce qui serait un demi-tour.
+      const voisines = j === i + 1 || (i === 0 && j === n - 1);
+      if (voisines ? seSuperposent(a, b, c, d) : seRencontrent(a, b, c, d)) return false;
+    }
+  }
+  return true;
+}
+
+// Les pièces qui n'en sont pas, par leur rang dans le découpage.
+export function pincees({ pieces }) {
+  return pieces.flatMap((points, i) => (polygoneSimple(points) ? [] : [i]));
+}
+
+const vectoriel = (o, p, q) => (p[0] - o[0]) * (q[1] - o[1]) - (p[1] - o[1]) * (q[0] - o[0]);
+
+const surLeSegment = (a, b, p) =>
+  vectoriel(a, b, p) === 0 &&
+  p[0] >= Math.min(a[0], b[0]) &&
+  p[0] <= Math.max(a[0], b[0]) &&
+  p[1] >= Math.min(a[1], b[1]) &&
+  p[1] <= Math.max(a[1], b[1]);
+
+// Un point commun, franc ou du bout des lèvres : se toucher suffit à pincer.
+function seRencontrent(a, b, c, d) {
+  const cote = (o, p, q) => Math.sign(vectoriel(o, p, q));
+  if (cote(a, b, c) * cote(a, b, d) < 0 && cote(c, d, a) * cote(c, d, b) < 0) return true;
+  return (
+    surLeSegment(a, b, c) || surLeSegment(a, b, d) || surLeSegment(c, d, a) || surLeSegment(c, d, b)
+  );
+}
+
+function seSuperposent(a, b, c, d) {
+  if (vectoriel(a, b, c) !== 0 || vectoriel(a, b, d) !== 0) return false;
+  const proj = (p) => (Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) ? p[0] : p[1]);
+  const [u0, u1] = [proj(a), proj(b)].sort((x, y) => x - y);
+  const [v0, v1] = [proj(c), proj(d)].sort((x, y) => x - y);
+  return Math.min(u1, v1) - Math.max(u0, v0) > 0;
+}
+
+// ---------------------------------------------------------------------------
 // Pavage
 // ---------------------------------------------------------------------------
 
@@ -315,6 +380,11 @@ export function chercherSolutions(
 // Un seul calcul pour l'import, l'outil en ligne de commande et l'éditeur, sans
 // quoi celui-ci finirait par afficher autre chose que ce que le jeu vérifie.
 export function analyser(decoupage, fichierMotif, { bords = false } = {}) {
+  // Avant le pavage : une pièce pincée le pave très bien, l'aire d'une fente
+  // étant nulle. C'est la pièce elle-même qui n'existe pas.
+  const pinces = pincees(decoupage);
+  if (pinces.length) return { etat: 'pincee', pincees: pinces };
+
   const pavage = verifierPavage(decoupage);
   if (pavage.doubles.length) return { etat: 'superposition', pavage };
   if (pavage.trous.length) return { etat: 'trou', pavage };
