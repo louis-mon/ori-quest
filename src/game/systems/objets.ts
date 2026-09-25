@@ -14,6 +14,9 @@ export interface Objet {
   // l'image que l'énigme montre comme but, et l'objet obtenu garde la même.
   modele?: string;
   dessin?: Dessin;
+  // Un pliage de l'artiste qui n'a pas de `.origami` : sa photo détourée, comme
+  // les personnages du décor.
+  photo?: string;
 }
 
 export const OBJETS: Record<string, Objet> = {
@@ -67,6 +70,39 @@ export const OBJETS: Record<string, Objet> = {
     nom: "L'os",
     description: 'Un os un peu abîmé et tout baveux. Pouah!',
     modele: 'os',
+  },
+
+  // Chapitre 3 — la salle du trône, la cuisine et le jardin.
+  // [A ECRIRE] noms et descriptions.
+  idee_couronne: {
+    nom: 'Idée : la couronne',
+    description: 'Une idée de comment plier une couronne digne de la reine.',
+    modele: 'couronne',
+  },
+  couronne: {
+    nom: 'La couronne',
+    description: 'Une couronne de papier doré, sertie de gemmes.',
+    modele: 'couronne',
+  },
+  carpe: {
+    nom: 'Une carpe',
+    description: 'Une carpe pêchée dans la fontaine. Elle gigote encore.',
+    photo: 'assets/decor/carpe.png',
+  },
+  idee_poisson: {
+    nom: 'Idée : la daurade',
+    description: 'Une idée de comment plier une daurade royale.',
+    modele: 'poisson',
+  },
+  daurade: {
+    nom: 'La daurade',
+    description: 'Une daurade royale aux reflets dorés, de quoi régaler deux chats.',
+    modele: 'poisson',
+  },
+  idee_coeur: {
+    nom: 'Idée : le cœur',
+    description: 'Une idée de comment plier un cœur, glanée dans les énigmes de la wyvern.',
+    modele: 'coeur',
   },
 };
 

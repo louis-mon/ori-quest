@@ -12,6 +12,7 @@
 //   # goto: <scène>              change de scène
 //   # puzzle: <nom>              ouvre une énigme et attend son verdict
 //   # then: <knot>               repart au knot, une fois les tags appliqués
+//   # fin: histoire              clôt l'histoire, l'écran de fin prend la suite
 //
 // Les `VAR` ci-dessous sont un miroir en lecture seule de l'état de jeu, poussé
 // par le TS (préfixes `flag_` et `has_`). Les affecter avec `~` n'atteint pas
@@ -102,6 +103,38 @@ VAR flag_os_plie = false
 VAR has_os = false
 VAR flag_diplo_su = false
 VAR flag_diplo_pousse = false
+
+// Chapitre 3 — la salle du trône, la cuisine et le jardin. Trois drapeaux y
+// déclenchent un mouvement de décor (`auLeverDe`) : `chats_invites` fait partir
+// les chats vers la cuisine, `chats_rassasies` les en fait revenir,
+// `reconciliation` les approche du cœur.
+VAR flag_trone_vu = false
+VAR flag_libou_parle = false
+VAR has_idee_couronne = false
+VAR flag_couronne_resolu = false
+VAR flag_couronne_pliee = false
+VAR has_couronne = false
+VAR flag_couronne_rendue = false
+VAR flag_chat_faim = false
+VAR flag_lune_chat_parle = false
+VAR flag_cuisine_vue = false
+VAR flag_cheffe_poisson = false
+VAR has_carpe = false
+VAR flag_cheffe_daurade = false
+VAR has_idee_poisson = false
+VAR flag_poisson_resolu = false
+VAR flag_poisson_plie = false
+VAR has_daurade = false
+VAR flag_repas_pret = false
+VAR flag_chats_invites = false
+VAR flag_chats_rassasies = false
+VAR flag_jardin_vu = false
+VAR flag_wyvern_indices = false
+VAR has_idee_coeur = false
+VAR flag_coeur_resolu = false
+VAR flag_coeur_plie = false
+VAR flag_reconciliation = false
+VAR flag_histoire_finie = false
 
 // ink exige un knot avant tout contenu libre, et ce fichier n'en a pas.
 === function _unused ===
@@ -956,14 +989,460 @@ NON ! NE T'APPROCHE PAS DU CHAT MAL LUNÉ !
 -> DONE
 
 
-// Franchir l'entrée referme le chapitre.
+// Franchir l'entrée referme le chapitre et ouvre le suivant.
 //
-// ⚠ Pas de `# goto:` : le chapitre 3 n'existe pas. Le jour où il existera, ce
-// knot est le seul endroit à modifier.
+// ⚠ Le `# goto:` est SEUL sur sa ligne, pour la raison donnée à la porte du
+// chapitre 1 : la réplique doit se lire avant que la salle du trône n'apparaisse.
 === entree_fin_chapitre ===
 # qui: heros
 Il est temps de retrouver Sa Majesté Le Libou Des Bois Jolis et de confronter le Chat Mal Luné.
 J'appréhende un peu...
+# goto: trone
+-> DONE
+
+
+// ================================================================
+// Chapitre 3 — La salle du trône
+// Voir game-design/scenes/chapter-3/salle-du-trone.md
+//
+// ⚠ Tout le texte du chapitre 3 est un PREMIER JET : il tient la structure, les
+// conditions et l'enchaînement, pas la voix. Chaque knot à reprendre porte un
+// « [A ECRIRE] » ; `grep -n "A ECRIRE" content/story.ink` les liste, et la
+// marque s'enlève une fois les répliques réécrites.
+// ================================================================
+
+// Joué automatiquement à la première arrivée dans la scène (TroneScene.create).
+// [A ECRIRE]
+=== trone_arrivee ===
+# qui: heros
+Me voici enfin dans la salle du trône. Crôa crôa
+# qui: narrateur
+Le Petit Chat et le Chat Mal Luné se toisent, chacun à un bout de la salle, en feulant à qui mieux mieux.
+# qui: heros
+Sa Majesté a l'air à bout de nerfs. Je devrais aller la saluer.
+# flag: trone_vu
+-> DONE
+
+
+// Le Libou Des Bois Jolis. Elle a perdu sa couronne et ne supporte plus les
+// disputes des chats ; la couronne rendue, elle pose la feuille rouge au centre
+// de la salle.
+//
+// ⚠ La branche la plus avancée d'abord, comme pour la vache du village.
+// [A ECRIRE]
+=== trone_libou ===
+{
+  - flag_reconciliation:
+    # qui: hibou
+    Hou hou ! Enfin la paix dans mon château. Merci, mon cher Maître Origamiste.
+  - has_couronne:
+    # qui: heros
+    Votre Majesté, voici une couronne toute neuve, pliée de mes mains.
+    # qui: hibou
+    Hou hou ! Qu'elle est belle ! Elle brille encore plus que l'ancienne. # drop: couronne
+    Pour te remercier, je te confie ma plus belle feuille. Elle scintille comme un rubis.
+    # qui: narrateur
+    Sa Majesté dépose une feuille rouge scintillante au centre de la salle. # flag: couronne_rendue
+    # qui: hibou
+    Si seulement elle pouvait ramener un peu de paix entre ces deux-là...
+  - flag_couronne_rendue:
+    # qui: hibou
+    Ma feuille rouge est le plus beau papier du royaume. Sauras-tu en tirer de quoi apaiser ces deux chats ?
+  - flag_libou_parle:
+    # qui: hibou
+    Hou hou... Ma couronne... Comment régner sans couronne ?
+  - else:
+    -> trone_libou_rencontre
+}
+-> DONE
+
+// [A ECRIRE]
+=== trone_libou_rencontre ===
+# qui: heros
+Votre Majesté ! Me voici rentré de voyage. Votre origamiste royal est à votre service.
+# qui: hibou
+Hou hou ! Il était temps ! Tout va de travers dans ce château.
+J'ai perdu ma couronne, et ces deux chats n'arrêtent pas de se chamailler du matin au soir.
+# qui: heros
+Perdu votre couronne ? Encore ?
+# qui: hibou
+Je ne peux pas recevoir mes sujets tête nue ! Fais quelque chose, toi qui plies si bien.
+# qui: heros
+Une couronne de papier, digne de Sa Majesté... Il me faudrait un papier précieux.
+# qui: narrateur
+Mémorisons la forme de la couronne : ça pourrait être utile. # flag: libou_parle # give: idee_couronne
+-> DONE
+
+
+// Le Petit Chat. Il a faim, encore ; le repas prêt, il suit l'autre à la
+// cuisine.
+// [A ECRIRE]
+=== trone_chat ===
+{
+  - flag_reconciliation:
+    # qui: chat
+    Miaou ! Plus jamais de querelle, / Désormais la vie est belle.
+  - flag_chats_rassasies:
+    # qui: chat
+    Le ventre plein, je suis comblé, / Mais ce Chat Mal Luné me fait toujours bouder.
+  - flag_repas_pret:
+    -> trone_invitation
+  - flag_chat_faim:
+    # qui: chat
+    Miaou... Mon ventre crie famine, / Que fait donc la cuisine ?
+  - else:
+    # qui: chat
+    Miaou ! Te voilà enfin au Château, / Mais ici rien ne va, c'est le chaos.
+    Ce Chat Mal Luné a tout déplié, / Et moi, je n'ai rien à manger.
+    # qui: heros
+    Tu as encore faim ? Tu viens pourtant de laper tout un pot de lait.
+    # qui: chat
+    Le lait n'était qu'une mise en bouche, / C'est un festin qu'il me faut sous la moustache.
+    # qui: heros
+    Il faudra voir ça avec les cuisines, Petit Chat. # flag: chat_faim
+}
+-> DONE
+
+
+// Le Chat Mal Luné. Il a déplié les origamis que la reine aimait, parce qu'elle
+// lui préfère le Petit Chat ; il a faim, et il n'a pas envie de parler.
+// [A ECRIRE]
+=== trone_lune_chat ===
+{
+  - flag_reconciliation:
+    # qui: lune_chat
+    Je tiendrai parole. Plus rien ne sera déplié dans ce château.
+  - flag_chats_rassasies:
+    # qui: lune_chat
+    Pas mauvais, ce poisson. Mais je n'ai toujours rien à dire au Petit Chat.
+  - flag_repas_pret:
+    -> trone_invitation
+  - flag_lune_chat_parle:
+    # qui: lune_chat
+    Laisse-moi tranquille. J'ai faim.
+  - else:
+    # qui: heros
+    Chat Mal Luné ! C'est donc toi qui as déplié tous les origamis du château ?
+    # qui: lune_chat
+    Pfff. Et alors ?
+    La reine les adorait, ces origamis. Presque autant que son précieux Petit Chat.
+    Elle ne jure que par lui. Moi, on m'accuse de tout, alors autant le mériter.
+    # qui: heros
+    Ce n'est pas une raison pour transformer le royaume en tas de feuilles !
+    # qui: lune_chat
+    J'ai faim. Je n'ai pas envie de parler. # flag: lune_chat_parle
+}
+-> DONE
+
+
+// Le repas est prêt : on invite l'un ou l'autre chat, les deux partent. Le
+// départ se joue une fois la boîte refermée (`auLeverDe` dans trone-scene.ts),
+// donc rien ici ne le commente.
+// [A ECRIRE]
+=== trone_invitation ===
+# qui: heros
+À table, les chats ! La Cheffe Éléphant vous a préparé une daurade royale.
+# qui: chat
+Miaou ! Une daurade, quel délice, / Courons-y sans artifice !
+# qui: lune_chat
+Enfin quelque chose d'intéressant. # flag: chats_invites
+-> DONE
+
+
+// La feuille rouge de la reine, au centre de la salle, puis le cœur qu'elle
+// devient. Elle se plie en bien des choses ; le cœur n'est proposé qu'à qui a
+// écouté la wyvern.
+// [A ECRIRE]
+=== trone_coeur ===
+{ flag_coeur_plie: -> trone_coeur_plie }
+# qui: heros
+Une feuille rouge qui scintille comme un rubis. Il faut en faire quelque chose qui rapproche ces deux chats.
++ [plier une souris]
+    Une souris pour deux chats ? Ils se la disputeraient, et ce serait pire qu'avant.
++ [plier une couronne]
+    Sa Majesté a déjà la sienne. Et un chat couronné, ça ferait des jaloux.
++ { has_idee_coeur } [plier un cœur]
+    Un cœur, comme l'a soufflé la wyvern. Voyons s'il peut réconcilier ces deux-là.
+    -> trone_coeur_lancement
++ [plier une pelote de laine]
+    Ils joueraient ensemble... ou pas. Je ne veux pas risquer une bagarre de plus.
+- -> DONE
+
+// Tag seul, sans texte : voir `pont_enigme_lancement`.
+=== trone_coeur_lancement ===
+# puzzle: coeur # then: trone_coeur_issue
+-> DONE
+
+// Plié en dernier, le cœur enchaîne sur les retrouvailles ; plié avant le
+// repas, il attend que les chats reviennent de la cuisine (TroneScene).
+// [A ECRIRE]
+=== trone_coeur_issue ===
+{ flag_coeur_resolu:
+    # qui: heros
+    Un pli après l'autre, avec tout mon cœur... # origami: coeur # flag: coeur_plie # drop: idee_coeur
+    { flag_chats_rassasies: -> trone_retrouvailles }
+    Reste à ce que les chats s'en approchent. Mais le ventre vide, ils n'ont d'yeux que pour la cuisine.
+  - else:
+    # qui: heros
+    J'ai le cœur qui n'y est pas... Je réessaierai.
+}
+-> DONE
+
+// [A ECRIRE]
+=== trone_coeur_plie ===
+# qui: heros
+Un cœur rouge et scintillant, au milieu de la salle du trône.
+{ not flag_chats_rassasies: Les chats ne le regarderont qu'une fois le ventre plein. }
+-> DONE
+
+
+// Les chats repus devant le cœur plié. C'est le seul knot qui lève
+// `reconciliation`, et le rapprochement se joue une fois la boîte refermée :
+// rien ici ne le décrit. La scène enchaîne sur `trone_reconciliation` à la fin
+// du trajet.
+//
+// On y arrive par le cœur plié en dernier (`trone_coeur_issue`), ou par les
+// chats rentrés en dernier de la cuisine (TroneScene, à l'entrée dans la pièce).
+// [A ECRIRE]
+=== trone_retrouvailles ===
+# qui: narrateur
+Le ventre plein, les deux chats remarquent enfin le cœur rouge au milieu de la salle. # flag: reconciliation
+-> DONE
+
+// La fin de l'histoire, lancée par la scène au bout du rapprochement. Relancée
+// aussi à l'entrée dans la pièce tant que `histoire_finie` n'est pas levé : un
+// rechargement pendant les aveux ne doit pas coûter la fin.
+//
+// ⚠ Le `# fin:` est SEUL sur sa ligne, comme le `# goto:` des fins de chapitre :
+// l'écran de fin ne vient qu'après la dernière réplique.
+// [A ECRIRE]
+=== trone_reconciliation ===
+# qui: narrateur
+Côte à côte devant le cœur, les deux chats restent un long moment silencieux.
+# qui: chat
+Miaou... Il est temps que je l'avoue, / J'ai fait une grosse bêtise, entre nous.
+La couronne de Sa Majesté, c'est moi qui l'ai cachée, / Plus d'une fois, pour que tu sois accusé.
+Je voulais que la reine n'aime que moi. / Pardon, Chat Mal Luné, pardon à toi.
+# qui: hibou
+Hou hou ! Petit Chat ! C'était donc toi !
+# qui: lune_chat
+...
+Bon. J'arrêterai de déplier les origamis du château. À condition que tu te tiennes à carreau, Petit Chat.
+# qui: chat
+Promis, juré, sur mes moustaches, / Plus jamais de couronne que je cache !
+# qui: hibou
+Enfin la paix dans mon château. Merci, mon cher Maître Origamiste.
+# qui: heros
+Crôa crôa ! Il n'y a pas de quoi, Votre Majesté. Un origamiste a toujours un pli d'avance. # flag: histoire_finie
+# fin: histoire
+-> DONE
+
+
+// ================================================================
+// Chapitre 3 — La cuisine
+// Voir game-design/scenes/chapter-3/cuisine.md
+// ================================================================
+
+// Joué automatiquement à la première arrivée dans la scène (CuisineScene.create).
+// [A ECRIRE]
+=== cuisine_arrivee ===
+# qui: narrateur
+Ça sent bon le bouillon. La Cheffe Éléphant s'affaire devant ses fourneaux.
+# flag: cuisine_vue
+-> DONE
+
+
+// La Cheffe Éléphant. Elle veut du poisson pour les chats ; la carpe n'est pas
+// comestible, la daurade si. La daurade apportée, le repas est prêt.
+//
+// ⚠ La branche la plus avancée d'abord : `cheffe_daurade` reste levé une fois
+// l'idée donnée, et couvrirait le cas où on lui tend la daurade.
+// [A ECRIRE]
+=== cuisine_cheffe ===
+{
+  - flag_chats_rassasies:
+    # qui: elephant
+    Deux assiettes vides et deux chats repus. Voilà qui fait plaisir à une cuisinière !
+  - flag_chats_invites:
+    # qui: elephant
+    Chut, laisse-les manger tranquilles.
+  - flag_repas_pret:
+    # qui: elephant
+    Le repas est prêt ! Va donc chercher ces deux chats, qu'ils mangent tant que c'est chaud.
+  - has_daurade:
+    # qui: heros
+    Voici une daurade royale, toute fraîche pliée !
+    # qui: elephant
+    Magnifique ! Voilà un poisson digne des chats de Sa Majesté. # drop: daurade
+    # qui: narrateur
+    La Cheffe Éléphant découpe, assaisonne et fait mijoter en un tour de trompe.
+    # qui: elephant
+    Le repas est prêt ! Va chercher les chats, et qu'ils ne se battent pas à table. # flag: repas_pret
+  - has_carpe:
+    # qui: heros
+    Voici une belle carpe, pêchée dans la fontaine du jardin !
+    # qui: elephant
+    Une carpe ? Malheureux ! Les carpes du jardin sont décoratives, elles ne se mangent pas.
+    Je la remettrai dans sa fontaine. # drop: carpe
+    Il me faudrait un vrai poisson de roi... Une daurade royale, voilà ce qu'il faut.
+    # qui: narrateur
+    Mémorisons la forme de la daurade : ça pourrait être utile. # flag: cheffe_daurade # give: idee_poisson
+  - flag_cheffe_daurade:
+    # qui: elephant
+    Une daurade royale, pas moins ! Les chats de Sa Majesté ont le palais délicat.
+  - flag_cheffe_poisson:
+    # qui: elephant
+    Alors, ce poisson ? Mes casseroles s'impatientent.
+  - else:
+    # qui: heros
+    Bonjour, Cheffe ! Ça sent drôlement bon, ici.
+    # qui: elephant
+    Ça sentirait meilleur si j'avais de quoi cuisiner ! Les chats de Sa Majesté réclament leur repas, et je n'ai plus un seul poisson.
+    Sans poisson, pas de repas. Et sans repas, ces deux-là vont finir par se dévorer entre eux.
+    # qui: heros
+    Je vais voir ce que je peux trouver. # flag: cheffe_poisson
+}
+-> DONE
+
+
+// Les deux chats à table. Leur parler, c'est les renvoyer repus vers la salle du
+// trône ; le départ se joue boîte refermée (`auLeverDe` dans cuisine-scene.ts).
+// [A ECRIRE]
+=== cuisine_chats ===
+# qui: narrateur
+Les deux chats dévorent la daurade, chacun à un bout de la table, sans se regarder.
+# qui: chat
+Miaou ! Quel festin, quelle merveille, / Rien au monde n'est pareil !
+# qui: lune_chat
+Mmmh. Pas mal.
+# qui: heros
+Alors, rassasiés ? Sa Majesté vous attend dans la salle du trône.
+# qui: chat
+Le ventre plein, la mine ravie, / Retournons au trône, mes amis. # flag: chats_rassasies
+-> DONE
+
+
+// ================================================================
+// Chapitre 3 — Le jardin
+// Voir game-design/scenes/chapter-3/jardin.md
+// ================================================================
+
+// Joué automatiquement à la première arrivée dans la scène (JardinScene.create).
+// [A ECRIRE]
+=== jardin_arrivee ===
+# qui: heros
+Le jardin du château ! La fontaine, le banc... Rien n'a changé. Crôa crôa
+# qui: narrateur
+Dans un coin, une silhouette rouge m'observe sans un bruit.
+# flag: jardin_vu
+-> DONE
+
+
+// La fontaine et ses carpes. On n'en pêche une qu'après la requête de la
+// Cheffe, et plus du tout une fois qu'elle a dit ce qu'elle en pensait.
+// [A ECRIRE]
+=== jardin_fontaine ===
+{
+  - has_carpe:
+    # qui: heros
+    Une carpe me suffit. La Cheffe attend.
+  - flag_cheffe_daurade:
+    # qui: heros
+    Des carpes décoratives, pas comestibles. C'est vrai qu'elles sont plus jolies dans l'eau.
+  - flag_cheffe_poisson:
+    # qui: heros
+    Du poisson ! Voilà qui devrait faire l'affaire.
+    # qui: narrateur
+    D'un coup de langue, j'attrape une carpe qui passait par là. # give: carpe
+  - else:
+    # qui: narrateur
+    Deux carpes de papier tournent lentement dans le bassin de la fontaine.
+}
+-> DONE
+
+
+// Le papier chatoyant, près de la fontaine : la daurade en puissance. Pas de
+// menu, l'idée vient de la Cheffe et elle est déjà précise — comme le pot à
+// lait du village.
+// [A ECRIRE]
+=== jardin_papier_poisson ===
+{ not has_idee_poisson:
+    # qui: heros
+    Un papier chatoyant, aux reflets d'argent et d'or. On dirait des écailles.
+    -> DONE
+}
+# qui: heros
+Des reflets d'argent et d'or... Les couleurs d'une daurade royale ! Parfait pour la Cheffe.
+-> jardin_poisson_lancement
+
+=== jardin_poisson_lancement ===
+# puzzle: poisson # then: jardin_poisson_issue
+-> DONE
+
+// [A ECRIRE]
+=== jardin_poisson_issue ===
+{ flag_poisson_resolu:
+    # qui: heros
+    Une nageoire, une queue... # origami: poisson # flag: poisson_plie # give: daurade # drop: idee_poisson
+    Une daurade royale, prête pour la cuisine !
+  - else:
+    # qui: heros
+    Ce poisson a plutôt l'air d'une limande. Je recommencerai.
+}
+-> DONE
+
+
+// Le papier doré serti de gemmes, sur le banc. Il ne se plie qu'une fois la
+// requête de la reine entendue.
+// [A ECRIRE]
+=== jardin_papier_couronne ===
+{ not has_idee_couronne:
+    # qui: heros
+    Un papier doré, incrusté de petites gemmes. Bien trop précieux pour en faire n'importe quoi.
+    -> DONE
+}
+# qui: heros
+Un papier doré, serti de gemmes : de quoi plier une couronne digne de Sa Majesté.
+-> jardin_couronne_lancement
+
+=== jardin_couronne_lancement ===
+# puzzle: couronne # then: jardin_couronne_issue
+-> DONE
+
+// [A ECRIRE]
+=== jardin_couronne_issue ===
+{ flag_couronne_resolu:
+    # qui: heros
+    Et un dernier pli pour les pointes... # origami: couronne # flag: couronne_pliee # give: couronne # drop: idee_couronne
+    Une couronne toute neuve ! Sa Majesté va être ravie.
+  - else:
+    # qui: heros
+    Pas facile de plier une couronne sans l'avoir sur la tête. Je réessaierai.
+}
+-> DONE
+
+
+// La wyvern, dans un coin du jardin. Elle parle du cœur par énigmes, et c'est
+// d'elle que vient l'idée de le plier.
+// [A ECRIRE]
+=== jardin_wyvern ===
+{ flag_wyvern_indices:
+    # qui: wyvern
+    Ce que deux cœurs fâchés ne savent plus se dire, un seul, bien plié, le dira pour eux.
+    -> DONE
+}
+# qui: heros
+Euh... Bonjour ? Je ne crois pas vous connaître.
+# qui: wyvern
+Moi, je te connais, petit plieur. Je veille sur ce jardin depuis bien avant ta naissance.
+Deux félins se déchirent sous ce toit. Ni griffes ni couronne ne les réuniront.
+Il faut plier ce qui bat : deux lobes et une pointe, rouge comme ma peau.
+# qui: heros
+Deux lobes et une pointe... Rouge... Un cœur ?
+# qui: wyvern
+Le papier viendra de la reine. Le reste viendra de toi.
+# qui: narrateur
+Mémorisons la forme du cœur : ça pourrait être utile. # flag: wyvern_indices # give: idee_coeur
 -> DONE
 
 

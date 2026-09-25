@@ -3,6 +3,9 @@ import { PontScene } from './scenes/pont-scene';
 import { PorteScene } from './scenes/porte-scene';
 import { VillageScene } from './scenes/village-scene';
 import { EntreeScene } from './scenes/entree-scene';
+import { TroneScene } from './scenes/trone-scene';
+import { CuisineScene } from './scenes/cuisine-scene';
+import { JardinScene } from './scenes/jardin-scene';
 
 // Le registre des chapitres, annoncé dans game-design/02-chapitres-et-scenes.md.
 // Il répond à deux questions, et il est seul à y répondre : quelles scènes
@@ -31,17 +34,22 @@ const CHAPITRES: Chapitre[] = [
     nom: 'Le village et le château',
     scenes: { village: VillageScene, entree: EntreeScene },
   },
+  {
+    nom: 'La salle du trône',
+    scenes: { trone: TroneScene, cuisine: CuisineScene, jardin: JardinScene },
+  },
 ];
 
-// Les quatre scènes sont embarquées : le chapitre 2 se joue de bout en bout, et
-// le menu des points d'étape y dépose le testeur (src/game/systems/etapes.ts).
+// Toutes les scènes sont embarquées : les chapitres 2 et 3 se jouent de bout en
+// bout, et le menu des points d'étape y dépose le testeur
+// (src/game/systems/etapes.ts).
 const LIVRES = CHAPITRES;
 
 // Mais la traversée, elle, s'arrête toujours à la fin du chapitre 1 : franchir
 // la porte pose « À suivre… » au lieu d'ouvrir le village. Le chapitre 2 a son
-// fond peint, mais ses objets ne sont pas encore calés dessus — on veut bien
-// qu'on aille l'essayer, pas qu'un joueur du récit y débarque sans l'avoir
-// demandé.
+// fond peint, mais ses objets ne sont pas encore calés dessus, et le chapitre 3
+// n'a que des décors provisoires — on veut bien qu'on aille les essayer, pas
+// qu'un joueur du récit y débarque sans l'avoir demandé.
 //
 // Index du dernier chapitre relié au suivant. La narration, elle, ignore tout de
 // ce réglage : son knot de fin de chapitre se joue en entier de toute façon.

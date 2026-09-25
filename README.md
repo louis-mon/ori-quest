@@ -357,7 +357,7 @@ Le tracé est juste, le papier sait quoi faire. # origami: pont # flag: pont_pli
 ```
 
 Tags disponibles : `give`, `drop`, `flag`, `unflag`, `origami`, `goto`, `puzzle`,
-`then`, `qui`. En ajouter
+`then`, `qui`, `fin`. En ajouter
 un = une entrée dans `handlers` (`src/game/systems/dialogue.ts`).
 
 **Une exception, et une seule** : le texte des tutoriels d'énigme vit dans
@@ -390,9 +390,11 @@ npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 200
 
 Ce qui part en ligne s'arrête **à la fin du chapitre 1**, sur « À suivre… » : le
 chapitre 2 se joue en développement et son texte est écrit, mais les objets de
-ses deux scènes ne sont pas encore calés sur leur fond. La frontière tient en une
-ligne de [`src/game/chapitres.ts`](src/game/chapitres.ts) — la narration, elle,
-ignore quels chapitres ont été compilés.
+ses deux scènes ne sont pas encore calés sur leur fond ; le chapitre 3 n'a que
+des décors provisoires et un texte de premier jet. Les deux ne s'atteignent que
+par le menu des points d'étape. La frontière tient en une ligne de
+[`src/game/chapitres.ts`](src/game/chapitres.ts) — la narration, elle, ignore
+quels chapitres ont été compilés.
 
 ### Une fois pour toutes
 
@@ -436,8 +438,8 @@ itch.io sert le jeu depuis un sous-dossier arbitraire.
 ### Voir le build avant de l'envoyer
 
 `npm run preview` sert `dist/` tel qu'il sera livré : délai anti-tap réel,
-chapitre 2 absent, fin sur « À suivre… ». Le serveur de dev ne montre aucune de
-ces trois choses.
+traversée arrêtée au chapitre 1, fin sur « À suivre… ». Le serveur de dev ne
+montre aucune de ces trois choses.
 
 ## Orientation
 
@@ -457,6 +459,10 @@ pour que le plein écran parte dans le bon sens.
   à toucher dans le code. C'est ce qui garde le chapitre hors de la traversée
   livrée (`DERNIER_TRAVERSE`, `src/game/chapitres.ts`) — son texte, lui, est
   écrit.
+- Le **chapitre 3** se joue de bout en bout, mais tout y est provisoire : ses
+  trois scènes n'ont pas de fond (`decor-provisoire.ts`), et son texte, ses
+  découpages d'énigme et quelques noms sont des premiers jets
+  (`grep -rn "A ECRIRE"`).
 - **Rien ne remet l'état à zéro entre deux chapitres**, alors que le game design
   le prévoit (voir [game-design/02-chapitres-et-scenes.md](game-design/02-chapitres-et-scenes.md)).
   Sans conséquence tant que les drapeaux d'un chapitre ne servent pas au suivant.

@@ -22,6 +22,9 @@ export interface DialogueEffects {
   // posé sur une ligne SANS texte : la ligne suivante ne doit être évaluée
   // qu'une fois le drapeau connu.
   puzzle(name: string): Promise<void>;
+  // La fin de l'histoire, pas d'un chapitre : l'écran de fin prend la suite de
+  // la dernière réplique.
+  fin(): void;
 }
 
 // Un handler peut renvoyer le nom d'un knot : le récit y repart aussitôt le tag
@@ -46,6 +49,9 @@ const handlers: Record<string, TagHandler> = {
   puzzle: (value, fx) => fx.puzzle(value),
   // Repart au knot indiqué, une fois les tags précédents appliqués.
   then: (value) => value,
+  // `# fin: histoire` — la valeur ne sert qu'à faire un tag, qui exige ses
+  // deux-points.
+  fin: (_value, fx) => fx.fin(),
   // Traité en amont par `readSpeaker`. Listé ici pour ne pas ressortir en « tag
   // inconnu ».
   qui: () => {},

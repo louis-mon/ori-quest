@@ -99,4 +99,32 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     decoupage: DECOUPAGES.os,
     title: "L'os",
   },
+
+  // game-design/scenes/chapter-3/jardin.md — la couronne de la reine.
+  couronne: {
+    svg: 'assets/enigmes/couronne/solution.svg',
+    modele: 'couronne',
+    decoupage: DECOUPAGES.couronne,
+    // [A ECRIRE]
+    title: 'La couronne',
+  },
+
+  // game-design/scenes/chapter-3/jardin.md — la daurade. L'énigme porte le nom
+  // du dossier de l'artiste, l'objet celui que parlent les knots (`daurade`).
+  poisson: {
+    svg: 'assets/enigmes/poisson/solution.svg',
+    modele: 'poisson',
+    decoupage: DECOUPAGES.poisson,
+    // [A ECRIRE]
+    title: 'La daurade',
+  },
+
+  // game-design/scenes/chapter-3/salle-du-trone.md — le cœur qui réconcilie.
+  coeur: {
+    svg: 'assets/enigmes/coeur/solution.svg',
+    modele: 'coeur',
+    decoupage: DECOUPAGES.coeur,
+    // [A ECRIRE]
+    title: 'Le cœur',
+  },
 };

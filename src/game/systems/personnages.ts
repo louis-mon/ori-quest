@@ -26,7 +26,7 @@ export interface Personnage {
 export const PERSONNAGES: Record<string, Personnage> = {
   grenouille: { nom: 'La grenouille', portrait: 'assets/personnages/grenouille.png' },
   renard: { nom: 'Le renard', portrait: 'assets/personnages/renard.png' },
-  hibou: { nom: 'Le hibou', portrait: 'assets/personnages/hibou.png' },
+  hibou: { nom: 'Le Libou Des Bois Jolis', portrait: 'assets/personnages/hibou.png' },
   // Sa vignette est le pliage que la scène du pont pose dans le décor : celui
   // qui parle et celui qu'on voit au bord du ravin doivent être le même.
   arbre: { nom: 'Le jeune arbre', portrait: 'assets/personnages/arbre.png' },
@@ -39,9 +39,14 @@ export const PERSONNAGES: Record<string, Personnage> = {
   // Le seul personnage que le joueur plie lui-même, et donc le seul rendu :
   // « rien de ce qui se plie n'est dessiné » vaut ici comme ailleurs, et son
   // portrait doit être le pliage qui sort de l'énigme, pas une photo qui
-  // finirait par en différer. Les huit autres sont photographiés parce
-  // qu'aucun n'est un pliage.
+  // finirait par en différer. Les autres sont photographiés parce qu'aucun
+  // ne sort d'une énigme.
   chien: { nom: 'Chouaf', modele: 'chien' },
+  // Chapitre 3. Les fichiers gardent le nom que l'artiste leur a donné.
+  lune_chat: { nom: 'Chat Mal Luné', portrait: 'assets/personnages/lune_chat.png' },
+  // [A ECRIRE] les fiches ne donnent pas leur nom dans le jeu.
+  elephant: { nom: 'Cheffe Éléphant', portrait: 'assets/personnages/elephant_humain.png' },
+  wyvern: { nom: 'La wyvern', portrait: 'assets/personnages/hydre.png' },
 };
 
 // Noms de rôle acceptés dans ink, à côté des identifiants d'espèce. Le jour où

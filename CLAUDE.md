@@ -94,13 +94,13 @@ qu'elle se paie.
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
 
-**Le build embarque les deux chapitres, la traversée s'arrête au premier.**
+**Le build embarque tous les chapitres, la traversée s'arrête au premier.**
 C'étaient deux façons de dire la même chose tant que le chapitre 2 restait
 dehors ; `src/game/chapitres.ts` les sépare depuis qu'on veut le faire essayer
 sans le raccorder — les objets de ses deux scènes ne sont pas encore calés sur
-leur fond, et un joueur du récit n'a rien à y faire, alors qu'un testeur si.
-`LIVRES` dit ce que la version contient, `DERNIER_TRAVERSE` jusqu'où elle laisse
-aller.
+leur fond, le chapitre 3 n'a que des décors provisoires, et un joueur du récit
+n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce que la version
+contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller.
 
 `goto()` (`main.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour les deux raisons :
 destination absente du build, ou franchissement hors traversée — **sans l'écrire
@@ -114,12 +114,15 @@ en Draft (`ETAPES_LIVREES`, dans `src/game/systems/etapes.ts`) : un testeur ne
 retraverse pas le chapitre pour en atteindre la fin. Il ne propose que les
 chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin avec
 les drapeaux du chapitre suivant levés. C'est par lui, et par lui seul, qu'on
-atteint le chapitre 2.
+atteint les chapitres 2 et 3.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la
 suite. C'est le seul texte du jeu hors d'ink avec celui des tutoriels, et pour
-une raison voisine : il parle de la version, pas de l'histoire.
+une raison voisine : il clôt, il ne raconte pas. La fin de l'histoire passe par
+le même écran, dans sa variante « Fin » : c'est le tag `# fin:` du dernier knot
+qui la pose — la narration sait que l'histoire est finie, l'écran ne fait que le
+constater.
 
 **Une idée est un objet d'inventaire comme un autre.** Même `# give:`, même
 condition `has_`, même liste ; seul l'affichage les distingue, à partir du

@@ -17,7 +17,11 @@ export type Papier =
   | 'pierre'
   | 'tachete'
   | 'metal'
-  | 'marron';
+  | 'marron'
+  | 'rouge'
+  | 'chatoyant'
+  | 'or'
+  | 'orGemmes';
 
 interface PapierModele {
   recto: Papier;
@@ -41,6 +45,11 @@ export const PAPIERS: Record<string, PapierModele> = {
   pot: { recto: 'papier', verso: 'pierre' },
   chien: { recto: 'tachete', verso: 'papier' },
   os: { recto: 'papier', verso: 'pierre' },
+  // Chapitre 3, mêmes sources. La tête du poisson est un rabat retourné : le
+  // verso doré y fait le bandeau d'or de la daurade royale.
+  poisson: { recto: 'chatoyant', verso: 'or' },
+  coeur: { recto: 'rouge', verso: 'papier' },
+  couronne: { recto: 'orGemmes', verso: 'or' },
   // Les feuilles de démonstration des tutoriels. Un verso, sinon la feuille
   // pliée n'est qu'un aplat clair où le pli ne se lit qu'à l'ombre — et le même
   // pour les trois, pour qu'on reconnaisse la feuille sur laquelle on explique.
@@ -349,7 +358,150 @@ const ASPECTS: Record<Papier, Aspect> = {
       grain(ctx, 20);
     },
   },
+
+  // Ce sont les paillettes qui font « scintillant » : un rouge qui brille
+  // uniformément se lit comme du plastique.
+  rouge: {
+    teinte: '#b3262f',
+    specular: 0x7a4a4a,
+    shininess: 50,
+    peindre: (ctx) => {
+      fond(ctx, ASPECTS.rouge.teinte);
+      ctx.globalAlpha = 0.3;
+      for (let i = 0; i < 600; i++) {
+        const x = Math.random() * TAILLE;
+        const y = Math.random() * TAILLE;
+        const l = 4 + Math.random() * 12;
+        const a = Math.random() * Math.PI;
+        ctx.strokeStyle = Math.random() > 0.5 ? '#cf3d46' : '#8c1b23';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+        ctx.stroke();
+      }
+      for (let i = 0; i < 320; i++) {
+        ctx.globalAlpha = 0.45 + Math.random() * 0.55;
+        ctx.fillStyle = Math.random() > 0.35 ? '#ffd2cc' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(
+          Math.random() * TAILLE,
+          Math.random() * TAILLE,
+          0.8 + Math.random() * 1.6,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      grain(ctx, 10);
+    },
+  },
+
+  // Les couleurs d'une daurade royale : un argent qui tire au bleu, au rose puis
+  // à l'or d'un bout à l'autre. C'est ce glissement de teinte qui fait
+  // « chatoyant », là où un argent uni retomberait sur le métal de la hache.
+  chatoyant: {
+    teinte: '#bcc6cc',
+    specular: 0xffffff,
+    shininess: 90,
+    peindre: (ctx) => {
+      const base = ctx.createLinearGradient(0, 0, TAILLE, TAILLE);
+      base.addColorStop(0, '#dde3e7');
+      base.addColorStop(0.3, '#a8b9c9');
+      base.addColorStop(0.55, '#d9c6ca');
+      base.addColorStop(0.8, '#cbc099');
+      base.addColorStop(1, '#b9c4ca');
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, TAILLE, TAILLE);
+
+      // Des écailles à peine marquées : plus appuyées, le papier devient un
+      // poisson imprimé avant même d'être plié.
+      ctx.strokeStyle = '#ffffff';
+      ctx.globalAlpha = 0.16;
+      ctx.lineWidth = 1.5;
+      const pas = 18;
+      for (let y = 0; y <= TAILLE + pas; y += pas) {
+        const decale = (y / pas) % 2 ? pas / 2 : 0;
+        for (let x = decale; x <= TAILLE + pas; x += pas) {
+          ctx.beginPath();
+          ctx.arc(x, y, pas / 2, 0, Math.PI);
+          ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+      grain(ctx, 6);
+    },
+  },
+
+  // Même construction que le métal — des valeurs contrastées le long d'une
+  // direction —, dans les ors : c'est le contraste qui fait lire « doré », pas
+  // le jaune.
+  or: {
+    teinte: '#c9a13b',
+    specular: 0xffe7a0,
+    shininess: 110,
+    peindre: (ctx) => {
+      const base = ctx.createLinearGradient(0, 0, TAILLE * 0.35, TAILLE);
+      base.addColorStop(0, '#f2da8c');
+      base.addColorStop(0.3, '#b88a2c');
+      base.addColorStop(0.55, '#e4c268');
+      base.addColorStop(0.78, '#a47822');
+      base.addColorStop(1, '#ddb95c');
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, TAILLE, TAILLE);
+      grain(ctx, 6);
+    },
+  },
+
+  // Le papier de la couronne. Les gemmes n'y sont pas semées : chacune est
+  // sertie là où, la couronne pliée, elle tombe au pied d'une pointe.
+  orGemmes: {
+    teinte: '#c9a13b',
+    specular: 0xffe7a0,
+    shininess: 110,
+    peindre: (ctx) => {
+      ASPECTS.or.peindre(ctx);
+      const pierres = ['#b81f35', '#2352b0', '#1d8a57', '#7a3cae'];
+      GEMMES_COURONNE.forEach(([u, v], i) => {
+        // Le haut d'une texture est v = 1 : three.js la retourne au chargement.
+        const x = u * TAILLE;
+        const y = (1 - v) * TAILLE;
+        // Allongée selon u, l'axe de la pointe sur la feuille : elle se tient
+        // debout une fois la couronne pliée.
+        const r = 14;
+        ctx.fillStyle = pierres[i % pierres.length];
+        ctx.beginPath();
+        ctx.moveTo(x - r, y);
+        ctx.lineTo(x, y - r * 0.7);
+        ctx.lineTo(x + r, y);
+        ctx.lineTo(x, y + r * 0.7);
+        ctx.closePath();
+        ctx.fill();
+        // Le sertissage et un éclat : sans eux, une pastille de couleur.
+        ctx.strokeStyle = '#8a6418';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.beginPath();
+        ctx.arc(x + r * 0.35, y - r * 0.2, r * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    },
+  },
 };
+
+// En coordonnées de la feuille à plat (u vers la droite, v vers le haut), une
+// par pointe de la couronne, de gauche à droite : aux trois quarts de ce qu'on
+// voit de la pointe, dans la pose de `POSES`, avant qu'elle passe derrière sa
+// voisine. Mesurées sur le modèle plié — un autre crease pattern, ou une pose
+// qui montrerait l'autre face, demande de les reprendre.
+const GEMMES_COURONNE: readonly (readonly [number, number])[] = [
+  [0.532, 0.125],
+  [0.404, 0.376],
+  [0.277, 0.624],
+  [0.154, 0.875],
+];
 
 // Partagées entre tous les meshes et jamais libérées : six au maximum, et les
 // repeindre à chaque ouverture de scène coûterait bien plus cher.

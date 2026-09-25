@@ -323,6 +323,149 @@ export const CHAPITRES: Chapitre[] = [
       },
     ],
   },
+  // [A ECRIRE] noms du chapitre et des étapes.
+  {
+    nom: 'Chapitre 3 — la salle du trône',
+    etapes: [
+      {
+        nom: 'Début du chapitre',
+        piece: 'trone',
+        drapeaux: [],
+        objets: [],
+      },
+      {
+        nom: 'La reine a perdu sa couronne',
+        piece: 'trone',
+        drapeaux: ['trone_vu', 'libou_parle'],
+        objets: ['idee_couronne'],
+      },
+      {
+        nom: 'Couronne pliée',
+        piece: 'jardin',
+        drapeaux: ['trone_vu', 'libou_parle', 'jardin_vu', 'couronne_resolu', 'couronne_pliee'],
+        objets: ['couronne'],
+      },
+      {
+        nom: 'La feuille rouge est posée',
+        piece: 'trone',
+        drapeaux: [
+          'trone_vu',
+          'libou_parle',
+          'jardin_vu',
+          'couronne_resolu',
+          'couronne_pliee',
+          'couronne_rendue',
+        ],
+        objets: [],
+      },
+      {
+        // La carpe a été refusée : c'est l'étape d'où l'on repart plier la
+        // daurade.
+        nom: 'Idée de la daurade',
+        piece: 'jardin',
+        drapeaux: [
+          'trone_vu',
+          'libou_parle',
+          'jardin_vu',
+          'couronne_resolu',
+          'couronne_pliee',
+          'couronne_rendue',
+          'cuisine_vue',
+          'cheffe_poisson',
+          'cheffe_daurade',
+        ],
+        objets: ['idee_poisson'],
+      },
+      {
+        nom: 'Daurade pliée',
+        piece: 'jardin',
+        drapeaux: [
+          'trone_vu',
+          'libou_parle',
+          'jardin_vu',
+          'couronne_resolu',
+          'couronne_pliee',
+          'couronne_rendue',
+          'cuisine_vue',
+          'cheffe_poisson',
+          'cheffe_daurade',
+          'poisson_resolu',
+          'poisson_plie',
+        ],
+        objets: ['daurade'],
+      },
+      {
+        // Le repas est prêt, les chats sont encore là : les inviter les fait
+        // partir vers la cuisine.
+        nom: 'Le repas est prêt',
+        piece: 'trone',
+        drapeaux: [
+          'trone_vu',
+          'libou_parle',
+          'jardin_vu',
+          'couronne_resolu',
+          'couronne_pliee',
+          'couronne_rendue',
+          'cuisine_vue',
+          'cheffe_poisson',
+          'cheffe_daurade',
+          'poisson_resolu',
+          'poisson_plie',
+          'repas_pret',
+        ],
+        objets: [],
+      },
+      {
+        // L'autre ordre du dénouement : le cœur est déjà plié, et ce sont les
+        // chats qui le découvrent en rentrant de la cuisine.
+        nom: 'Cœur plié, chats à table',
+        piece: 'cuisine',
+        drapeaux: [
+          'trone_vu',
+          'libou_parle',
+          'jardin_vu',
+          'couronne_resolu',
+          'couronne_pliee',
+          'couronne_rendue',
+          'cuisine_vue',
+          'cheffe_poisson',
+          'cheffe_daurade',
+          'poisson_resolu',
+          'poisson_plie',
+          'repas_pret',
+          'chats_invites',
+          'wyvern_indices',
+          'coeur_resolu',
+          'coeur_plie',
+        ],
+        objets: [],
+      },
+      {
+        // Les chats repus sont revenus, la feuille rouge attend au centre de la
+        // salle : plier le cœur mène droit à la fin.
+        nom: 'Avant le cœur (fin)',
+        piece: 'trone',
+        drapeaux: [
+          'trone_vu',
+          'libou_parle',
+          'jardin_vu',
+          'couronne_resolu',
+          'couronne_pliee',
+          'couronne_rendue',
+          'cuisine_vue',
+          'cheffe_poisson',
+          'cheffe_daurade',
+          'poisson_resolu',
+          'poisson_plie',
+          'repas_pret',
+          'chats_invites',
+          'chats_rassasies',
+          'wyvern_indices',
+        ],
+        objets: ['idee_coeur'],
+      },
+    ],
+  },
 ];
 
 // Ce que ce build sait rouvrir. Un point d'étape posé dans une scène absente de

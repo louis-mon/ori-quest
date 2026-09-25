@@ -17,4 +17,7 @@ export const POSES: Record<string, Pose> = {
   pot: { angles: [-84, -41, -20], pliage: 0.98 },
   chien: { angles: [33, -13, 112], pliage: 0.98 },
   os: { angles: [-101, 0, 2], pliage: 0.97 },
+  poisson: { angles: [160, 315, 0], pliage: 0.95 },
+  coeur: { angles: [-105, -3, -6], pliage: 0.94 },
+  couronne: { angles: [-55, 77, 0], pliage: 0.89 },
 };

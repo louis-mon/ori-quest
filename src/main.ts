@@ -13,7 +13,7 @@ import { DialogueRunner } from './game/systems/dialogue';
 import { FIRST_ROOM, gameState } from './game/systems/state';
 import { OrigamiLayer } from './origami/origami-layer';
 import { pliageDe } from './origami/vue';
-import { montrerFin } from './ui/fin';
+import { montrerFin, type RaisonDeFin } from './ui/fin';
 import { Menu } from './ui/menu';
 import { Overlay } from './ui/overlay';
 
@@ -175,10 +175,10 @@ async function playPuzzle(name: string) {
 // la flèche — sinon l'une des deux oublie d'enregistrer la pièce courante.
 const goto = (room: string) => {
   // Deux façons de finir ici plutôt que de changer de scène : une destination
-  // que ce build ne contient pas — le chapitre 3 n'existe pas —, et une qui sort
-  // de la traversée livrée, le village n'étant atteignable que par le menu
-  // (src/game/chapitres.ts). Et surtout sans `goTo()` : la sauvegarde doit rester
-  // sur une pièce que ce build sait rouvrir.
+  // que ce build ne contient pas, et une qui sort de la traversée livrée, le
+  // village n'étant atteignable que par le menu (src/game/chapitres.ts). Et
+  // surtout sans `goTo()` : la sauvegarde doit rester sur une pièce que ce build
+  // sait rouvrir.
   if (!estLivree(room) || sortDeLaTraversee(gameState.room, room)) {
     finirLaPartie();
     return;
@@ -210,6 +210,7 @@ const dialogue = new DialogueRunner(storyJson, overlay, {
   puzzle: playPuzzle,
   goto,
   donner,
+  fin: () => finirLaPartie('histoire'),
 });
 
 const game = new Phaser.Game({
@@ -272,13 +273,14 @@ function figerLeJeu(gele: boolean) {
   }
 }
 
-// Fin de la version : le chapitre suivant n'est pas dans ce build. La scène est
-// gelée plutôt qu'arrêtée — une scène en pause reste dessinée, et le décor qu'on
-// vient de quitter fait un meilleur fond de fin qu'un cadre noir —, et l'écran
-// couvre le menu : il n'y a plus rien à reprendre, seulement à recommencer.
-function finirLaPartie() {
+// Fin de la version — le chapitre suivant n'est pas dans ce build —, ou de
+// l'histoire. La scène est gelée plutôt qu'arrêtée — une scène en pause reste
+// dessinée, et le décor qu'on vient de quitter fait un meilleur fond de fin
+// qu'un cadre noir —, et l'écran couvre le menu : il n'y a plus rien à
+// reprendre, seulement à recommencer.
+function finirLaPartie(raison: RaisonDeFin = 'version') {
   figerLeJeu(true);
-  montrerFin(uiRoot);
+  montrerFin(uiRoot, raison);
 }
 
 new Menu(uiRoot, { onLayoutChange: syncStage, onGel: figerLeJeu });

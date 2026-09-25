@@ -50,6 +50,13 @@ export interface OptionsDeplacement {
   ease?: string;
 }
 
+// L'endroit où l'objet se retrouve une fois le trajet joué : c'est là qu'on le
+// pose en revenant dans la pièce.
+export function finDuChemin(chemin: Contour): Position {
+  const [x, y] = chemin[chemin.length - 1] ?? [0, 0];
+  return { x, y };
+}
+
 // Traverser le cadre en cinq secondes environ. À régler à l'œil au cas par cas.
 const VITESSE = 260;
 

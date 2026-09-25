@@ -34,10 +34,11 @@ sans double-clic, sans glisser-déposer.
 
 ## Statut
 
-Ces documents décrivent la cible. L'implémentation couvre aujourd'hui les deux
-chapitres — quatre scènes, la navigation, l'inventaire, le minijeu et l'animation
-de pliage —, le second sur décor provisoire et hors du build publié. Les écarts
-sont signalés par **⚠ pas encore implémenté**.
+Ces documents décrivent la cible. L'implémentation couvre aujourd'hui les trois
+chapitres — sept scènes, la navigation, l'inventaire, le minijeu et l'animation
+de pliage —, les deux derniers hors de la traversée publiée : le deuxième n'est
+pas encore calé sur ses fonds, le troisième n'a que des décors provisoires et un
+texte de premier jet. Les écarts sont signalés par **⚠ pas encore implémenté**.
 
 Les questions non tranchées sont marquées **❓ à décider** — ce sont des
 décisions qui attendent, pas des oublis. Il n'en reste aucune : le mauvais choix

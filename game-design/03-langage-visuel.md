@@ -128,6 +128,21 @@ du jeu à demander l'attention.
 Le ciel, son soleil et ses nuages vivent **sous** le décor (profondeurs
 négatives), de sorte qu'un rempart passe devant les nuages.
 
+## Un pliage photographié se retourne comme une feuille
+
+Les carpes du jardin nagent d'un bout à l'autre du bassin et doivent faire
+demi-tour. Retournées d'une image à l'autre, en miroir, elles sautaient :
+**c'était brusque**. Elles se retournent donc comme on retourne une feuille — prise
+par la tête, courbée par-dessus la queue, qui sert de charnière, et reposée à
+l'envers de l'autre côté (`src/game/scenes/retournement.ts`).
+
+L'œil regarde la feuille **un peu d'en haut** pendant qu'elle tourne. De face,
+une feuille qui se courbe vers lui ne fait que rétrécir, l'arc étant dans l'axe
+du regard ; d'en haut, ce qui vient vers l'œil descend à l'écran, et la courbe
+se voit. Une ombre suit l'angle du papier, et c'est elle qui fait lire du papier
+plutôt qu'une image qu'on étire. À plat, rien de tout ça ne se voit : la carpe
+au repos est exactement la photo.
+
 ## Palette
 
 Définie dans `src/game/config.ts`.

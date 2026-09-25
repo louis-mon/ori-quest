@@ -3,7 +3,7 @@ import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/entree';
-import { boxOf, cheminOf, exitsFrom, hotspotsFrom, type Contour } from './layout';
+import { boxOf, cheminOf, exitsFrom, hotspotsFrom } from './layout';
 import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
@@ -11,6 +11,7 @@ import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
 import { dessinerFeuille, poserFeuille, type FeuilleMobile } from './feuille';
+import { finDuChemin } from './deplacement';
 
 // L'entrée du château — seconde scène du chapitre 2.
 // Voir game-design/scenes/chapter-2/entree-chateau.md.
@@ -36,13 +37,6 @@ const VITESSE_DIPLO = 170;
 // Un saut se mesure en durée, pas en vitesse : c'est son rythme qui le rend
 // lisible, et les deux sauts de la scène doivent avoir le même.
 const DUREE_SAUT = 1550;
-
-// Le dernier sommet d'un chemin, donc l'endroit où l'objet se retrouve une fois
-// le mouvement joué : c'est là qu'on le pose en revenant dans la pièce.
-function arrivee(chemin: Contour) {
-  const [x, y] = chemin[chemin.length - 1] ?? [0, 0];
-  return { x, y };
-}
 
 export class EntreeScene extends PointClickScene {
   protected readonly plan = PLAN;
@@ -194,7 +188,7 @@ export class EntreeScene extends PointClickScene {
     const chute = cheminOf(PLAN, 'chute_os');
     this.auLeverDe('os_tombe', {
       pose: () => {
-        this.os.conteneur.setPosition(arrivee(chute).x, arrivee(chute).y);
+        this.os.conteneur.setPosition(finDuChemin(chute).x, finDuChemin(chute).y);
         this.caler('papier_os', this.os.emprise());
       },
       jouer: () => {
@@ -218,7 +212,7 @@ export class EntreeScene extends PointClickScene {
     const fuite = cheminOf(PLAN, 'fuite_diplo');
     this.auLeverDe('diplo_pousse', {
       pose: () => {
-        this.diplo.setPosition(arrivee(fuite).x, arrivee(fuite).y);
+        this.diplo.setPosition(finDuChemin(fuite).x, finDuChemin(fuite).y);
         this.caler('diplo', empriseDe(this.diplo));
         // Déjà écarté en arrivant : le passage est libre tout de suite.
         this.passageDegage = true;

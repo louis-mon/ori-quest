@@ -46,24 +46,34 @@ confortable pour le pouce — donc **plutôt bas que centré verticalement**, et
 jamais dans les coins supérieurs, hors d'atteinte sur un grand téléphone.
 
 **La topologie n'est pas une question tant qu'un chapitre a deux scènes** :
-A ↔ B, une flèche de chaque côté, rien à comprendre. Le choix entre une ligne
-(A ↔ B ↔ C) et une étoile ne se posera que le jour où un chapitre en demandera
-trois — et il se tranchera alors sur le contenu de ce chapitre-là.
+A ↔ B, une flèche de chaque côté, rien à comprendre.
+
+**Tranché au chapitre 3, le premier à en avoir trois** : une ligne, cuisine ↔
+salle du trône ↔ jardin, la salle du trône au milieu. À trois scènes, c'est aussi
+une étoile dont elle serait le centre, et c'est le contenu qui la désigne : elle
+est le point d'entrée du chapitre, les deux quêtes y commencent — la couronne de
+la reine, la faim des chats — et le dénouement s'y joue. Chaque pièce garde la
+règle des bords : deux flèches dans la salle du trône, une de chaque côté, et une
+seule dans les deux autres, du côté par où l'on revient.
 
 ## Ce que ça implique techniquement
 
 Le chapitre 1 a ses deux scènes, le ravin et la porte ; le chapitre 2, le village
-et l'entrée du château. La navigation fonctionne dans les deux sens à l'intérieur
-d'un chapitre, et franchir la porte mène du premier au second.
+et l'entrée du château ; le chapitre 3, la salle du trône, la cuisine et le
+jardin. La navigation fonctionne dans les deux sens à l'intérieur d'un chapitre,
+franchir la porte mène du premier au second, et l'entrée du château du second au
+troisième. La fin du troisième est celle de l'histoire : son dernier knot pose
+l'écran de fin (`# fin:`).
 
 **Les liaisons sont dans les plans**, pas dans un registre : une boîte `exit_<id>`
 dans le SVG, et la scène dit vers quelle pièce elle mène. Le registre de
 chapitres, lui, existe (`src/game/chapitres.ts`), mais il ne dit encore que deux
 choses : quelles scènes chaque chapitre contient, et **jusqu'où va la
-traversée**. Les deux chapitres sont embarqués — le menu des points d'étape mène
-au second —, mais la traversée s'arrête au bout du premier, sur « À suivre… » :
-le texte du chapitre 2 est écrit et ses énigmes tiennent, ses décors sont encore
-provisoires. ⚠ Il reste à ce registre un point d'entrée par
+traversée**. Les trois chapitres sont embarqués — le menu des points d'étape mène
+aux deux derniers —, mais la traversée s'arrête au bout du premier, sur « À
+suivre… » : le texte du chapitre 2 est écrit et ses énigmes tiennent, ses objets
+ne sont pas encore calés sur ses fonds ; le chapitre 3 n'a que des décors
+provisoires et un texte de premier jet. ⚠ Il reste à ce registre un point d'entrée par
 chapitre, et avec lui la remise à zéro de l'inventaire et des drapeaux au passage
 d'un chapitre au suivant : rien ne l'effectue aujourd'hui.
 

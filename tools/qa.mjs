@@ -106,6 +106,26 @@ const CHOUAF_ET_OS = etape(
   ],
   ['os'],
 );
+// Chapitre 3, le cœur déjà plié et les chats encore à table : le même état que le
+// point d'étape « Cœur plié, chats à table » (src/game/systems/etapes.ts).
+const COEUR_PLIE_CHATS_A_TABLE = etape('cuisine', [
+  'trone_vu',
+  'libou_parle',
+  'jardin_vu',
+  'couronne_resolu',
+  'couronne_pliee',
+  'couronne_rendue',
+  'cuisine_vue',
+  'cheffe_poisson',
+  'cheffe_daurade',
+  'poisson_resolu',
+  'poisson_plie',
+  'repas_pret',
+  'chats_invites',
+  'wyvern_indices',
+  'coeur_resolu',
+  'coeur_plie',
+]);
 const BOIS_EN_POCHE = etape(
   'porte',
   [
@@ -451,8 +471,8 @@ test(
 );
 
 // Ce que le build embarque, et jusqu'où il laisse aller. Les deux ne coïncident
-// plus : le chapitre 2 est dans le bundle et le menu y mène, mais la traversée
-// s'arrête toujours au bout du premier.
+// plus : les chapitres 2 et 3 sont dans le bundle et le menu y mène, mais la
+// traversée s'arrête toujours au bout du premier.
 test(
   'fin-de-chapitre',
   async (page, dire) => ({
@@ -461,7 +481,11 @@ test(
       await page().locator('.menu__button').click();
       await pause(600);
       const chapitres = await page().locator('.menu__panel [data-action="chapitre"]').count();
-      dire('le menu propose les deux chapitres embarqués', chapitres === 2, `${chapitres} chapitre(s)`);
+      dire(
+        'le menu propose les trois chapitres embarqués',
+        chapitres === 3,
+        `${chapitres} chapitre(s)`,
+      );
       await page().locator('.menu__voile').click();
       await pause(600);
 
@@ -531,6 +555,69 @@ test(
       // trajet, donc un tap qui porte prouve que la flèche s'est allumée.
       await taperZone(page(), 'entree', 'chateau');
       dire('le passage vers le château est ouvert', (await etat(page())).boite);
+    },
+  }),
+  { livre: true },
+);
+
+// Le dénouement du chapitre 3, dans l'ordre qui ne passe pas par l'énigme : le
+// cœur est déjà plié quand les chats reviennent de la cuisine, et c'est la salle
+// du trône qui reprend la parole d'elle-même. Les aveux ne viennent qu'une fois
+// les chats arrivés près du cœur — la leçon du plan machiavélique du chapitre 2 —,
+// et un rechargement pendant qu'on les lit ne doit pas coûter la fin.
+test(
+  'chapitre-3',
+  async (page, dire) => ({
+    sauvegarde: COEUR_PLIE_CHATS_A_TABLE,
+    jouer: async () => {
+      await taperZone(page(), 'cuisine', 'chat');
+      await attendreLaBoite(page());
+      await deroulerDialogue(page());
+      dire('la tirade du repas se referme avant le départ', !(await etat(page())).boite);
+
+      // Le départ des chats est bloquant : la flèche ne porte qu'une fois qu'ils
+      // sont sortis. On retape donc jusqu'à changer de pièce, sans supposer de
+      // durée.
+      for (let i = 0; i < 30 && (await etat(page())).piece !== 'trone'; i++) {
+        await taperZone(page(), 'cuisine', 'trone');
+        await pause(400);
+      }
+      dire('la salle du trône rouvre', (await etat(page())).piece === 'trone');
+
+      dire('la pièce reprend la parole seule', await attendreLaBoite(page()));
+      const tirade = [];
+      for (let i = 0; i < 20; i++) {
+        const e = await etat(page());
+        if (!e.boite) break;
+        tirade.push(e.texte);
+        await avancer(page());
+      }
+      dire(
+        'les retrouvailles ne commentent pas un rapprochement à venir',
+        !tirade.some((ligne) => ligne.includes('Côte à côte')),
+        tirade.at(-1),
+      );
+      dire('la boîte se referme pour le rapprochement', !(await etat(page())).boite);
+      dire('le rapprochement rend la parole au récit', await attendreLaBoite(page(), 12_000));
+      dire(
+        'les aveux arrivent après lui',
+        (await etat(page())).texte.includes('Côte à côte'),
+        (await etat(page())).texte,
+      );
+
+      await avancer(page());
+      await avancer(page());
+      await page().reload({ waitUntil: 'networkidle' });
+      dire('après un rechargement, les aveux reprennent', await attendreLaBoite(page()));
+      dire('depuis le début', (await etat(page())).texte.includes('Côte à côte'));
+
+      await deroulerDialogue(page(), 60);
+      for (let i = 0; i < 30 && !(await etat(page())).fin; i++) await pause(100);
+      const titre = await page().evaluate(
+        () => document.querySelector('.fin__titre')?.textContent ?? '',
+      );
+      dire("l'écran de fin clôt l'histoire", titre === 'Fin', titre);
+      dire('la fin est enregistrée', (await etat(page())).enregistres.histoire_finie === true);
     },
   }),
   { livre: true },

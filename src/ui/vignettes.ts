@@ -21,7 +21,8 @@ export function vignette(id: string): Promise<string | null> {
 }
 
 async function resoudre(id: string): Promise<string | null> {
-  const { modele, dessin } = objet(id);
+  const { modele, dessin, photo } = objet(id);
+  if (photo) return photo;
   if (modele) {
     try {
       return await urlApercuOrigami(modele, { taille: TAILLE * 2 });
