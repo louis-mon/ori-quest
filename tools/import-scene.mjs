@@ -583,7 +583,8 @@ function main() {
   const check = argv.includes('--check');
   const nameFlag = argv.indexOf('--name');
   const explicitName = nameFlag >= 0 ? argv[nameFlag + 1] : null;
-  const inputs = argv.filter((a, i) => !a.startsWith('--') && i !== nameFlag + 1);
+  // Sans `--name`, `nameFlag + 1` vaut 0 et désignerait la première carte.
+  const inputs = argv.filter((a, i) => !a.startsWith('--') && (nameFlag < 0 || i !== nameFlag + 1));
 
   let files = inputs.map((f) => resolve(f));
   if (files.length === 0) {
