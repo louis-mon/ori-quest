@@ -1223,6 +1223,20 @@ body {
   cursor: default;
 }
 
+/* Visible en développement seulement, et doit le rester à l'œil : pointillés. */
+.puzzle__resoudre {
+  flex: 0 1 auto;
+  min-height: 44px;
+  padding: 0 calc(14px * var(--ui-scale));
+  border: 1px dashed var(--paper);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--paper);
+  font: inherit;
+  font-size: calc(14px * var(--ui-scale));
+  cursor: pointer;
+}
+
 .puzzle__quit {
   background: transparent;
   color: var(--accent);

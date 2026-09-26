@@ -444,6 +444,12 @@ export async function runCreasePuzzle(
       void lanceur(controle, true);
     }
 
+    const reussir = () => {
+      board.classList.add('is-solved');
+      check.disabled = true;
+      window.setTimeout(() => finish('solved'), 600);
+    };
+
     check.addEventListener('pointerup', (e) => {
       e.stopPropagation();
       if (check.disabled) return;
@@ -456,9 +462,7 @@ export async function runCreasePuzzle(
         });
 
       if (solved) {
-        board.classList.add('is-solved');
-        check.disabled = true;
-        window.setTimeout(() => finish('solved'), 600);
+        reussir();
         return;
       }
 
@@ -466,6 +470,26 @@ export async function runCreasePuzzle(
       board.classList.add('is-wrong');
       window.setTimeout(() => board.classList.remove('is-wrong'), FLASH_MS);
     });
+
+    // Pour atteindre la suite du récit sans refaire l'énigme. Les pièces sont
+    // posées à la vue avant la victoire : c'est le même chemin que « Vérifier »,
+    // donc ce qui suit la résolution se teste tel que le joueur le verra.
+    if (import.meta.env.DEV) {
+      const resoudre = document.createElement('button');
+      resoudre.type = 'button';
+      resoudre.className = 'puzzle__resoudre';
+      resoudre.textContent = 'Résoudre (dev)';
+      el.querySelector('.puzzle__actions')!.prepend(resoudre);
+      resoudre.addEventListener('pointerup', (e) => {
+        e.stopPropagation();
+        if (check.disabled) return;
+        for (const { el: piece, boite: b } of pieces) place(piece, { c: b.x, r: b.y });
+        // Une pièce chassée en chemin par une voisine mal posée a lancé son vol
+        // vers le bac, et il se jouerait sur le plateau.
+        for (const { el: piece } of pieces) annulerRetour(piece);
+        reussir();
+      });
+    }
 
     // La seule action de l'énigme qu'on ne peut pas défaire, et elle arrivait
     // par erreur : sûr à gauche, irréversible à droite.
