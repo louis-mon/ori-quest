@@ -300,6 +300,13 @@ game.events.once(Phaser.Core.Events.READY, () => {
   // enregistrée ne donne qu'un écran noir.
   const piece = estLivree(gameState.room) ? gameState.room : FIRST_ROOM;
   game.scene.start(piece, { overlay, dialogue, goto });
+
+  // Une histoire finie ne se rouvre pas au rechargement, seulement au
+  // « Recommencer » de l'écran de fin (`fin.ts`) : sans ce garde, une partie
+  // terminée reprenait comme si de rien n'était, château rendu jouable à
+  // volonté — la scène est démarrée d'abord pour lui servir de fond, comme au
+  // fondu de fin de chapitre.
+  if (gameState.flag('histoire_finie')) finirLaPartie('histoire');
 });
 
 window.addEventListener('resize', syncStage);
