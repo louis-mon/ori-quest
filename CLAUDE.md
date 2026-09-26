@@ -225,13 +225,23 @@ pas la scène** — le décor reste touchable pendant qu'un objet traverse, sauf
 `bloquant: true` pour ce qui doit être vu avant qu'on puisse agir.
 
 **Bloquant veut dire vraiment bloquant**, et l'état est **transitoire** : décor
-et inventaire cessent de répondre, et les marqueurs s'endorment — grisés,
-arrêtés sur une pose stable et non au milieu de leur battement, qu'on lirait
-comme un défaut d'affichage. Seul le menu reste atteignable, et il **fige la
-scène** (`figerLeJeu`, dans `main.ts`) : sans ça, ce qu'on regardait finit sa
-course derrière le panneau. Tout se relève à la fin du trajet **et au
-shutdown** — des attentes restées ouvertes rendraient la pièce sourde pour de
-bon.
+et inventaire cessent de répondre, et les marqueurs se retirent (ci-dessous).
+Seul le menu reste atteignable, et il **fige la scène** (`figerLeJeu`, dans
+`main.ts`) : sans ça, ce qu'on regardait finit sa course derrière le panneau.
+Tout se relève à la fin du trajet **et au shutdown** — des attentes restées
+ouvertes rendraient la pièce sourde pour de bon.
+
+**Pendant un dialogue ou une cinématique, les marqueurs se retirent** d'un zoom,
+et l'inventaire reste à l'écran sans répondre — `Overlay.marquerLeRecit()`,
+tenu par `DialogueRunner.run()`, couvre aussi les moments où le récit travaille
+boîte fermée : pliage, énigme, changement de pièce. Le retrait est **recalculé à
+chaque image** depuis l'état du récit (`update()` de `PointClickScene`), jamais
+déclenché par un événement : aucun chemin ne peut laisser les marqueurs partis
+une fois la scène rendue. Ils attendent `RETOUR_MS` avant de revenir, sinon ils
+reparaissent pour repartir entre deux maillons — la tirade puis le départ
+qu'elle déclenche, le rapprochement puis les aveux. Le battement et le zoom
+animent deux conteneurs imbriqués (`marqueur-papier.ts`) : sur un seul, ils se
+disputaient l'échelle.
 
 **C'est la narration qui déclenche, la scène qui joue** : `# flag:` lève le
 drapeau, `auLeverDe()` (`PointClickScene`) joue le mouvement. Un drapeau **déjà

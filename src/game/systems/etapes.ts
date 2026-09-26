@@ -346,7 +346,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['couronne'],
       },
       {
-        nom: 'La feuille rouge est posée',
+        nom: 'Les feuilles de la reine sont posées',
         piece: 'trone',
         drapeaux: [
           'trone_vu',
@@ -441,7 +441,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: [],
       },
       {
-        // Les chats repus sont revenus, la feuille rouge attend au centre de la
+        // Les chats repus sont revenus, les feuilles attendent au centre de la
         // salle : plier le cœur mène droit à la fin.
         nom: 'Avant le cœur (fin)',
         piece: 'trone',
@@ -462,7 +462,7 @@ export const CHAPITRES: Chapitre[] = [
           'chats_rassasies',
           'wyvern_indices',
         ],
-        objets: ['idee_coeur'],
+        objets: [],
       },
     ],
   },

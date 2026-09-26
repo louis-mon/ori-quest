@@ -137,6 +137,7 @@ export class DialogueRunner {
   async run(knot: string): Promise<void> {
     if (this.running) return;
     this.running = true;
+    this.overlay.marquerLeRecit(true);
     // Tout ce que ce knot pose — drapeaux, inventaire, verdict d'énigme, pièce —
     // reste en mémoire jusqu'à sa dernière réplique. Un joueur qui recharge en
     // cours de route doit pouvoir le rejouer en ENTIER, sans quoi la moitié
@@ -157,6 +158,7 @@ export class DialogueRunner {
       await this.overlay.say('…');
     } finally {
       this.running = false;
+      this.overlay.marquerLeRecit(false);
       this.overlay.hideDialogue();
       if (this.panne) this.remettreDebout();
       // En dernier, et dans le `finally` : une narration en panne a quand même

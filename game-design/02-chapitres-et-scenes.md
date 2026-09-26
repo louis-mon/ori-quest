@@ -82,7 +82,8 @@ sauvegarde : le joueur qui revient au ravin retrouve le pont posé.
 
 **La transition** est un fondu de 260 ms. Le pli qui balaie l'écran serait plus
 juste et reste à faire — le fondu n'est là que pour que la scène suivante
-n'apparaisse pas d'un coup, marqueurs déjà en plein battement.
+n'apparaisse pas d'un coup, et les marqueurs n'y paraissent qu'une fois le fondu
+fini (voir [03-langage-visuel.md](03-langage-visuel.md)).
 
 ⚠ Deux pièges rencontrés, à ne pas réintroduire : `game.scene.start()`
 **n'arrête pas** la scène qu'on quitte (les deux restent actives, avec deux jeux

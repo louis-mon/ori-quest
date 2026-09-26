@@ -44,16 +44,16 @@
                  "y":470
                 }, 
                 {
-                 "height":170,
+                 "height":252,
                  "id":4,
                  "name":"lune_chat",
                  "opacity":1,
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
-                 "width":115,
-                 "x":400,
-                 "y":440
+                 "width":150,
+                 "x":382,
+                 "y":358
                 }, 
                 {
                  "height":190,

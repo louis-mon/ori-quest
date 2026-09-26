@@ -9,8 +9,9 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerDecorProvisoire } from './decor-provisoire';
-import { dessinerFeuille } from './feuille';
+import { poserFeuillesPrecieuses, type FeuillesPrecieuses } from './feuilles-precieuses';
 import { finDuChemin } from './deplacement';
+import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 
 // La salle du trône — point d'entrée du chapitre 3, entre la cuisine (à gauche)
 // et le jardin (à droite). Voir game-design/scenes/chapter-3/salle-du-trone.md.
@@ -24,28 +25,29 @@ const PLAN = plan;
 
 const HIBOU = 'hibou';
 const CHAT = 'chat';
-const LUNE_CHAT = 'lune_chat';
 
 // Deux chats qui ont faim ne traînent pas.
 const VITESSE_SORTIE = 220;
 // Deux chats qui se sont disputés, si.
 const DUREE_RAPPROCHEMENT = 2400;
+// Le délai du dialogue d'arrivée : la pièce peint sa première image d'abord.
+const DELAI_DENOUEMENT = 400;
 
 export class TroneScene extends PointClickScene {
   protected readonly plan = PLAN;
   protected arrivee = { knot: 'trone_arrivee', flag: 'trone_vu' };
 
   private chat!: Phaser.GameObjects.Image;
-  private luneChat!: Phaser.GameObjects.Image;
-  private feuilleRouge!: Phaser.GameObjects.Graphics;
+  private luneChat!: LuneChat;
+  private feuilles!: FeuillesPrecieuses;
   private coeur!: OrigamiDecor;
-  private empriseFeuille?: Box;
   private empriseCoeur?: Box;
   // Les chats sont à la cuisine entre l'invitation et leur retour. Leurs zones
   // s'éteignent à la fin de leur sortie et non au drapeau : `refresh()` applique
   // la visibilité AVANT de jouer le mouvement — même piège que le passage de
   // Gros Diplo (entree-scene.ts).
   private chatsSortis = false;
+  private denouementArme = false;
 
   constructor() {
     super({ key: 'trone', active: false });
@@ -55,7 +57,7 @@ export class TroneScene extends PointClickScene {
     preloadHeros(this);
     preloadSprite(this, HIBOU, 'assets/decor/hibou.png');
     preloadSprite(this, CHAT, 'assets/decor/chat.png');
-    preloadSprite(this, LUNE_CHAT, 'assets/decor/lune_chat.png');
+    preloadLuneChat(this);
   }
 
   protected hotspots(): HotspotDef[] {
@@ -74,9 +76,10 @@ export class TroneScene extends PointClickScene {
         knot: 'trone_lune_chat',
         visibleIf: () => !this.chatsSortis,
       },
-      // La feuille rouge, puis le cœur qu'elle devient : une seule zone, et
-      // c'est la narration qui sait laquelle des deux on regarde. Elle n'est
-      // au centre de la salle qu'une fois la couronne rendue.
+      // Les quatre feuilles de la reine, puis le cœur que la rouge devient :
+      // une seule zone, et c'est la narration qui sait lequel des deux on
+      // regarde. Elles ne sont au centre de la salle qu'une fois la couronne
+      // rendue.
       coeur: {
         knot: 'trone_coeur',
         visibleIf: () => gameState.flag('couronne_rendue'),
@@ -98,10 +101,16 @@ export class TroneScene extends PointClickScene {
   protected onStateChange() {
     const donnee = gameState.flag('couronne_rendue');
     const plie = gameState.flag('coeur_plie');
-    this.feuilleRouge?.setVisible(donnee && !plie);
+    // Plié, le cœur prend toute la place : les trois autres feuilles, restées
+    // là, se liraient comme une chose de plus à examiner.
+    this.feuilles?.groupe.setVisible(donnee && !plie);
     this.coeur?.montrer(plie);
-    const emprise = plie ? this.empriseCoeur : this.empriseFeuille;
+    const emprise = plie ? this.empriseCoeur : this.feuilles?.emprise;
     if (emprise) this.caler('coeur', emprise);
+
+    if (plie && gameState.flag('chats_rassasies') && !gameState.flag('histoire_finie')) {
+      this.armerLeDenouement();
+    }
   }
 
   // ------------------------------------------------------------------
@@ -116,10 +125,9 @@ export class TroneScene extends PointClickScene {
       meubles: [boxOf(PLAN, 'dec_trone')],
     });
 
-    // Deux boîtes, comme la montagne du village : le modèle plié étirerait la
-    // feuille s'il partageait la sienne.
-    this.feuilleRouge = this.add.graphics();
-    this.empriseFeuille = dessinerFeuille(this.feuilleRouge, boxOf(PLAN, 'hs_coeur'), 'coeur');
+    // Deux boîtes, comme la montagne du village : la rangée de feuilles et le
+    // cœur plié n'ont ni la même forme ni la même place.
+    this.feuilles = poserFeuillesPrecieuses(this, boxOf(PLAN, 'hs_coeur'));
     this.coeur = poserOrigami(this, 'coeur', boxOf(PLAN, 'dec_coeur'), (emprise) => {
       this.empriseCoeur = emprise;
       this.refresh();
@@ -128,12 +136,11 @@ export class TroneScene extends PointClickScene {
     this.caler('libou', empriseDe(placeSprite(this, HIBOU, boxOf(PLAN, 'hs_libou'))));
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));
     this.calerSur('chat', this.chat);
-    this.luneChat = placeSprite(this, LUNE_CHAT, boxOf(PLAN, 'hs_lune_chat'));
-    this.calerSur('lune_chat', this.luneChat);
+    this.luneChat = placerLuneChat(this, boxOf(PLAN, 'hs_lune_chat'));
+    this.calerSur('lune_chat', this.luneChat.conteneur, this.luneChat.emprise);
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
     this.brancherLesMouvements();
-    this.guetterLeDenouement();
 
     this.add
       .text(DESIGN_WIDTH / 2, 40, 'La salle du trône', {
@@ -148,6 +155,7 @@ export class TroneScene extends PointClickScene {
   private brancherLesMouvements() {
     // Phaser réutilise l'instance d'un passage à l'autre.
     this.chatsSortis = false;
+    this.denouementArme = false;
 
     // Invités à manger, les deux chats partent vers la cuisine, et n'en
     // reviennent que rassasiés : repasser par ici entre-temps ne les montre pas.
@@ -163,7 +171,7 @@ export class TroneScene extends PointClickScene {
               sortie: true,
               bloquant: true,
             }),
-            this.deplacer(this.luneChat, cheminOf(PLAN, 'sortie_lune_chat'), {
+            this.deplacer(this.luneChat.conteneur, cheminOf(PLAN, 'sortie_lune_chat'), {
               vitesse: VITESSE_SORTIE,
               sortie: true,
               bloquant: true,
@@ -178,64 +186,61 @@ export class TroneScene extends PointClickScene {
       },
     });
 
-    const versLeCoeurChat = cheminOf(PLAN, 'rapprochement_chat');
-    const versLeCoeurLune = cheminOf(PLAN, 'rapprochement_lune_chat');
-    this.auLeverDe('reconciliation', {
-      pose: () => {
-        const chat = finDuChemin(versLeCoeurChat);
-        const lune = finDuChemin(versLeCoeurLune);
-        this.chat.setPosition(chat.x, chat.y);
-        this.luneChat.setPosition(lune.x, lune.y);
-        this.caler('chat', empriseDe(this.chat));
-        this.caler('lune_chat', empriseDe(this.luneChat));
-      },
-      jouer: () => {
-        void (async () => {
-          const pas = { duree: DUREE_RAPPROCHEMENT, ease: 'Sine.easeInOut', bloquant: true };
-          await Promise.all([
-            this.deplacer(this.chat, versLeCoeurChat, pas),
-            this.deplacer(this.luneChat, versLeCoeurLune, pas),
-          ]);
-          if (!this.scene.isActive()) return;
-          // Les aveux commentent un rapprochement : ils viennent après lui, pas
-          // à la suite du `# flag:` qui l'a déclenché.
-          void this.services.dialogue.run('trone_reconciliation');
-        })();
-      },
-    });
+    // Seulement derrière l'écran de fin, rouvert au chargement (main.ts).
+    if (gameState.flag('histoire_finie')) {
+      const chat = finDuChemin(cheminOf(PLAN, 'rapprochement_chat'));
+      const lune = finDuChemin(cheminOf(PLAN, 'rapprochement_lune_chat'));
+      this.chat.setPosition(chat.x, chat.y);
+      this.luneChat.conteneur.setPosition(lune.x, lune.y);
+      this.caler('chat', empriseDe(this.chat));
+      this.caler('lune_chat', this.luneChat.emprise());
+    }
   }
 
   private cacherLesChats() {
     this.chatsSortis = true;
     this.chat.setVisible(false);
-    this.luneChat.setVisible(false);
+    this.luneChat.conteneur.setVisible(false);
   }
 
-  // Deux cas où la pièce reprend la parole d'elle-même en y entrant. Le cœur
-  // plié AVANT que les chats ne reviennent repus : c'est ici qu'ils le
-  // découvrent — dans l'autre ordre, `trone_coeur_issue` enchaîne seul. Et les
-  // aveux interrompus par un rechargement : la réconciliation est acquise, sa
-  // fin ne l'est pas encore.
-  private guetterLeDenouement() {
-    const knot = gameState.flag('reconciliation')
-      ? gameState.flag('histoire_finie')
-        ? null
-        : 'trone_reconciliation'
-      : gameState.flag('coeur_plie') && gameState.flag('chats_rassasies')
-        ? 'trone_retrouvailles'
-        : null;
-    if (!knot) return;
+  // Le cœur plié et les chats repus, dans un ordre ou dans l'autre : la scène
+  // finale — retrouvailles, rapprochement, aveux — se joue d'un seul tenant.
+  //
+  // Le décor se ferme dès cet instant, pas au lancement : entre les deux, un
+  // tap sur un personnage ouvrirait une conversation hors récit, qui retarderait
+  // la fin et parlerait d'une réconciliation qui n'a pas eu lieu.
+  private armerLeDenouement() {
+    if (this.denouementArme) return;
+    this.denouementArme = true;
+    void this.enAttendant(this.jouerLeDenouement());
+  }
 
-    // Un tap sur le décor dans l'intervalle ouvre un autre dialogue, et `run()`
-    // refuserait celui-ci : on attend qu'il se referme au lieu de le perdre.
-    const lancer = () => {
-      if (this.services.dialogue.isRunning || this.services.overlay.occupeLeJoueur) {
-        this.time.delayedCall(200, lancer);
-        return;
-      }
-      void this.services.dialogue.run(knot);
+  // UNE transaction pour les trois temps, comme une conversation (state.ts) :
+  // rechargée en route, la scène finale n'a pas eu lieu, et se rejoue depuis
+  // les retrouvailles. Ouverte seulement une fois la boîte du cœur refermée, pour
+  // que le pliage, lui, reste acquis.
+  private async jouerLeDenouement() {
+    await this.quandLeRecitSeTait(DELAI_DENOUEMENT);
+    let quittee = false;
+    const fermer = gameState.ouvrirUneTransaction();
+    const surShutdown = () => {
+      quittee = true;
+      fermer();
     };
-    // Le même délai que le dialogue d'arrivée, sur l'horloge de la scène.
-    this.time.delayedCall(400, lancer);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, surShutdown);
+    try {
+      await this.services.dialogue.run('trone_retrouvailles');
+      if (quittee) return;
+      const pas = { duree: DUREE_RAPPROCHEMENT, ease: 'Sine.easeInOut' };
+      await Promise.all([
+        this.deplacer(this.chat, cheminOf(PLAN, 'rapprochement_chat'), pas),
+        this.deplacer(this.luneChat.conteneur, cheminOf(PLAN, 'rapprochement_lune_chat'), pas),
+      ]);
+      if (quittee) return;
+      await this.services.dialogue.run('trone_reconciliation');
+    } finally {
+      this.events.off(Phaser.Scenes.Events.SHUTDOWN, surShutdown);
+      fermer();
+    }
   }
 }

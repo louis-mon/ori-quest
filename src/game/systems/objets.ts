@@ -99,11 +99,6 @@ export const OBJETS: Record<string, Objet> = {
     description: 'Une daurade royale aux reflets dorés, de quoi régaler deux chats.',
     modele: 'poisson',
   },
-  idee_coeur: {
-    nom: 'Idée : le cœur',
-    description: 'Une idée de comment plier un cœur, glanée dans les énigmes de la wyvern.',
-    modele: 'coeur',
-  },
 };
 
 // Une idée se dessine dans une bulle ; un objet, non.

@@ -563,8 +563,9 @@ test(
 // Le dénouement du chapitre 3, dans l'ordre qui ne passe pas par l'énigme : le
 // cœur est déjà plié quand les chats reviennent de la cuisine, et c'est la salle
 // du trône qui reprend la parole d'elle-même. Les aveux ne viennent qu'une fois
-// les chats arrivés près du cœur — la leçon du plan machiavélique du chapitre 2 —,
-// et un rechargement pendant qu'on les lit ne doit pas coûter la fin.
+// les chats arrivés près du cœur — la leçon du plan machiavélique du chapitre 2.
+// La scène finale est une seule transaction : le décor n'y répond pas, et un
+// rechargement en route la rejoue depuis les retrouvailles.
 test(
   'chapitre-3',
   async (page, dire) => ({
@@ -598,9 +599,11 @@ test(
         tirade.at(-1),
       );
       dire('la boîte se referme pour le rapprochement', !(await etat(page())).boite);
+      // Le hibou ne répond pas : sa réplique prendrait la place des aveux.
+      await taperZone(page(), 'trone', 'libou');
       dire('le rapprochement rend la parole au récit', await attendreLaBoite(page(), 12_000));
       dire(
-        'les aveux arrivent après lui',
+        'les aveux arrivent après lui, et personne ne les a devancés',
         (await etat(page())).texte.includes('Côte à côte'),
         (await etat(page())).texte,
       );
@@ -608,8 +611,16 @@ test(
       await avancer(page());
       await avancer(page());
       await page().reload({ waitUntil: 'networkidle' });
-      dire('après un rechargement, les aveux reprennent', await attendreLaBoite(page()));
-      dire('depuis le début', (await etat(page())).texte.includes('Côte à côte'));
+      dire('après un rechargement, la scène finale reprend', await attendreLaBoite(page()));
+      dire(
+        'depuis les retrouvailles',
+        (await etat(page())).texte.includes('Le ventre plein'),
+        (await etat(page())).texte,
+      );
+      await deroulerDialogue(page());
+      await taperZone(page(), 'trone', 'chat');
+      dire('puis le rapprochement, sans le Petit Chat', await attendreLaBoite(page(), 12_000));
+      dire('puis les aveux', (await etat(page())).texte.includes('Côte à côte'));
 
       await deroulerDialogue(page(), 60);
       for (let i = 0; i < 30 && !(await etat(page())).fin; i++) await pause(100);

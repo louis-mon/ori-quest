@@ -8,6 +8,7 @@ import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { dessinerDecorProvisoire } from './decor-provisoire';
+import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 
 // La cuisine — à gauche de la salle du trône, chapitre 3.
 // Voir game-design/scenes/chapter-3/cuisine.md.
@@ -21,7 +22,6 @@ const PLAN = plan;
 
 const ELEPHANT = 'elephant_humain';
 const CHAT = 'chat';
-const LUNE_CHAT = 'lune_chat';
 
 // Des chats repus ne courent plus.
 const VITESSE_RETOUR = 170;
@@ -31,7 +31,7 @@ export class CuisineScene extends PointClickScene {
   protected arrivee = { knot: 'cuisine_arrivee', flag: 'cuisine_vue' };
 
   private chat!: Phaser.GameObjects.Image;
-  private luneChat!: Phaser.GameObjects.Image;
+  private luneChat!: LuneChat;
   // Même raison qu'à la salle du trône : la zone s'éteint au bout du trajet, pas
   // au drapeau que la narration lève avant lui.
   private chatsRepartis = false;
@@ -44,7 +44,7 @@ export class CuisineScene extends PointClickScene {
     preloadHeros(this);
     preloadSprite(this, ELEPHANT, 'assets/decor/elephant_humain.png');
     preloadSprite(this, CHAT, 'assets/decor/chat.png');
-    preloadSprite(this, LUNE_CHAT, 'assets/decor/lune_chat.png');
+    preloadLuneChat(this);
   }
 
   private chatsATable(): boolean {
@@ -82,7 +82,7 @@ export class CuisineScene extends PointClickScene {
   protected onStateChange() {
     const aTable = this.chatsATable();
     this.chat?.setVisible(aTable);
-    this.luneChat?.setVisible(aTable);
+    this.luneChat?.conteneur.setVisible(aTable);
   }
 
   // ------------------------------------------------------------------
@@ -100,8 +100,8 @@ export class CuisineScene extends PointClickScene {
     this.caler('cheffe', empriseDe(placeSprite(this, ELEPHANT, boxOf(PLAN, 'hs_cheffe'))));
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));
     this.calerSur('chat', this.chat);
-    this.luneChat = placeSprite(this, LUNE_CHAT, boxOf(PLAN, 'hs_lune_chat'));
-    this.calerSur('lune_chat', this.luneChat);
+    this.luneChat = placerLuneChat(this, boxOf(PLAN, 'hs_lune_chat'));
+    this.calerSur('lune_chat', this.luneChat.conteneur, this.luneChat.emprise);
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
     this.brancherLesMouvements();
@@ -129,7 +129,7 @@ export class CuisineScene extends PointClickScene {
           const pas = { vitesse: VITESSE_RETOUR, sortie: true, bloquant: true };
           await Promise.all([
             this.deplacer(this.chat, cheminOf(PLAN, 'retour_chat'), pas),
-            this.deplacer(this.luneChat, cheminOf(PLAN, 'retour_lune_chat'), pas),
+            this.deplacer(this.luneChat.conteneur, cheminOf(PLAN, 'retour_lune_chat'), pas),
           ]);
           if (!this.scene.isActive()) return;
           this.chatsRepartis = true;

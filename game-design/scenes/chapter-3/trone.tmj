@@ -44,28 +44,28 @@
                  "y":400
                 }, 
                 {
-                 "height":200,
+                 "height":300,
                  "id":4,
                  "name":"lune_chat",
                  "opacity":1,
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
-                 "width":140,
-                 "x":860,
-                 "y":360
+                 "width":180,
+                 "x":840,
+                 "y":260
                 }, 
                 {
-                 "height":110,
+                 "height":88,
                  "id":5,
                  "name":"coeur",
                  "opacity":1,
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
-                 "width":110,
-                 "x":585,
-                 "y":540
+                 "width":386,
+                 "x":447,
+                 "y":562
                 }, 
                 {
                  "height":190,

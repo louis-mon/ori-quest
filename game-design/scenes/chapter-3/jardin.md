@@ -22,3 +22,5 @@ Un papier doré avec des gemmes incrustées est posé sur un banc. Il permet de 
 ## La wyvern
 
 Une mysterieuse wyvern est dans un coin du jardin. Elle donne des indices sur le coeur final.
+Un indice seulement, pas une idée : rien n'arrive dans l'inventaire. Il débloque le cœur dans l'arbre de choix des
+feuilles de la reine (salle du trône), et la wyvern le redit si on revient la voir.

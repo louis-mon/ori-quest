@@ -104,10 +104,11 @@ VAR has_os = false
 VAR flag_diplo_su = false
 VAR flag_diplo_pousse = false
 
-// Chapitre 3 — la salle du trône, la cuisine et le jardin. Trois drapeaux y
+// Chapitre 3 — la salle du trône, la cuisine et le jardin. Deux drapeaux y
 // déclenchent un mouvement de décor (`auLeverDe`) : `chats_invites` fait partir
-// les chats vers la cuisine, `chats_rassasies` les en fait revenir,
-// `reconciliation` les approche du cœur.
+// les chats vers la cuisine, `chats_rassasies` les en fait revenir. Le
+// rapprochement autour du cœur, lui, appartient à la scène finale, que la salle
+// du trône joue d'un seul tenant (voir `trone_retrouvailles`).
 VAR flag_trone_vu = false
 VAR flag_libou_parle = false
 VAR has_idee_couronne = false
@@ -129,11 +130,11 @@ VAR flag_repas_pret = false
 VAR flag_chats_invites = false
 VAR flag_chats_rassasies = false
 VAR flag_jardin_vu = false
+// L'indice de la wyvern est un savoir, pas une idée qu'on porte : rien dans
+// l'inventaire ne le rappelle au joueur.
 VAR flag_wyvern_indices = false
-VAR has_idee_coeur = false
 VAR flag_coeur_resolu = false
 VAR flag_coeur_plie = false
-VAR flag_reconciliation = false
 VAR flag_histoire_finie = false
 
 // ink exige un knot avant tout contenu libre, et ce fichier n'en a pas.
@@ -1012,94 +1013,110 @@ J'appréhende un peu...
 // ================================================================
 
 // Joué automatiquement à la première arrivée dans la scène (TroneScene.create).
-// [A ECRIRE]
 === trone_arrivee ===
 # qui: heros
-Me voici enfin dans la salle du trône. Crôa crôa
+Qu'il est bon de revenir chez soi. Crôa crôa
+Mais l'ambiance a l'air particulièrement tendue.
 # qui: narrateur
-Le Petit Chat et le Chat Mal Luné se toisent, chacun à un bout de la salle, en feulant à qui mieux mieux.
+Chacun d'un coté de la salle, le Petit Chat et le Chat Mal Luné se toisent en feulant, le poil hérissé.
+La reine est perchée sur son trône et semble excédée au plus haut point. 
 # qui: heros
-Sa Majesté a l'air à bout de nerfs. Je devrais aller la saluer.
+Je devrais aller saluer Sa Majesté.
 # flag: trone_vu
 -> DONE
 
 
 // Le Libou Des Bois Jolis. Elle a perdu sa couronne et ne supporte plus les
-// disputes des chats ; la couronne rendue, elle pose la feuille rouge au centre
-// de la salle.
+// disputes des chats ; la couronne rendue, elle pose ses quatre plus belles
+// feuilles au centre de la salle.
 //
 // ⚠ La branche la plus avancée d'abord, comme pour la vache du village.
-// [A ECRIRE]
 === trone_libou ===
 {
-  - flag_reconciliation:
-    # qui: hibou
-    Hou hou ! Enfin la paix dans mon château. Merci, mon cher Maître Origamiste.
   - has_couronne:
     # qui: heros
-    Votre Majesté, voici une couronne toute neuve, pliée de mes mains.
+    Votre Majesté, j'ai retrouvé et replié votre couronne.
     # qui: hibou
-    Hou hou ! Qu'elle est belle ! Elle brille encore plus que l'ancienne. # drop: couronne
-    Pour te remercier, je te confie ma plus belle feuille. Elle scintille comme un rubis.
+    Hou hou ! Ma magnifique couronne toute rutilante! # drop: couronne
+    Qu'elle est belle et brille de milles feux!
+    Vite, coiffe moi.
     # qui: narrateur
-    Sa Majesté dépose une feuille rouge scintillante au centre de la salle. # flag: couronne_rendue
+    Je dépose la couronne sur la tête royale.
+    # qui: heros
+    Vous être à nouveau ravissante, Votre Majesté le Libou Des Bois Jolis.
     # qui: hibou
-    Si seulement elle pouvait ramener un peu de paix entre ces deux-là...
+    Qu'entend-je ? Je n'était pas ravissante avant ?
+    Ton voyage t'as fait oublier les bonnes manière, Grenouille.
+    # qui: heros
+    Non non, excusez cette maladresse. Je voulais souligner la beauté de votre Magnificience accordée à vos accessoires.
+    # qui: hibou
+    Tu t'enfonces mon cher origamiste. Mais ce n'est pas grave, tu es doué, je vais t'excuser pour cette fois.
+    Et je voudrais te témoigner ma reconnaissance pour ton aide à résoudre cette crise.
+    Choisis donc parmis mes papiers d'origami les plus précieux.
+    # qui: narrateur
+    Sa Majesté Le Libou Des Bois Jolis sort d'un coffre finement ouvragé quatre feuilles scintillantes et les dépose au centre de la pièce. # flag: couronne_rendue
+    # qui: hibou
+    Peux-être pourrais tu en faire quelque chose pour apaiser toute cette tension.
   - flag_couronne_rendue:
     # qui: hibou
-    Ma feuille rouge est le plus beau papier du royaume. Sauras-tu en tirer de quoi apaiser ces deux chats ?
+    Fais bon usage de ces papiers d'origami, ce sont les plus précieux du royaume.
   - flag_libou_parle:
     # qui: hibou
-    Hou hou... Ma couronne... Comment régner sans couronne ?
+    Hou hou... Où est ma couronne ? Je suis perdue sans elle. À l'aide, mon cher origamiste.
   - else:
     -> trone_libou_rencontre
 }
 -> DONE
 
-// [A ECRIRE]
 === trone_libou_rencontre ===
 # qui: heros
-Votre Majesté ! Me voici rentré de voyage. Votre origamiste royal est à votre service.
+Je vous salue avec mes plus grands respects, Votre Majesté Le Libou Des Bois Jolis.
+Me voici rentré de voyage et je suis très heureux de vous retrouver.
 # qui: hibou
-Hou hou ! Il était temps ! Tout va de travers dans ce château.
-J'ai perdu ma couronne, et ces deux chats n'arrêtent pas de se chamailler du matin au soir.
+Hou hou ! Il était grand temps ! J'ai besoin de ton aide, tout va mal ici.
+Je n'ai plus de couronne, et les deux chats se disputent sans cesse.
 # qui: heros
-Perdu votre couronne ? Encore ?
+Croa Croa. Je constate en effet une certaine agitation depuis mon retour.
+Accessoirement, si je puis me permettre, Votre Majesté, un certain chaos règne à l'exterieur du chateau.
+J'ai pu régler une partie de la situation, mais vous devriez allez vérifier.
 # qui: hibou
-Je ne peux pas recevoir mes sujets tête nue ! Fais quelque chose, toi qui plies si bien.
+Quelle insolence! Tu sous entends peux-être que je gouverne mal mon royaume ?
+Sans ma couronne je ne peux rien faire de toute façon.
 # qui: heros
-Une couronne de papier, digne de Sa Majesté... Il me faudrait un papier précieux.
+Veuiller excuser ma formulation, Votre Majesté le Libou Des Bois Jolis.
+Bien sûr, il vous faut vos attributs royaux, sans cela que penseraient les habitants ?
+# qui: hibou
+Hou hou! Aide moi donc à retrouver ma couronne pour te faire pardonner, au lieu de marmoner des plates excuses.
 # qui: narrateur
-Mémorisons la forme de la couronne : ça pourrait être utile. # flag: libou_parle # give: idee_couronne
+Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle # give: idee_couronne
 -> DONE
 
 
 // Le Petit Chat. Il a faim, encore ; le repas prêt, il suit l'autre à la
 // cuisine.
-// [A ECRIRE]
 === trone_chat ===
 {
-  - flag_reconciliation:
-    # qui: chat
-    Miaou ! Plus jamais de querelle, / Désormais la vie est belle.
   - flag_chats_rassasies:
     # qui: chat
-    Le ventre plein, je suis comblé, / Mais ce Chat Mal Luné me fait toujours bouder.
+    Je suis à nouveau pleinement rassasié, / Mais je dois toujours supporter ce tas de bousier.
+    # qui: heros
+    Ce tas de bousier ? Ce n'est pas en appelant comme ça le Chat Mal Luné que vous allez vous réconcilier.
   - flag_repas_pret:
     -> trone_invitation
   - flag_chat_faim:
     # qui: chat
-    Miaou... Mon ventre crie famine, / Que fait donc la cuisine ?
+    Miaou... J'ai l'estomac dans les coussinets. / Donnez moi quelque chose, même du panais.
   - else:
     # qui: chat
-    Miaou ! Te voilà enfin au Château, / Mais ici rien ne va, c'est le chaos.
-    Ce Chat Mal Luné a tout déplié, / Et moi, je n'ai rien à manger.
+    Miaou! Regarde donc cet individu malsain! / Qui complote de noirs desseins.
+    Et j'ai si faim! Que fais donc le service ? / As-il lui aussi été gagné par le vice ?
     # qui: heros
-    Tu as encore faim ? Tu viens pourtant de laper tout un pot de lait.
+    Mais tu viens de t'enfiler une bouteille de lait entière ? Ton apétit n'a donc pas de limites ?
+    Ne veux tu pas t'expliquer avec Le Chat Mal Luné pour régler cette situation ?
     # qui: chat
-    Le lait n'était qu'une mise en bouche, / C'est un festin qu'il me faut sous la moustache.
-    # qui: heros
-    Il faudra voir ça avec les cuisines, Petit Chat. # flag: chat_faim
+    Ce n'est pas ça qui va me remplir l'estomac. / Vite, avant qu'il n'arrive un drama.
+    # qui: narrateur
+    Il n'entendra pas raison avant d'avoir avalé quelque chose. # flag: chat_faim
 }
 -> DONE
 
@@ -1109,9 +1126,6 @@ Mémorisons la forme de la couronne : ça pourrait être utile. # flag: libou_pa
 // [A ECRIRE]
 === trone_lune_chat ===
 {
-  - flag_reconciliation:
-    # qui: lune_chat
-    Je tiendrai parole. Plus rien ne sera déplié dans ce château.
   - flag_chats_rassasies:
     # qui: lune_chat
     Pas mauvais, ce poisson. Mais je n'ai toujours rien à dire au Petit Chat.
@@ -1149,21 +1163,41 @@ Enfin quelque chose d'intéressant. # flag: chats_invites
 -> DONE
 
 
-// La feuille rouge de la reine, au centre de la salle, puis le cœur qu'elle
-// devient. Elle se plie en bien des choses ; le cœur n'est proposé qu'à qui a
-// écouté la wyvern.
+// Les quatre feuilles de la reine, au centre de la salle, puis le cœur que la
+// rouge devient. On choisit la feuille, puis ce qu'on en plie : le cœur n'est
+// proposé qu'à qui a écouté la wyvern, sous chacune des quatre, et seule la
+// rouge fait l'affaire.
 // [A ECRIRE]
 === trone_coeur ===
 { flag_coeur_plie: -> trone_coeur_plie }
 # qui: heros
-Une feuille rouge qui scintille comme un rubis. Il faut en faire quelque chose qui rapproche ces deux chats.
+Quatre feuilles précieuses, et chacune scintille à sa façon. Laquelle choisir pour rapprocher ces deux chats ?
+-> trone_feuilles
+
+=== trone_feuilles ===
++ [rouge avec paillettes scintillantes] -> trone_feuille("rouge")
++ [vert éclat argenté] -> trone_feuille("vert")
++ [bleu veiné d'or] -> trone_feuille("bleu")
++ [mauve effet diamant] -> trone_feuille("mauve")
+
+// [A ECRIRE]
+=== trone_feuille(couleur) ===
+{
+  - couleur == "rouge": Du rouge, semé de paillettes qui scintillent. Qu'est-ce que je pourrais en plier ?
+  - couleur == "vert": Un vert profond, qui jette des éclats d'argent. Qu'est-ce que je pourrais en plier ?
+  - couleur == "bleu": Un bleu de nuit, veiné d'or. Qu'est-ce que je pourrais en plier ?
+  - else: Du mauve, taillé comme un diamant. Qu'est-ce que je pourrais en plier ?
+}
 + [plier une souris]
     Une souris pour deux chats ? Ils se la disputeraient, et ce serait pire qu'avant.
 + [plier une couronne]
     Sa Majesté a déjà la sienne. Et un chat couronné, ça ferait des jaloux.
-+ { has_idee_coeur } [plier un cœur]
-    Un cœur, comme l'a soufflé la wyvern. Voyons s'il peut réconcilier ces deux-là.
-    -> trone_coeur_lancement
++ { flag_wyvern_indices } [plier un cœur]
+    { couleur == "rouge":
+        Un cœur rouge, comme l'a soufflé la wyvern. Voyons s'il peut réconcilier ces deux-là.
+        -> trone_coeur_lancement
+    }
+    Un cœur de cette couleur-là ? Non... Ce n'est pas ce que la wyvern avait en tête.
 + [plier une pelote de laine]
     Ils joueraient ensemble... ou pas. Je ne veux pas risquer une bagarre de plus.
 - -> DONE
@@ -1173,45 +1207,46 @@ Une feuille rouge qui scintille comme un rubis. Il faut en faire quelque chose q
 # puzzle: coeur # then: trone_coeur_issue
 -> DONE
 
-// Plié en dernier, le cœur enchaîne sur les retrouvailles ; plié avant le
-// repas, il attend que les chats reviennent de la cuisine (TroneScene).
+// Plié en dernier, le cœur laisse la scène finale prendre la suite, boîte
+// refermée ; plié avant le repas, il attend que les chats reviennent de la
+// cuisine (TroneScene).
 // [A ECRIRE]
 === trone_coeur_issue ===
 { flag_coeur_resolu:
     # qui: heros
-    Un pli après l'autre, avec tout mon cœur... # origami: coeur # flag: coeur_plie # drop: idee_coeur
-    { flag_chats_rassasies: -> trone_retrouvailles }
-    Reste à ce que les chats s'en approchent. Mais le ventre vide, ils n'ont d'yeux que pour la cuisine.
+    Un pli après l'autre, avec tout mon cœur... # origami: coeur # flag: coeur_plie
+    { not flag_chats_rassasies: Reste à ce que les chats s'en approchent. Mais le ventre vide, ils n'ont d'yeux que pour la cuisine. }
   - else:
     # qui: heros
     J'ai le cœur qui n'y est pas... Je réessaierai.
 }
 -> DONE
 
+// Le cœur plié, les chats encore affamés : chats repus, la scène finale se joue
+// d'elle-même et le décor ne répond plus.
 // [A ECRIRE]
 === trone_coeur_plie ===
 # qui: heros
 Un cœur rouge et scintillant, au milieu de la salle du trône.
-{ not flag_chats_rassasies: Les chats ne le regarderont qu'une fois le ventre plein. }
+Les chats ne le regarderont qu'une fois le ventre plein.
 -> DONE
 
 
-// Les chats repus devant le cœur plié. C'est le seul knot qui lève
-// `reconciliation`, et le rapprochement se joue une fois la boîte refermée :
-// rien ici ne le décrit. La scène enchaîne sur `trone_reconciliation` à la fin
-// du trajet.
+// La scène finale, en trois temps que la salle du trône enchaîne
+// (`jouerLeDenouement`, trone-scene.ts) : ces retrouvailles, le rapprochement
+// des chats boîte refermée — d'où rien ici ne le décrit —, puis les aveux.
+// Les trois ne font qu'UNE transaction : rechargée en route, la scène finale
+// n'a pas eu lieu, et se rejoue d'ici. Le décor reste sourd de bout en bout.
 //
-// On y arrive par le cœur plié en dernier (`trone_coeur_issue`), ou par les
-// chats rentrés en dernier de la cuisine (TroneScene, à l'entrée dans la pièce).
+// Lancée quand le cœur est plié et les chats repus, dans un ordre ou dans
+// l'autre.
 // [A ECRIRE]
 === trone_retrouvailles ===
 # qui: narrateur
-Le ventre plein, les deux chats remarquent enfin le cœur rouge au milieu de la salle. # flag: reconciliation
+Le ventre plein, les deux chats remarquent enfin le cœur rouge au milieu de la salle.
 -> DONE
 
-// La fin de l'histoire, lancée par la scène au bout du rapprochement. Relancée
-// aussi à l'entrée dans la pièce tant que `histoire_finie` n'est pas levé : un
-// rechargement pendant les aveux ne doit pas coûter la fin.
+// Le dernier temps de la scène finale : voir `trone_retrouvailles`.
 //
 // ⚠ Le `# fin:` est SEUL sur sa ligne, comme le `# goto:` des fins de chapitre :
 // l'écran de fin ne vient qu'après la dernière réplique.
@@ -1423,12 +1458,13 @@ Un papier doré, serti de gemmes : de quoi plier une couronne digne de Sa Majest
 
 
 // La wyvern, dans un coin du jardin. Elle parle du cœur par énigmes, et c'est
-// d'elle que vient l'idée de le plier.
+// d'elle que vient l'indice — la feuille et le modèle. Revenue la voir, elle le
+// redit : le joueur n'a que sa mémoire pour le garder.
 // [A ECRIRE]
 === jardin_wyvern ===
 { flag_wyvern_indices:
     # qui: wyvern
-    Ce que deux cœurs fâchés ne savent plus se dire, un seul, bien plié, le dira pour eux.
+    Ce que deux cœurs fâchés ne savent plus se dire, un seul, rouge comme ma peau, le dira pour eux.
     -> DONE
 }
 # qui: heros
@@ -1440,9 +1476,7 @@ Il faut plier ce qui bat : deux lobes et une pointe, rouge comme ma peau.
 # qui: heros
 Deux lobes et une pointe... Rouge... Un cœur ?
 # qui: wyvern
-Le papier viendra de la reine. Le reste viendra de toi.
-# qui: narrateur
-Mémorisons la forme du cœur : ça pourrait être utile. # flag: wyvern_indices # give: idee_coeur
+Le papier viendra de la reine. Le reste viendra de toi. # flag: wyvern_indices
 -> DONE
 
 

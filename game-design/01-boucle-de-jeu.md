@@ -75,6 +75,12 @@ choisir un modèle qu'on ne connaît pas. C'est le dialogue qui les présente : 
 n'y a pas d'écran de carnet à consulter avant
 (voir [04-interface.md](04-interface.md)). Le bon choix lance le minijeu.
 
+**Exception, le cœur du chapitre 3.** La wyvern ne donne pas d'idée mais un
+**indice**, un drapeau que rien ne montre à l'écran : c'est au joueur de s'en
+souvenir. Et le choix du modèle y est précédé de celui du papier, parmi les
+quatre feuilles de la reine — voir
+[scenes/chapter-3/salle-du-trone.md](scenes/chapter-3/salle-du-trone.md).
+
 **Tranché : le mauvais choix est *doux*.** Le héros écarte la piste, la feuille
 reste utilisable, le joueur réessaie aussitôt. Rien n'est perdu, rien n'est
 puni.

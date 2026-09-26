@@ -11,25 +11,22 @@ import type { Box } from './layout';
 //
 // En primitives et pas en 3D : charger three.js pour un carré de papier
 // condamnerait le premier écran du jeu, où rien n'est encore plié.
-export function dessinerFeuille(g: Phaser.GameObjects.Graphics, box: Box, modele: string): Box {
-  const { recto, verso } = teintesDe(modele);
-  const cote = Math.min(box.w, box.h);
-  const x = box.x + (box.w - cote) / 2;
-  const y = box.y + box.h - cote;
+//
+// `papier` est le modèle que la feuille deviendra, ou ses teintes quand elle ne
+// deviendra rien. `motif` s'imprime sur le recto, sous le coin rabattu.
+export function dessinerFeuille(
+  g: Phaser.GameObjects.Graphics,
+  box: Box,
+  papier: string | Teintes,
+  motif?: (g: Phaser.GameObjects.Graphics, geometrie: GeometrieFeuille) => void,
+): Box {
+  const { recto, verso } = typeof papier === 'string' ? teintesDe(papier) : papier;
+  const geometrie = geometrieFeuille(box);
+  const { x, y, w: cote } = geometrie.carre;
+  const [[ax, ay], [bx, by], [cx, cy]] = geometrie.rabat;
+  const pli = bx - ax;
 
-  // Le coin replié, en haut à droite. `pli` est la longueur du côté rabattu.
-  const pli = Math.round(cote * 0.24);
-  // Les deux extrémités de la pliure…
-  const ax = x + cote - pli;
-  const ay = y;
-  const bx = x + cote;
-  const by = y + pli;
-  // …et le point où le coin retombe. Le triangle étant rectangle et isocèle, ce
-  // symétrique tombe exactement en (ax, by).
-  const cx = ax;
-  const cy = by;
-
-  const polygone = (points: number[][]) => {
+  const polygone = (points: readonly Point[]) => {
     g.beginPath();
     g.moveTo(points[0][0], points[0][1]);
     for (let i = 1; i < points.length; i++) g.lineTo(points[i][0], points[i][1]);
@@ -38,16 +35,7 @@ export function dessinerFeuille(g: Phaser.GameObjects.Graphics, box: Box, modele
 
   g.clear();
 
-  // Le carré MOINS le coin, puisque celui-ci s'est rabattu : c'est ce manque qui
-  // fait tout. Un triangle de verso posé sur un carré entier ressemblait à une
-  // décoration collée, pas à un pli.
-  const feuille = [
-    [x, y],
-    [ax, ay],
-    [bx, by],
-    [x + cote, y + cote],
-    [x, y + cote],
-  ];
+  const { feuille } = geometrie;
   g.fillStyle(recto, 1);
   polygone(feuille);
   g.fillPath();
@@ -76,13 +64,11 @@ export function dessinerFeuille(g: Phaser.GameObjects.Graphics, box: Box, modele
   ]);
   g.fillPath();
 
+  motif?.(g, geometrie);
+
   // Le rabat : le dos du papier, puisqu'on le voit à l'envers.
   g.fillStyle(verso, 1);
-  polygone([
-    [ax, ay],
-    [bx, by],
-    [cx, cy],
-  ]);
+  polygone(geometrie.rabat);
   g.fillPath();
   // Son ombre du côté de la pliure : c'est ce qui donne son épaisseur au papier.
   g.fillStyle(0x000000, 0.18);
@@ -103,7 +89,45 @@ export function dessinerFeuille(g: Phaser.GameObjects.Graphics, box: Box, modele
   g.lineTo(bx, by);
   g.strokePath();
 
-  return { x, y, w: cote, h: cote };
+  return geometrie.carre;
+}
+
+export interface Teintes {
+  recto: number;
+  verso: number;
+}
+
+export type Point = readonly [number, number];
+
+export interface GeometrieFeuille {
+  carre: Box;
+  // Le carré MOINS le coin, puisque celui-ci s'est rabattu : c'est ce manque qui
+  // fait tout. Un triangle de verso posé sur un carré entier ressemblait à une
+  // décoration collée, pas à un pli.
+  feuille: readonly Point[];
+  // Le coin rabattu, posé sur la feuille : les deux extrémités de la pliure,
+  // puis le point où il retombe.
+  rabat: readonly [Point, Point, Point];
+}
+
+export function geometrieFeuille(box: Box): GeometrieFeuille {
+  const cote = Math.min(box.w, box.h);
+  const x = box.x + (box.w - cote) / 2;
+  const y = box.y + box.h - cote;
+
+  // En haut à droite. `pli` est la longueur du côté rabattu.
+  const pli = Math.round(cote * 0.24);
+  const a: Point = [x + cote - pli, y];
+  const b: Point = [x + cote, y + pli];
+  // Le triangle étant rectangle et isocèle, le symétrique du coin tombe
+  // exactement en (ax, by).
+  const c: Point = [a[0], b[1]];
+
+  return {
+    carre: { x, y, w: cote, h: cote },
+    feuille: [[x, y], a, b, [x + cote, y + cote], [x, y + cote]],
+    rabat: [a, b, c],
+  };
 }
 
 // Une feuille qui doit pouvoir se déplacer — celle de l'os, suspendue puis

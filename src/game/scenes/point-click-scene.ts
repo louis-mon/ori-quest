@@ -8,7 +8,13 @@ import {
   type Marqueur,
 } from '../systems/hotspots';
 import { createHotspotMarker, preloadCocotte } from '../systems/hotspot-marker';
-import { endormirMarqueur, escamoterMarqueur, estEscamote } from '../systems/marqueur-papier';
+import {
+  detruireMarqueur,
+  estMontre,
+  montrerMarqueur,
+  succeder,
+  ZOOM_MS,
+} from '../systems/marqueur-papier';
 import { createExitMarker, preloadFleche } from '../systems/exit-marker';
 import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
@@ -31,6 +37,20 @@ export interface SceneServices {
 
 // Fondu d'entrée et de sortie, en millisecondes.
 const FONDU = 260;
+
+// Le dialogue que la scène lance d'elle-même laisse d'abord peindre sa première
+// image.
+const DELAI_DIALOGUE = 400;
+
+// Le temps que les marqueurs attendent, la scène rendue au joueur, avant de
+// revenir. Un récit en enchaîne souvent un autre — le rapprochement des chats
+// puis leurs aveux, la tirade puis le départ qu'elle déclenche —, et sans ce
+// délai ils reparaîtraient pour repartir aussitôt. Plus long que les deux
+// attentes qui séparent ces maillons : celle d'un mouvement qui guette la
+// fermeture de la boîte (`quandLaBoiteEstFermee`), celle d'un dialogue qui
+// guette la fin du précédent (`programmerDialogue`).
+const RETOUR_MS = 250;
+const RELANCE_MS = 120;
 
 // Une scène concrète ne décrit que son plan, le sens de chaque zone et son
 // décor. Zones tactiles, marqueurs, profondeurs, réactions à l'état et
@@ -65,6 +85,20 @@ export abstract class PointClickScene extends Phaser.Scene {
   // resté plein rendrait la pièce sourde pour de bon.
   private attentes = new Set<object>();
 
+  // Les zones dont l'objet est en route, et le nombre de trajets qui l'emmènent :
+  // leur marqueur est parti avec lui. Voir `deplacer()`.
+  private enRoute = new Map<string, number>();
+
+  // Pendant un dialogue ou une cinématique, tous les marqueurs se retirent : il
+  // n'y a rien à toucher. L'inventaire, lui, reste à l'écran.
+  //
+  // Recalculé à chaque image depuis l'état du récit, jamais sur un événement :
+  // aucun chemin, interruption comprise, ne peut laisser les marqueurs partis
+  // une fois la scène rendue au joueur. `retenue` est le temps qui reste avant
+  // leur retour.
+  private retires = true;
+  private retenue = 0;
+
   // Ce que la narration déclenche une fois : voir `auLeverDe()`.
   private declencheurs: { flag: string; jouer: () => void; fait: boolean }[] = [];
 
@@ -92,6 +126,11 @@ export abstract class PointClickScene extends Phaser.Scene {
     // passage précédent parleraient d'objets détruits.
     this.declencheurs = [];
     this.attentes.clear();
+    this.enRoute.clear();
+    // Les marqueurs paraissent une fois la scène peinte : pendant le fondu, ils
+    // étaient déjà en plein battement.
+    this.retires = true;
+    this.retenue = FONDU;
     this.drawScenery();
     this.monterZones();
 
@@ -104,6 +143,7 @@ export abstract class PointClickScene extends Phaser.Scene {
       unsubscribe();
       // Une scène quittée ne doit rien retenir.
       this.attentes.clear();
+      this.enRoute.clear();
       this.services.overlay.suspendreLInventaire(false);
       this.declencheurs = [];
       this.markers.clear();
@@ -120,13 +160,39 @@ export abstract class PointClickScene extends Phaser.Scene {
       ]);
     }
 
-    // Le délai laisse la scène peindre sa première image avant que la boîte ne
-    // s'ouvre. Sur l'horloge de Phaser volontairement : il se met en pause avec
-    // le jeu, donc un joueur qui range son téléphone ne manque pas le dialogue.
     const arrivee = this.arrivee;
-    if (arrivee && !gameState.flag(arrivee.flag)) {
-      this.time.delayedCall(400, () => void this.services.dialogue.run(arrivee.knot));
-    }
+    if (arrivee && !gameState.flag(arrivee.flag)) this.programmerDialogue(arrivee.knot);
+  }
+
+  // Les marqueurs suivent l'état du récit. Une scène en pause — le menu ouvert —
+  // ne passe pas ici : ils restent comme ils étaient.
+  update(_time: number, delta: number) {
+    const { dialogue, overlay } = this.services;
+    const occupe = dialogue.isRunning || overlay.occupeLeJoueur || this.attentes.size > 0;
+    this.retenue = occupe ? Math.max(this.retenue, RETOUR_MS) : Math.max(0, this.retenue - delta);
+    const retires = this.retenue > 0;
+    if (retires === this.retires) return;
+    this.retires = retires;
+    this.appliquerVisibilite();
+  }
+
+  // Un dialogue que la scène lance d'elle-même : l'arrivée, un dénouement.
+  //
+  // Sur l'horloge de Phaser volontairement : elle se met en pause avec le jeu,
+  // donc un joueur qui range son téléphone ne manque pas le dialogue. Un tap sur
+  // le décor dans l'intervalle ouvre un autre dialogue, et `run()` refuserait
+  // celui-ci : on attend qu'il se referme au lieu de le perdre.
+  protected programmerDialogue(knot: string) {
+    // Les marqueurs n'ont pas à paraître pour repartir aussitôt.
+    this.retenue = Math.max(this.retenue, DELAI_DIALOGUE + RETOUR_MS);
+    const lancer = () => {
+      if (this.services.dialogue.isRunning || this.services.overlay.occupeLeJoueur) {
+        this.time.delayedCall(RELANCE_MS, lancer);
+        return;
+      }
+      void this.services.dialogue.run(knot);
+    };
+    this.time.delayedCall(DELAI_DIALOGUE, lancer);
   }
 
   // Emmène un objet du décor vers un chemin, un repère du plan ou une position.
@@ -139,7 +205,9 @@ export abstract class PointClickScene extends Phaser.Scene {
   // Le trajet part de la position courante de l'objet ; voir `deplacement.ts`.
   //
   // Les zones que l'objet porte (`calerSur()`) font le trajet avec lui : leur
-  // marqueur s'escamote au départ et revient à l'arrivée, sur l'emprise recalée.
+  // marqueur part avant lui, et revient à l'arrivée sur l'emprise recalée. Une
+  // cocotte qui court après le Petit Chat se lirait comme un bug, et le
+  // battement pilote déjà sa position.
   protected deplacer(
     objet: Mobile,
     destination: Destination,
@@ -147,7 +215,7 @@ export abstract class PointClickScene extends Phaser.Scene {
   ): Promise<void> {
     const portees = this.zonesPortees(objet);
     const trajet = (async () => {
-      await this.escamoter(portees, true);
+      if (this.mettreEnRoute(portees, 1)) await this.attendre(ZOOM_MS);
       await animerDeplacement(this, objet, destination, options);
       // Le trajet se dénoue aussi quand la scène est quittée en route, et le
       // shutdown a tout vidé : il n'y a plus rien à recaler.
@@ -155,20 +223,29 @@ export abstract class PointClickScene extends Phaser.Scene {
         const porteur = this.porteurs.get(id);
         if (porteur) this.caler(id, porteur.emprise());
       }
+      this.mettreEnRoute(portees, -1);
     })();
-
-    // La réapparition est hors de l'attente, et non dedans : le marqueur y est
-    // encore endormi, et on le verrait grandir en gris avant de reprendre ses
-    // couleurs.
-    return (options.bloquant ? this.enAttendant(trajet) : trajet).then(() =>
-      this.escamoter(portees, false),
-    );
+    return options.bloquant ? this.enAttendant(trajet) : trajet;
   }
 
-  // Le décor cesse de répondre le temps de la promesse. Toujours relevé : elle
-  // se dénoue aussi quand la scène est quittée en cours de route, sans quoi le
-  // décor resterait sourd au retour.
-  private enAttendant(trajet: Promise<void>): Promise<void> {
+  // Sur l'horloge de la scène : elle s'arrête avec le menu, comme le zoom qu'on
+  // attend.
+  private attendre(ms: number): Promise<void> {
+    return new Promise((resolve) => this.time.delayedCall(ms, resolve));
+  }
+
+  // Se dénoue quand plus aucune boîte n'est ouverte, après `delai` : le temps de
+  // peindre la première image, à l'arrivée dans la pièce.
+  protected async quandLeRecitSeTait(delai = 0): Promise<void> {
+    if (delai > 0) await this.attendre(delai);
+    const { dialogue, overlay } = this.services;
+    while (dialogue.isRunning || overlay.occupeLeJoueur) await this.attendre(RELANCE_MS);
+  }
+
+  // Le décor cesse de répondre le temps de la promesse. Toujours relevé : à la
+  // fin du trajet, ou par le shutdown qui vide `attentes` quand la scène est
+  // quittée en route — sans quoi le décor resterait sourd au retour.
+  protected enAttendant(trajet: Promise<void>): Promise<void> {
     const jeton = {};
     this.attentes.add(jeton);
     this.appliquerAttente();
@@ -182,29 +259,29 @@ export abstract class PointClickScene extends Phaser.Scene {
     return [...this.porteurs].filter(([, porteur]) => porteur.objet === objet).map(([id]) => id);
   }
 
-  // Le zoom des marqueurs concernés, et la zone avec : escamotée, elle ne répond
-  // plus — son objet est en route, et le tap tomberait sur la place qu'il vient
-  // de quitter.
-  private async escamoter(ids: string[], escamote: boolean) {
-    if (ids.length === 0) return;
-    const zooms = ids.map((id) => {
+  // Une zone en route ne répond plus : son objet est parti, et le tap tomberait
+  // sur la place qu'il vient de quitter. Rend vrai si l'un des marqueurs était
+  // à l'écran — il faut alors le laisser partir avant l'objet.
+  private mettreEnRoute(ids: string[], pas: 1 | -1): boolean {
+    if (ids.length === 0) return false;
+    let aLEcran = false;
+    for (const id of ids) {
       const marqueur = this.markers.get(id);
-      return marqueur ? escamoterMarqueur(marqueur, escamote) : Promise.resolve();
-    });
-    // L'état est posé avant le zoom : la zone se ferme au départ du marqueur,
-    // pas à la fin de son escamotage.
+      if (marqueur && estMontre(marqueur)) aLEcran = true;
+      const n = (this.enRoute.get(id) ?? 0) + pas;
+      if (n > 0) this.enRoute.set(id, n);
+      else this.enRoute.delete(id);
+    }
     this.appliquerVisibilite();
-    await Promise.all(zooms);
+    return aLEcran;
   }
 
   // Le joueur n'a rien à faire pendant qu'un objet traverse sous ses yeux : les
-  // zones ne répondent plus (`repondAuTap`), l'inventaire non plus, et les
-  // marqueurs s'éteignent pour le dire. Seul le menu reste atteignable, et il fige la
-  // scène — voir `figerLeJeu()` dans main.ts.
+  // zones ne répondent plus (`repondAuTap`), les marqueurs se retirent
+  // (`update()`) et l'inventaire s'éteint. Seul le menu reste atteignable, et il
+  // fige la scène — voir `figerLeJeu()` dans main.ts.
   private appliquerAttente() {
-    const attend = this.attentes.size > 0;
-    for (const marqueur of this.markers.values()) endormirMarqueur(marqueur, attend);
-    this.services.overlay.suspendreLInventaire(attend);
+    this.services.overlay.suspendreLInventaire(this.attentes.size > 0);
   }
 
   // La narration lève un drapeau, la scène joue le mouvement : c'est le même
@@ -332,25 +409,17 @@ export abstract class PointClickScene extends Phaser.Scene {
     if (this.centres.get(def.id) === centre) return;
     this.centres.set(def.id, centre);
 
-    const ancien = this.markers.get(def.id);
-    // Une emprise qui change pendant un trajet refait le marqueur : né entier au
-    // milieu du vol, il annulerait l'escamotage en cours.
-    const escamote = ancien ? estEscamote(ancien) : false;
-    if (ancien) {
-      this.tweens.killTweensOf(ancien);
-      ancien.destroy();
-    }
-
     const marqueur =
       'sortie' in def
         ? // La flèche pointe vers l'extérieur du cadre : c'est ce qui dit
           // « on sort par là » plutôt que « regarde ici ».
           createExitMarker(this, cx, cy, cx < DESIGN_WIDTH / 2 ? -1 : 1)
         : createHotspotMarker(this, cx, cy);
-    // Un marqueur refait pendant un déplacement bloquant naîtrait éveillé : une
-    // emprise qui change en cours de trajet suffit à le refaire.
-    endormirMarqueur(marqueur, this.attentes.size > 0);
-    if (escamote) void escamoterMarqueur(marqueur, true, 0);
+    const ancien = this.markers.get(def.id);
+    if (ancien) {
+      succeder(marqueur, ancien);
+      detruireMarqueur(ancien);
+    }
     this.markers.set(def.id, marqueur);
   }
 
@@ -398,18 +467,22 @@ export abstract class PointClickScene extends Phaser.Scene {
       jouer();
       return;
     }
-    this.time.delayedCall(120, () => this.quandLaBoiteEstFermee(jouer));
+    this.time.delayedCall(RELANCE_MS, () => this.quandLaBoiteEstFermee(jouer));
   }
 
+  // Le retrait général ne ferme aucune zone : `repondAuTap()` refuse déjà les
+  // taps tant que le récit tourne, et le joueur qui tape pendant que les
+  // marqueurs reviennent n'a pas à attendre la fin de leur zoom.
   private appliquerVisibilite() {
     for (const { def, zone } of this.montees) {
       const visible = def.visibleIf ? def.visibleIf() : true;
+      const enRoute = this.enRoute.has(def.id);
       const marqueur = this.markers.get(def.id);
-      marqueur?.setVisible(visible);
+      if (marqueur) montrerMarqueur(marqueur, visible && !enRoute && !this.retires);
       // `enabled` plutôt que `setInteractive()` : appelé sans argument, celui-ci
       // refabrique une zone d'écoute rectangulaire et efface donc le contour des
       // zones polygonales.
-      if (zone.input) zone.input.enabled = visible && !(marqueur && estEscamote(marqueur));
+      if (zone.input) zone.input.enabled = visible && !enRoute;
     }
   }
 

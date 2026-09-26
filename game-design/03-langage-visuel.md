@@ -61,6 +61,21 @@ Idée à explorer : la flèche pourrait être **animée** par le pipeline plutô
 photographiée, et se plier/déplier au tap. Cohérent avec le sujet, et on a déjà
 toute la chaîne technique pour le faire.
 
+## Les marqueurs se retirent quand on n'a rien à toucher
+
+**Tranché.** Pendant un dialogue ou une cinématique, cocottes et flèches
+**partent d'un zoom**, et reviennent de même un quart de seconde après que la
+scène est rendue au joueur. Elles promettaient une action que rien ne pouvait
+tenir : le décor est sourd tant que le récit tourne. Le délai de retour évite
+qu'elles reparaissent pour repartir aussitôt entre deux maillons d'une même
+séquence — la tirade puis le départ qu'elle déclenche.
+
+**L'inventaire, lui, reste à l'écran**, même s'il ne répond plus : ce qu'on a en
+poche ne disparaît pas le temps d'une conversation.
+
+En entrant dans une pièce, les marqueurs paraissent de la même façon, une fois le
+fondu fini — ou après le dialogue d'arrivée, s'il y en a un.
+
 ## Le héros est dans le décor
 
 **Tranché.** La grenouille est **dessinée dans chaque scène** et **s'analyse

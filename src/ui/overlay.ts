@@ -93,6 +93,8 @@ export class Overlay {
 
   // Le temps d'un déplacement bloquant. Voir `suspendreLInventaire()`.
   private inventaireSuspendu = false;
+  // Le temps d'un knot. Voir `marquerLeRecit()`.
+  private recitEnCours = false;
 
   // Branché depuis `main.ts`, qui possède la couche 3D : l'interface n'a pas à
   // savoir que three.js existe. Absent, l'examen se contente de la description.
@@ -398,6 +400,15 @@ export class Overlay {
     this.inventory.classList.toggle('inventory--suspendue', suspendu);
   }
 
+  // Tenu par `DialogueRunner`, du début à la fin d'un knot : le récit travaille
+  // aussi boîte fermée ou réplique déjà payée — un pliage, une énigme, un
+  // changement de pièce —, et une description ouverte à ce moment-là lui
+  // prenait la boîte. Sans éteindre la colonne, qui reste à l'écran telle
+  // quelle pendant un dialogue.
+  marquerLeRecit(enCours: boolean) {
+    this.recitEnCours = enCours;
+  }
+
   // ---------- Divers ----------
 
   // Une vignette de 42 px dit ce qu'on possède, pas ce que c'est : l'épaisseur,
@@ -489,7 +500,7 @@ export class Overlay {
       e.stopPropagation();
       // Pas pendant une réplique : la boîte est prise, et le joueur retrouverait
       // cette description à la place de ce qu'il lisait.
-      if (this.occupeLeJoueur || this.inventaireSuspendu) return;
+      if (this.occupeLeJoueur || this.recitEnCours || this.inventaireSuspendu) return;
       void this.examiner(id);
     });
     return el;

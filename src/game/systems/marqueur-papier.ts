@@ -17,34 +17,20 @@ const OMBRE_DESCENTE = 3;
 // Au-dessus de tout le décor.
 export const PROFONDEUR = 50;
 
-// Le zoom d'aller-retour d'un marqueur qui suit son objet. Assez court pour ne
-// pas retarder le mouvement qu'il annonce, assez long pour qu'on le voie partir.
-const ESCAMOTAGE_MS = 180;
+// Le zoom d'un marqueur qui part ou revient. Assez court pour ne pas retarder le
+// mouvement qu'il annonce, assez long pour qu'on le voie partir.
+export const ZOOM_MS = 180;
 
-// Un marqueur endormi reste à sa place — la zone existe toujours — mais ne bat
-// plus et perd sa couleur : c'est ce qui distingue « rien à faire pour
-// l'instant » de « rien ici ».
-const GRIS = 0x9c968c;
-const ALPHA_ENDORMI = 0.4;
-
-// De quoi endormir un marqueur : son battement, le pliage à griser, et la pose
-// où l'arrêter. La pose est enregistrée et non relevée au moment venu : figé en
-// cours de tween, le marqueur reste penché ou à moitié transparent, ce qui se
-// lit comme un défaut d'affichage plutôt que comme une pause.
-//
-// Endormi et escamoté sont deux états distincts et cumulables — le premier dit
-// « pas maintenant », le second « plus ici » —, et ils se disputent l'échelle du
-// conteneur : d'où les deux drapeaux, sans lesquels un réveil ferait réapparaître
-// un marqueur parti avec son objet.
-interface Battement {
-  tween?: Phaser.Tweens.Tween;
-  dessin: Phaser.GameObjects.Image;
-  x: number;
-  endormi: boolean;
-  escamote: boolean;
+// Deux conteneurs l'un dans l'autre : le battement anime celui de l'intérieur,
+// le zoom celui de l'extérieur. Sur un seul, ils se disputaient l'échelle — il
+// fallait figer le battement pour zoomer, et le marqueur sautait en le reprenant.
+interface Zoom {
+  interieur: Phaser.GameObjects.Container;
+  // Là où le zoom l'emmène, pas là où il en est.
+  montre: boolean;
 }
 
-const CLE = 'battement';
+const CLE = 'zoom';
 
 // Chemin relatif : itch.io sert le jeu depuis un sous-dossier.
 export function preloadMarqueur(scene: Phaser.Scene, key: string, fichier: string): void {
@@ -52,9 +38,10 @@ export function preloadMarqueur(scene: Phaser.Scene, key: string, fichier: strin
   scene.load.image(key, fichier);
 }
 
-// C'est le conteneur qui s'anime, donc l'ombre suit le pliage au lieu de se
-// décoller de lui. `hauteur` est la taille voulue en pixels du jeu ; le fichier
-// est livré en double densité pour rester net sur un téléphone.
+// `hauteur` est la taille voulue en pixels du jeu ; le fichier est livré en
+// double densité pour rester net sur un téléphone.
+//
+// Il naît retiré : c'est la scène qui décide quand il paraît.
 export function creerMarqueur(
   scene: Phaser.Scene,
   texture: string,
@@ -66,104 +53,93 @@ export function creerMarqueur(
   const source = scene.textures.get(texture).getSourceImage();
   const echelle = hauteur / source.height;
 
+  // Dans le conteneur qui bat, pour que l'ombre suive le pliage au lieu de se
+  // décoller de lui.
   const ombre = scene.add
     .image(0, OMBRE_DESCENTE, texture)
     .setScale(echelle * OMBRE_DILATATION)
     .setTint(COLORS.ink)
     .setAlpha(OMBRE_ALPHA)
     .setFlipX(miroir);
-
   const dessin = scene.add.image(0, 0, texture).setScale(echelle).setFlipX(miroir);
+  const interieur = scene.add.container(0, 0, [ombre, dessin]);
 
-  const marqueur = scene.add.container(x, y, [ombre, dessin]).setDepth(PROFONDEUR);
-  marqueur.setData(CLE, { dessin, x, endormi: false, escamote: false } satisfies Battement);
+  const marqueur = scene.add
+    .container(x, y, [interieur])
+    .setDepth(PROFONDEUR)
+    .setScale(0)
+    .setVisible(false);
+  marqueur.setData(CLE, { interieur, montre: false } satisfies Zoom);
   return marqueur;
 }
 
-// Le battement passe par ici plutôt que par `scene.tweens.add` : c'est ce qui
-// permet de l'arrêter et de le reprendre sans que l'appelant ait à le garder.
+// Le battement, en coordonnées locales : il ne touche jamais au zoom.
 export function battre(
   marqueur: Phaser.GameObjects.Container,
   config: Omit<Phaser.Types.Tweens.TweenBuilderConfig, 'targets'>,
 ): void {
-  const battement = marqueur.getData(CLE) as Battement | undefined;
-  if (!battement) return;
-  battement.tween = marqueur.scene.tweens.add({ targets: marqueur, ...config });
+  const zoom = marqueur.getData(CLE) as Zoom | undefined;
+  if (!zoom) return;
+  marqueur.scene.tweens.add({ targets: zoom.interieur, ...config });
 }
 
-// Appelé par `PointClickScene` pendant un déplacement bloquant, et remis à
-// l'endroit dès qu'il finit — voir `attentes` là-bas.
-export function endormirMarqueur(marqueur: Phaser.GameObjects.Container, endormi: boolean): void {
-  const battement = marqueur.getData(CLE) as Battement | undefined;
-  if (!battement) return;
+// Paraître ou se retirer. Sans effet quand le marqueur va déjà là où on
+// l'envoie : la scène le redemande à chaque changement d'état.
+//
+// Repart de la taille du moment, pour une durée proportionnelle à ce qui reste :
+// un retrait interrompu par un retour ne saute pas.
+export function montrerMarqueur(marqueur: Phaser.GameObjects.Container, montre: boolean): void {
+  const zoom = marqueur.getData(CLE) as Zoom | undefined;
+  if (!zoom || zoom.montre === montre) return;
+  zoom.montre = montre;
 
-  battement.endormi = endormi;
-
-  if (endormi) {
-    battement.tween?.pause();
-    marqueur.setPosition(battement.x, marqueur.y).setAngle(0).setAlpha(ALPHA_ENDORMI);
-    // Un marqueur escamoté n'a pas d'échelle de repos : la lui reposer le ferait
-    // rentrer dans le cadre le temps du trajet, à l'endroit que son objet quitte.
-    if (!battement.escamote) marqueur.setScale(1);
-    battement.dessin.setTint(GRIS);
+  const tweens = marqueur.scene.tweens;
+  tweens.killTweensOf(marqueur);
+  const cible = montre ? 1 : 0;
+  const reste = Math.abs(cible - marqueur.scaleX);
+  if (reste === 0) {
+    marqueur.setVisible(montre);
     return;
   }
-  battement.dessin.clearTint();
-  // Escamoté, il se réveillera en réapparaissant, pas avant.
-  if (battement.escamote) return;
-  marqueur.setAlpha(1);
-  // Repris là où il s'était arrêté, le tween reposerait d'un coup la valeur
-  // qu'il avait en s'endormant, et le marqueur sauterait. Il repart donc du
-  // début de son cycle.
-  battement.tween?.restart();
-}
 
-// Le marqueur d'un objet qui se déplace part avec lui — mais pas en le suivant :
-// une cocotte qui court après le Petit Chat se lit comme un bug, et le battement
-// pilote déjà sa position. Elle se retire donc avant le trajet et revient à
-// l'arrivée, sur l'emprise que la scène vient de recaler.
-//
-// La promesse se dénoue à la fin du zoom ; `duree` à zéro pose l'état sans
-// animation, pour un marqueur refait pendant que son objet est en route.
-export function escamoterMarqueur(
-  marqueur: Phaser.GameObjects.Container,
-  escamote: boolean,
-  duree = ESCAMOTAGE_MS,
-): Promise<void> {
-  const battement = marqueur.getData(CLE) as Battement | undefined;
-  if (!battement) return Promise.resolve();
-  battement.escamote = escamote;
-  // Le battement anime la même échelle : le laisser tourner rendrait le zoom
-  // illisible, et reposerait le marqueur au cycle suivant.
-  battement.tween?.pause();
-
-  const cible = escamote ? 0 : 1;
-  const finir = () => {
-    if (!escamote) endormirMarqueur(marqueur, battement.endormi);
-  };
-
-  if (duree === 0) {
-    marqueur.setScale(cible);
-    finir();
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve) => {
-    marqueur.scene.tweens.add({
-      targets: marqueur,
-      scaleX: cible,
-      scaleY: cible,
-      duration: duree,
-      // Le léger dépassement dit « objet posé » plutôt que « objet effacé ».
-      ease: escamote ? 'Back.easeIn' : 'Back.easeOut',
-      onComplete: () => {
-        finir();
-        resolve();
-      },
-    });
+  marqueur.setVisible(true);
+  tweens.add({
+    targets: marqueur,
+    scaleX: cible,
+    scaleY: cible,
+    duration: ZOOM_MS * Math.min(reste, 1),
+    // Le léger dépassement dit « objet posé » plutôt que « objet effacé ».
+    ease: montre ? 'Back.easeOut' : 'Back.easeIn',
+    onComplete: () => marqueur.setVisible(montre),
   });
 }
 
-export function estEscamote(marqueur: Phaser.GameObjects.Container): boolean {
-  return (marqueur.getData(CLE) as Battement | undefined)?.escamote ?? false;
+export function estMontre(marqueur: Phaser.GameObjects.Container): boolean {
+  return (marqueur.getData(CLE) as Zoom | undefined)?.montre ?? false;
+}
+
+// Un marqueur refait — son emprise a changé — reprend là où l'ancien en était :
+// refait entier, il annulerait un retrait en cours ; refait à zéro, il
+// clignoterait.
+export function succeder(
+  nouveau: Phaser.GameObjects.Container,
+  ancien: Phaser.GameObjects.Container,
+): void {
+  const zoom = nouveau.getData(CLE) as Zoom | undefined;
+  if (!zoom) return;
+  const montre = estMontre(ancien);
+  nouveau.setScale(ancien.scaleX).setVisible(ancien.visible);
+  // Posé à l'inverse, pour que la demande reparte d'ici vers la même cible.
+  zoom.montre = !montre;
+  montrerMarqueur(nouveau, montre);
+}
+
+// Le battement vise le conteneur intérieur : détruire le marqueur sans l'arrêter
+// laisserait un tween sur un objet détruit.
+export function detruireMarqueur(marqueur: Phaser.GameObjects.Container): void {
+  const zoom = marqueur.getData(CLE) as Zoom | undefined;
+  const tweens = marqueur.scene?.tweens;
+  tweens?.killTweensOf(marqueur);
+  if (zoom) tweens?.killTweensOf(zoom.interieur);
+  marqueur.destroy();
 }

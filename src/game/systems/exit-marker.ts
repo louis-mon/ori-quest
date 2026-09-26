@@ -31,7 +31,7 @@ export function createExitMarker(
   const marker = creerMarqueur(scene, TEXTURE, x, y, HAUTEUR, sens > 0);
 
   battre(marker, {
-    x: { from: x - 6 * sens, to: x + 6 * sens },
+    x: { from: -6 * sens, to: 6 * sens },
     alpha: { from: 0.55, to: 0.95 },
     duration: 1600,
     yoyo: true,
