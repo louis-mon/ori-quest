@@ -202,6 +202,30 @@
                  "width":52,
                  "x":948,
                  "y":380
+                },
+                {
+                 "height":300,
+                 "id":19,
+                 "name":"ravin",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":250,
+                 "x":515,
+                 "y":420
+                },
+                {
+                 "height":250,
+                 "id":20,
+                 "name":"eau",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":250,
+                 "x":515,
+                 "y":470
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -210,7 +234,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":19,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

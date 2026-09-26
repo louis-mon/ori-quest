@@ -169,6 +169,21 @@ joueur aura sous les yeux. **Seul le ciel reste peint** (`ciel.ts`), le fond
 étant livré transparent au-dessus de l'horizon pour laisser passer soleil et
 nuages derrière le rempart.
 
+**L'eau du ravin est l'exception, et elle a été demandée** (`eau.ts`) : TexEau,
+un papier bleu froissé **calculé** au lancement, pas photographié. Le fond de
+gorge noir de l'image est découpé dans la zone `ravin` du plan — un pixel
+sombre *et* neutre, le beige restant chaud jusque dans l'ombre — et l'on voit le
+ciel par la brèche ; l'eau passe derrière le fond, dans la zone `eau`, dont le
+bord haut est la surface. Tout se règle dans `eau.html`, qui écrit
+`eau-reglages.ts`. Trois contraintes : TexEau reste une **puissance de deux**
+(WebGL 1 ne répète que celles-là, et le défilement boucle par cette répétition) ;
+les vagues vont **moins vite que le papier** par construction, leur vitesse étant
+une fraction de la sienne bornée sous 1 ; et ses **mipmaps** se demandent à la
+texture elle-même (`update()` de son `glTexture`), `refresh()` ne les accordant
+qu'à la configuration globale — sans eux, le papier vu en perspective scintille.
+Le calcul coûte un temps notable au premier passage sur téléphone : s'il gêne, le
+passer dans un Worker.
+
 **La zone tactile suit le dessin, pas la boîte du plan.** Une boîte est une
 emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une
 partie. `caler()` (`PointClickScene`) recale la zone sur ce qui est réellement à

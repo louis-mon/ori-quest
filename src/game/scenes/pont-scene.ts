@@ -11,6 +11,7 @@ import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
 import { dessinerFeuille } from './feuille';
+import { poserEau } from './eau';
 
 // Le ravin — première scène du chapitre 1.
 // Voir game-design/scenes/chapter-1/le-pont.md.
@@ -136,9 +137,8 @@ export class PontScene extends PointClickScene {
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 6);
 
-    // Le vide n'est pas un fond de gorge qu'on pourrait mesurer des yeux : c'est
-    // ce qui rend la traversée inquiétante.
-    dessinerFond(this, PLAN.fond);
+    const fond = dessinerFond(this, PLAN.fond);
+    poserEau(this, fond, { ravin: boxOf(PLAN, 'dec_ravin'), eau: boxOf(PLAN, 'dec_eau') });
 
     // La zone tactile suit l'emprise réelle du sprite, pas la boîte du plan.
     this.caler('arbre', empriseDe(placeSprite(this, JEUNE_ARBRE, boxOf(PLAN, 'hs_arbre'))));

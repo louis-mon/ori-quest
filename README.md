@@ -39,9 +39,12 @@ Pages de réglage, en développement uniquement (hors build) :
 - `http://localhost:5173/decoupage.html` — le découpage des énigmes : on trace
   des coupes sur le crease pattern, d'un bord à l'autre d'une pièce, et l'outil
   dit après chaque coupe si la solution reste unique.
+- `http://localhost:5173/eau.html` — l'eau du ravin : teinte du papier, courant,
+  vagues, inclinaison du plan d'eau. Sa place, elle, se dessine dans Tiled
+  (zones `ravin` et `eau` du plan du ravin).
 
 Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
-`game-design/enigmes/<nom>.json`) par un point d'entrée du serveur de dev défini
+`game-design/enigmes/<nom>.json`, `src/game/scenes/eau-reglages.ts`) par un point d'entrée du serveur de dev défini
 dans `vite.config.ts` — qui n'existe qu'en développement et ne garde que des
 nombres bornés.
 

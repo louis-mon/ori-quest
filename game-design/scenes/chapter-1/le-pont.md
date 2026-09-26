@@ -13,6 +13,13 @@ En cas de réussite, le pont est plié (animation) et placé sur le précipice.
 
 # Annexe
 
+## Le fond du ravin
+
+Une rivière de papier bleu froissé coule au fond, vers le joueur, sous des
+vagues plus lentes qu'elle ; le plan d'eau fuit vers l'arrière. Sa surface est
+une ligne droite sous le pont posé, et entre les deux on voit le ciel par la
+brèche.
+
 ## Choses à examiner
 
 ### Feuille du pont

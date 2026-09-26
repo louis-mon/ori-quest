@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 const FICHIER_POSES = 'src/origami/poses.ts';
+const FICHIER_EAU = 'src/game/scenes/eau-reglages.ts';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
@@ -44,6 +45,39 @@ function enregistrerPoses(): Plugin {
           try {
             const source = readFileSync(FICHIER_POSES, 'utf8');
             writeFileSync(FICHIER_POSES, rendreFichier(source, JSON.parse(corps)));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
+          }
+        });
+      });
+    },
+  };
+}
+
+// Les réglages de l'eau du ravin, depuis eau.html. Mêmes garde-fous que pour
+// les poses : `apply: 'serve'`, un seul fichier connu d'avance, et rien d'écrit
+// tel quel — une teinte au format strict, des nombres bornés, le bloc regénéré.
+function enregistrerEau(): Plugin {
+  return {
+    name: 'ori-quest:eau',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__eau', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        let corps = '';
+        req.on('data', (bout) => {
+          corps += bout;
+          // Neuf valeurs : au-delà, ce n'est pas l'outil qui parle.
+          if (corps.length > 2_000) req.destroy();
+        });
+        req.on('end', () => {
+          try {
+            const source = readFileSync(FICHIER_EAU, 'utf8');
+            writeFileSync(FICHIER_EAU, rendreEau(source, JSON.parse(corps)));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true }));
           } catch (err) {
@@ -361,9 +395,47 @@ function rendreFichier(source: string, recu: unknown): string {
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }
 
+// Alignées sur les curseurs de src/dev/eau.ts, et dans l'ordre du fichier.
+const LIMITES_EAU = {
+  relief: [0, 3],
+  plis: [0, 3],
+  defilement: [0, 200],
+  // Sous 1 : les vagues doivent aller moins vite que le papier.
+  vagues: [0, 0.95],
+  amplitude: [0, 20],
+  longueur: [20, 300],
+  reflet: [0, 0.6],
+  berges: [0, 1],
+  inclinaison: [0, 75],
+} as const;
+
+const TEINTE = /^#[0-9a-f]{6}$/i;
+
+function rendreEau(source: string, recu: unknown): string {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const valeurs = recu as Record<string, unknown>;
+
+  const debut = source.indexOf('export const REGLAGES_EAU');
+  const accolade = source.indexOf('{', debut);
+  const fin = source.indexOf('\n};', accolade);
+  if (debut < 0 || fin < 0) throw new Error(`${FICHIER_EAU} : bloc REGLAGES_EAU introuvable`);
+
+  const { couleur } = valeurs;
+  if (typeof couleur !== 'string' || !TEINTE.test(couleur)) {
+    throw new Error(`teinte invalide : ${String(couleur)}`);
+  }
+  const lignes = [`  couleur: '${couleur.toLowerCase()}',`];
+  for (const [cle, [min, max]] of Object.entries(LIMITES_EAU)) {
+    lignes.push(`  ${cle}: ${nombre(valeurs[cle], min, max, cle)},`);
+  }
+
+  return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
+}
+
 export default defineConfig({
   plugins: [
     enregistrerPoses(),
+    enregistrerEau(),
     enregistrerDecoupage(),
     suivreLesPlans(),
     suivreLesDecoupages(),
