@@ -46,12 +46,15 @@ const CHAPITRES: Chapitre[] = [
 const LIVRES = CHAPITRES;
 
 // Mais la traversée, elle, s'arrête toujours à la fin du chapitre 1 : franchir
-// la porte pose « À suivre… » au lieu d'ouvrir le village. Le chapitre 2 a son
+// la porte pose « À suivre… » au lieu d'ouvrir le village. Et les chapitres
+// suivants, atteints par le menu, ne se raccordent pas davantage : la porte du
+// château pose « À suivre… » elle aussi, au lieu d'ouvrir la salle du trône.
+// Le chapitre 2 a son
 // fond peint, mais ses objets ne sont pas encore calés dessus, et le chapitre 3
 // n'a que des décors provisoires — on veut bien qu'on aille les essayer, pas
 // qu'un joueur du récit y débarque sans l'avoir demandé.
 //
-// Index du dernier chapitre relié au suivant. La narration, elle, ignore tout de
+// Index du premier chapitre qui n'est plus relié au suivant. La narration, elle, ignore tout de
 // ce réglage : son knot de fin de chapitre se joue en entier de toute façon.
 const DERNIER_TRAVERSE = 0;
 
@@ -68,12 +71,14 @@ export function estLivree(piece: string): boolean {
   return LIVRES.some((chapitre) => piece in chapitre.scenes);
 }
 
-// Vrai quand aller de `depuis` à `vers` quitte la traversée livrée.
+// Vrai quand aller de `depuis` à `vers` passe à un chapitre suivant que la
+// traversée livrée ne relie pas.
 //
 // ⚠ Le test porte sur le FRANCHISSEMENT, pas sur la seule destination : le
 // village est hors traversée, mais y revenir depuis l'entrée du château est un
 // déplacement interne au chapitre 2. Sur la destination seule, la flèche de
 // gauche finirait la partie et enfermerait le testeur dans la seconde scène.
 export function sortDeLaTraversee(depuis: string, vers: string): boolean {
-  return chapitreDe(depuis) <= DERNIER_TRAVERSE && chapitreDe(vers) > DERNIER_TRAVERSE;
+  const de = chapitreDe(depuis);
+  return de >= DERNIER_TRAVERSE && chapitreDe(vers) > de;
 }

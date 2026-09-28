@@ -555,6 +555,13 @@ test(
       // trajet, donc un tap qui porte prouve que la flèche s'est allumée.
       await taperZone(page(), 'entree', 'chateau');
       dire('le passage vers le château est ouvert', (await etat(page())).boite);
+
+      // Le chapitre 3 n'est pas raccordé : la porte du château finit la partie.
+      await deroulerDialogue(page());
+      await pause(1800);
+      const e = await etat(page());
+      dire('« À suivre… » à la porte du château', e.fin);
+      dire('la sauvegarde reste sur l’entrée', e.piece === 'entree', `room=${e.piece}`);
     },
   }),
   { livre: true },

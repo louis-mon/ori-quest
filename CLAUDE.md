@@ -100,7 +100,9 @@ dehors ; `src/game/chapitres.ts` les sépare depuis qu'on veut le faire essayer
 sans le raccorder — les objets de ses deux scènes ne sont pas encore calés sur
 leur fond, le chapitre 3 n'a que des décors provisoires, et un joueur du récit
 n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce que la version
-contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller.
+contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller — et au-delà, aucun
+chapitre ne s'ouvre sur le suivant : atteint par le menu, le chapitre 2 finit
+lui aussi sur « À suivre… » à la porte du château.
 
 `goto()` (`main.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour les deux raisons :
 destination absente du build, ou franchissement hors traversée — **sans l'écrire
