@@ -162,21 +162,22 @@ mention « décor provisoire » en clair à l'écran. Il tient la place sans pr�
 au fond, et s'enlève en une ligne le jour où l'image arrive — les boîtes du plan,
 elles, ne bougent pas.
 
-Le terrain non plus n'est pas dessiné : sol, ravin et rempart sont l'image de
+Le terrain non plus n'est pas dessiné : sol, ravin et château sont l'image de
 l'artiste, désignée par un **calque image de classe `fond`** qui pointe le
 fichier de `public/` — les zones tactiles s'ajustent donc sur les pixels que le
 joueur aura sous les yeux. **Seul le ciel reste peint** (`ciel.ts`), le fond
 étant livré transparent au-dessus de l'horizon pour laisser passer soleil et
-nuages derrière le rempart.
+nuages derrière le château.
 
 **L'eau du ravin est l'exception, et elle a été demandée** (`eau.ts`) : TexEau,
-un papier bleu froissé **calculé** au lancement, pas photographié. Le fond de
-gorge noir de l'image est découpé dans la zone `ravin` du plan — un pixel
-sombre *et* neutre, le beige restant chaud jusque dans l'ombre — et l'on voit le
-ciel par la brèche ; l'eau passe derrière le fond, dans la zone `eau`, dont le
-bord haut est la surface. Tout se règle dans `eau.html`, qui écrit
-`eau-reglages.ts`. Trois contraintes : TexEau reste une **puissance de deux**
-(WebGL 1 ne répète que celles-là, et le défilement boucle par cette répétition) ;
+un papier bleu froissé **calculé** au lancement, pas photographié. L'artiste
+livre le fond **transparent dans la brèche** comme au-dessus de l'horizon : on y
+voit le ciel, et l'eau passe derrière le fond, dans la zone `eau`, dont le bord
+haut est la surface. Rien n'est découpé par le code — un fond de gorge noir
+revenu dans l'image se corrige chez l'artiste, pas par un seuil. Tout se règle
+dans `eau.html`, qui écrit `eau-reglages.ts`. Trois contraintes : TexEau reste
+une **puissance de deux** (WebGL 1 ne répète que celles-là, et le défilement
+boucle par cette répétition) ;
 les vagues vont **moins vite que le papier** par construction, leur vitesse étant
 une fraction de la sienne bornée sous 1 ; et ses **mipmaps** se demandent à la
 texture elle-même (`update()` de son `glTexture`), `refresh()` ne les accordant

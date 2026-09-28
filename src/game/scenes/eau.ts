@@ -5,9 +5,9 @@ import { alea } from './hasard';
 import type { Box } from './layout';
 
 // L'eau du ravin : un papier bleu froissé, TexEau, qui défile vers le bas sous
-// une houle plus lente que lui. Le fond de gorge noir est découpé de l'image
-// dans la zone `ravin` du plan, et l'on voit le ciel par la brèche ; l'eau passe
-// derrière le fond, dans la zone `eau`, dont le bord haut est la surface.
+// une houle plus lente que lui. L'artiste livre le fond transparent dans la
+// brèche, où l'on voit le ciel ; l'eau passe derrière le fond, dans la zone
+// `eau`, dont le bord haut est la surface.
 
 // Le sens de chaque champ ; les valeurs vivent dans `eau-reglages.ts`.
 export interface ReglagesEau {
@@ -38,7 +38,6 @@ export interface ReglagesEau {
 export interface Eau {
   // Pour l'outil de réglage : la scène s'en tient à l'enregistré.
   regler(reglages: ReglagesEau): void;
-  montrer(visible: boolean): void;
 }
 
 export const TEXTURE_EAU = 'TexEau';
@@ -74,20 +73,6 @@ const COUCHES: readonly Couche[] = [
 const LUMIERE = unitaire(-0.45, -0.6, 0.9);
 
 const GRAIN = 0.05;
-
-// « La partie noire » : sombre ET neutre. La luminance seule ne tranche pas — le
-// haut du fond de gorge est un papier gris qui monte à 90, l'ombre des berges
-// beiges descend à 75 —, mais le beige reste chaud jusque dans l'ombre. Mesuré
-// sur fond-pont.webp : le ravin reste sous 130 de score, lisière du haut
-// comprise, et les berges passent 160. Plus bas, cette lisière, qui prend la
-// lumière, restait en pointillé sombre le long de l'horizon.
-const CHALEUR = 2.5;
-const SEUIL = [130, 158] as const;
-
-// Pour la lisière de l'horizon, seule partie du fond à demi transparente. Celle
-// du papier noir y monte à 157 et restait en fil sombre tendu devant le ciel ;
-// celle des berges beiges ne descend pas sous 230.
-const SEUIL_LISIERE = [165, 195] as const;
 
 // En pixels, et horizontale seulement : la surface, en haut, ne touche aucune
 // berge.
@@ -171,10 +156,10 @@ let froissage: Froissage | undefined;
 export function poserEau(
   scene: Phaser.Scene,
   fond: Phaser.GameObjects.Image,
-  zones: { ravin: Box; eau: Box },
+  zone: Box,
   reglages: ReglagesEau = REGLAGES_EAU,
 ): Eau | undefined {
-  // Sans WebGL, pas de shader : le ravin garde son fond noir.
+  // Sans WebGL, pas de shader : on voit le ciel au fond du ravin.
   if (scene.sys.renderer.type !== Phaser.WEBGL) return undefined;
 
   let r = { ...reglages };
@@ -191,23 +176,18 @@ export function poserEau(
     h: Math.round(b.h),
   });
 
-  const original = fond.texture.key;
-  const decoupe = `${original}-ravin`;
-  if (!scene.textures.exists(decoupe)) decouper(scene, fond, decoupe, versImage(zones.ravin));
-  fond.setTexture(decoupe);
-
-  const x = Math.round(zones.eau.x);
-  const y = Math.round(zones.eau.y);
-  const w = Math.round(zones.eau.w);
-  const h = Math.round(zones.eau.h);
-  const cleOmbre = `${decoupe}-ombre`;
-  if (!scene.textures.exists(cleOmbre)) ombrer(scene, decoupe, cleOmbre, versImage(zones.eau));
+  const x = Math.round(zone.x);
+  const y = Math.round(zone.y);
+  const w = Math.round(zone.w);
+  const h = Math.round(zone.h);
+  const cleOmbre = `${fond.texture.key}-ombre`;
+  if (!scene.textures.exists(cleOmbre)) ombrer(scene, fond, cleOmbre, versImage(zone));
 
   const taille = [w, h];
   const phases = [0, 0];
   let decalage = 0;
 
-  const shader = scene.add
+  scene.add
     .shader(
       {
         name: 'EauDuRavin',
@@ -259,10 +239,6 @@ export function poserEau(
         nouveaux.couleur !== r.couleur || nouveaux.relief !== r.relief || nouveaux.plis !== r.plis;
       r = { ...nouveaux };
       if (reteindre) teindre(papier, r);
-    },
-    montrer(visible) {
-      shader.setVisible(visible);
-      fond.setTexture(visible ? decoupe : original);
     },
   };
 }
@@ -383,42 +359,17 @@ function teindre(texture: Phaser.Textures.CanvasTexture, { couleur, relief, plis
   );
 }
 
-// Une copie du fond où la partie noire du ravin devient transparente : on voit
-// le ciel par la brèche, et l'eau là où elle passe derrière.
-function decouper(
-  scene: Phaser.Scene,
-  fond: Phaser.GameObjects.Image,
-  cle: string,
-  ravin: Box,
-): void {
-  const source = fond.texture.getSourceImage() as HTMLImageElement;
-  const texture = scene.textures.createCanvas(cle, source.width, source.height);
-  if (!texture) throw new Error(`[eau] texture ${cle} impossible à créer`);
-  const ctx = texture.getContext();
-  ctx.drawImage(source, 0, 0);
-
-  const pixels = ctx.getImageData(ravin.x, ravin.y, ravin.w, ravin.h);
-  const px = pixels.data;
-  for (let o = 0; o < px.length; o += 4) {
-    const score =
-      0.299 * px[o] +
-      0.587 * px[o + 1] +
-      0.114 * px[o + 2] +
-      CHALEUR * Math.max(0, px[o] - px[o + 2]);
-    const [bas, haut] = px[o + 3] < 255 ? SEUIL_LISIERE : SEUIL;
-    px[o + 3] *= transition(bas, haut, score);
-  }
-
-  ctx.putImageData(pixels, ravin.x, ravin.y);
-  texture.refresh();
-}
-
 // L'ouverture de la brèche sur la zone de l'eau, floutée en travers : 1 au
 // milieu, moins au pied des berges, qui y portent leur ombre. L'alpha reste
 // plein, sinon l'envoi au GPU prémultiplierait la valeur par lui.
-function ombrer(scene: Phaser.Scene, decoupe: string, cle: string, eau: Box): void {
-  const fond = (scene.textures.get(decoupe) as Phaser.Textures.CanvasTexture).getContext();
-  const px = fond.getImageData(eau.x, eau.y, eau.w, eau.h).data;
+function ombrer(scene: Phaser.Scene, fond: Phaser.GameObjects.Image, cle: string, eau: Box): void {
+  const lecture = document.createElement('canvas');
+  lecture.width = eau.w;
+  lecture.height = eau.h;
+  const ctxLecture = lecture.getContext('2d', { willReadFrequently: true });
+  if (!ctxLecture) throw new Error(`[eau] fond illisible pour ${cle}`);
+  ctxLecture.drawImage(fond.texture.getSourceImage() as HTMLImageElement, -eau.x, -eau.y);
+  const px = ctxLecture.getImageData(0, 0, eau.w, eau.h).data;
   const ouvert = new Float32Array(eau.w * eau.h);
   for (let i = 0; i < ouvert.length; i++) ouvert[i] = 1 - px[i * 4 + 3] / 255;
 
@@ -453,11 +404,6 @@ function flouEnTravers(source: Float32Array, largeur: number, rayon: number): Fl
     }
   }
   return flou;
-}
-
-function transition(bas: number, haut: number, x: number): number {
-  const t = Math.min(1, Math.max(0, (x - bas) / (haut - bas)));
-  return t * t * (3 - 2 * t);
 }
 
 function entre([min, max]: readonly [number, number], t: number): number {

@@ -74,11 +74,10 @@ const GROS_PLAN = 2.2;
 // ce qu'on regardait doit survivre au rechargement.
 const MEMOIRE = { grosPlan: 'eau-gros-plan', enregistre: 'eau-enregistree' };
 
-const ZONES = { ravin: boxOf(plan, 'dec_ravin'), eau: boxOf(plan, 'dec_eau') };
+const ZONE = boxOf(plan, 'dec_eau');
 
 const reglages: ReglagesEau = { ...REGLAGES_EAU };
 let grosPlan = sessionStorage.getItem(MEMOIRE.grosPlan) === '1';
-let origine = false;
 let eau: Eau | undefined;
 let scene: Phaser.Scene | undefined;
 
@@ -86,7 +85,6 @@ const conteneur = document.getElementById('curseurs')!;
 const sortie = document.getElementById('sortie')!;
 const statut = document.getElementById('statut')!;
 const boutonGrosPlan = document.getElementById('gros-plan')!;
-const boutonOrigine = document.getElementById('origine')!;
 
 // ------------------------------------------------------------------
 // Aperçu
@@ -104,7 +102,7 @@ class Apercu extends Phaser.Scene {
 
   create() {
     dessinerCiel(this, boxOf(plan, 'dec_sol').y, boxOf(plan, 'dec_soleil'));
-    eau = poserEau(this, dessinerFond(this, plan.fond), ZONES, reglages);
+    eau = poserEau(this, dessinerFond(this, plan.fond), ZONE, reglages);
     scene = this;
     cadrer();
   }
@@ -128,10 +126,7 @@ function cadrer() {
   // Bornée au décor : l'eau touche le bas du cadre, et le gros plan montrait
   // sinon une bande noire sous elle.
   camera.setBounds(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
-  if (grosPlan)
-    camera
-      .setZoom(GROS_PLAN)
-      .centerOn(ZONES.ravin.x + ZONES.ravin.w / 2, ZONES.ravin.y + ZONES.ravin.h / 2);
+  if (grosPlan) camera.setZoom(GROS_PLAN).centerOn(ZONE.x + ZONE.w / 2, ZONE.y + ZONE.h / 2);
   else camera.setZoom(1).centerOn(DESIGN_WIDTH / 2, DESIGN_HEIGHT / 2);
 }
 
@@ -215,13 +210,6 @@ boutonGrosPlan.addEventListener('click', () => {
   grosPlan = !grosPlan;
   sessionStorage.setItem(MEMOIRE.grosPlan, grosPlan ? '1' : '');
   cadrer();
-});
-
-// Pour juger le découpage : ce que l'eau recouvre, et ce qu'elle laisse.
-boutonOrigine.addEventListener('click', () => {
-  origine = !origine;
-  boutonOrigine.setAttribute('aria-pressed', String(origine));
-  eau?.montrer(!origine);
 });
 
 // Le point d'entrée est défini dans `vite.config.ts` : il n'existe qu'en

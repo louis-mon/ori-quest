@@ -106,16 +106,16 @@
                  "y":410
                 }, 
                 {
-                 "height":240,
+                 "height":210,
                  "id":8,
                  "name":"chateau",
                  "opacity":1,
                  "rotation":0,
                  "type":"exit",
                  "visible":true,
-                 "width":170,
-                 "x":870,
-                 "y":300
+                 "width":200,
+                 "x":786,
+                 "y":360
                 }, 
                 {
                  "height":240,

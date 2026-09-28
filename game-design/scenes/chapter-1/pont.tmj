@@ -204,18 +204,6 @@
                  "y":380
                 },
                 {
-                 "height":300,
-                 "id":19,
-                 "name":"ravin",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":250,
-                 "x":515,
-                 "y":420
-                },
-                {
                  "height":250,
                  "id":20,
                  "name":"eau",

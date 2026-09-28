@@ -138,7 +138,7 @@ export class PontScene extends PointClickScene {
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 6);
 
     const fond = dessinerFond(this, PLAN.fond);
-    poserEau(this, fond, { ravin: boxOf(PLAN, 'dec_ravin'), eau: boxOf(PLAN, 'dec_eau') });
+    poserEau(this, fond, boxOf(PLAN, 'dec_eau'));
 
     // La zone tactile suit l'emprise réelle du sprite, pas la boîte du plan.
     this.caler('arbre', empriseDe(placeSprite(this, JEUNE_ARBRE, boxOf(PLAN, 'hs_arbre'))));

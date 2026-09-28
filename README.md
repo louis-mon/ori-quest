@@ -41,7 +41,7 @@ Pages de réglage, en développement uniquement (hors build) :
   dit après chaque coupe si la solution reste unique.
 - `http://localhost:5173/eau.html` — l'eau du ravin : teinte du papier, courant,
   vagues, inclinaison du plan d'eau. Sa place, elle, se dessine dans Tiled
-  (zones `ravin` et `eau` du plan du ravin).
+  (zone `eau` du plan du ravin).
 
 Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 `game-design/enigmes/<nom>.json`, `src/game/scenes/eau-reglages.ts`) par un point d'entrée du serveur de dev défini
@@ -132,7 +132,8 @@ knots d'ink, les sauvegardes et les plans. Le joueur, lui, lit « Le ravin ».
 Le WebP est gardé tel quel — 33 Ko contre 550 Ko pour le même dessin en PNG, et
 il porte sa couche alpha : le fond est **transparent au-dessus de l'horizon**,
 c'est ce qui laisse passer le ciel, son soleil et ses nuages, peints par le code
-(`src/game/scenes/ciel.ts`).
+(`src/game/scenes/ciel.ts`). Celui du ravin l'est aussi **dans la brèche**, où
+coule l'eau (`src/game/scenes/eau.ts`).
 
 Reste à le **brancher dans la carte Tiled** de la scène : un calque image de
 classe `fond`, qui pointe le fichier de `public/`. C'est la carte qui dit au jeu

@@ -131,8 +131,7 @@ export class EntreeScene extends PointClickScene {
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
 
-    // Le passage est un trou dans le rempart, pas un battant : la porte du
-    // château est plus loin, et ce chapitre ne la montre pas.
+    // La porte du château est dans le fond : le passage n'a rien à dessiner.
     dessinerFond(this, PLAN.fond);
 
     this.feuilleChien = this.add.graphics();
