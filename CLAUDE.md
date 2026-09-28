@@ -173,13 +173,13 @@ nuages derrière le château.
 un papier bleu froissé **calculé** au lancement, pas photographié. L'artiste
 livre le fond **transparent dans la brèche** comme au-dessus de l'horizon : on y
 voit le ciel, et l'eau passe derrière le fond, dans la zone `eau`, dont le bord
-haut est la surface. Tout se règle dans `eau.html`, qui écrit `eau-reglages.ts`. Trois contraintes : TexEau reste
-une **puissance de deux** (WebGL 1 ne répète que celles-là, et le défilement
-boucle par cette répétition) ;
-les vagues vont **moins vite que le papier** par construction, leur vitesse étant
-une fraction de la sienne bornée sous 1 ; et ses **mipmaps** se demandent à la
-texture elle-même (`update()` de son `glTexture`), `refresh()` ne les accordant
-qu'à la configuration globale — sans eux, le papier vu en perspective scintille.
+haut est la surface. Tout se règle dans `eau.html`, qui écrit `eau-reglages.ts`.
+Trois contraintes : TexEau reste une **puissance de deux** (WebGL 1 ne répète que
+celles-là, et le défilement boucle par cette répétition) ; les vagues vont
+**moins vite que le papier** par construction, leur vitesse étant une fraction de
+la sienne bornée sous 1 ; et ses **mipmaps** se demandent à la texture elle-même
+(`update()` de son `glTexture`), `refresh()` ne les accordant qu'à la
+configuration globale — sans eux, le papier vu en perspective scintille.
 Le calcul coûte un temps notable au premier passage sur téléphone : s'il gêne, le
 passer dans un Worker.
 
