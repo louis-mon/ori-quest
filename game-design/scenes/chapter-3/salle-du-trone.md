@@ -26,9 +26,10 @@ Maintenant il a faim.
 Disponibles après la quête de la reine, et on les voit au centre de la salle avec des effets de lumière :
 rouge avec paillettes scintillantes, vert éclat argenté, bleu veiné d'or, mauve effet diamant.
 
-Un arbre de choix : d'abord la couleur, puis le modèle. Le cœur n'apparaît parmi les modèles qu'une fois les indices
-de la wyvern entendus — sous chacune des quatre couleurs —, et seule la rouge le permet. L'indice n'est pas dans
-l'inventaire : c'est au joueur de s'en souvenir. Plié, le cœur prend la place des quatre feuilles.
+Tant que les indices de la wyvern n'ont pas été entendus, on les regarde sans y toucher : le héros les commente,
+et aucun choix n'est proposé. Ensuite, un arbre de choix : d'abord la couleur, puis le modèle — le cœur parmi les
+autres, sous chacune des quatre couleurs —, et seule la rouge le permet. L'indice n'est pas dans l'inventaire :
+c'est au joueur de s'en souvenir. Plié, le cœur prend la place des quatre feuilles.
 
 Une fois le coeur plié, et les chats rassasiés, une cinématique montre les chats qui se rapprochent du coeur et se réconcilient. Le Petit Chat avoue
 qu'il a plusieurs fois caché la couronne de la reine pour accuser le chat mal luné et obtenir les faveurs de la reine, et s'excuse publiquement.

@@ -1123,28 +1123,36 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
 
 // Le Chat Mal Luné. Il a déplié les origamis que la reine aimait, parce qu'elle
 // lui préfère le Petit Chat ; il a faim, et il n'a pas envie de parler.
-// [A ECRIRE]
 === trone_lune_chat ===
 {
   - flag_chats_rassasies:
     # qui: lune_chat
-    Pas mauvais, ce poisson. Mais je n'ai toujours rien à dire au Petit Chat.
+    Je me suis régalé. Tu est peut-être plus utile que je le pensais.
+    # qui: heros
+    Tu vas essayer de parler au Petit Chat pour vous expliquer ?
+    # qui: lune_chat
+    C'est à lui d'arrêter de faire le beau et de venir vers moi.
   - flag_repas_pret:
     -> trone_invitation
   - flag_lune_chat_parle:
     # qui: lune_chat
-    Laisse-moi tranquille. J'ai faim.
+    Vas-t-en. Sauf si tu m'apporte à manger.
   - else:
-    # qui: heros
-    Chat Mal Luné ! C'est donc toi qui as déplié tous les origamis du château ?
     # qui: lune_chat
-    Pfff. Et alors ?
-    La reine les adorait, ces origamis. Presque autant que son précieux Petit Chat.
-    Elle ne jure que par lui. Moi, on m'accuse de tout, alors autant le mériter.
+    Maww! Tiens tiens tiens mais qui voilà ? Tu viens m'apporter mon repas ?
     # qui: heros
-    Ce n'est pas une raison pour transformer le royaume en tas de feuilles !
+    C'est une curieuse façon de me saluer Chat Mal Luné!
+    Vas tu cesser tes enfantillages et remettre un peu d'ordre ?
     # qui: lune_chat
-    J'ai faim. Je n'ai pas envie de parler. # flag: lune_chat_parle
+    Tsss... J'arrêterai peut-être quand ce précieux petit chouchou fera moins le malin.
+    Regarde le, là, à se dandiner aux pieds de la Reine. Il obtiens toutes ses faveurs et moi je n'ai rien.
+    J'ai même pas eu mon repas, j'ai les crocs.
+    # qui: heros
+    Et tu crois que c'est comme ça que la reine va mieux t'apprécier ? En dépliant tout ses origamis ?
+    D'ailleurs si tu n'as pas ton repas c'est à cause du bazar que tu as causé, le Petit Chat a aussi l'air de trépigner.
+    # qui: lune_chat
+    J'ai pas besoin de tes leçons de morale, la grenouille.
+    Maintenant dégerpis avant que ça soit toi, mon repas. Mawww! # flag: lune_chat_parle
 }
 -> DONE
 
@@ -1152,27 +1160,28 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
 // Le repas est prêt : on invite l'un ou l'autre chat, les deux partent. Le
 // départ se joue une fois la boîte refermée (`auLeverDe` dans trone-scene.ts),
 // donc rien ici ne le commente.
-// [A ECRIRE]
 === trone_invitation ===
 # qui: heros
-À table, les chats ! La Cheffe Éléphant vous a préparé une daurade royale.
+Le repas est prêt mes châtons! La Cheffe Elephant vous attends à la cuisine.
 # qui: chat
-Miaou ! Une daurade, quel délice, / Courons-y sans artifice !
+Hummm quelle déclicieuse odeur de poisson! / Vite, avant un larcin de ce vilain garçon.
 # qui: lune_chat
-Enfin quelque chose d'intéressant. # flag: chats_invites
+Hé toi, pas intérêt à me piquer ma part!
+# qui: heros
+Calmez-vous, vas y'en avoir pour tout le monde. # flag: chats_invites
 -> DONE
 
 
 // Les quatre feuilles de la reine, au centre de la salle, puis le cœur que la
-// rouge devient. On choisit la feuille, puis ce qu'on en plie : le cœur n'est
-// proposé qu'à qui a écouté la wyvern, sous chacune des quatre, et seule la
+// rouge devient. Tant que la wyvern n'a rien dit, on les regarde sans y
+// toucher ; ensuite, on choisit la feuille, puis ce qu'on en plie, et seule la
 // rouge fait l'affaire.
-// [A ECRIRE]
 === trone_coeur ===
 { flag_coeur_plie: -> trone_coeur_plie }
 # qui: heros
-Quatre feuilles précieuses, et chacune scintille à sa façon. Laquelle choisir pour rapprocher ces deux chats ?
--> trone_feuilles
+Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâcher.
+{ flag_wyvern_indices: -> trone_feuilles }
+-> DONE
 
 === trone_feuilles ===
 + [rouge avec paillettes scintillantes] -> trone_feuille("rouge")
@@ -1180,26 +1189,26 @@ Quatre feuilles précieuses, et chacune scintille à sa façon. Laquelle choisir
 + [bleu veiné d'or] -> trone_feuille("bleu")
 + [mauve effet diamant] -> trone_feuille("mauve")
 
-// [A ECRIRE]
 === trone_feuille(couleur) ===
 {
-  - couleur == "rouge": Du rouge, semé de paillettes qui scintillent. Qu'est-ce que je pourrais en plier ?
-  - couleur == "vert": Un vert profond, qui jette des éclats d'argent. Qu'est-ce que je pourrais en plier ?
-  - couleur == "bleu": Un bleu de nuit, veiné d'or. Qu'est-ce que je pourrais en plier ?
-  - else: Du mauve, taillé comme un diamant. Qu'est-ce que je pourrais en plier ?
+  - couleur == "vert": Un vert émeraude strié d'argent. Que faire avec ?
+  - couleur == "rouge": Un rouge éclatant incrusté d'éclats dorés. Que faire avec ?
+  - couleur == "bleu": Un bleu profond veiné d'or. Que faire avec ?
+  - else: Du mauve, taillé comme un diamant. Que faire avec ?
 }
-+ [plier une souris]
-    Une souris pour deux chats ? Ils se la disputeraient, et ce serait pire qu'avant.
-+ [plier une couronne]
-    Sa Majesté a déjà la sienne. Et un chat couronné, ça ferait des jaloux.
-+ { flag_wyvern_indices } [plier un cœur]
++ [plier de l'herbe à chat]
+    Ça les détenderait bien, mais ça ne va pas régler le fond du problème.
++ [plier des oiseaux]
+    Les pauvres oiseaux, ils vont se faire plumer par ces deux là.
+    Heureusement qu'ils n'osent pas s'en prendre à la reine d'ailleurs.
++ [plier un cœur]
     { couleur == "rouge":
-        Un cœur rouge, comme l'a soufflé la wyvern. Voyons s'il peut réconcilier ces deux-là.
+        Un coeur scintillant pour symboliser la paix qui devrait les réunir.
         -> trone_coeur_lancement
     }
-    Un cœur de cette couleur-là ? Non... Ce n'est pas ce que la wyvern avait en tête.
+    Ça part d'une bonne idée, mais il y a quelque chose qui ne va pas.
 + [plier une pelote de laine]
-    Ils joueraient ensemble... ou pas. Je ne veux pas risquer une bagarre de plus.
+    Ils joueraient ensemble... ou risqueraient de se chamailler pour l'avoir. C'est un peu risqué.
 - -> DONE
 
 // Tag seul, sans texte : voir `pont_enigme_lancement`.
@@ -1210,15 +1219,15 @@ Quatre feuilles précieuses, et chacune scintille à sa façon. Laquelle choisir
 // Plié en dernier, le cœur laisse la scène finale prendre la suite, boîte
 // refermée ; plié avant le repas, il attend que les chats reviennent de la
 // cuisine (TroneScene).
-// [A ECRIRE]
 === trone_coeur_issue ===
 { flag_coeur_resolu:
     # qui: heros
-    Un pli après l'autre, avec tout mon cœur... # origami: coeur # flag: coeur_plie
-    { not flag_chats_rassasies: Reste à ce que les chats s'en approchent. Mais le ventre vide, ils n'ont d'yeux que pour la cuisine. }
+    J'ai pris mon temps pour ne pas gâcher ce beau papier. # origami: coeur # flag: coeur_plie
+    Un coeur qui palpite d'amour.
+    { not flag_chats_rassasies: Encore faut il attirer l'attention des chats dessus. Ils n'ont pas la tête à ça pour l'instant }
   - else:
     # qui: heros
-    J'ai le cœur qui n'y est pas... Je réessaierai.
+    Le cœur qui n'y est pas... plus tard peux-être.
 }
 -> DONE
 
