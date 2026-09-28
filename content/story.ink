@@ -1127,7 +1127,7 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
 {
   - flag_chats_rassasies:
     # qui: lune_chat
-    Je me suis régalé. Tu est peut-être plus utile que je le pensais.
+    Je me suis régalé. Tu es peut-être plus utile que je le pensais.
     # qui: heros
     Tu vas essayer de parler au Petit Chat pour vous expliquer ?
     # qui: lune_chat
@@ -1136,7 +1136,7 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
     -> trone_invitation
   - flag_lune_chat_parle:
     # qui: lune_chat
-    Vas-t-en. Sauf si tu m'apporte à manger.
+    Va-t'en. Sauf si tu m'apportes à manger.
   - else:
     # qui: lune_chat
     Maww! Tiens tiens tiens mais qui voilà ? Tu viens m'apporter mon repas ?
@@ -1145,10 +1145,10 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
     Vas tu cesser tes enfantillages et remettre un peu d'ordre ?
     # qui: lune_chat
     Tsss... J'arrêterai peut-être quand ce précieux petit chouchou fera moins le malin.
-    Regarde le, là, à se dandiner aux pieds de la Reine. Il obtiens toutes ses faveurs et moi je n'ai rien.
+    Regarde le, là, à se dandiner aux pieds de la Reine. Il obtient toutes ses faveurs et moi je n'ai rien.
     J'ai même pas eu mon repas, j'ai les crocs.
     # qui: heros
-    Et tu crois que c'est comme ça que la reine va mieux t'apprécier ? En dépliant tout ses origamis ?
+    Et tu crois que c'est comme ça que la reine va mieux t'apprécier ? En dépliant tous ses origamis ?
     D'ailleurs si tu n'as pas ton repas c'est à cause du bazar que tu as causé, le Petit Chat a aussi l'air de trépigner.
     # qui: lune_chat
     J'ai pas besoin de tes leçons de morale, la grenouille.
@@ -1162,13 +1162,13 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
 // donc rien ici ne le commente.
 === trone_invitation ===
 # qui: heros
-Le repas est prêt mes châtons! La Cheffe Elephant vous attends à la cuisine.
+Le repas est prêt mes chatons! La Cheffe Elephant vous attend à la cuisine.
 # qui: chat
-Hummm quelle déclicieuse odeur de poisson! / Vite, avant un larcin de ce vilain garçon.
+Hummm quelle délicieuse odeur de poisson! / Vite, avant un larcin de ce vilain garçon.
 # qui: lune_chat
 Hé toi, pas intérêt à me piquer ma part!
 # qui: heros
-Calmez-vous, vas y'en avoir pour tout le monde. # flag: chats_invites
+Calmez-vous, va y'en avoir pour tout le monde. # flag: chats_invites
 -> DONE
 
 
@@ -1197,7 +1197,7 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
   - else: Du mauve, taillé comme un diamant. Que faire avec ?
 }
 + [plier de l'herbe à chat]
-    Ça les détenderait bien, mais ça ne va pas régler le fond du problème.
+    Ça les détendrait bien, mais ça ne va pas régler le fond du problème.
 + [plier des oiseaux]
     Les pauvres oiseaux, ils vont se faire plumer par ces deux là.
     Heureusement qu'ils n'osent pas s'en prendre à la reine d'ailleurs.
@@ -1227,7 +1227,7 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
     { not flag_chats_rassasies: Encore faut il attirer l'attention des chats dessus. Ils n'ont pas la tête à ça pour l'instant }
   - else:
     # qui: heros
-    Le cœur qui n'y est pas... plus tard peux-être.
+    Le cœur n'y est pas... plus tard peux-être.
 }
 -> DONE
 
