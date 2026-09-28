@@ -154,18 +154,6 @@
                  "y":70
                 }, 
                 {
-                 "height":300,
-                 "id":12,
-                 "name":"rempart",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":660,
-                 "x":620,
-                 "y":240
-                }, 
-                {
                  "height":0,
                  "id":14,
                  "name":"saut_chat",

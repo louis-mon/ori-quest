@@ -132,8 +132,7 @@ knots d'ink, les sauvegardes et les plans. Le joueur, lui, lit « Le ravin ».
 Le WebP est gardé tel quel — 33 Ko contre 550 Ko pour le même dessin en PNG, et
 il porte sa couche alpha : le fond est **transparent au-dessus de l'horizon**,
 c'est ce qui laisse passer le ciel, son soleil et ses nuages, peints par le code
-(`src/game/scenes/ciel.ts`). Celui du ravin l'est aussi **dans la brèche**, où
-coule l'eau (`src/game/scenes/eau.ts`).
+(`src/game/scenes/ciel.ts`).
 
 Reste à le **brancher dans la carte Tiled** de la scène : un calque image de
 classe `fond`, qui pointe le fichier de `public/`. C'est la carte qui dit au jeu
