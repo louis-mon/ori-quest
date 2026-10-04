@@ -1,4 +1,5 @@
 import type * as THREE_NS from 'three';
+import { ECLAT_OR, type Eclat } from './etoiles';
 import type { FoldAnimation } from './fold-file';
 
 // Le verso n'apparaît qu'aux endroits où le papier s'est retourné : c'est lui
@@ -72,6 +73,8 @@ interface Aspect {
   peindre: (ctx: CanvasRenderingContext2D) => void;
   specular: number;
   shininess: number;
+  // Les étoiles qui s'y allument, pendant le pliage comme une fois posé.
+  eclat?: Eclat;
 }
 
 // Appliqué en dernier : c'est lui qui empêche l'aplat plastique.
@@ -419,6 +422,7 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#b3262f',
     specular: 0x7a4a4a,
     shininess: 50,
+    eclat: ECLAT_OR,
     peindre: (ctx) => {
       fond(ctx, ASPECTS.rouge.teinte);
       ctx.globalAlpha = 0.3;
@@ -681,6 +685,12 @@ export function teintesDe(nom: string): { recto: number; verso: number } {
   const papier = PAPIERS[nom] ?? DEFAUT;
   const teinte = (p: Papier) => Number.parseInt(ASPECTS[p].teinte.slice(1), 16);
   return { recto: teinte(papier.recto), verso: teinte(papier.verso) };
+}
+
+// Celui du papier qui fait face au joueur, le seul que voient les étoiles.
+export function eclatDe(nom: string): Eclat | undefined {
+  const { recto, verso, retourne } = PAPIERS[nom] ?? DEFAUT;
+  return ASPECTS[retourne ? verso : recto].eclat;
 }
 
 // Les textures, elles, restent partagées.

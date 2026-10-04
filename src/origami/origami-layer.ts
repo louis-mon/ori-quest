@@ -1,7 +1,8 @@
 import type * as THREE_NS from 'three';
 import { PREFERENCE_GPU } from '../gpu';
+import { EtoilesPliage } from './etoiles-pliage';
 import { animationOrigami, sampleFold, type FoldAnimation } from './fold-file';
-import { creerMeshOrigami, libererMateriaux } from './papier';
+import { creerMeshOrigami, eclatDe, libererMateriaux } from './papier';
 import {
   DIRECTION_VUE,
   HAUT_VUE,
@@ -34,6 +35,8 @@ export class OrigamiLayer {
   // une rotation appliquée à lui se ferait autour de l'origine brute du pliage
   // et le modèle décrirait un arc de cercle au lieu de tourner sur lui-même.
   private pivot?: THREE_NS.Group;
+  // Celles d'un papier précieux, qui brillent pendant qu'il se plie.
+  private etoiles?: EtoilesPliage;
 
   private anim?: FoldAnimation;
   private scratch?: Float32Array;
@@ -151,6 +154,8 @@ export class OrigamiLayer {
     this.scratch = positions;
     this.mesh = mesh;
     this.geometry = geometry;
+    const eclat = eclatDe(nom);
+    if (eclat) this.etoiles = new EtoilesPliage(this.THREE, mesh, anim, positions, nom, eclat);
     this.pivot = new this.THREE.Group();
     this.pivot.add(mesh);
     this.scene.add(this.pivot);
@@ -321,6 +326,7 @@ export class OrigamiLayer {
         this.pivot.quaternion.copy(this.rotBalancement).multiply(this.pose);
       }
     }
+    this.etoiles?.update(dt, this.camera);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -340,6 +346,8 @@ export class OrigamiLayer {
   };
 
   private disposeMesh() {
+    this.etoiles?.dispose();
+    this.etoiles = undefined;
     if (this.pivot) this.scene.remove(this.pivot);
     if (this.mesh) libererMateriaux(this.mesh);
     this.geometry?.dispose();

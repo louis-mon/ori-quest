@@ -1,4 +1,16 @@
 import Phaser from 'phaser';
+import {
+  DIAMANT as FORME_DIAMANT,
+  ECLAT_OR,
+  ETINCELLE as FORME_ETINCELLE,
+  ETINCELLES_OR,
+  peindreEtoile,
+  ROTATION,
+  TAILLE_ETOILE,
+  type Etoiles,
+  type FormeEtoile,
+  type Lumiere,
+} from '../../origami/etoiles';
 import { incrustationsDOr, ORS, teintesDe } from '../../origami/papier';
 import {
   dessinerFeuille,
@@ -33,19 +45,13 @@ const TEINTES: Record<Precieuse, Teintes> = {
   mauve: { recto: 0x8d62ae, verso: 0xeadff2 },
 };
 
-// Les étoiles se posent en mélange normal, en teintes franches : ajoutées au
-// papier, de l'or sur du bleu donnait du blanc, et les couleurs du diamant se
-// délavaient sur le mauve.
-const ETINCELLES_OR = [0xffb81f, 0xffcc3a, 0xffdd70] as const;
 // Un diamant éclairé renvoie toutes les couleurs à la fois : chaque éclat
 // parcourt l'arc-en-ciel pendant qu'il brille (voir `irise`). Un choix de
 // couleurs figées, tirées dans une liste, faisait des confettis.
 const SATURATION_DIAMANT = 0.7;
 
-// Le papier s'allume autour de chaque éclat, comme un métal qui accroche la
-// lumière là où elle tombe. `rayon` en fraction du côté, `force` à son plus fort.
-const LUMIERES: Record<Exclude<Precieuse, 'vert'>, { rayon: number; force: number }> = {
-  rouge: { rayon: 0.32, force: 0.3 },
+const LUMIERES: Record<Exclude<Precieuse, 'vert'>, Lumiere> = {
+  rouge: ECLAT_OR.lumiere,
   bleu: { rayon: 0.3, force: 0.32 },
   mauve: { rayon: 0.3, force: 0.34 },
 };
@@ -473,16 +479,8 @@ function centre(points: readonly Point[]): Point {
 // Les lumières, qui jouent dessus
 // ------------------------------------------------------------------
 
-interface Scintillement {
-  nombre: number;
+interface Scintillement extends Etoiles {
   texture: string;
-  teintes: readonly number[];
-  // En fraction du côté, tirée entre les deux.
-  taille: readonly [number, number];
-  // Le temps de s'allumer, autant pour s'éteindre.
-  duree: number;
-  // Le noir entre deux éclats d'une même étoile, tiré entre les deux, en ms.
-  pause: readonly [number, number];
   // Là où ils peuvent paraître ; partout sur la surface sinon.
   points?: readonly Point[];
   // Le feu d'un diamant : l'éclat parcourt l'arc-en-ciel pendant qu'il brille,
@@ -493,14 +491,7 @@ interface Scintillement {
 }
 
 // Les étoiles d'or de la feuille rouge, que le cœur garde une fois plié.
-const ETOILES_ROUGE: Scintillement = {
-  nombre: 8,
-  texture: ETINCELLE,
-  teintes: ETINCELLES_OR,
-  taille: [0.2, 0.34],
-  duree: 560,
-  pause: [200, 1400],
-};
+const ETOILES_ROUGE: Scintillement = { ...ECLAT_OR.etoiles, texture: ETINCELLE };
 
 // Là où se posent les étoiles : le recto d'une feuille, ou le cœur plié.
 interface Surface {
@@ -508,10 +499,6 @@ interface Surface {
   cote: number;
   point(hasard: () => number): Point;
 }
-
-// Le tour qu'une étoile fait, en degrés, le temps de s'allumer et de s'éteindre :
-// c'est ce qui la fait crépiter plutôt que gonfler.
-const ROTATION = 90;
 
 // Des étoiles qui s'allument et s'éteignent, chacune à son rythme, et
 // changent de place une fois éteintes.
@@ -962,81 +949,15 @@ function peindreTextures(scene: Phaser.Scene) {
     }
   }
 
-  // L'étincelle : des branches effilées et un cœur minuscule. Un cœur rond et
-  // large, ajouté au papier, se lisait comme une boule blanche.
-  // Les branches restent épaisses dans la texture : affichée à une vingtaine de
-  // pixels, une branche fine y disparaît, et il ne reste que le cœur.
-  peindreEtoile(
-    scene,
-    ETINCELLE,
-    [
-      [1, 0],
-      [0.5, Math.PI / 4],
-    ],
-    2.8,
-    0.08,
-  );
-  // Le diamant : quatre longues branches, quatre courtes en diagonale.
-  peindreEtoile(
-    scene,
-    DIAMANT,
-    [
-      [1, 0],
-      [0.62, Math.PI / 4],
-    ],
-    3,
-    0.1,
-  );
+  peindreUneEtoile(scene, ETINCELLE, FORME_ETINCELLE);
+  peindreUneEtoile(scene, DIAMANT, FORME_DIAMANT);
 }
 
-// Chaque paire de branches est un losange effilé, `longueur` en fraction du
-// rayon, tourné de `angle`. `epaisseur` en pixels de texture, `coeur` en
-// fraction du rayon.
-function peindreEtoile(
-  scene: Phaser.Scene,
-  cle: string,
-  paires: readonly [number, number][],
-  epaisseur: number,
-  coeur: number,
-) {
+function peindreUneEtoile(scene: Phaser.Scene, cle: string, forme: FormeEtoile) {
   if (scene.textures.exists(cle)) return;
-  const taille = 64;
-  const c = taille / 2;
-  const texture = scene.textures.createCanvas(cle, taille, taille);
+  const texture = scene.textures.createCanvas(cle, TAILLE_ETOILE, TAILLE_ETOILE);
   const ctx = texture?.getContext();
   if (!texture || !ctx) return;
-
-  // La lumière tient jusqu'au bout des branches au lieu de s'éteindre au
-  // premier quart : c'est la branche qui fait l'étincelle, pas le cœur.
-  // Définie autour de l'origine : les branches sont peintes dans le repère
-  // déplacé au centre, où un dégradé centré sur (c, c) tomberait dans le coin.
-  const lumiere = (ox: number) => {
-    const d = ctx.createRadialGradient(ox, ox, 0, ox, ox, c);
-    d.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    d.addColorStop(0.2, 'rgba(255, 255, 255, 0.9)');
-    d.addColorStop(0.6, 'rgba(255, 255, 255, 0.4)');
-    d.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    return d;
-  };
-  for (const [longueur, angle] of paires) {
-    for (const quart of [0, Math.PI / 2]) {
-      ctx.save();
-      ctx.translate(c, c);
-      ctx.rotate(angle + quart);
-      ctx.fillStyle = lumiere(0);
-      ctx.beginPath();
-      ctx.moveTo(-c * longueur, 0);
-      ctx.lineTo(0, -epaisseur);
-      ctx.lineTo(c * longueur, 0);
-      ctx.lineTo(0, epaisseur);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-  ctx.fillStyle = lumiere(c);
-  ctx.beginPath();
-  ctx.arc(c, c, c * coeur, 0, Math.PI * 2);
-  ctx.fill();
+  peindreEtoile(ctx, forme);
   texture.refresh();
 }
