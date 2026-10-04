@@ -9,7 +9,12 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerDecorProvisoire } from './decor-provisoire';
-import { poserFeuillesPrecieuses, type FeuillesPrecieuses } from './feuilles-precieuses';
+import {
+  eclatDuCoeur,
+  poserFeuillesPrecieuses,
+  type EclatDuCoeur,
+  type FeuillesPrecieuses,
+} from './feuilles-precieuses';
 import { finDuChemin } from './deplacement';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 
@@ -42,6 +47,7 @@ export class TroneScene extends PointClickScene {
   private feuilles!: FeuillesPrecieuses;
   private coeur!: OrigamiDecor;
   private empriseCoeur?: Box;
+  private eclatCoeur?: EclatDuCoeur;
   // Les chats sont à la cuisine entre l'invitation et leur retour. Leurs zones
   // s'éteignent à la fin de leur sortie et non au drapeau : `refresh()` applique
   // la visibilité AVANT de jouer le mouvement — même piège que le passage de
@@ -105,6 +111,7 @@ export class TroneScene extends PointClickScene {
     // là, se liraient comme une chose de plus à examiner.
     this.feuilles?.groupe.setVisible(donnee && !plie);
     this.coeur?.montrer(plie);
+    this.eclatCoeur?.setVisible(plie);
     const emprise = plie ? this.empriseCoeur : this.feuilles?.emprise;
     if (emprise) this.caler('coeur', emprise);
 
@@ -128,8 +135,11 @@ export class TroneScene extends PointClickScene {
     // Deux boîtes, comme la montagne du village : la rangée de feuilles et le
     // cœur plié n'ont ni la même forme ni la même place.
     this.feuilles = poserFeuillesPrecieuses(this, boxOf(PLAN, 'hs_coeur'));
+    // Phaser réutilise l'instance : celui du passage précédent a été détruit.
+    this.eclatCoeur = undefined;
     this.coeur = poserOrigami(this, 'coeur', boxOf(PLAN, 'dec_coeur'), (emprise) => {
       this.empriseCoeur = emprise;
+      this.eclatCoeur = eclatDuCoeur(this, this.coeur.image, emprise);
       this.refresh();
     });
 

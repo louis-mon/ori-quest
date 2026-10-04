@@ -117,6 +117,60 @@ function fond(ctx: CanvasRenderingContext2D, couleur: string) {
   ctx.fillRect(0, 0, TAILLE, TAILLE);
 }
 
+// L'or des incrustations et des veines des feuilles précieuses, du plus sombre
+// au plus clair.
+export const ORS = [0xb8862a, 0xd9ad45, 0xf0cf72, 0xfbe7a6] as const;
+
+type Sommet = [number, number];
+
+export interface Incrustations {
+  // Des fragments anguleux ; `teinte` indexe ORS, et l'arête claire, celle qui
+  // accroche la lumière, va du premier sommet au deuxième.
+  eclats: { sommets: Sommet[]; teinte: number }[];
+  poussiere: { x: number; y: number; l: number; h: number; teinte: number; alpha: number }[];
+  // La largeur de cette arête.
+  arete: number;
+}
+
+// Des éclats d'or pris dans le papier rouge. Une seule recette pour la feuille
+// posée dans la salle du trône (`feuilles-precieuses.ts`) et pour la texture du
+// cœur qu'elle devient : deux recettes finiraient par diverger, et le pliage
+// changerait de papier en route. Ronds, les éclats se lisaient comme des bulles,
+// pas comme du métal.
+//
+// Tout est en unités de `cote` ; `point` tire un point du recto visible.
+export function incrustationsDOr(
+  cote: number,
+  point: () => readonly [number, number],
+  hasard: () => number,
+): Incrustations {
+  const eclats: Incrustations['eclats'] = [];
+  for (let i = 0; i < 38; i++) {
+    const [x, y] = point();
+    const r = cote * (0.012 + hasard() * 0.026);
+    const nombre = 3 + Math.floor(hasard() * 3);
+    const depart = hasard() * Math.PI * 2;
+    const sommets: Sommet[] = [];
+    for (let k = 0; k < nombre; k++) {
+      const a = depart + (k / nombre) * Math.PI * 2 + (hasard() - 0.5) * 0.8;
+      const rk = r * (0.55 + hasard() * 0.6);
+      sommets.push([x + Math.cos(a) * rk, y + Math.sin(a) * rk]);
+    }
+    eclats.push({ sommets, teinte: Math.floor(hasard() * 3) });
+  }
+  // La poussière d'or entre les éclats.
+  const poussiere: Incrustations['poussiere'] = [];
+  for (let i = 0; i < 45; i++) {
+    const [x, y] = point();
+    const teinte = 1 + Math.floor(hasard() * 3);
+    const alpha = 0.5 + hasard() * 0.5;
+    const l = cote * (0.01 + hasard() * 0.007);
+    const h = cote * (0.01 + hasard() * 0.007);
+    poussiere.push({ x, y, l, h, teinte, alpha });
+  }
+  return { eclats, poussiere, arete: cote * 0.007 };
+}
+
 const ASPECTS: Record<Papier, Aspect> = {
   papier: {
     teinte: '#f2ece1',
@@ -359,8 +413,8 @@ const ASPECTS: Record<Papier, Aspect> = {
     },
   },
 
-  // Ce sont les paillettes qui font « scintillant » : un rouge qui brille
-  // uniformément se lit comme du plastique.
+  // La feuille rouge de la reine : ce sont les éclats d'or qui font « précieux »,
+  // un rouge qui brille uniformément se lit comme du plastique.
   rouge: {
     teinte: '#b3262f',
     specular: 0x7a4a4a,
@@ -380,18 +434,34 @@ const ASPECTS: Record<Papier, Aspect> = {
         ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
         ctx.stroke();
       }
-      for (let i = 0; i < 320; i++) {
-        ctx.globalAlpha = 0.45 + Math.random() * 0.55;
-        ctx.fillStyle = Math.random() > 0.35 ? '#ffd2cc' : '#ffffff';
+      ctx.globalAlpha = 1;
+
+      const or = (i: number) => `#${ORS[i].toString(16).padStart(6, '0')}`;
+      const { eclats, poussiere, arete } = incrustationsDOr(
+        TAILLE,
+        () => [Math.random() * TAILLE, Math.random() * TAILLE],
+        Math.random,
+      );
+      for (const { sommets, teinte } of eclats) {
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = or(teinte);
         ctx.beginPath();
-        ctx.arc(
-          Math.random() * TAILLE,
-          Math.random() * TAILLE,
-          0.8 + Math.random() * 1.6,
-          0,
-          Math.PI * 2,
-        );
+        ctx.moveTo(sommets[0][0], sommets[0][1]);
+        for (const [x, y] of sommets.slice(1)) ctx.lineTo(x, y);
+        ctx.closePath();
         ctx.fill();
+        ctx.globalAlpha = 0.9;
+        ctx.strokeStyle = or(3);
+        ctx.lineWidth = arete;
+        ctx.beginPath();
+        ctx.moveTo(sommets[0][0], sommets[0][1]);
+        ctx.lineTo(sommets[1][0], sommets[1][1]);
+        ctx.stroke();
+      }
+      for (const { x, y, l, h, teinte, alpha } of poussiere) {
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = or(teinte);
+        ctx.fillRect(x, y, l, h);
       }
       ctx.globalAlpha = 1;
       grain(ctx, 10);

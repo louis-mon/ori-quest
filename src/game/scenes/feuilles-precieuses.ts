@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { teintesDe } from '../../origami/papier';
+import { incrustationsDOr, ORS, teintesDe } from '../../origami/papier';
 import {
   dessinerFeuille,
   geometrieFeuille,
@@ -15,9 +15,11 @@ import type { Box } from './layout';
 // leur éclat est ce qui les distingue au premier regard, et ce que le menu
 // nomme.
 //
-// Seule la rouge devient quelque chose — le cœur —, et sa teinte vient donc de
-// son modèle, comme pour toute feuille du jeu. Les trois autres n'ont pas de
-// modèle : leurs teintes sont écrites ici.
+// Seule la rouge devient quelque chose — le cœur —, et son papier vient donc de
+// son modèle, comme pour toute feuille du jeu : la teinte, et les éclats d'or
+// que la texture du cœur porte aussi. Plié, il garde ses lumières
+// (`eclatDuCoeur`). Les trois autres n'ont pas de modèle : leurs teintes sont
+// écrites ici.
 
 type Precieuse = 'rouge' | 'vert' | 'bleu' | 'mauve';
 
@@ -31,8 +33,6 @@ const TEINTES: Record<Precieuse, Teintes> = {
   mauve: { recto: 0x8d62ae, verso: 0xeadff2 },
 };
 
-// L'or des incrustations et des veines, du plus sombre au plus clair.
-const ORS = [0xb8862a, 0xd9ad45, 0xf0cf72, 0xfbe7a6] as const;
 // Les étoiles se posent en mélange normal, en teintes franches : ajoutées au
 // papier, de l'or sur du bleu donnait du blanc, et les couleurs du diamant se
 // délavaient sur le mauve.
@@ -68,6 +68,7 @@ const GRAINE = 5813;
 const ETINCELLE = 'eclat-etincelle';
 const DIAMANT = 'eclat-diamant';
 const HALO = 'eclat-halo';
+const LUMIERE_COEUR = 'eclat-lumiere-coeur';
 
 export interface FeuillesPrecieuses {
   // Les quatre, qu'on montre ou cache ensemble.
@@ -104,26 +105,10 @@ function poserFeuille(
   hasard: () => number,
 ): Phaser.GameObjects.Container {
   const geo = geometrieFeuille({ x: -cote / 2, y: -cote / 2, w: cote, h: cote });
+  const recto: Surface = { cote, point: (h) => pointSurLeRecto(geo, h) };
   const feuille = scene.add.container(0, 0);
 
-  // La lueur, sous la feuille : c'est elle qui fait lire « précieux » de loin,
-  // quand les détails du papier ne se voient plus.
-  const lueur = scene.add
-    .image(0, 0, HALO)
-    .setDisplaySize(cote * 2, cote * 1.7)
-    .setTint(LUEURS[precieuse])
-    .setBlendMode(Phaser.BlendModes.ADD)
-    .setAlpha(0.35);
-  scene.tweens.add({
-    targets: lueur,
-    alpha: 0.7,
-    duration: 1500 + hasard() * 900,
-    delay: hasard() * 1200,
-    yoyo: true,
-    repeat: -1,
-    ease: 'Sine.easeInOut',
-  });
-
+  const lueur = allumerLaLueur(scene, LUEURS[precieuse], cote * 2, cote * 1.7, hasard);
   const dessin = scene.add.graphics();
   feuille.add([lueur, dessin]);
   const imprimer = (motif: (g: Phaser.GameObjects.Graphics) => void) =>
@@ -135,14 +120,7 @@ function poserFeuille(
   switch (precieuse) {
     case 'rouge':
       imprimer((g) => incruster(g, geo, hasard));
-      scintiller(scene, feuille, geo, hasard, eclairage, {
-        nombre: 8,
-        texture: ETINCELLE,
-        teintes: ETINCELLES_OR,
-        taille: [0.2, 0.34],
-        duree: 560,
-        pause: [200, 1400],
-      });
+      scintiller(scene, feuille, recto, hasard, eclairage, ETOILES_ROUGE);
       break;
     case 'vert':
       imprimer((g) => brosser(g, geo, hasard));
@@ -153,7 +131,7 @@ function poserFeuille(
       imprimer((g) => dessinerVeines(g, veines));
       parcourirLesVeines(scene, feuille, geo, veines, hasard, eclairage);
       // Des points d'or qui s'allument sur le réseau, là où la lueur ne passe pas.
-      scintiller(scene, feuille, geo, hasard, eclairage, {
+      scintiller(scene, feuille, recto, hasard, eclairage, {
         nombre: 4,
         texture: ETINCELLE,
         teintes: ETINCELLES_OR,
@@ -173,7 +151,7 @@ function poserFeuille(
       // Des éclats petits et nombreux, qui se relaient sans répit : c'est leur
       // chevauchement qui fait le diamant. Peu nombreux et espacés, on voyait
       // les salves arriver par paquets ; gros et rapides, la feuille clignotait.
-      scintiller(scene, feuille, geo, hasard, eclairage, {
+      scintiller(scene, feuille, recto, hasard, eclairage, {
         nombre: 9,
         texture: DIAMANT,
         teintes: [],
@@ -183,7 +161,7 @@ function poserFeuille(
         points: taille.sommets,
         irise: true,
       });
-      scintiller(scene, feuille, geo, hasard, undefined, {
+      scintiller(scene, feuille, recto, hasard, undefined, {
         nombre: 8,
         texture: ETINCELLE,
         teintes: [],
@@ -196,6 +174,115 @@ function poserFeuille(
     }
   }
   return feuille;
+}
+
+// La lueur, sous la feuille : c'est elle qui fait lire « précieux » de loin,
+// quand les détails du papier ne se voient plus.
+function allumerLaLueur(
+  scene: Phaser.Scene,
+  teinte: number,
+  largeur: number,
+  hauteur: number,
+  hasard: () => number,
+): Phaser.GameObjects.Image {
+  const lueur = scene.add
+    .image(0, 0, HALO)
+    .setDisplaySize(largeur, hauteur)
+    .setTint(teinte)
+    .setBlendMode(Phaser.BlendModes.ADD)
+    .setAlpha(0.35);
+  scene.tweens.add({
+    targets: lueur,
+    alpha: 0.7,
+    duration: 1500 + hasard() * 900,
+    delay: hasard() * 1200,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.easeInOut',
+  });
+  return lueur;
+}
+
+// ------------------------------------------------------------------
+// Le cœur plié
+// ------------------------------------------------------------------
+
+export interface EclatDuCoeur {
+  setVisible(visible: boolean): void;
+}
+
+// Le cœur garde l'éclat de la feuille rouge qu'il était : la même lueur
+// dessous, les mêmes étoiles d'or, le même papier qui s'allume autour d'elles.
+// Ses éclats d'or, eux, sont dans la texture du modèle.
+//
+// `image` est le rendu du modèle, déjà posé sur `emprise` : tout se cale sur ses
+// pixels, la silhouette d'un cœur n'ayant rien d'un carré.
+export function eclatDuCoeur(
+  scene: Phaser.Scene,
+  image: Phaser.GameObjects.Image,
+  emprise: Box,
+): EclatDuCoeur {
+  peindreTextures(scene);
+  // `poserOrigami` l'a posé par `addCanvas`.
+  const rendu = image.texture as Phaser.Textures.CanvasTexture;
+  const silhouette = mesurerLaSilhouette(rendu, emprise.w / rendu.width);
+  const hasard = alea(GRAINE);
+
+  const lueur = allumerLaLueur(scene, LUEURS.rouge, emprise.w * 2, emprise.h * 1.7, hasard)
+    .setPosition(emprise.x + emprise.w / 2, emprise.y + emprise.h / 2)
+    .setBelow(image);
+  const eclats = scene.add.container(emprise.x, emprise.y).setAbove(image);
+  const { rayon, force } = LUMIERES.rouge;
+  const eclairage = eclairerLaSilhouette(scene, eclats, rendu.getCanvas(), emprise, {
+    rayon: rayon * silhouette.cote,
+    force,
+  });
+  scintiller(scene, eclats, silhouette, hasard, eclairage, ETOILES_ROUGE);
+
+  return {
+    setVisible(visible) {
+      lueur.setVisible(visible);
+      eclats.setVisible(visible);
+    },
+  };
+}
+
+// Le cœur vu de face, ramené à l'écran. Son `cote` est celui d'un carré de même
+// aire : les étoiles y gardent la taille et la densité qu'elles avaient sur la
+// feuille. Ses points restent à distance du bord, comme sur le recto.
+//
+// Les pixels sont ceux que Phaser a lus en créant la texture : les relire, c'est
+// une deuxième lecture du même canvas, et Chrome s'en plaint dans la console.
+function mesurerLaSilhouette(rendu: Phaser.Textures.CanvasTexture, echelle: number): Surface {
+  const { width: l, height: h, data } = rendu;
+  const opaque = (x: number, y: number) =>
+    x >= 0 && y >= 0 && x < l && y < h && data[(y * l + x) * 4 + 3] > 128;
+
+  let aire = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < l; x++) if (opaque(x, y)) aire++;
+
+  const marge = Math.round(Math.sqrt(aire) * 0.06);
+  // Un point par pixel d'écran : le rendu est plus fin que son affichage.
+  const pas = Math.max(1, Math.round(1 / echelle));
+  const points: Point[] = [];
+  for (let y = 0; y < h; y += pas) {
+    for (let x = 0; x < l; x += pas) {
+      if (
+        opaque(x, y) &&
+        opaque(x - marge, y) &&
+        opaque(x + marge, y) &&
+        opaque(x, y - marge) &&
+        opaque(x, y + marge)
+      ) {
+        points.push([x * echelle, y * echelle]);
+      }
+    }
+  }
+  const centre: Point = [(l * echelle) / 2, (h * echelle) / 2];
+  return {
+    cote: Math.sqrt(aire) * echelle,
+    point: (hasard) => (points.length ? points[Math.floor(hasard() * points.length)] : centre),
+  };
 }
 
 // ------------------------------------------------------------------
@@ -216,32 +303,22 @@ function bande(s: number, l: number, cote: number): Point[] {
   ];
 }
 
-// Des éclats d'or pris dans le papier : des fragments anguleux, chacun avec son
-// arête claire. Ronds, ils se lisaient comme des bulles, pas comme du métal.
+// Des éclats d'or pris dans le papier, ceux de la texture du cœur.
 function incruster(g: Phaser.GameObjects.Graphics, geo: GeometrieFeuille, hasard: () => number) {
-  const { w } = geo.carre;
-  for (let i = 0; i < 38; i++) {
-    const [x, y] = pointSurLeRecto(geo, hasard);
-    const r = w * (0.012 + hasard() * 0.026);
-    const sommets = 3 + Math.floor(hasard() * 3);
-    const depart = hasard() * Math.PI * 2;
-    const eclat: Point[] = [];
-    for (let k = 0; k < sommets; k++) {
-      const a = depart + (k / sommets) * Math.PI * 2 + (hasard() - 0.5) * 0.8;
-      const rk = r * (0.55 + hasard() * 0.6);
-      eclat.push([x + Math.cos(a) * rk, y + Math.sin(a) * rk]);
-    }
-    g.fillStyle(ORS[Math.floor(hasard() * 3)], 0.95);
-    remplir(g, eclat);
-    // L'arête qui accroche la lumière, du côté d'où elle vient.
-    g.lineStyle(0.6, ORS[3], 0.9);
-    g.lineBetween(eclat[0][0], eclat[0][1], eclat[1][0], eclat[1][1]);
+  const { eclats, poussiere, arete } = incrustationsDOr(
+    geo.carre.w,
+    () => pointSurLeRecto(geo, hasard),
+    hasard,
+  );
+  for (const { sommets, teinte } of eclats) {
+    g.fillStyle(ORS[teinte], 0.95);
+    remplir(g, sommets);
+    g.lineStyle(arete, ORS[3], 0.9);
+    g.lineBetween(sommets[0][0], sommets[0][1], sommets[1][0], sommets[1][1]);
   }
-  // La poussière d'or entre les éclats.
-  for (let i = 0; i < 45; i++) {
-    const [x, y] = pointSurLeRecto(geo, hasard);
-    g.fillStyle(ORS[1 + Math.floor(hasard() * 3)], 0.5 + hasard() * 0.5);
-    g.fillRect(x, y, 0.8 + hasard() * 0.6, 0.8 + hasard() * 0.6);
+  for (const { x, y, l, h, teinte, alpha } of poussiere) {
+    g.fillStyle(ORS[teinte], alpha);
+    g.fillRect(x, y, l, h);
   }
 }
 
@@ -406,13 +483,30 @@ interface Scintillement {
   duree: number;
   // Le noir entre deux éclats d'une même étoile, tiré entre les deux, en ms.
   pause: readonly [number, number];
-  // Là où ils peuvent paraître ; partout sur le recto sinon.
+  // Là où ils peuvent paraître ; partout sur la surface sinon.
   points?: readonly Point[];
   // Le feu d'un diamant : l'éclat parcourt l'arc-en-ciel pendant qu'il brille,
   // entouré de deux franges aux teintes voisines, un peu plus grandes et
   // décalées d'angle — la lumière décomposée par la taille. `teintes` est alors
   // ignoré.
   irise?: boolean;
+}
+
+// Les étoiles d'or de la feuille rouge, que le cœur garde une fois plié.
+const ETOILES_ROUGE: Scintillement = {
+  nombre: 8,
+  texture: ETINCELLE,
+  teintes: ETINCELLES_OR,
+  taille: [0.2, 0.34],
+  duree: 560,
+  pause: [200, 1400],
+};
+
+// Là où se posent les étoiles : le recto d'une feuille, ou le cœur plié.
+interface Surface {
+  // La mesure des étoiles et de leur lumière.
+  cote: number;
+  point(hasard: () => number): Point;
 }
 
 // Le tour qu'une étoile fait, en degrés, le temps de s'allumer et de s'éteindre :
@@ -424,17 +518,17 @@ const ROTATION = 90;
 function scintiller(
   scene: Phaser.Scene,
   feuille: Phaser.GameObjects.Container,
-  geo: GeometrieFeuille,
+  surface: Surface,
   hasard: () => number,
   eclairage: Eclairage | undefined,
   s: Scintillement,
 ) {
-  const cote = geo.carre.w;
+  const { cote } = surface;
   const placer = (etoile: Phaser.GameObjects.Image) => {
     const [px, py] =
       s.points && s.points.length
         ? s.points[Math.floor(hasard() * s.points.length)]
-        : pointSurLeRecto(geo, hasard);
+        : surface.point(hasard);
     etoile.setPosition(px, py);
     if (!s.irise) etoile.setTint(s.teintes[Math.floor(hasard() * s.teintes.length)]);
   };
@@ -513,6 +607,39 @@ interface Eclairage {
   poser(source: object, x: number, y: number, force: number, teinte: number): void;
 }
 
+interface Source {
+  x: number;
+  y: number;
+  force: number;
+  teinte: number;
+}
+
+// Un dessin par image au plus, quel que soit le nombre de sources qui bougent.
+// Un tween et non un écouteur d'`update` : il meurt avec la scène, là où
+// l'écouteur survivrait au changement de pièce.
+function eclairage(scene: Phaser.Scene, dessiner: (sources: Iterable<Source>) => void): Eclairage {
+  const sources = new Map<object, Source>();
+  let aDessiner = false;
+  scene.tweens.addCounter({
+    from: 0,
+    to: 1,
+    duration: 1000,
+    repeat: -1,
+    onUpdate: () => {
+      if (!aDessiner) return;
+      aDessiner = false;
+      dessiner(sources.values());
+    },
+  });
+
+  return {
+    poser(source, x, y, force, teinte) {
+      sources.set(source, { x, y, force, teinte });
+      aDessiner = true;
+    },
+  };
+}
+
 function eclairer(
   scene: Phaser.Scene,
   groupe: Phaser.GameObjects.Container,
@@ -522,18 +649,16 @@ function eclairer(
 ): Eclairage {
   const lumiere = scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
   feuille.add(lumiere);
-  const sources = new Map<object, { x: number; y: number; force: number; teinte: number }>();
   const rayon = geo.carre.w * reglage.rayon;
   // Des disques emboîtés, du plus large au plus serré : un dégradé radial que
   // Phaser ne sait pas remplir d'un coup. À cinq, les anneaux se voyaient.
   const ANNEAUX = 12;
   const COTES = 20;
-  let aDessiner = false;
 
-  const dessiner = () => {
+  return eclairage(scene, (sources) => {
     lumiere.clear();
     if (!groupe.visible) return;
-    for (const { x, y, force, teinte } of sources.values()) {
+    for (const { x, y, force, teinte } of sources) {
       if (force < 0.02) continue;
       for (let k = ANNEAUX; k >= 1; k--) {
         const r = (rayon * k) / ANNEAUX;
@@ -546,28 +671,51 @@ function eclairer(
         remplir(lumiere, decouper(disque, geo.feuille));
       }
     }
-  };
-  // Un dessin par image au plus, quel que soit le nombre de sources qui bougent.
-  // Un tween et non un écouteur d'`update` : il meurt avec la scène, là où
-  // l'écouteur survivrait au changement de pièce.
-  scene.tweens.addCounter({
-    from: 0,
-    to: 1,
-    duration: 1000,
-    repeat: -1,
-    onUpdate: () => {
-      if (!aDessiner) return;
-      aDessiner = false;
-      dessiner();
-    },
   });
+}
 
-  return {
-    poser(source, x, y, force, teinte) {
-      sources.set(source, { x, y, force, teinte });
-      aDessiner = true;
-    },
-  };
+// La même lumière sur le cœur plié, dont le contour n'est pas un polygone
+// convexe que `decouper` saurait suivre : elle est peinte dans un canvas, puis
+// gommée hors du modèle par son propre rendu. `rayon` est ici en pixels.
+function eclairerLaSilhouette(
+  scene: Phaser.Scene,
+  eclats: Phaser.GameObjects.Container,
+  rendu: HTMLCanvasElement,
+  emprise: Box,
+  reglage: { rayon: number; force: number },
+): Eclairage {
+  // La texture survit au changement de pièce, l'image qui la montrait non.
+  if (scene.textures.exists(LUMIERE_COEUR)) scene.textures.remove(LUMIERE_COEUR);
+  const texture = scene.textures.createCanvas(
+    LUMIERE_COEUR,
+    Math.ceil(emprise.w),
+    Math.ceil(emprise.h),
+  );
+  const ctx = texture?.getContext();
+  if (!texture || !ctx) return { poser() {} };
+  eclats.add(scene.add.image(0, 0, LUMIERE_COEUR).setOrigin(0).setBlendMode(Phaser.BlendModes.ADD));
+  const { rayon } = reglage;
+
+  return eclairage(scene, (sources) => {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, texture.width, texture.height);
+    if (eclats.visible) {
+      // Les sources s'additionnent, comme les disques de `eclairer`.
+      ctx.globalCompositeOperation = 'lighter';
+      for (const { x, y, force, teinte } of sources) {
+        if (force < 0.02) continue;
+        const { r, g, b } = Phaser.Display.Color.IntegerToRGB(teinte);
+        const flaque = ctx.createRadialGradient(x, y, 0, x, y, rayon);
+        flaque.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${reglage.force * force})`);
+        flaque.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        ctx.fillStyle = flaque;
+        ctx.fillRect(x - rayon, y - rayon, rayon * 2, rayon * 2);
+      }
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.drawImage(rendu, 0, 0, emprise.w, emprise.h);
+    }
+    texture.refresh();
+  });
 }
 
 // L'éclat argenté : un reflet qui balaie la feuille en diagonale, puis se fait
@@ -818,9 +966,27 @@ function peindreTextures(scene: Phaser.Scene) {
   // large, ajouté au papier, se lisait comme une boule blanche.
   // Les branches restent épaisses dans la texture : affichée à une vingtaine de
   // pixels, une branche fine y disparaît, et il ne reste que le cœur.
-  peindreEtoile(scene, ETINCELLE, [[1, 0], [0.5, Math.PI / 4]], 2.8, 0.08);
+  peindreEtoile(
+    scene,
+    ETINCELLE,
+    [
+      [1, 0],
+      [0.5, Math.PI / 4],
+    ],
+    2.8,
+    0.08,
+  );
   // Le diamant : quatre longues branches, quatre courtes en diagonale.
-  peindreEtoile(scene, DIAMANT, [[1, 0], [0.62, Math.PI / 4]], 3, 0.1);
+  peindreEtoile(
+    scene,
+    DIAMANT,
+    [
+      [1, 0],
+      [0.62, Math.PI / 4],
+    ],
+    3,
+    0.1,
+  );
 }
 
 // Chaque paire de branches est un losange effilé, `longueur` en fraction du
