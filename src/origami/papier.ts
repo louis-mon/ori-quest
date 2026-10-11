@@ -41,7 +41,7 @@ export const PAPIERS: Record<string, PapierModele> = {
   porte: { recto: 'noir', verso: 'boisFonce' },
   // Chapitre 2. Les teintes viennent des fiches de scène, où elles décrivent le
   // papier posé dans le décor : c'est la même matière avant et après le pliage.
-  montagne: { recto: 'pierre', verso: 'papier' },
+  montagne: { recto: 'papier', verso: 'pierre' },
   herbe: { recto: 'herbe', verso: 'feuille' },
   pot: { recto: 'papier', verso: 'pierre' },
   chien: { recto: 'tachete', verso: 'papier' },
