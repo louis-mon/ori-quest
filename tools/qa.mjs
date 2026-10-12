@@ -226,6 +226,44 @@ test(
   { attendu: /\[origami\] contexte WebGL perdu/ },
 );
 
+// La flèche ne s'affiche que si un tap est attendu. Restée à l'écran pendant le
+// pliage, elle invitait à taper une boîte qui n'écoutait plus ; et la pose,
+// tenue au minuteur, faisait attendre qui avait déjà vu.
+test('fleche', async (page, dire) => ({
+  sauvegarde: BOIS_EN_POCHE,
+  jouer: async () => {
+    await taperZone(page(), 'porte', 'porte');
+    await deroulerDialogue(page());
+    await tutoriel(page(), false);
+    await resoudreEnigme(page(), 'porte');
+    dire('le pliage démarre', await attendreLePliage(page()));
+    await attendreLaBoite(page());
+
+    // Achever l'écriture, puis payer la lecture : le pliage tourne encore.
+    const replique = (await etat(page())).texte;
+    for (let i = 0; i < 4 && (await etat(page())).fleche; i++) {
+      await page().mouse.click(640, 660);
+      await pause(400);
+    }
+    let e = await etat(page());
+    dire('la flèche part une fois la réplique lue', !e.fleche && e.texte === replique);
+    dire('le pliage est encore à l’écran', e.origami);
+
+    for (let i = 0; i < 100 && !(await etat(page())).fleche; i++) await pause(100);
+    e = await etat(page());
+    dire('la flèche revient une fois le modèle plié', e.fleche && e.texte === replique);
+
+    await pause(3500);
+    dire('la pose tient jusqu’au tap', (await etat(page())).origami);
+
+    await page().mouse.click(640, 660);
+    for (let i = 0; i < 20 && (await etat(page())).texte === replique; i++) await pause(100);
+    e = await etat(page());
+    dire('un tap passe à la suite et range le modèle', e.texte !== replique && !e.origami);
+    await deroulerDialogue(page());
+  },
+}));
+
 // Sur itch.io le plein écran est un bouton du SITE : il tombe pendant qu'une
 // énigme est ouverte, et `eparpiller()` doit se rejouer.
 test('redimensionnement', async (page, dire) => ({

@@ -141,6 +141,9 @@ export const etat = (page) =>
       // DOM, seulement invisible.
       texte: document.querySelector('.dialogue__text')?.textContent ?? '',
       defile: !!document.querySelector('.dialogue--defile'),
+      fleche:
+        !document.querySelector('.dialogue')?.hidden &&
+        !document.querySelector('.dialogue__next')?.hidden,
       qui: document.querySelector('.dialogue__nom')?.textContent ?? '',
       choix: [...document.querySelectorAll('.dialogue__choices button')].map((b) => b.textContent),
       enigme: !!document.querySelector('.puzzle'),

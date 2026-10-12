@@ -151,18 +151,23 @@ export class Overlay {
     this.showSpeaker(qui);
     this.defiler(typographier(text));
     this.dialogueChoices.innerHTML = '';
-    this.dialogueNext.hidden = false;
     return this.attendreUnTap();
   }
 
-  // Attend un tap sans rien changer à l'écran, pour ce qui se joue pendant
-  // qu'une réplique est affichée. Sans ça, la ligne suivante remplace celle
-  // qu'on lit à la seconde où l'animation se termine : un tap, deux avancées.
+  // Attend un tap sans changer la réplique, pour ce qui se joue pendant qu'elle
+  // est affichée. Sans ça, la ligne suivante remplace celle qu'on lit à la
+  // seconde où l'animation se termine : un tap, deux avancées.
+  //
+  // La flèche n'est là que le temps de cette attente : elle disparaît au tap qui
+  // la dénoue, et revient avec l'attente suivante. Restée affichée pendant un
+  // pliage, elle invitait à taper une boîte qui n'écoutait plus — le joueur
+  // tapait cinq secondes dans le vide.
   //
   // Boîte fermée, il n'y a rien à taper : attendre bloquerait la partie faute de
   // cible où poser le doigt.
   attendreUnTap(): Promise<void> {
     if (this.dialogue.hidden) return Promise.resolve();
+    this.dialogueNext.hidden = false;
     // Rouvert quand un tap achève le défilement : ce tap-là compte pour un
     // contact neuf, le rebond qui le suit ne doit pas emporter la réplique.
     let ouvert = performance.now();
@@ -173,6 +178,7 @@ export class Overlay {
       const finir = () => {
         if (fait) return;
         fait = true;
+        this.dialogueNext.hidden = true;
         this.dialogue.removeEventListener('pointerup', advance);
         rendreLesTaps();
         if (this.terminerLigne === finir) this.terminerLigne = null;

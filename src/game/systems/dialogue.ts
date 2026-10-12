@@ -11,7 +11,10 @@ import { gameState, type SaveData } from './state';
 // Ajouter un effet = ajouter une entrée dans `handlers`, pas réécrire le runner.
 
 export interface DialogueEffects {
+  // Se dénoue une fois le modèle plié, qui reste alors à l'écran jusqu'à
+  // `rangerLePliage()` — appelé quand le joueur quitte la réplique.
   origami(name: string): Promise<void>;
+  rangerLePliage(): void;
   goto(room: string): void;
   // Donne un objet ET le montre arriver. Passe par les effets plutôt que par
   // `gameState.give()` parce que c'est le seul chemin où l'on sait que l'objet
@@ -160,6 +163,8 @@ export class DialogueRunner {
       this.running = false;
       this.overlay.marquerLeRecit(false);
       this.overlay.hideDialogue();
+      // Une narration en panne n'a pas atteint la fin de sa réplique.
+      this.fx.rangerLePliage();
       if (this.panne) this.remettreDebout();
       // En dernier, et dans le `finally` : une narration en panne a quand même
       // pu poser la moitié de ses tags, et cette moitié-là est acquise — c'est
@@ -201,6 +206,7 @@ export class DialogueRunner {
         const depense = !effetFini;
         await pending;
         if (depense) await this.overlay.attendreUnTap();
+        this.fx.rangerLePliage();
       }
 
       if (this.panne) return;

@@ -314,10 +314,17 @@ précédente que sur un **tap du joueur**, jamais parce qu'une animation vient d
 se terminer. Le piège se pose dès qu'un effet se joue entre deux répliques — le
 tap qui lance l'effet est dépensé, et sans rien de plus la ligne suivante prend
 la place à la seconde où l'effet finit. D'où `Overlay.attendreUnTap()`, qui
-attend **sans rien changer à l'écran**, la réplique en place servant de légende.
+attend **sans changer la réplique**, celle en place servant de légende.
 `jouer()` (`puzzle/tutoriel.ts`) l'appelle après tout effet ; `pump()`
 (`systems/dialogue.ts`) seulement quand le tap a été dépensé avant la fin d'un
 `# origami:` — une réplique se lit plus longtemps qu'un pliage ne dure.
+
+**La flèche ▶ ne s'affiche que si un tap est attendu** : elle part au tap qui
+dénoue une attente et revient avec la suivante, dans `attendreUnTap()` même.
+Restée à l'écran pendant un pliage, elle invitait à taper une boîte qui
+n'écoutait plus. Et le modèle plié **reste à l'écran jusqu'à ce qu'on quitte sa
+réplique** (`rangerLePliage()`, dans `main.ts`), pas pendant une durée fixe :
+qui a vu avance aussitôt, qui regarde garde la pose.
 
 **Et il n'avance qu'une fois par tap.** Deux contacts rapprochés dépensaient deux
 répliques, et rien dans le jeu ne revient en arrière. Une attente fraîchement

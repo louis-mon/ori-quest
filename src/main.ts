@@ -65,10 +65,6 @@ function syncStage() {
 // déclenché un, three.js ne coûte ni téléchargement ni contexte WebGL.
 let origamiLayer: OrigamiLayer | null = null;
 
-// Temps où le modèle reste à l'écran une fois plié. Trop court, on ne voit que
-// la fin du mouvement et l'écran est déjà rendu à la scène.
-const POSE_MS = 2600;
-
 // La couche 3D est unique : présenter un objet d'inventaire pendant qu'un pliage
 // est à l'écran remplacerait le modèle en cours de route. Le cas est rare, mais
 // un pliage se joue justement entre deux répliques.
@@ -105,15 +101,21 @@ async function playFold(name: string) {
     // l'inventaire montreront ensuite, et la pose finale du solveur est souvent
     // tout à fait plate.
     await layer.playTo(pliageDe(name), 2600);
-    await new Promise((r) => setTimeout(r, POSE_MS));
-    layer.hide();
   } catch (err) {
     // Une animation manquante ne doit jamais bloquer la progression.
     console.error(`[origami] lecture de "${name}" impossible`, err);
-    origamiLayer?.hide();
-  } finally {
-    pliageEnCours = false;
+    rangerLePliage();
   }
+}
+
+// Le modèle plié reste à l'écran jusqu'à ce que le joueur quitte la réplique
+// qui l'a plié, pas pendant une durée fixe : la pose tenue au minuteur
+// interdisait d'avancer à qui avait déjà vu, et repartait sous les yeux de qui
+// regardait encore.
+function rangerLePliage() {
+  if (!pliageEnCours) return;
+  pliageEnCours = false;
+  origamiLayer?.hide();
 }
 
 // Un aperçu se demande, puis s'abandonne — la description refermée, un pliage
@@ -207,6 +209,7 @@ function donner(item: string) {
 
 const dialogue = new DialogueRunner(storyJson, overlay, {
   origami: playFold,
+  rangerLePliage,
   puzzle: playPuzzle,
   goto,
   donner,
