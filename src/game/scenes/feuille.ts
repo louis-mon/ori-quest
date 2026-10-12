@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { teintesDe } from '../../origami/papier';
+import { teintesDe, type Degrade } from '../../origami/papier';
 import type { Box } from './layout';
 
 // Carrée, comme toute feuille d'origami. Elle occupe le bas de son emprise : la
@@ -8,6 +8,7 @@ import type { Box } from './layout';
 //
 // Sa teinte vient du recto du modèle qu'elle deviendra (`teintesDe`), donc de la
 // même source que la texture 3D : le pliage ne change pas de matériau en route.
+// Dégradé compris, quand le papier en a un.
 //
 // En primitives et pas en 3D : charger three.js pour un carré de papier
 // condamnerait le premier écran du jeu, où rien n'est encore plié.
@@ -20,7 +21,7 @@ export function dessinerFeuille(
   papier: string | Teintes,
   motif?: (g: Phaser.GameObjects.Graphics, geometrie: GeometrieFeuille) => void,
 ): Box {
-  const { recto, verso } = typeof papier === 'string' ? teintesDe(papier) : papier;
+  const { recto, verso, degrades } = typeof papier === 'string' ? teintesDe(papier) : papier;
   const geometrie = geometrieFeuille(box);
   const { x, y, w: cote } = geometrie.carre;
   const [[ax, ay], [bx, by], [cx, cy]] = geometrie.rabat;
@@ -36,9 +37,7 @@ export function dessinerFeuille(
   g.clear();
 
   const { feuille } = geometrie;
-  g.fillStyle(recto, 1);
-  polygone(feuille);
-  g.fillPath();
+  peindre(g, feuille, recto, degrades?.recto, geometrie.carre);
 
   // Sans ce coup de lumière, un aplat sur un carré se lit comme un bloc, surtout
   // en papier métallisé. Phaser ne remplit pas en dégradé : deux polygones à
@@ -67,9 +66,7 @@ export function dessinerFeuille(
   motif?.(g, geometrie);
 
   // Le rabat : le dos du papier, puisqu'on le voit à l'envers.
-  g.fillStyle(verso, 1);
-  polygone(geometrie.rabat);
-  g.fillPath();
+  peindre(g, geometrie.rabat, verso, degrades?.verso, geometrie.carre);
   // Son ombre du côté de la pliure : c'est ce qui donne son épaisseur au papier.
   g.fillStyle(0x000000, 0.18);
   polygone([
@@ -95,6 +92,107 @@ export function dessinerFeuille(
 export interface Teintes {
   recto: number;
   verso: number;
+  degrades?: { recto?: Degrade; verso?: Degrade };
+}
+
+// Phaser ne remplit pas en dégradé : des bandes perpendiculaires à sa direction,
+// assez fines pour ne pas se compter à l'œil, chacune de la couleur que le
+// dégradé de la texture a en son milieu.
+function peindre(
+  g: Phaser.GameObjects.Graphics,
+  contour: readonly Point[],
+  teinte: number,
+  degrade: Degrade | undefined,
+  carre: Box,
+) {
+  if (!degrade) {
+    g.fillStyle(teinte, 1);
+    remplir(g, contour);
+    return;
+  }
+  const dx = degrade.vers[0] * carre.w;
+  const dy = degrade.vers[1] * carre.h;
+  const longueur = Math.hypot(dx, dy);
+  const [ux, uy] = [dx / longueur, dy / longueur];
+  // Sur la feuille, `t` va de 0 à 1 comme les arrêts de la texture.
+  const t = ([px, py]: Point) => ((px - carre.x) * ux + (py - carre.y) * uy) / longueur;
+  const ts = contour.map(t);
+  const debut = Math.min(...ts);
+  const fin = Math.max(...ts);
+  const bandes = Math.max(1, Math.ceil(((fin - debut) * longueur) / 2));
+  const pas = (fin - debut) / bandes;
+  // Chaque bande déborde d'un demi-pixel sur la suivante : bord à bord, le
+  // rendu laisse passer des fils de fond entre elles.
+  const recouvrement = 0.5 / longueur;
+  const travers = carre.w + carre.h;
+  for (let i = 0; i < bandes; i++) {
+    const t0 = debut + i * pas;
+    const t1 = t0 + pas + recouvrement;
+    const point = (tk: number, s: number): Point => [
+      carre.x + ux * tk * longueur - uy * s,
+      carre.y + uy * tk * longueur + ux * s,
+    ];
+    const bande = [
+      point(t0, -travers),
+      point(t1, -travers),
+      point(t1, travers),
+      point(t0, travers),
+    ];
+    g.fillStyle(couleurA(degrade, t0 + pas / 2), 1);
+    remplir(g, decouper(bande, contour));
+  }
+}
+
+function couleurA({ arrets }: Degrade, t: number): number {
+  const rgb = (couleur: string) => {
+    const n = Number.parseInt(couleur.slice(1), 16);
+    return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+  };
+  const [premier] = arrets;
+  const dernier = arrets[arrets.length - 1];
+  if (t <= premier[0]) return Number.parseInt(premier[1].slice(1), 16);
+  if (t >= dernier[0]) return Number.parseInt(dernier[1].slice(1), 16);
+  const i = arrets.findIndex(([position]) => position > t);
+  const [p0, c0] = arrets[i - 1];
+  const [p1, c1] = arrets[i];
+  const k = (t - p0) / (p1 - p0);
+  const a = rgb(c0);
+  const b = rgb(c1);
+  const [r, v, bl] = a.map((x, j) => Math.round(x + (b[j] - x) * k));
+  return (r << 16) | (v << 8) | bl;
+}
+
+function remplir(g: Phaser.GameObjects.Graphics, points: readonly Point[]) {
+  if (points.length < 3) return;
+  g.beginPath();
+  g.moveTo(points[0][0], points[0][1]);
+  for (const [px, py] of points.slice(1)) g.lineTo(px, py);
+  g.closePath();
+  g.fillPath();
+}
+
+// Sutherland–Hodgman : un polygone découpé par un contour convexe, en sens
+// horaire à l'écran comme ceux de `geometrieFeuille`.
+export function decouper(sujet: readonly Point[], contour: readonly Point[]): Point[] {
+  let sortie: Point[] = [...sujet];
+  for (let i = 0; i < contour.length && sortie.length; i++) {
+    const a = contour[i];
+    const b = contour[(i + 1) % contour.length];
+    const cote = (p: Point) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    const entree = sortie;
+    sortie = [];
+    entree.forEach((p, j) => {
+      const q = entree[(j + 1) % entree.length];
+      const cp = cote(p);
+      const cq = cote(q);
+      if (cp >= 0) sortie.push(p);
+      if (cp >= 0 !== cq >= 0) {
+        const t = cp / (cp - cq);
+        sortie.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]);
+      }
+    });
+  }
+  return sortie;
 }
 
 export type Point = readonly [number, number];

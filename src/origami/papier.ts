@@ -75,7 +75,58 @@ interface Aspect {
   shininess: number;
   // Les étoiles qui s'y allument, pendant le pliage comme une fois posé.
   eclat?: Eclat;
+  // Le fond, quand il n'est pas uni. La feuille du décor le peint aussi : la
+  // seule `teinte` d'un papier chatoyant donnait un gris-bleu que le modèle plié
+  // ne montre nulle part.
+  degrade?: Degrade;
 }
+
+// Celui d'un `createLinearGradient` de (0, 0) à `vers`, en unités du côté de la
+// feuille, l'origine en haut à gauche.
+export interface Degrade {
+  vers: readonly [number, number];
+  arrets: readonly (readonly [number, string])[];
+}
+
+function peindreDegrade(ctx: CanvasRenderingContext2D, { vers, arrets }: Degrade) {
+  const base = ctx.createLinearGradient(0, 0, TAILLE * vers[0], TAILLE * vers[1]);
+  for (const [position, couleur] of arrets) base.addColorStop(position, couleur);
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, TAILLE, TAILLE);
+}
+
+const DEGRADE_METAL: Degrade = {
+  vers: [0.35, 1],
+  arrets: [
+    [0, '#e9eef3'],
+    [0.32, '#a8b0b8'],
+    [0.52, '#ced5db'],
+    [0.74, '#8d959d'],
+    [1, '#dde3e9'],
+  ],
+};
+
+const DEGRADE_CHATOYANT: Degrade = {
+  vers: [1, 1],
+  arrets: [
+    [0, '#dde3e7'],
+    [0.3, '#a8b9c9'],
+    [0.55, '#d9c6ca'],
+    [0.8, '#cbc099'],
+    [1, '#b9c4ca'],
+  ],
+};
+
+const DEGRADE_OR: Degrade = {
+  vers: [0.35, 1],
+  arrets: [
+    [0, '#f2da8c'],
+    [0.3, '#b88a2c'],
+    [0.55, '#e4c268'],
+    [0.78, '#a47822'],
+    [1, '#ddb95c'],
+  ],
+};
 
 // Appliqué en dernier : c'est lui qui empêche l'aplat plastique.
 function grain(ctx: CanvasRenderingContext2D, intensite: number, pas = 1) {
@@ -360,18 +411,11 @@ const ASPECTS: Record<Papier, Aspect> = {
     // Le seul papier qui brille vraiment : c'est le reflet qui dit « lame ».
     specular: 0xffffff,
     shininess: 140,
+    // Ce qui fait lire « métal » est le contraste de valeurs le long d'une
+    // direction, pas le gris. L'aplat brossé d'avant tirait vers le carton peint.
+    degrade: DEGRADE_METAL,
     peindre: (ctx) => {
-      // Ce qui fait lire « métal » est le contraste de valeurs le long d'une
-      // direction, pas le gris. L'aplat brossé d'avant tirait vers le carton
-      // peint.
-      const base = ctx.createLinearGradient(0, 0, TAILLE * 0.35, TAILLE);
-      base.addColorStop(0, '#e9eef3');
-      base.addColorStop(0.32, '#a8b0b8');
-      base.addColorStop(0.52, '#ced5db');
-      base.addColorStop(0.74, '#8d959d');
-      base.addColorStop(1, '#dde3e9');
-      ctx.fillStyle = base;
-      ctx.fillRect(0, 0, TAILLE, TAILLE);
+      peindreDegrade(ctx, DEGRADE_METAL);
 
       // Peu nombreux, sinon ils font rayure plutôt que poli.
       for (const [pos, largeur, force] of [
@@ -479,15 +523,9 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#bcc6cc',
     specular: 0xffffff,
     shininess: 90,
+    degrade: DEGRADE_CHATOYANT,
     peindre: (ctx) => {
-      const base = ctx.createLinearGradient(0, 0, TAILLE, TAILLE);
-      base.addColorStop(0, '#dde3e7');
-      base.addColorStop(0.3, '#a8b9c9');
-      base.addColorStop(0.55, '#d9c6ca');
-      base.addColorStop(0.8, '#cbc099');
-      base.addColorStop(1, '#b9c4ca');
-      ctx.fillStyle = base;
-      ctx.fillRect(0, 0, TAILLE, TAILLE);
+      peindreDegrade(ctx, DEGRADE_CHATOYANT);
 
       // Des écailles à peine marquées : plus appuyées, le papier devient un
       // poisson imprimé avant même d'être plié.
@@ -515,15 +553,9 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#c9a13b',
     specular: 0xffe7a0,
     shininess: 110,
+    degrade: DEGRADE_OR,
     peindre: (ctx) => {
-      const base = ctx.createLinearGradient(0, 0, TAILLE * 0.35, TAILLE);
-      base.addColorStop(0, '#f2da8c');
-      base.addColorStop(0.3, '#b88a2c');
-      base.addColorStop(0.55, '#e4c268');
-      base.addColorStop(0.78, '#a47822');
-      base.addColorStop(1, '#ddb95c');
-      ctx.fillStyle = base;
-      ctx.fillRect(0, 0, TAILLE, TAILLE);
+      peindreDegrade(ctx, DEGRADE_OR);
       grain(ctx, 6);
     },
   },
@@ -534,6 +566,7 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#c9a13b',
     specular: 0xffe7a0,
     shininess: 110,
+    degrade: DEGRADE_OR,
     peindre: (ctx) => {
       ASPECTS.or.peindre(ctx);
       const pierres = ['#b81f35', '#2352b0', '#1d8a57', '#7a3cae'];
@@ -681,10 +714,18 @@ export function creerMeshOrigami(
 
 // En entiers Phaser : le décor 2D est de la même matière que le modèle qu'il
 // deviendra, sans charger three.js.
-export function teintesDe(nom: string): { recto: number; verso: number } {
+export function teintesDe(nom: string): {
+  recto: number;
+  verso: number;
+  degrades: { recto?: Degrade; verso?: Degrade };
+} {
   const papier = PAPIERS[nom] ?? DEFAUT;
   const teinte = (p: Papier) => Number.parseInt(ASPECTS[p].teinte.slice(1), 16);
-  return { recto: teinte(papier.recto), verso: teinte(papier.verso) };
+  return {
+    recto: teinte(papier.recto),
+    verso: teinte(papier.verso),
+    degrades: { recto: ASPECTS[papier.recto].degrade, verso: ASPECTS[papier.verso].degrade },
+  };
 }
 
 // Celui du papier qui fait face au joueur, le seul que voient les étoiles.

@@ -13,6 +13,7 @@ import {
 } from '../../origami/etoiles';
 import { incrustationsDOr, ORS, teintesDe } from '../../origami/papier';
 import {
+  decouper,
   dessinerFeuille,
   geometrieFeuille,
   type GeometrieFeuille,
@@ -144,9 +145,7 @@ function poserFeuille(
         taille: [0.16, 0.26],
         duree: 480,
         pause: [400, 1800],
-        points: veines
-          .flatMap((v) => v.points)
-          .filter((p) => dansLeRecto(geo, p)),
+        points: veines.flatMap((v) => v.points).filter((p) => dansLeRecto(geo, p)),
       });
       break;
     }
@@ -450,9 +449,7 @@ function tailler(geo: GeometrieFeuille, hasard: () => number) {
     }
   }
   // Seules les facettes visibles s'allument : le rabat recouvre les autres.
-  const visibles = facettes
-    .filter((f) => dansLeRecto(geo, centre(f.points)))
-    .map((f) => f.points);
+  const visibles = facettes.filter((f) => dansLeRecto(geo, centre(f.points))).map((f) => f.points);
 
   return {
     facettes: visibles,
@@ -887,29 +884,6 @@ function morceaux(points: readonly Point[], garder: (p: Point) => boolean): Poin
   }
   if (courant.length > 1) resultat.push(courant);
   return resultat;
-}
-
-// Sutherland–Hodgman : un polygone découpé par un contour convexe.
-function decouper(sujet: readonly Point[], contour: readonly Point[]): Point[] {
-  let sortie: Point[] = [...sujet];
-  for (let i = 0; i < contour.length && sortie.length; i++) {
-    const a = contour[i];
-    const b = contour[(i + 1) % contour.length];
-    const cote = (p: Point) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
-    const entree = sortie;
-    sortie = [];
-    entree.forEach((p, j) => {
-      const q = entree[(j + 1) % entree.length];
-      const cp = cote(p);
-      const cq = cote(q);
-      if (cp >= 0) sortie.push(p);
-      if (cp >= 0 !== cq >= 0) {
-        const t = cp / (cp - cq);
-        sortie.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]);
-      }
-    });
-  }
-  return sortie;
 }
 
 function contour(g: Phaser.GameObjects.Graphics, points: readonly Point[]) {
