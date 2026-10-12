@@ -1184,8 +1184,8 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
 -> DONE
 
 === trone_feuilles ===
-+ [rouge avec paillettes scintillantes] -> trone_feuille("rouge")
 + [vert éclat argenté] -> trone_feuille("vert")
++ [rouge avec paillettes scintillantes] -> trone_feuille("rouge")
 + [bleu veiné d'or] -> trone_feuille("bleu")
 + [mauve effet diamant] -> trone_feuille("mauve")
 
@@ -1233,11 +1233,9 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
 
 // Le cœur plié, les chats encore affamés : chats repus, la scène finale se joue
 // d'elle-même et le décor ne répond plus.
-// [A ECRIRE]
 === trone_coeur_plie ===
-# qui: heros
-Un cœur rouge et scintillant, au milieu de la salle du trône.
-Les chats ne le regarderont qu'une fois le ventre plein.
+# qui: narrateur
+Le coeur rouge incrusté d'or étincellant est pour l'instant ignoré par les deux chats.
 -> DONE
 
 
@@ -1249,10 +1247,9 @@ Les chats ne le regarderont qu'une fois le ventre plein.
 //
 // Lancée quand le cœur est plié et les chats repus, dans un ordre ou dans
 // l'autre.
-// [A ECRIRE]
 === trone_retrouvailles ===
 # qui: narrateur
-Le ventre plein, les deux chats remarquent enfin le cœur rouge au milieu de la salle.
+Le coeur rouge incrusté d'or étincellant capte enfin l'attention des deux chats.
 -> DONE
 
 // Le dernier temps de la scène finale : voir `trone_retrouvailles`.
@@ -1262,22 +1259,81 @@ Le ventre plein, les deux chats remarquent enfin le cœur rouge au milieu de la 
 // [A ECRIRE]
 === trone_reconciliation ===
 # qui: narrateur
-Côte à côte devant le cœur, les deux chats restent un long moment silencieux.
+Les chats fixent le coeur en silence un petit moment. Ils n'osent pas trop se regarder directement encore.
+De temps à autre, l'un rique un coup d'oeuil furtif vers l'autre.
+Je vais leur laisser prendre le temps qu'il faudra.
 # qui: chat
-Miaou... Il est temps que je l'avoue, / J'ai fait une grosse bêtise, entre nous.
-La couronne de Sa Majesté, c'est moi qui l'ai cachée, / Plus d'une fois, pour que tu sois accusé.
-Je voulais que la reine n'aime que moi. / Pardon, Chat Mal Luné, pardon à toi.
+Miaou... Le Maître origamiste nous a réuni. / Mais en bonnes paroles me voici démuni.
+# qui: lune_chat
+Votre Majesté. Expliquez moi donc la raison de votre rejet.
+Profitons de cette atmosphère apaisée pour nous expliquer.
 # qui: hibou
-Hou hou ! Petit Chat ! C'était donc toi !
+Hou hou! Tu as déplié mes origami préférés! Et tu oses encores roder dans ce château.
+# qui: lune_chat
+J'ai agi ainsi dans un moment de colère. Vous n'avez pas répondu à ma question, votre Majesté.
+Je continuerai à déplier tout ce royaume s'il le faut, tant que je n'aurais pas d'explications.
+# qui: hibou
+Hou hou ! Des menaces! Comment osez vous! Gardes, sortez ce malotru!
+# qui: lune_chat
+Ha ha! Je les ai déplié les gardes, et le Gros Diplo a peur d'un petit chien.
+Un coeur scintillant ne vas pas suffire à laver vos affronts.
+# qui: narrateur
+Une lueur maléfique dans le regard, Le Chat Mal Luné s'apprête à partir.
+# qui: chat
+Non! Attends, je t'en conjure, mon frère adoré! / C'est ma faute si cette situation s'est déteriorée.
+# qui: lune_chat
+Maw! J'ai assez attendu, Petit Chat. Tes mots doux et belles paroles ne valent plus grand chose.
+# qui: heros
+Je ne savais pas que vous étiez frères! Chat Mal Luné, écoutons ce qu'à à dire le Petit Chat.
+Cette fois, j'ai l'impression qu'il a quelque chose d'important à exprimer.
+# qui: lune_chat
+Très bien. Viens-en au fait alors, et évite nous tes tournures alambiquées.
+# qui: chat
+Je ne vais pas le cacher plus longtemps. / De vous dire la vérité, il est grand temps.
+Chat Mal Luné, je dois l'avouer, j'au fauté. / Une grand injustice je dois maintenant ôter.
+# qui: lune_chat
+Mawww! Cesse ton bavardage et crache le morceau, tu me fais tourner en bourrique.
+# qui: hibou
+Hou hou! Sois gentil avec le Petit Chat je t'en prie!
+Petit Chat, il est vrai qu'il est maintenant temps de nous éclairer.
+Même ma patience a ses limites.
+# qui: chat
+D'accord, d'accord, ne vous fâchez pas! / Je vais accomplir votre volonté de ce pas!
+Votre majesté, la couronne disparue / Et autres mystères incongrus.
+Le Chat Mal Luné est innocent en réalité / C'est à moi que revient la faute en vérité!
+# qui: hibou
+Comment!!! Qu'entends-je ? Hou hou hou!
+# qui: narrateur
+Le Chat Mal Luné observe en silence, le regard sévere.
+# qui: chat
+J'avais caché ces objects précieux / Afin de semer le doute à vos yeux
+Et instiller, par exercice de mes talents de conteur, / Que ces méfait, Le Chat Mal Luné puisse en être l'auteur.
+Vous allez maintenant me demander / Pourquoi avoir eu pareille idée.
 # qui: lune_chat
 ...
-Bon. J'arrêterai de déplier les origamis du château. À condition que tu te tiennes à carreau, Petit Chat.
-# qui: chat
-Promis, juré, sur mes moustaches, / Plus jamais de couronne que je cache !
 # qui: hibou
-Enfin la paix dans mon château. Merci, mon cher Maître Origamiste.
+J'espère que tu as de bonnes explications à fournir.
+# qui: chat
+À mes demandes de tendresse et d'amour / Tout le château était desespérément sourd.
+Sur lui était braqué toute la lumière / Du haut de sa lune il faisait le fier.
+C'est ainsi que rongé par ce préjudice / J'ai voulu mettre fin à cette injustice.
+Le faire tomber de sa lune / Pour alléger mon infortune.
+# qui: lune_chat
+Maww... C'est bon on a compris, Petit Chat.
+Je reconnais que j'avais un peu tendance à attirer l'attention sur moi.
+# qui: hibou
+Hou hou! La faute me reviens aussi à vrai dire.
+Je devrais vous considérer de manière plus juste à l'avenir.
+# qui: chat
+Miaou... Pardonne moi, mon ami de toujours / De t'avoir joué ce mauvais tour.
+# lune_chat
+Ne n'en fais pas frérot, je te dois aussi des excuses.
+Allons nous promener ensemble comme autrefois et oublions tout ça.
+# qui: hibou
+Quel soulagement, la paix enfin revenue dans mon royaume.
+Grâce à toi, mon meilleur Origamiste royal.
 # qui: heros
-Crôa crôa ! Il n'y a pas de quoi, Votre Majesté. Un origamiste a toujours un pli d'avance. # flag: histoire_finie
+Croa croa! Tout le plaisir est pour moi, Votre Majesté le Libou des bois jolis. # flag: histoire_finie
 # fin: histoire
 -> DONE
 
