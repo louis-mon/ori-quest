@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { teintesDe, type Degrade } from '../../origami/papier';
+import { canvasDe, teintesDe, type Degrade } from '../../origami/papier';
 import type { Box } from './layout';
 
 // Carrée, comme toute feuille d'origami. Elle occupe le bas de son emprise : la
@@ -87,6 +87,106 @@ export function dessinerFeuille(
   g.strokePath();
 
   return geometrie.carre;
+}
+
+// La feuille sur le papier même du modèle : le canvas que sa texture 3D lit
+// (`canvasDe`), recto dans le carré moins le coin, verso dans le coin rabattu.
+// Grain, éclats et gemmes y sont ceux qui se plieront ensuite. La lumière, le
+// rabat et le contour sont ceux de `dessinerFeuille`.
+//
+// Composée une fois dans un canvas, à la taille de l'écran : Phaser ne sait pas
+// découper une image à un polygone sans masque, le Canvas 2D si.
+export function imprimerFeuille(
+  scene: Phaser.Scene,
+  box: Box,
+  modele: string,
+): { image: Phaser.GameObjects.Image; carre: Box } {
+  const geometrie = geometrieFeuille(box);
+  const { x, y, w: cote } = geometrie.carre;
+  const cle = `feuille:${modele}:${cote}`;
+  if (!scene.textures.exists(cle)) scene.textures.addCanvas(cle, composer(geometrie, modele));
+  // La marge de `composer`, pour que le carré retombe sur le plan.
+  const image = scene.add.image(x - MARGE_TRAIT, y - MARGE_TRAIT, cle).setOrigin(0);
+  return { image, carre: geometrie.carre };
+}
+
+// Le contour déborde du carré de la moitié de son épaisseur.
+const MARGE_TRAIT = 2;
+
+function composer(geometrie: GeometrieFeuille, modele: string): HTMLCanvasElement {
+  const { recto, verso } = canvasDe(modele);
+  const { carre, feuille, rabat } = geometrie;
+  const { x, y, w: cote } = carre;
+  const [a, b, c] = rabat;
+  const pli = b[0] - a[0];
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = Math.ceil(cote + 2 * MARGE_TRAIT);
+  const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingQuality = 'high';
+  // Tout se trace dans les coordonnées du plan, comme `dessinerFeuille`.
+  ctx.translate(MARGE_TRAIT - x, MARGE_TRAIT - y);
+
+  const trace = (points: readonly Point[]) => {
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    for (const [px, py] of points.slice(1)) ctx.lineTo(px, py);
+    ctx.closePath();
+  };
+  // Retourné de haut en bas : c'est ainsi que la couche de pliage montre la
+  // feuille à plat au premier instant (constaté sur les gemmes de la couronne).
+  // Droit, les gemmes changeaient de place quand le pliage prenait le relais.
+  const imprimer = (papier: HTMLCanvasElement) => {
+    ctx.save();
+    ctx.translate(x, y + cote);
+    ctx.scale(1, -1);
+    ctx.drawImage(papier, 0, 0, cote, cote);
+    ctx.restore();
+  };
+
+  ctx.save();
+  trace(feuille);
+  ctx.clip();
+  imprimer(recto);
+  // Le coup de lumière de `dessinerFeuille`, et pour la même raison.
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+  trace([[x, y], a, b, [x + cote, y + cote]]);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+  trace([
+    [x, y],
+    [x + cote, y + cote],
+    [x, y + cote],
+  ]);
+  ctx.fill();
+  ctx.restore();
+
+  // Le coin rabattu montre le dos de ce même coin, retourné autour de la
+  // pliure : la symétrie par rapport à la droite (a, b), à 45°, qui envoie le
+  // coin du carré sur c.
+  ctx.save();
+  trace(rabat);
+  ctx.clip();
+  ctx.save();
+  ctx.transform(0, 1, 1, 0, a[0] - a[1], a[1] - a[0]);
+  imprimer(verso);
+  ctx.restore();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+  trace([a, c, [a[0] + pli * 0.28, c[1]]]);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.28)';
+  trace(feuille);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(a[0], a[1]);
+  ctx.lineTo(c[0], c[1]);
+  ctx.lineTo(b[0], b[1]);
+  ctx.stroke();
+
+  return canvas;
 }
 
 export interface Teintes {

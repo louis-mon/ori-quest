@@ -576,7 +576,7 @@ const ASPECTS: Record<Papier, Aspect> = {
         const y = (1 - v) * TAILLE;
         // Allongée selon u, l'axe de la pointe sur la feuille : elle se tient
         // debout une fois la couronne pliée.
-        const r = 14;
+        const r = RAYON_GEMME;
         ctx.fillStyle = pierres[i % pierres.length];
         ctx.beginPath();
         ctx.moveTo(x - r, y);
@@ -610,6 +610,35 @@ const GEMMES_COURONNE: readonly (readonly [number, number])[] = [
   [0.154, 0.875],
 ];
 
+// En pixels de texture. À 14, elles ne se voyaient pas sur la feuille posée au
+// jardin, bien plus petite à l'écran que la couronne pliée ; à 26, elles
+// alourdissaient déjà la couronne.
+const RAYON_GEMME = 22;
+
+// Peints une fois pour la partie, et lus par les deux rendus : la feuille posée
+// dans le décor (`imprimerFeuille`, feuille.ts) et le modèle plié. Un seul
+// tirage, pas deux : le grain, les éclats et les gemmes sont au même endroit
+// avant et après le pliage.
+const peints = new Map<Papier, HTMLCanvasElement>();
+
+function canvasPeint(papier: Papier): HTMLCanvasElement {
+  let canvas = peints.get(papier);
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.width = canvas.height = TAILLE;
+    ASPECTS[papier].peindre(canvas.getContext('2d')!);
+    peints.set(papier, canvas);
+  }
+  return canvas;
+}
+
+// Le haut du canvas est le haut de la feuille à plat, v = 1 (voir `orGemmes`).
+// Ni Phaser ni three.js : la feuille du décor se passe de three.js.
+export function canvasDe(nom: string): { recto: HTMLCanvasElement; verso: HTMLCanvasElement } {
+  const { recto, verso } = PAPIERS[nom] ?? DEFAUT;
+  return { recto: canvasPeint(recto), verso: canvasPeint(verso) };
+}
+
 // Partagées entre tous les meshes et jamais libérées : six au maximum, et les
 // repeindre à chaque ouverture de scène coûterait bien plus cher.
 const textures = new Map<Papier, THREE_NS.Texture>();
@@ -618,12 +647,7 @@ function texture(THREE: typeof THREE_NS, papier: Papier): THREE_NS.Texture {
   const dejaLa = textures.get(papier);
   if (dejaLa) return dejaLa;
 
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = TAILLE;
-  const ctx = canvas.getContext('2d')!;
-  ASPECTS[papier].peindre(ctx);
-
-  const tex = new THREE.CanvasTexture(canvas);
+  const tex = new THREE.CanvasTexture(canvasPeint(papier));
   tex.colorSpace = THREE.SRGBColorSpace;
   // Les UV couvrent la feuille exactement une fois : le bord ne doit surtout pas
   // reboucler sur l'autre côté du motif.

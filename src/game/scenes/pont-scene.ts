@@ -10,7 +10,7 @@ import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
-import { dessinerFeuille } from './feuille';
+import { dessinerFeuille, imprimerFeuille } from './feuille';
 import { poserEau } from './eau';
 
 // Le ravin — première scène du chapitre 1.
@@ -39,7 +39,7 @@ export class PontScene extends PointClickScene {
   protected arrivee = { knot: 'pont_arrivee', flag: 'pont_vu' };
 
   private folded!: OrigamiDecor;
-  private sheet!: Phaser.GameObjects.Graphics;
+  private sheet!: Phaser.GameObjects.Image;
   private feuilleArbre!: Phaser.GameObjects.Graphics;
   private vieilArbre!: OrigamiDecor;
   private souche!: Phaser.GameObjects.Image;
@@ -160,8 +160,9 @@ export class PontScene extends PointClickScene {
 
     // Elle occupe exactement sa zone tactile : le seul objet du décor dont le
     // dessin et la cible se confondent.
-    this.sheet = this.add.graphics();
-    this.caler('feuille', dessinerFeuille(this.sheet, boxOf(PLAN, 'hs_feuille'), 'pont'));
+    const feuille = imprimerFeuille(this, boxOf(PLAN, 'hs_feuille'), 'pont');
+    this.sheet = feuille.image;
+    this.caler('feuille', feuille.carre);
 
     // La feuille du vieil arbre, et l'arbre qu'elle devient. Deux boîtes : la
     // boîte donne sa taille au modèle, et l'arbre déborde largement la feuille.
