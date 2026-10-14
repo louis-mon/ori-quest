@@ -1,4 +1,5 @@
 import type { ApercuOrigami } from '../ui/overlay';
+import { cadrerCommeLApercu } from './apercu';
 import { OrigamiLayer } from './origami-layer';
 import { pliageDe } from './vue';
 
@@ -24,6 +25,9 @@ export class CoucheDuRecit {
   // est à l'écran remplacerait le modèle en cours de route. Le cas est rare,
   // mais un pliage se joue justement entre deux répliques.
   private pliageEnCours = false;
+  // Le modèle de ce pliage, et qui attend qu'on le range.
+  private modelePlie: string | null = null;
+  private aRanger: ((emprise: DOMRect | null) => void)[] = [];
 
   // Un aperçu se demande, puis s'abandonne — la description refermée, un
   // pliage qui prend la couche. Le jeton dit si celui qu'on vient de charger
@@ -50,6 +54,7 @@ export class CoucheDuRecit {
   // Se dénoue le modèle plié, qui reste à l'écran jusqu'à `ranger()`.
   plier = async (nom: string) => {
     this.pliageEnCours = true;
+    this.modelePlie = nom;
     try {
       const layer = await this.couche();
       await layer.load(nom);
@@ -73,8 +78,20 @@ export class CoucheDuRecit {
   ranger = () => {
     if (!this.pliageEnCours) return;
     this.pliageEnCours = false;
+    this.modelePlie = null;
+    const silhouette = this.layer?.silhouette();
+    const emprise = silhouette ? cadrerCommeLApercu(silhouette) : null;
+    for (const relais of this.aRanger.splice(0)) relais(emprise);
     this.layer?.hide();
   };
+
+  // Où poser l'image de `modele` pour qu'elle relaie le pliage, connu quand on
+  // le range ; `null` s'il n'est pas à l'écran. Un objet obtenu en le pliant
+  // part de là vers l'inventaire, au lieu d'en sortir en double.
+  quandOnRange(modele: string): Promise<DOMRect | null> | null {
+    if (!this.pliageEnCours || this.modelePlie !== modele) return null;
+    return new Promise((relais) => this.aRanger.push(relais));
+  }
 
   readonly apercu: ApercuOrigami = {
     montrer: (modele) => {

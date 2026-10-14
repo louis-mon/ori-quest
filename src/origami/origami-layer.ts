@@ -256,6 +256,34 @@ export class OrigamiLayer {
     this.show();
   }
 
+  // La silhouette du modèle à l'écran, en pixels de la page, telle qu'elle est
+  // à l'instant — balancement compris.
+  silhouette(): DOMRect | null {
+    if (!this.mesh || !this.scratch || !this.visible || this.perdu) return null;
+    this.pivot?.updateMatrixWorld(true);
+    const p = new this.THREE.Vector3();
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (let i = 0; i < this.scratch.length; i += 3) {
+      p.set(this.scratch[i], this.scratch[i + 1], this.scratch[i + 2])
+        .applyMatrix4(this.mesh.matrixWorld)
+        .project(this.camera);
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+    const toile = this.canvas.getBoundingClientRect();
+    return new DOMRect(
+      toile.left + ((minX + 1) / 2) * toile.width,
+      toile.top + ((1 - maxY) / 2) * toile.height,
+      ((maxX - minX) / 2) * toile.width,
+      ((maxY - minY) / 2) * toile.height,
+    );
+  }
+
   // À appeler quand la toile revient dans le document : `resize` ne suit que la
   // fenêtre, et une toile détachée s'y mesure à zéro. Sans ça, la couche gardée
   // du tutoriel se réveillait en 1×1 pixel après un redimensionnement.

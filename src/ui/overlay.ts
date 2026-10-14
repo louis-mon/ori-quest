@@ -75,8 +75,9 @@ export class Overlay {
   private obtenuTimer = 0;
 
   // Ce qui distingue un objet obtenu d'un objet simplement présent : l'état de
-  // jeu, lui, ne connaît pas la différence.
-  private aAnnoncer = new Set<string>();
+  // jeu, lui, ne connaît pas la différence. La valeur est l'endroit d'où part
+  // l'objet, quand il est à l'écran ; voir `annoncerObtention()`.
+  private aAnnoncer = new Map<string, Promise<DOMRect | null> | null>();
   private annonceEnCours = false;
   // La boîte de dialogue est une ressource unique. Sans ce compteur, un tap sur
   // l'inventaire en pleine réplique écrasait le texte et laissait deux écouteurs
@@ -539,8 +540,13 @@ export class Overlay {
   // Appelé par l'effet `# give:` et par lui seul, jamais depuis l'abonnement à
   // l'état : `gameState.give()` sert aussi à charger une sauvegarde et à sauter
   // à un point d'étape, où annoncer trois objets à la file n'a aucun sens.
-  annoncerObtention(id: string) {
-    this.aAnnoncer.add(id);
+  //
+  // `depart` se dénoue sur l'emprise de l'objet déjà à l'écran — le modèle
+  // qu'on vient de plier — quand il s'en va. La vignette prend sa place à cet
+  // instant et pas avant : partie du centre pendant que le pliage restait
+  // affiché, elle en faisait un double qui s'envolait en laissant l'original.
+  annoncerObtention(id: string, depart: Promise<DOMRect | null> | null = null) {
+    this.aAnnoncer.set(id, depart);
   }
 
   private async jouerAnnonces() {
@@ -548,12 +554,12 @@ export class Overlay {
     this.annonceEnCours = true;
     try {
       while (this.aAnnoncer.size) {
-        const [id] = this.aAnnoncer;
+        const [[id, depart]] = this.aAnnoncer;
         this.aAnnoncer.delete(id);
         const el = this.inventory.querySelector<HTMLElement>(
           `.inventory__item[data-objet="${id}"]`,
         );
-        if (el) await this.montrerObtention(id, el);
+        if (el) await this.montrerObtention(id, el, depart);
       }
     } finally {
       this.annonceEnCours = false;
@@ -564,10 +570,15 @@ export class Overlay {
   // l'atterrissage dit maintenant, le texte dit quoi. Le nom en premier ferait
   // lire le bandeau au lieu de suivre le vol, et c'est le vol qui enseigne la
   // colonne.
-  private async montrerObtention(id: string, el: HTMLElement) {
+  private async montrerObtention(
+    id: string,
+    el: HTMLElement,
+    depart: Promise<DOMRect | null> | null,
+  ) {
     try {
       const url = await vignette(id);
-      if (url && !mouvementReduit()) await volVersLaCase(this.root, url, el);
+      const emprise = await depart;
+      if (url && !mouvementReduit()) await volVersLaCase(this.root, url, el, emprise);
     } catch (err) {
       // Montrer un objet ne doit jamais empêcher de l'avoir.
       console.error(`[objet] annonce de "${id}" impossible`, err);

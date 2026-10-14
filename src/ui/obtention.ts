@@ -7,7 +7,8 @@
 // Le départ est le centre du cadre pour tous les objets : c'est déjà l'endroit
 // où ce jeu montre. Partir de la source dans le décor serait faux dès le
 // deuxième cas — l'idée de la hache se forme dans la tête de la grenouille, pas
-// dans le corps du renard.
+// dans le corps du renard. L'objet qu'on vient de plier y est déjà, à sa
+// taille : la vignette part de lui.
 
 const APPARITION = 180; // millisecondes
 // Le regard doit avoir le temps de se poser dessus, sinon il ne suit pas le
@@ -15,22 +16,27 @@ const APPARITION = 180; // millisecondes
 const TENUE = 340;
 const VOL = 560;
 
-// En pixels de design, choisi pour recouvrir à peu près le modèle qui vient
-// d'être plié : la couche 3D s'efface pendant que cette image apparaît, et les
-// deux tailles doivent être proches pour que ça se lise comme un relais.
+// En pixels de design. Pour ce qui n'est pas déjà à l'écran — une idée, un
+// objet reçu sans pliage — : la taille d'une vignette qu'on montre, pas d'une
+// icône.
 const TAILLE_CENTRE = 190;
 
 export function mouvementReduit(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-// L'élément volant est posé à l'arrivée et animé depuis le centre, pas
+// L'élément volant est posé à l'arrivée et animé depuis son départ, pas
 // l'inverse : la fin d'un mouvement est ce qu'on regarde, et c'est elle qui doit
 // tomber au pixel sur la vignette de la case.
+//
+// `depart`, en pixels de la page, est l'emprise que l'image doit couvrir au
+// départ : celle du modèle qu'on vient de plier, que la vignette relaie pendant
+// que la couche 3D s'efface. Sans lui, le centre du cadre.
 export async function volVersLaCase(
   racine: HTMLElement,
   url: string,
   cible: HTMLElement,
+  depart: DOMRect | null = null,
 ): Promise<void> {
   const cadre = racine.getBoundingClientRect();
   const dest = rectArrivee(cible);
@@ -46,21 +52,38 @@ export async function volVersLaCase(
   el.style.height = `${dest.height}px`;
   racine.appendChild(el);
 
-  // L'UI est en pixels CSS et le cadre rétrécit avec la fenêtre : sans ce
-  // facteur, l'image garderait sa taille de design sur un écran deux fois plus
-  // petit et couvrirait la moitié de la scène.
-  const echelle = Number(getComputedStyle(racine).getPropertyValue('--ui-scale')) || 1;
-  const k = (TAILLE_CENTRE * echelle) / Math.max(dest.width, dest.height);
-  const dx = cadre.width / 2 - (dest.left - cadre.left + dest.width / 2);
-  const dy = cadre.height / 2 - (dest.top - cadre.top + dest.height / 2);
-  const centre = `translate(${dx}px, ${dy}px) scale(${k})`;
-  const total = APPARITION + TENUE + VOL;
-
   try {
+    let k: number;
+    let dx: number;
+    let dy: number;
+    if (depart) {
+      // Couvrir le modèle, c'est couvrir de l'IMAGE et non de l'élément : en
+      // `object-fit: contain`, elle n'occupe la case que dans un sens.
+      await el.decode();
+      const ajuste = Math.min(dest.width / el.naturalWidth, dest.height / el.naturalHeight);
+      k = Math.sqrt(
+        (depart.width / (el.naturalWidth * ajuste)) * (depart.height / (el.naturalHeight * ajuste)),
+      );
+      dx = depart.left + depart.width / 2 - (dest.left + dest.width / 2);
+      dy = depart.top + depart.height / 2 - (dest.top + dest.height / 2);
+    } else {
+      // L'UI est en pixels CSS et le cadre rétrécit avec la fenêtre : sans ce
+      // facteur, l'image garderait sa taille de design sur un écran deux fois
+      // plus petit et couvrirait la moitié de la scène.
+      const echelle = Number(getComputedStyle(racine).getPropertyValue('--ui-scale')) || 1;
+      k = (TAILLE_CENTRE * echelle) / Math.max(dest.width, dest.height);
+      dx = cadre.width / 2 - (dest.left - cadre.left + dest.width / 2);
+      dy = cadre.height / 2 - (dest.top - cadre.top + dest.height / 2);
+    }
+    const centre = `translate(${dx}px, ${dy}px) scale(${k})`;
+    const total = APPARITION + TENUE + VOL;
+
     await el.animate(
       [
         {
-          transform: `translate(${dx}px, ${dy}px) scale(${k * 0.82})`,
+          // Le relais apparaît sur place : grandir sous les yeux, c'est ne
+          // plus être le modèle qu'il remplace.
+          transform: `translate(${dx}px, ${dy}px) scale(${depart ? k : k * 0.82})`,
           opacity: 0,
           offset: 0,
           easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)',

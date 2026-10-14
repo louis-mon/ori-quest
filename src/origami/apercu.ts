@@ -83,6 +83,19 @@ export function apercuOrigami(
   return promesse;
 }
 
+// Où poser l'image d'un modèle pour qu'elle recouvre sa silhouette à l'écran :
+// le cadrage serré ci-dessous laisse la marge autour.
+export function cadrerCommeLApercu(silhouette: DOMRect): DOMRect {
+  const mx = silhouette.width * MARGE;
+  const my = silhouette.height * MARGE;
+  return new DOMRect(
+    silhouette.x - mx,
+    silhouette.y - my,
+    silhouette.width + mx * 2,
+    silhouette.height + my * 2,
+  );
+}
+
 // En `data:`, pour un `<img>` de l'interface DOM.
 export async function urlApercuOrigami(nom: string, options: OptionsApercu = {}): Promise<string> {
   return (await apercuOrigami(nom, options)).toDataURL('image/png');

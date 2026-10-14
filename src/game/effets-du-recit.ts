@@ -3,6 +3,7 @@ import type { Overlay } from '../ui/overlay';
 import type { Navigation } from './navigation';
 import { jouerEnigme } from './puzzle/jouer-enigme';
 import type { DialogueEffects } from './systems/dialogue';
+import { objet } from './systems/objets';
 import { gameState } from './systems/state';
 
 // Ce que chaque tag ink fait au jeu, branché sur le système qui le joue.
@@ -17,7 +18,10 @@ export function effetsDuRecit(
     rangerLePliage: couche.ranger,
     puzzle: (nom) => jouerEnigme(uiRoot, overlay, nom),
     goto: navigation.goto,
-    donner: (item) => donner(overlay, item),
+    donner: (item) => {
+      const { modele } = objet(item);
+      donner(overlay, item, modele ? couche.quandOnRange(modele) : null);
+    },
     fin: () => navigation.finir('histoire'),
   };
 }
@@ -26,7 +30,11 @@ export function effetsDuRecit(
 // sauvegarde et à sauter à un point d'étape, où il n'y a rien à annoncer. Seul
 // le tag `# give:` est une obtention — et pas quand l'objet est déjà là, sinon
 // un `# give:` rejoué ferait voler une seconde hache.
-export function donner(overlay: Overlay, item: string) {
-  if (!gameState.has(item)) overlay.annoncerObtention(item);
+export function donner(
+  overlay: Overlay,
+  item: string,
+  depart: Promise<DOMRect | null> | null = null,
+) {
+  if (!gameState.has(item)) overlay.annoncerObtention(item, depart);
   gameState.give(item);
 }

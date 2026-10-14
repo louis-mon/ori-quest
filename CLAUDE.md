@@ -148,6 +148,11 @@ haut à gauche, ils lisent en bas, rien ne bougeait. La vignette vole donc du
 centre jusqu'à sa case, un bandeau la nomme, et la colonne ne s'efface plus quand
 elle est vide. **Le centre pour tous les objets** : partir de la source dans le
 décor serait faux dès la deuxième idée, qui se forme dans la tête du héros.
+**Un objet qu'on vient de plier y est déjà**, et c'est lui qui part : la
+vignette attend qu'on quitte sa réplique, se pose sur la silhouette du modèle
+pendant que la couche 3D s'efface, puis vole (`quandOnRange()`, dans
+`couche-du-recit.ts`). Partie plus tôt, elle s'envolait en double sous le pliage
+resté à l'écran.
 
 Deux pièges (`src/ui/obtention.ts`). **Le vol se déclenche sur le tag `# give:`**
 (`donner()` dans `src/game/effets-du-recit.ts`), jamais sur un changement
