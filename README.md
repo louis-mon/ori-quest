@@ -300,17 +300,24 @@ game-design/scenes/*.tmj     géométrie des scènes (Tiled) — fait foi
 game-design/enigmes/*.json   découpage des énigmes (decoupage.html) — fait foi
 public/assets/origami/*.origami  animations bakées
 src/
-  main.ts                    bootstrap, syncStage, déblocage audio, sauvegarde
+  main.ts                    assemble les modules ci-dessous, sans logique propre
+  audio.ts                   déblocage de l'audio au premier geste (iOS)
   game/
     config.ts                résolution logique, seuil tactile, palette
     chapitres.ts             quelles scènes cette version embarque, où elle s'arrête
+    moteur.ts                le jeu Phaser et sa configuration
+    navigation.ts            quelle pièce est à l'écran, ou l'écran de fin
+    gel.ts                   figer les scènes (menu ouvert, fin de partie)
+    effets-du-recit.ts       ce que chaque tag ink fait au jeu
     scenes/pont-scene.ts     décor + hotspots
     puzzle/crease-puzzle.ts  minijeu de reconstitution (DOM)
+    puzzle/jouer-enigme.ts   le tag `# puzzle:` : ouvre l'énigme, publie le verdict
     puzzle/decoupage.ts      pièces polygonales : boîtes, masques, détourage
     puzzle/puzzles.ts        registre des énigmes, en données
     puzzle/tutoriel.ts       le tutoriel, posé sur l'énigme ouverte
     puzzle/tutoriels.ts      son texte et son enchaînement, en données
     systems/state.ts         état sérialisable (drapeaux, inventaire)
+    systems/sauvegarde-a-la-sortie.ts  écrit l'état quand l'onglet disparaît
     systems/hotspots.ts      définition des zones et des verbes
     systems/dialogue.ts      pont ink <-> UI, gestion des tags
     scenes/origami-decor.ts  les modèles pliés, posés dans le décor
@@ -319,16 +326,20 @@ src/
   origami/
     fold-file.ts             parseur du format .origami + interpolation
     origami-layer.ts         animation de pliage, three.js (import dynamique)
+    couche-du-recit.ts       la couche 3D du récit : pliage d'un `# origami:`, aperçu
     apercu.ts                image fixe d'un modèle plié (décor, inventaire, énigme)
     papier.ts                recto/verso de chaque modèle, textures peintes
     vue.ts                   angle et lumière, partagés par tous les rendus
   ui/
     overlay.ts               dialogues, inventaire, menu de verbes (DOM)
+    cadre.ts                 recale l'UI sur le canvas letterboxé (syncStage)
+    isolation.ts             un tap né dans l'UI ne remonte pas jusqu'au jeu
     fin.ts                   « À suivre… » quand le chapitre suivant n'est pas livré
     vignettes.ts             image d'un objet d'inventaire
     style.css
   dev/
     orientation.ts           page de réglage des poses (hors build)
+    console.ts               raccourcis de console en développement
     decoupage.ts             éditeur de découpage des énigmes (hors build)
     couper.ts                fendre une pièce le long d'un trait
 tools/

@@ -52,7 +52,7 @@ export class EntreeScene extends PointClickScene {
   private passageDegage = false;
 
   constructor() {
-    // Même raison qu'au chapitre 1 : c'est main.ts qui décide de la scène à
+    // Même raison qu'au chapitre 1 : c'est `Navigation` qui décide de la scène à
     // ouvrir, avec les services qu'elle attend.
     super({ key: 'entree', active: false });
   }

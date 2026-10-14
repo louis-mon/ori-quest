@@ -469,7 +469,7 @@ export const CHAPITRES: Chapitre[] = [
 ];
 
 // Ce que ce build sait rouvrir. Un point d'étape posé dans une scène absente de
-// la version ne mènerait nulle part : `main.ts` renverrait le joueur au ravin,
+// la version ne mènerait nulle part : `Navigation` renverrait le joueur au ravin,
 // les drapeaux du chapitre suivant levés. Le chapitre vidé de ses étapes
 // disparaît avec elles.
 export function chapitresAtteignables(): Chapitre[] {

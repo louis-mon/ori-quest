@@ -205,7 +205,7 @@ pour un seul événement, c'est un de trop.
 `# give:` d'une réplique, et sur lui seul — jamais sur un changement de
 l'inventaire. L'état est aussi rempli au chargement d'une sauvegarde et par le
 menu des points d'étape, où faire voler trois objets à la file n'aurait aucun
-sens. Voir `donner()` dans [`main.ts`](../src/main.ts).
+sens. Voir `donner()` dans [`effets-du-recit.ts`](../src/game/effets-du-recit.ts).
 
 ## Le carnet d'idées : c'est l'inventaire
 

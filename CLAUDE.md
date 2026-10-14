@@ -59,9 +59,17 @@ GPLv3. Si un besoin de maths origami apparaît, l'utiliser en outil de build
 
 **L'UI est en DOM, pas dans le canvas.** Dialogues, inventaire et menus vivent
 dans `src/ui/`, au-dessus du canvas Phaser : le texte reste net à toutes les
-densités et la mise en page s'itère en CSS. `syncStage()` (`main.ts`) recale
-cette couche à chaque redimensionnement, sans quoi l'UI dérive sur les bandes du
-letterbox — ce qui arrive sur à peu près tous les téléphones.
+densités et la mise en page s'itère en CSS. `syncStage()` (`src/ui/cadre.ts`)
+recale cette couche à chaque redimensionnement, sans quoi l'UI dérive sur les
+bandes du letterbox — ce qui arrive sur à peu près tous les téléphones.
+
+**`main.ts` assemble, il ne fait rien lui-même.** Chaque responsabilité a son
+module — le moteur Phaser (`game/moteur.ts`), la pièce à l'écran
+(`game/navigation.ts`), ce que fait chaque tag ink (`game/effets-du-recit.ts`),
+la couche 3D du récit (`origami/couche-du-recit.ts`), le cadre
+(`ui/cadre.ts`)… — et `main.ts` ne fait que les créer et les brancher entre eux.
+Un comportement nouveau va dans le module qui en a la charge, ou dans un module
+neuf, jamais dans `main.ts`.
 
 **Les effets de jeu passent par des tags ink**, pas par du code par hotspot :
 
@@ -104,10 +112,10 @@ contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller — et au-delà, aucun
 chapitre ne s'ouvre sur le suivant : atteint par le menu, le chapitre 2 finit
 lui aussi sur « À suivre… » à la porte du château.
 
-`goto()` (`main.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour les deux raisons :
-destination absente du build, ou franchissement hors traversée — **sans l'écrire
-dans la sauvegarde**, qui doit rester sur une pièce que ce build sait rouvrir. Le
-test porte sur le franchissement et non sur la seule destination : le village est
+`goto()` (`src/game/navigation.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour
+les deux raisons : destination absente du build, ou franchissement hors
+traversée — **sans l'écrire dans la sauvegarde**, qui doit rester sur une pièce
+que ce build sait rouvrir. Le test porte sur le franchissement et non sur la seule destination : le village est
 hors traversée, mais y revenir depuis l'entrée du château est un déplacement
 interne au chapitre 2, et finir la partie là-dessus enfermerait le testeur.
 
@@ -142,8 +150,8 @@ elle est vide. **Le centre pour tous les objets** : partir de la source dans le
 décor serait faux dès la deuxième idée, qui se forme dans la tête du héros.
 
 Deux pièges (`src/ui/obtention.ts`). **Le vol se déclenche sur le tag `# give:`**
-(`donner()` dans `main.ts`), jamais sur un changement d'inventaire —
-`gameState.give()` sert aussi à charger une sauvegarde. Et **`renderInventory()`
+(`donner()` dans `src/game/effets-du-recit.ts`), jamais sur un changement
+d'inventaire — `gameState.give()` sert aussi à charger une sauvegarde. Et **`renderInventory()`
 rend par identifiant, sans jamais repartir d'un `innerHTML` vide** : la colonne
 se redessine à chaque changement d'état, et la reconstruire fait perdre au vol en
 cours la case où il doit se poser.
@@ -228,8 +236,8 @@ pas la scène** — le décor reste touchable pendant qu'un objet traverse, sauf
 **Bloquant veut dire vraiment bloquant**, et l'état est **transitoire** : décor
 et inventaire cessent de répondre, et les marqueurs se retirent (ci-dessous).
 Seul le menu reste atteignable, et il **fige la scène** (`figerLeJeu`, dans
-`main.ts`) : sans ça, ce qu'on regardait finit sa course derrière le panneau.
-Tout se relève à la fin du trajet **et au shutdown** — des attentes restées
+`src/game/gel.ts`) : sans ça, ce qu'on regardait finit sa course derrière le
+panneau. Tout se relève à la fin du trajet **et au shutdown** — des attentes restées
 ouvertes rendraient la pièce sourde pour de bon.
 
 **Pendant un dialogue ou une cinématique, les marqueurs se retirent** d'un zoom,
@@ -323,8 +331,9 @@ attend **sans changer la réplique**, celle en place servant de légende.
 dénoue une attente et revient avec la suivante, dans `attendreUnTap()` même.
 Restée à l'écran pendant un pliage, elle invitait à taper une boîte qui
 n'écoutait plus. Et le modèle plié **reste à l'écran jusqu'à ce qu'on quitte sa
-réplique** (`rangerLePliage()`, dans `main.ts`), pas pendant une durée fixe :
-qui a vu avance aussitôt, qui regarde garde la pose.
+réplique** (`CoucheDuRecit.ranger()`, dans `src/origami/couche-du-recit.ts`),
+pas pendant une durée fixe : qui a vu avance aussitôt, qui regarde garde la
+pose. La durée du pliage lui-même est `PLIAGE_MS`, dans le même fichier.
 
 **Et il n'avance qu'une fois par tap.** Deux contacts rapprochés dépensaient deux
 répliques, et rien dans le jeu ne revient en arrière. Une attente fraîchement
@@ -441,7 +450,7 @@ jetait une couche 3D à chaque lecture ; les contextes s'accumulaient, et au-del
 d'une quinzaine le navigateur tue le **plus ancien** — celui de Phaser. Deux
 réponses, les deux en place : `forceContextLoss()` avant `dispose()`, et surtout
 **une seule couche gardée** pour toute la partie (`coucheDemo`, dans
-`tutoriel.ts`), comme `main.ts` le fait pour celle du récit. Une couche qui doit
+`tutoriel.ts`), comme `CoucheDuRecit` le fait pour celle du récit. Une couche qui doit
 resservir se recharge avec `load()` ; `dispose()` est une fin de vie.
 
 **Un contexte WebGL perdu ne lève aucune erreur** : le rendu continue de

@@ -33,7 +33,7 @@ export class PorteScene extends PointClickScene {
   private feuilleHache!: Phaser.GameObjects.Graphics;
 
   constructor() {
-    // Même raison que PontScene : c'est main.ts qui décide de la scène à
+    // Même raison que PontScene : c'est `Navigation` qui décide de la scène à
     // ouvrir.
     super({ key: 'porte', active: false });
   }

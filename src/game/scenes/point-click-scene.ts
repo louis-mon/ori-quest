@@ -279,7 +279,7 @@ export abstract class PointClickScene extends Phaser.Scene {
   // Le joueur n'a rien à faire pendant qu'un objet traverse sous ses yeux : les
   // zones ne répondent plus (`repondAuTap`), les marqueurs se retirent
   // (`update()`) et l'inventaire s'éteint. Seul le menu reste atteignable, et il
-  // fige la scène — voir `figerLeJeu()` dans main.ts.
+  // fige la scène — voir `figerLeJeu()` (`game/gel.ts`).
   private appliquerAttente() {
     this.services.overlay.suspendreLInventaire(this.attentes.size > 0);
   }

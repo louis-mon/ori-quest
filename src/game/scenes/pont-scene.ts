@@ -50,7 +50,7 @@ export class PontScene extends PointClickScene {
 
   constructor() {
     // `active: false` est indispensable : Phaser démarre tout seul la première
-    // scène du tableau `scene:`, sans les services que main.ts lui passe. La
+    // scène du tableau `scene:`, sans les services que `Navigation` lui passe. La
     // scène était créée deux fois, et le redémarrage en pleine initialisation
     // laissait une horloge à l'arrêt — les `time.delayedCall` ne partaient
     // jamais.

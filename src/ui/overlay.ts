@@ -96,7 +96,7 @@ export class Overlay {
   // Le temps d'un knot. Voir `marquerLeRecit()`.
   private recitEnCours = false;
 
-  // Branché depuis `main.ts`, qui possède la couche 3D : l'interface n'a pas à
+  // Branché sur `CoucheDuRecit`, qui possède la couche 3D : l'interface n'a pas à
   // savoir que three.js existe. Absent, l'examen se contente de la description.
   private apercu?: ApercuOrigami;
 
@@ -327,7 +327,7 @@ export class Overlay {
   // est sourd tant qu'une réplique est en cours —, alors la boîte se signale.
   //
   // Seuls les taps du décor arrivent jusqu'ici : `uiRoot` arrête tout ce qui
-  // naît dans l'interface (`main.ts`), inventaire et menu compris, qui eux ont
+  // naît dans l'interface (`ui/isolation.ts`), inventaire et menu compris, qui eux ont
   // répondu au joueur.
   private surveillerAilleurs(ouvert: () => number): () => void {
     const ailleurs = (e: Event) => {

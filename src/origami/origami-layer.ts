@@ -109,7 +109,7 @@ export class OrigamiLayer {
       this.perdu = true;
       this.stop();
       // Qui attendait la fin du pliage doit reprendre la main. Sans ça,
-      // `playFold()` (main.ts) reste suspendu, le récit avec lui, et TOUT le
+      // `CoucheDuRecit.plier()` reste suspendu, le récit avec lui, et TOUT le
       // décor cesse de répondre — sans la moindre erreur en console.
       this.settle();
       console.warn('[origami] contexte WebGL perdu');
