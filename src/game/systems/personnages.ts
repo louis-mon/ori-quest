@@ -44,9 +44,9 @@ export const PERSONNAGES: Record<string, Personnage> = {
   chien: { nom: 'Chouaf', modele: 'chien' },
   // Chapitre 3. Les fichiers gardent le nom que l'artiste leur a donné.
   lune_chat: { nom: 'Chat Mal Luné', portrait: 'assets/personnages/lune_chat.png' },
-  // [A ECRIRE] les fiches ne donnent pas leur nom dans le jeu.
+  wyvern: { nom: 'Wyverne énigmatique', portrait: 'assets/personnages/hydre.png' },
+  // [A ECRIRE] la fiche ne donne pas son nom dans le jeu.
   elephant: { nom: 'Cheffe Éléphant', portrait: 'assets/personnages/elephant_humain.png' },
-  wyvern: { nom: 'La wyvern', portrait: 'assets/personnages/hydre.png' },
 };
 
 // Noms de rôle acceptés dans ink, à côté des identifiants d'espèce. Le jour où
