@@ -32,7 +32,7 @@ export const OBJETS: Record<string, Objet> = {
   },
   hache: {
     nom: 'La hache',
-    description: 'Une hache de papier bien tranchante, idéale pour couper du bois',
+    description: 'Une hache de papier bien tranchante. Attention en la manipulant!',
     modele: 'hache',
   },
   bois: {
@@ -73,10 +73,9 @@ export const OBJETS: Record<string, Objet> = {
   },
 
   // Chapitre 3 — la salle du trône, la cuisine et le jardin.
-  // [A ECRIRE] noms et descriptions.
   idee_couronne: {
     nom: 'Idée : la couronne',
-    description: 'Une idée de comment plier une couronne digne de la reine.',
+    description: 'Une idée de comment plier une couronne digne de Sa Majesté.',
     modele: 'couronne',
   },
   couronne: {
@@ -96,7 +95,7 @@ export const OBJETS: Record<string, Objet> = {
   },
   daurade: {
     nom: 'La daurade',
-    description: 'Une daurade royale aux reflets dorés, de quoi régaler deux chats.',
+    description: 'Une daurade royale aux reflets chatoyants.',
     modele: 'poisson',
   },
 };

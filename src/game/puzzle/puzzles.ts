@@ -105,7 +105,6 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/couronne/solution.svg',
     modele: 'couronne',
     decoupage: DECOUPAGES.couronne,
-    // [A ECRIRE]
     title: 'La couronne',
   },
 
@@ -115,7 +114,6 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/poisson/solution.svg',
     modele: 'poisson',
     decoupage: DECOUPAGES.poisson,
-    // [A ECRIRE]
     title: 'La daurade',
   },
 
@@ -124,7 +122,6 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/coeur/solution.svg',
     modele: 'coeur',
     decoupage: DECOUPAGES.coeur,
-    // [A ECRIRE]
     title: 'Le cœur',
   },
 };

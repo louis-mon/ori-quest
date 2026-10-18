@@ -67,7 +67,14 @@ function ombreDouce(scene: Phaser.Scene): string {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = taille;
   const ctx = canvas.getContext('2d')!;
-  const halo = ctx.createRadialGradient(taille / 2, taille / 2, 0, taille / 2, taille / 2, taille / 2);
+  const halo = ctx.createRadialGradient(
+    taille / 2,
+    taille / 2,
+    0,
+    taille / 2,
+    taille / 2,
+    taille / 2,
+  );
   halo.addColorStop(0, 'rgba(26, 23, 20, 0.5)');
   halo.addColorStop(1, 'rgba(26, 23, 20, 0)');
   ctx.fillStyle = halo;

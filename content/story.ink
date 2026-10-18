@@ -1256,7 +1256,6 @@ Le coeur rouge incrusté d'or étincellant capte enfin l'attention des deux chat
 //
 // ⚠ Le `# fin:` est SEUL sur sa ligne, comme le `# goto:` des fins de chapitre :
 // l'écran de fin ne vient qu'après la dernière réplique.
-// [A ECRIRE]
 === trone_reconciliation ===
 # qui: narrateur
 Les chats fixent le coeur en silence un petit moment. Ils n'osent pas trop se regarder directement encore.
@@ -1326,7 +1325,7 @@ Hou hou! La faute me reviens aussi à vrai dire.
 Je devrais vous considérer de manière plus juste à l'avenir.
 # qui: chat
 Miaou... Pardonne moi, mon ami de toujours / De t'avoir joué ce mauvais tour.
-# lune_chat
+# qui: lune_chat
 Ne n'en fais pas frérot, je te dois aussi des excuses.
 Allons nous promener ensemble comme autrefois et oublions tout ça.
 # qui: hibou
@@ -1344,10 +1343,10 @@ Croa croa! Tout le plaisir est pour moi, Votre Majesté le Libou des bois jolis.
 // ================================================================
 
 // Joué automatiquement à la première arrivée dans la scène (CuisineScene.create).
-// [A ECRIRE]
 === cuisine_arrivee ===
 # qui: narrateur
-Ça sent bon le bouillon. La Cheffe Éléphant s'affaire devant ses fourneaux.
+Hmmmm... Quelle plaisir de retrouver ces bonnes odeurs de cuisine!
+Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Eléphant.
 # flag: cuisine_vue
 -> DONE
 
@@ -1357,68 +1356,75 @@ Croa croa! Tout le plaisir est pour moi, Votre Majesté le Libou des bois jolis.
 //
 // ⚠ La branche la plus avancée d'abord : `cheffe_daurade` reste levé une fois
 // l'idée donnée, et couvrirait le cas où on lui tend la daurade.
-// [A ECRIRE]
 === cuisine_cheffe ===
 {
   - flag_chats_rassasies:
     # qui: elephant
-    Deux assiettes vides et deux chats repus. Voilà qui fait plaisir à une cuisinière !
+    Ils n'ont pas laissé une arête dans leur assiete! Ils devaient être affamés.
   - flag_chats_invites:
     # qui: elephant
-    Chut, laisse-les manger tranquilles.
+    J'espère qu'ils vont apprécier mon repas!
   - flag_repas_pret:
     # qui: elephant
-    Le repas est prêt ! Va donc chercher ces deux chats, qu'ils mangent tant que c'est chaud.
+    C'est prêt, il n'y a plus qu'à faire venir les chats.
   - has_daurade:
     # qui: heros
-    Voici une daurade royale, toute fraîche pliée !
+    Comme tu me l'a demandé, une daurade royale fraîchement pliée!
     # qui: elephant
-    Magnifique ! Voilà un poisson digne des chats de Sa Majesté. # drop: daurade
+    Qu'elle a l'air charnue! Les chats vont se régaler avec ça.
+    Donne moi un instant pour la préparer. # drop: daurade
     # qui: narrateur
-    La Cheffe Éléphant découpe, assaisonne et fait mijoter en un tour de trompe.
+    En jouant adroitemant de sa trompe, la Cheffe Eléphant sublime la daurade avec diverse épices.
     # qui: elephant
-    Le repas est prêt ! Va chercher les chats, et qu'ils ne se battent pas à table. # flag: repas_pret
+    Voilà, une daurade royale digne des chats royaux prête à être dégustée.
+    Tu peux faire venir les chats. # flag: repas_pret
   - has_carpe:
     # qui: heros
-    Voici une belle carpe, pêchée dans la fontaine du jardin !
+    J'ai trouvé ce joli poisson. Les chats vont le trouver apétissants non ?
     # qui: elephant
-    Une carpe ? Malheureux ! Les carpes du jardin sont décoratives, elles ne se mangent pas.
-    Je la remettrai dans sa fontaine. # drop: carpe
-    Il me faudrait un vrai poisson de roi... Une daurade royale, voilà ce qu'il faut.
+    Mais... c'est une carpe de la fontaine des jardins de Sa Majesté!
+    Ça ne se mange pas, c'est un poisson décoratif.
+    # qui: heros
+    Ah tu as raison, où avais-je la tête... Je vais le remettre à sa place. # drop: carpe
+    Quel poisson serais plus adapté ?
+    # qui: elephant
+    Pour les chats de la reine, une daurade royale devrait faire l'affaire.
     # qui: narrateur
-    Mémorisons la forme de la daurade : ça pourrait être utile. # flag: cheffe_daurade # give: idee_poisson
+    Je vais retenir l'idée de la daurade royale: ça pourrais me servir. # flag: cheffe_daurade # give: idee_poisson
   - flag_cheffe_daurade:
     # qui: elephant
-    Une daurade royale, pas moins ! Les chats de Sa Majesté ont le palais délicat.
+    C'est une daurade royale qu'il me faut. Ces chats sont gâtés et ont le palais fin.
   - flag_cheffe_poisson:
     # qui: elephant
-    Alors, ce poisson ? Mes casseroles s'impatientent.
+    Sans poisson, je ne vais pas pouvoir cuisiner grand chose...
   - else:
     # qui: heros
-    Bonjour, Cheffe ! Ça sent drôlement bon, ici.
+    Salut Cheffe Elephant! Ça donne faim toutes ces bonnes odeurs! Croa croa
     # qui: elephant
-    Ça sentirait meilleur si j'avais de quoi cuisiner ! Les chats de Sa Majesté réclament leur repas, et je n'ai plus un seul poisson.
-    Sans poisson, pas de repas. Et sans repas, ces deux-là vont finir par se dévorer entre eux.
+    Oh, tu es de retour. Hélas, ces bonnes odeurs ne sont qu'un souvenir.
+    Sans ingrédients dignes de ce nom, je ne peux rien cuisiner.
     # qui: heros
-    Je vais voir ce que je peux trouver. # flag: cheffe_poisson
+    C'est un problème. Les chats vont avoir faim. Une idée de ce qui leur plairait ?
+    # qui: elephant
+    Avec du bon poisson, je pourrais trouver de l'inspiration...
+    # qui: heros
+    D'accord, je vais regarder où je peux trouver ça. # flag: cheffe_poisson
 }
 -> DONE
 
 
 // Les deux chats à table. Leur parler, c'est les renvoyer repus vers la salle du
 // trône ; le départ se joue boîte refermée (`auLeverDe` dans cuisine-scene.ts).
-// [A ECRIRE]
 === cuisine_chats ===
 # qui: narrateur
-Les deux chats dévorent la daurade, chacun à un bout de la table, sans se regarder.
+Sans prêter attention l'un à l'autre, les chats dévorent le délicat poisson.
 # qui: chat
-Miaou ! Quel festin, quelle merveille, / Rien au monde n'est pareil !
+Miaou ! Quel festin, quel délice!, / En manquer serait un supplice.
 # qui: lune_chat
-Mmmh. Pas mal.
-# qui: heros
-Alors, rassasiés ? Sa Majesté vous attend dans la salle du trône.
-# qui: chat
-Le ventre plein, la mine ravie, / Retournons au trône, mes amis. # flag: chats_rassasies
+Mmmh. Pas mauvais.
+# qui: narrateur
+Maintenant q'ils ont la panse bien remplie, ils seront peux être dans de meilleures dispositions.
+Les chats retournent dans la salle du trône. # flag: chats_rassasies
 -> DONE
 
 
@@ -1428,35 +1434,33 @@ Le ventre plein, la mine ravie, / Retournons au trône, mes amis. # flag: chats_
 // ================================================================
 
 // Joué automatiquement à la première arrivée dans la scène (JardinScene.create).
-// [A ECRIRE]
 === jardin_arrivee ===
 # qui: heros
-Le jardin du château ! La fontaine, le banc... Rien n'a changé. Crôa crôa
-# qui: narrateur
-Dans un coin, une silhouette rouge m'observe sans un bruit.
+Ahhhhh.... Quel lieu paisible... J'ai envie de faire une petite pause ici et d'oublier toutes ces histoires.
+Tiens ? Une curieuse créature est là à m'observer.
 # flag: jardin_vu
 -> DONE
 
 
 // La fontaine et ses carpes. On n'en pêche une qu'après la requête de la
 // Cheffe, et plus du tout une fois qu'elle a dit ce qu'elle en pensait.
-// [A ECRIRE]
 === jardin_fontaine ===
 {
   - has_carpe:
     # qui: heros
-    Une carpe me suffit. La Cheffe attend.
+    J'ai déjà une carpe. Je devrait aller voir la Cheffe Élephant.
   - flag_cheffe_daurade:
     # qui: heros
-    Des carpes décoratives, pas comestibles. C'est vrai qu'elles sont plus jolies dans l'eau.
+    Ces carpes sont des poissons d'ornement, les chats n'en voudrons pas.
   - flag_cheffe_poisson:
     # qui: heros
-    Du poisson ! Voilà qui devrait faire l'affaire.
+    Oh! des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit.
+    Si ces poissons sont aussi bons que beaux, les chats vont être ravis.
     # qui: narrateur
     D'un coup de langue, j'attrape une carpe qui passait par là. # give: carpe
   - else:
     # qui: narrateur
-    Deux carpes de papier tournent lentement dans le bassin de la fontaine.
+    Oh! des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit.
 }
 -> DONE
 
@@ -1464,60 +1468,54 @@ Dans un coin, une silhouette rouge m'observe sans un bruit.
 // Le papier chatoyant, près de la fontaine : la daurade en puissance. Pas de
 // menu, l'idée vient de la Cheffe et elle est déjà précise — comme le pot à
 // lait du village.
-// [A ECRIRE]
 === jardin_papier_poisson ===
+# qui: heros
+Un papier de bonne qualité, légèrement irisé, aux reflets dorés et argentés.
 { not has_idee_poisson:
-    # qui: heros
-    Un papier chatoyant, aux reflets d'argent et d'or. On dirait des écailles.
     -> DONE
 }
-# qui: heros
-Des reflets d'argent et d'or... Les couleurs d'une daurade royale ! Parfait pour la Cheffe.
+Ça devrait faire l'affaire pour une daurade royale.
 -> jardin_poisson_lancement
 
 === jardin_poisson_lancement ===
 # puzzle: poisson # then: jardin_poisson_issue
 -> DONE
 
-// [A ECRIRE]
 === jardin_poisson_issue ===
 { flag_poisson_resolu:
     # qui: heros
-    Une nageoire, une queue... # origami: poisson # flag: poisson_plie # give: daurade # drop: idee_poisson
-    Une daurade royale, prête pour la cuisine !
+    Une nageoire par çi, une queue par là... # origami: poisson # flag: poisson_plie # give: daurade # drop: idee_poisson
+    Une daurade royale toute fraîche !
   - else:
     # qui: heros
-    Ce poisson a plutôt l'air d'une limande. Je recommencerai.
+    On distingue à peine les nageoires de la queue... Je rééssaierai plus tard.
 }
 -> DONE
 
 
 // Le papier doré serti de gemmes, sur le banc. Il ne se plie qu'une fois la
 // requête de la reine entendue.
-// [A ECRIRE]
 === jardin_papier_couronne ===
+# qui: heros
+Un papier doré serti de gemmes précieuses. 
 { not has_idee_couronne:
-    # qui: heros
-    Un papier doré, incrusté de petites gemmes. Bien trop précieux pour en faire n'importe quoi.
     -> DONE
 }
-# qui: heros
-Un papier doré, serti de gemmes : de quoi plier une couronne digne de Sa Majesté.
+Parfait pour la couronne de Sa Majesté.
 -> jardin_couronne_lancement
 
 === jardin_couronne_lancement ===
 # puzzle: couronne # then: jardin_couronne_issue
 -> DONE
 
-// [A ECRIRE]
 === jardin_couronne_issue ===
 { flag_couronne_resolu:
     # qui: heros
     Et un dernier pli pour les pointes... # origami: couronne # flag: couronne_pliee # give: couronne # drop: idee_couronne
-    Une couronne toute neuve ! Sa Majesté va être ravie.
+    Une couronne toute rutilante! Voilà qui va faire plaisir à Sa Majesté.
   - else:
     # qui: heros
-    Pas facile de plier une couronne sans l'avoir sur la tête. Je réessaierai.
+    Difficile d'imaginer Le Libou Des Bois Jolis avec ça sur la tête. Je réésaierai.
 }
 -> DONE
 
@@ -1525,24 +1523,50 @@ Un papier doré, serti de gemmes : de quoi plier une couronne digne de Sa Majest
 // La wyvern, dans un coin du jardin. Elle parle du cœur par énigmes, et c'est
 // d'elle que vient l'indice — la feuille et le modèle. Revenue la voir, elle le
 // redit : le joueur n'a que sa mémoire pour le garder.
-// [A ECRIRE]
 === jardin_wyvern ===
 { flag_wyvern_indices:
-    # qui: wyvern
-    Ce que deux cœurs fâchés ne savent plus se dire, un seul, rouge comme ma peau, le dira pour eux.
-    -> DONE
+    -> revoir_wyvern
 }
 # qui: heros
-Euh... Bonjour ? Je ne crois pas vous connaître.
+Crôa crôa ? Bonjour, mystérieux visiteur. Je ne crois pas avoir déjà eu le plaisir de vous rencontrer au château ?
 # qui: wyvern
-Moi, je te connais, petit plieur. Je veille sur ce jardin depuis bien avant ta naissance.
-Deux félins se déchirent sous ce toit. Ni griffes ni couronne ne les réuniront.
-Il faut plier ce qui bat : deux lobes et une pointe, rouge comme ma peau.
+Verte et élastique. Est-ce véritablement ce que Lumière me fait parvenir ?
 # qui: heros
-Deux lobes et une pointe... Rouge... Un cœur ?
+Heu... je ne vous suis pas très bien. C'est qui Lumière ?
 # qui: wyvern
-Le papier viendra de la reine. Le reste viendra de toi. # flag: wyvern_indices
+La Lumière apporte la vision verte et élastique. / Le Temps enjoint la Parole.
+La vision verte est élastique est le Flux. / Le Flux est il prêt pour la Parole ?
+# qui: heros
+Ok, je suppose que c'est moi "verte et élastique". Je vous écoute.
+-> indice_wyvern ->
+# qui: heros
+Okay... Je vous remercie pour cette histoire passionante.
+# qui: narrateur
+Je vais m'éloigner de ce personnage, il me fait un peu peur... # flag: wyvern_indices
 -> DONE
+
+=== revoir_wyvern ===
+# qui: wyvern
+Le Flux reflue vers la Parole. / Le Flux s'est il disputé avec la Mémoire ?
+# qui: heros
++ [C'est une façon de voir les choses.]
+  -> indice_wyvern ->
+  # qui: heros
+  Merci, mysterieux visiteur.
++ [Non, mais merci de vous en inquiéter.]
+- -> DONE
+
+
+=== indice_wyvern ===
+# qui: wyvern
+Le Flux reçois la Parole. / Le Flux éteindra la Discorde.
+Pour que s'épanouisse la Discorde, naquit la Tromperie.
+La Tromperie elle même naquit de trois géniteurs: le Noyau, la Terre et le Ciel.
+La Discorde a séparé la Terre et le Ciel du Noyau.
+Le Flux mêlera a nouveau le Ciel et la Terre. / Pour ce faire il créera le Moteur.
+Le Moteur pulsera pour mettre fin à la Discorde. / Et brillera des teintes de la Parole.
+Le Flux a reçu la Parole. / La Parole peut s'estomper.
+->->
 
 
 // ================================================================

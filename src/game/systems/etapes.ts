@@ -323,7 +323,6 @@ export const CHAPITRES: Chapitre[] = [
       },
     ],
   },
-  // [A ECRIRE] noms du chapitre et des étapes.
   {
     nom: 'Chapitre 3 — la salle du trône',
     etapes: [

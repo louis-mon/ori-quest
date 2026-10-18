@@ -45,7 +45,6 @@ export const PERSONNAGES: Record<string, Personnage> = {
   // Chapitre 3. Les fichiers gardent le nom que l'artiste leur a donné.
   lune_chat: { nom: 'Chat Mal Luné', portrait: 'assets/personnages/lune_chat.png' },
   wyvern: { nom: 'Wyverne énigmatique', portrait: 'assets/personnages/hydre.png' },
-  // [A ECRIRE] la fiche ne donne pas son nom dans le jeu.
   elephant: { nom: 'Cheffe Éléphant', portrait: 'assets/personnages/elephant_humain.png' },
 };
 
