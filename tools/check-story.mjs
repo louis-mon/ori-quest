@@ -32,9 +32,12 @@ const racine = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const json = readFileSync(resolve(racine, 'src/generated/story.json'), 'utf8');
 const source = readFileSync(resolve(racine, 'content/story.ink'), 'utf8');
 
-const KNOTS = [...source.matchAll(/^=== (\w+) ===/gm)]
-  .map((m) => m[1])
-  .filter((n) => n !== '_unused');
+// Un tunnel (`->->`) n'est jamais un point d'entrée : lancé seul, son retour ne
+// trouve personne à qui rendre la main, et ink le signale comme un cul-de-sac.
+// Il est exploré depuis les knots qui l'appellent.
+const KNOTS = [...source.matchAll(/^=== (\w+) ===\n([\s\S]*?)(?=^=== |(?![\s\S]))/gm)]
+  .filter(([, nom, corps]) => nom !== '_unused' && !/^\s*->->\s*$/m.test(corps))
+  .map(([, nom]) => nom);
 const VARS = [...source.matchAll(/^VAR (\w+) = /gm)].map((m) => m[1]);
 
 const TIRAGES = Number(process.argv[2] ?? 150);
@@ -75,6 +78,14 @@ function appliquer(etat, cle, val) {
 
 const trouves = [];
 
+// Une seule instance, remise à zéro à chaque branche : reconstruire une `Story`
+// reparse tout le JSON, et l'exploration en fait des dizaines de milliers.
+const story = new Story(json);
+let panne = null;
+story.onError = (m) => {
+  panne = m;
+};
+
 // Une exploration = un knot d'entrée et un état de départ. On rejoue le chemin
 // de choix déjà connu, puis on empile les branches du point atteint.
 function explorer(knotDepart, etatDepart, etiquette) {
@@ -83,11 +94,8 @@ function explorer(knotDepart, etatDepart, etiquette) {
 
   while (pile.length && gardefou-- > 0) {
     const chemin = pile.pop();
-    const story = new Story(json);
-    let panne = null;
-    story.onError = (m) => {
-      panne = m;
-    };
+    story.ResetState();
+    panne = null;
 
     const etat = { ...etatDepart };
     poser(story, etat);
