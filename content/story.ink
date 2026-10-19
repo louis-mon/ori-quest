@@ -1018,8 +1018,8 @@ J'appréhende un peu...
 Qu'il est bon de revenir chez soi. Crôa crôa
 Mais l'ambiance a l'air particulièrement tendue.
 # qui: narrateur
-Chacun d'un coté de la salle, le Petit Chat et le Chat Mal Luné se toisent en feulant, le poil hérissé.
-La reine est perchée sur son trône et semble excédée au plus haut point. 
+Chacun d'un côté de la salle, le Petit Chat et le Chat Mal Luné se toisent en feulant, le poil hérissé.
+La reine est perchée sur son trône et semble excédée au plus haut point.
 # qui: heros
 Je devrais aller saluer Sa Majesté.
 # flag: trone_vu
@@ -1037,26 +1037,26 @@ Je devrais aller saluer Sa Majesté.
     # qui: heros
     Votre Majesté, j'ai retrouvé et replié votre couronne.
     # qui: hibou
-    Hou hou ! Ma magnifique couronne toute rutilante! # drop: couronne
-    Qu'elle est belle et brille de milles feux!
-    Vite, coiffe moi.
+    Hou hou ! Ma magnifique couronne toute rutilante ! # drop: couronne
+    Qu'elle est belle et brille de mille feux !
+    Vite, coiffe-moi.
     # qui: narrateur
     Je dépose la couronne sur la tête royale.
     # qui: heros
-    Vous être à nouveau ravissante, Votre Majesté le Libou Des Bois Jolis.
+    Vous êtes à nouveau ravissante, Votre Majesté Le Libou Des Bois Jolis.
     # qui: hibou
-    Qu'entend-je ? Je n'était pas ravissante avant ?
-    Ton voyage t'as fait oublier les bonnes manière, Grenouille.
+    Qu'entends-je ? Je n'étais pas ravissante avant ?
+    Ton voyage t'a fait oublier les bonnes manières, Grenouille.
     # qui: heros
-    Non non, excusez cette maladresse. Je voulais souligner la beauté de votre Magnificience accordée à vos accessoires.
+    Non non, excusez cette maladresse. Je voulais souligner la beauté de Votre Magnificence accordée à vos accessoires.
     # qui: hibou
-    Tu t'enfonces mon cher origamiste. Mais ce n'est pas grave, tu es doué, je vais t'excuser pour cette fois.
+    Tu t'enfonces, mon cher origamiste. Mais ce n'est pas grave, tu es doué, je vais t'excuser pour cette fois.
     Et je voudrais te témoigner ma reconnaissance pour ton aide à résoudre cette crise.
-    Choisis donc parmis mes papiers d'origami les plus précieux.
+    Choisis donc parmi mes papiers d'origami les plus précieux.
     # qui: narrateur
     Sa Majesté Le Libou Des Bois Jolis sort d'un coffre finement ouvragé quatre feuilles scintillantes et les dépose au centre de la pièce. # flag: couronne_rendue
     # qui: hibou
-    Peux-être pourrais tu en faire quelque chose pour apaiser toute cette tension.
+    Peut-être pourrais-tu en faire quelque chose pour apaiser toute cette tension.
   - flag_couronne_rendue:
     # qui: hibou
     Fais bon usage de ces papiers d'origami, ce sont les plus précieux du royaume.
@@ -1076,19 +1076,19 @@ Me voici rentré de voyage et je suis très heureux de vous retrouver.
 Hou hou ! Il était grand temps ! J'ai besoin de ton aide, tout va mal ici.
 Je n'ai plus de couronne, et les deux chats se disputent sans cesse.
 # qui: heros
-Croa Croa. Je constate en effet une certaine agitation depuis mon retour.
-Accessoirement, si je puis me permettre, Votre Majesté, un certain chaos règne à l'exterieur du chateau.
-J'ai pu régler une partie de la situation, mais vous devriez allez vérifier.
+Crôa crôa. Je constate en effet une certaine agitation depuis mon retour.
+Accessoirement, si je puis me permettre, Votre Majesté, un certain chaos règne à l'extérieur du château.
+J'ai pu régler une partie de la situation, mais vous devriez aller vérifier.
 # qui: hibou
-Quelle insolence! Tu sous entends peux-être que je gouverne mal mon royaume ?
+Quelle insolence ! Tu sous-entends peut-être que je gouverne mal mon royaume ?
 Sans ma couronne je ne peux rien faire de toute façon.
 # qui: heros
-Veuiller excuser ma formulation, Votre Majesté le Libou Des Bois Jolis.
+Veuillez excuser ma formulation, Votre Majesté Le Libou Des Bois Jolis.
 Bien sûr, il vous faut vos attributs royaux, sans cela que penseraient les habitants ?
 # qui: hibou
-Hou hou! Aide moi donc à retrouver ma couronne pour te faire pardonner, au lieu de marmoner des plates excuses.
+Hou hou ! Aide-moi donc à retrouver ma couronne pour te faire pardonner, au lieu de marmonner de plates excuses.
 # qui: narrateur
-Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle # give: idee_couronne
+Je pense me rappeler à quoi ressemble la fameuse couronne. # flag: libou_parle # give: idee_couronne
 -> DONE
 
 
@@ -1105,14 +1105,14 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
     -> trone_invitation
   - flag_chat_faim:
     # qui: chat
-    Miaou... J'ai l'estomac dans les coussinets. / Donnez moi quelque chose, même du panais.
+    Miaou... J'ai l'estomac dans les coussinets. / Donnez-moi quelque chose, même du panais.
   - else:
     # qui: chat
-    Miaou! Regarde donc cet individu malsain! / Qui complote de noirs desseins.
-    Et j'ai si faim! Que fais donc le service ? / As-il lui aussi été gagné par le vice ?
+    Miaou ! Regarde donc cet individu malsain ! / Qui complote de noirs desseins.
+    Et j'ai si faim ! Que fait donc le service ? / A-t-il lui aussi été gagné par le vice ?
     # qui: heros
-    Mais tu viens de t'enfiler une bouteille de lait entière ? Ton apétit n'a donc pas de limites ?
-    Ne veux tu pas t'expliquer avec Le Chat Mal Luné pour régler cette situation ?
+    Mais tu viens de t'enfiler une bouteille de lait entière ? Ton appétit n'a donc pas de limites ?
+    Ne veux-tu pas t'expliquer avec le Chat Mal Luné pour régler cette situation ?
     # qui: chat
     Ce n'est pas ça qui va me remplir l'estomac. / Vite, avant qu'il n'arrive un drama.
     # qui: narrateur
@@ -1139,20 +1139,20 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
     Va-t'en. Sauf si tu m'apportes à manger.
   - else:
     # qui: lune_chat
-    Maww! Tiens tiens tiens mais qui voilà ? Tu viens m'apporter mon repas ?
+    Maww ! Tiens, tiens, tiens, mais qui voilà ? Tu viens m'apporter mon repas ?
     # qui: heros
-    C'est une curieuse façon de me saluer Chat Mal Luné!
-    Vas tu cesser tes enfantillages et remettre un peu d'ordre ?
+    C'est une curieuse façon de me saluer, Chat Mal Luné !
+    Vas-tu cesser tes enfantillages et remettre un peu d'ordre ?
     # qui: lune_chat
     Tsss... J'arrêterai peut-être quand ce précieux petit chouchou fera moins le malin.
-    Regarde le, là, à se dandiner aux pieds de la Reine. Il obtient toutes ses faveurs et moi je n'ai rien.
+    Regarde-le, là, à se dandiner aux pieds de la reine. Il obtient toutes ses faveurs et moi je n'ai rien.
     J'ai même pas eu mon repas, j'ai les crocs.
     # qui: heros
     Et tu crois que c'est comme ça que la reine va mieux t'apprécier ? En dépliant tous ses origamis ?
-    D'ailleurs si tu n'as pas ton repas c'est à cause du bazar que tu as causé, le Petit Chat a aussi l'air de trépigner.
+    D'ailleurs, si tu n'as pas ton repas, c'est à cause du bazar que tu as causé, le Petit Chat a aussi l'air de trépigner.
     # qui: lune_chat
     J'ai pas besoin de tes leçons de morale, la grenouille.
-    Maintenant dégerpis avant que ça soit toi, mon repas. Mawww! # flag: lune_chat_parle
+    Maintenant déguerpis avant que ça soit toi, mon repas. Mawww ! # flag: lune_chat_parle
 }
 -> DONE
 
@@ -1162,13 +1162,13 @@ Je pense me rapeller à quoi ressemble la fameuse couronne. # flag: libou_parle 
 // donc rien ici ne le commente.
 === trone_invitation ===
 # qui: heros
-Le repas est prêt mes chatons! La Cheffe Elephant vous attend à la cuisine.
+Le repas est prêt, mes chatons ! La Cheffe Éléphant vous attend à la cuisine.
 # qui: chat
-Hummm quelle délicieuse odeur de poisson! / Vite, avant un larcin de ce vilain garçon.
+Hummm, quelle délicieuse odeur de poisson ! / Vite, avant un larcin de ce vilain garçon.
 # qui: lune_chat
-Hé toi, pas intérêt à me piquer ma part!
+Hé toi, pas intérêt à me piquer ma part !
 # qui: heros
-Calmez-vous, va y'en avoir pour tout le monde. # flag: chats_invites
+Calmez-vous, va y en avoir pour tout le monde. # flag: chats_invites
 -> DONE
 
 
@@ -1199,11 +1199,11 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
 + [plier de l'herbe à chat]
     Ça les détendrait bien, mais ça ne va pas régler le fond du problème.
 + [plier des oiseaux]
-    Les pauvres oiseaux, ils vont se faire plumer par ces deux là.
-    Heureusement qu'ils n'osent pas s'en prendre à la reine d'ailleurs.
+    Les pauvres oiseaux, ils vont se faire plumer par ces deux-là.
+    Heureusement qu'ils n'osent pas s'en prendre à la reine, d'ailleurs.
 + [plier un cœur]
     { couleur == "rouge":
-        Un coeur scintillant pour symboliser la paix qui devrait les réunir.
+        Un cœur scintillant pour symboliser la paix qui devrait les réunir.
         -> trone_coeur_lancement
     }
     Ça part d'une bonne idée, mais il y a quelque chose qui ne va pas.
@@ -1223,11 +1223,11 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
 { flag_coeur_resolu:
     # qui: heros
     J'ai pris mon temps pour ne pas gâcher ce beau papier. # origami: coeur # flag: coeur_plie
-    Un coeur qui palpite d'amour.
-    { not flag_chats_rassasies: Encore faut il attirer l'attention des chats dessus. Ils n'ont pas la tête à ça pour l'instant }
+    Un cœur qui palpite d'amour.
+    { not flag_chats_rassasies: Encore faut-il attirer l'attention des chats dessus. Ils n'ont pas la tête à ça pour l'instant. }
   - else:
     # qui: heros
-    Le cœur n'y est pas... plus tard peux-être.
+    Le cœur n'y est pas... plus tard peut-être.
 }
 -> DONE
 
@@ -1235,7 +1235,7 @@ Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâc
 // d'elle-même et le décor ne répond plus.
 === trone_coeur_plie ===
 # qui: narrateur
-Le coeur rouge incrusté d'or étincellant est pour l'instant ignoré par les deux chats.
+Le cœur rouge incrusté d'or étincelant est pour l'instant ignoré par les deux chats.
 -> DONE
 
 
@@ -1249,7 +1249,7 @@ Le coeur rouge incrusté d'or étincellant est pour l'instant ignoré par les de
 // l'autre.
 === trone_retrouvailles ===
 # qui: narrateur
-Le coeur rouge incrusté d'or étincellant capte enfin l'attention des deux chats.
+Le cœur rouge incrusté d'or étincelant capte enfin l'attention des deux chats.
 -> DONE
 
 // Le dernier temps de la scène finale : voir `trone_retrouvailles`.
@@ -1258,81 +1258,81 @@ Le coeur rouge incrusté d'or étincellant capte enfin l'attention des deux chat
 // l'écran de fin ne vient qu'après la dernière réplique.
 === trone_reconciliation ===
 # qui: narrateur
-Les chats fixent le coeur en silence un petit moment. Ils n'osent pas trop se regarder directement encore.
-De temps à autre, l'un rique un coup d'oeuil furtif vers l'autre.
+Les chats fixent le cœur en silence un petit moment. Ils n'osent pas trop se regarder directement encore.
+De temps à autre, l'un risque un coup d'œil furtif vers l'autre.
 Je vais leur laisser prendre le temps qu'il faudra.
 # qui: chat
-Miaou... Le Maître origamiste nous a réuni. / Mais en bonnes paroles me voici démuni.
+Miaou... Le Maître Origamiste nous a réunis. / Mais en bonnes paroles me voici démuni.
 # qui: lune_chat
-Votre Majesté. Expliquez moi donc la raison de votre rejet.
+Votre Majesté. Expliquez-moi donc la raison de votre rejet.
 Profitons de cette atmosphère apaisée pour nous expliquer.
 # qui: hibou
-Hou hou! Tu as déplié mes origami préférés! Et tu oses encores roder dans ce château.
+Hou hou ! Tu as déplié mes origamis préférés ! Et tu oses encore rôder dans ce château.
 # qui: lune_chat
-J'ai agi ainsi dans un moment de colère. Vous n'avez pas répondu à ma question, votre Majesté.
-Je continuerai à déplier tout ce royaume s'il le faut, tant que je n'aurais pas d'explications.
+J'ai agi ainsi dans un moment de colère. Vous n'avez pas répondu à ma question, Votre Majesté.
+Je continuerai à déplier tout ce royaume s'il le faut, tant que je n'aurai pas d'explications.
 # qui: hibou
-Hou hou ! Des menaces! Comment osez vous! Gardes, sortez ce malotru!
+Hou hou ! Des menaces ! Comment osez-vous ! Gardes, sortez ce malotru !
 # qui: lune_chat
-Ha ha! Je les ai déplié les gardes, et le Gros Diplo a peur d'un petit chien.
-Un coeur scintillant ne vas pas suffire à laver vos affronts.
+Ha ha ! Je les ai dépliés, les gardes, et le Gros Diplo a peur d'un petit chien.
+Un cœur scintillant ne va pas suffire à laver vos affronts.
 # qui: narrateur
-Une lueur maléfique dans le regard, Le Chat Mal Luné s'apprête à partir.
+Une lueur maléfique dans le regard, le Chat Mal Luné s'apprête à partir.
 # qui: chat
-Non! Attends, je t'en conjure, mon frère adoré! / C'est ma faute si cette situation s'est déteriorée.
+Non ! Attends, je t'en conjure, mon frère adoré ! / C'est ma faute si cette situation s'est détériorée.
 # qui: lune_chat
-Maw! J'ai assez attendu, Petit Chat. Tes mots doux et belles paroles ne valent plus grand chose.
+Maw ! J'ai assez attendu, Petit Chat. Tes mots doux et belles paroles ne valent plus grand-chose.
 # qui: heros
-Je ne savais pas que vous étiez frères! Chat Mal Luné, écoutons ce qu'à à dire le Petit Chat.
+Je ne savais pas que vous étiez frères ! Chat Mal Luné, écoutons ce qu'a à dire le Petit Chat.
 Cette fois, j'ai l'impression qu'il a quelque chose d'important à exprimer.
 # qui: lune_chat
-Très bien. Viens-en au fait alors, et évite nous tes tournures alambiquées.
+Très bien. Viens-en au fait, alors, et évite-nous tes tournures alambiquées.
 # qui: chat
 Je ne vais pas le cacher plus longtemps. / De vous dire la vérité, il est grand temps.
-Chat Mal Luné, je dois l'avouer, j'au fauté. / Une grand injustice je dois maintenant ôter.
+Chat Mal Luné, je dois l'avouer, j'ai fauté. / Une grande injustice je dois maintenant ôter.
 # qui: lune_chat
-Mawww! Cesse ton bavardage et crache le morceau, tu me fais tourner en bourrique.
+Mawww ! Cesse ton bavardage et crache le morceau, tu me fais tourner en bourrique.
 # qui: hibou
-Hou hou! Sois gentil avec le Petit Chat je t'en prie!
+Hou hou ! Sois gentil avec le Petit Chat, je t'en prie !
 Petit Chat, il est vrai qu'il est maintenant temps de nous éclairer.
 Même ma patience a ses limites.
 # qui: chat
-D'accord, d'accord, ne vous fâchez pas! / Je vais accomplir votre volonté de ce pas!
-Votre majesté, la couronne disparue / Et autres mystères incongrus.
-Le Chat Mal Luné est innocent en réalité / C'est à moi que revient la faute en vérité!
+D'accord, d'accord, ne vous fâchez pas ! / Je vais accomplir votre volonté de ce pas !
+Votre Majesté, la couronne disparue / Et autres mystères incongrus.
+Le Chat Mal Luné est innocent en réalité / C'est à moi que revient la faute en vérité !
 # qui: hibou
-Comment!!! Qu'entends-je ? Hou hou hou!
+Comment !!! Qu'entends-je ? Hou hou hou !
 # qui: narrateur
-Le Chat Mal Luné observe en silence, le regard sévere.
+Le Chat Mal Luné observe en silence, le regard sévère.
 # qui: chat
-J'avais caché ces objects précieux / Afin de semer le doute à vos yeux
-Et instiller, par exercice de mes talents de conteur, / Que ces méfait, Le Chat Mal Luné puisse en être l'auteur.
+J'avais caché ces objets précieux / Afin de semer le doute à vos yeux
+Et instiller, par exercice de mes talents de conteur, / Que ces méfaits, le Chat Mal Luné puisse en être l'auteur.
 Vous allez maintenant me demander / Pourquoi avoir eu pareille idée.
 # qui: lune_chat
 ...
 # qui: hibou
 J'espère que tu as de bonnes explications à fournir.
 # qui: chat
-À mes demandes de tendresse et d'amour / Tout le château était desespérément sourd.
-Sur lui était braqué toute la lumière / Du haut de sa lune il faisait le fier.
-C'est ainsi que rongé par ce préjudice / J'ai voulu mettre fin à cette injustice.
+À mes demandes de tendresse et d'amour / Tout le château était désespérément sourd.
+Sur lui était braquée toute la lumière / Du haut de sa lune il faisait le fier.
+C'est ainsi que, rongé par ce préjudice, / J'ai voulu mettre fin à cette injustice.
 Le faire tomber de sa lune / Pour alléger mon infortune.
 # qui: lune_chat
-Maww... C'est bon on a compris, Petit Chat.
+Maww... C'est bon, on a compris, Petit Chat.
 Je reconnais que j'avais un peu tendance à attirer l'attention sur moi.
 # qui: hibou
-Hou hou! La faute me reviens aussi à vrai dire.
+Hou hou ! La faute me revient aussi, à vrai dire.
 Je devrais vous considérer de manière plus juste à l'avenir.
 # qui: chat
-Miaou... Pardonne moi, mon ami de toujours / De t'avoir joué ce mauvais tour.
+Miaou... Pardonne-moi, mon ami de toujours, / De t'avoir joué ce mauvais tour.
 # qui: lune_chat
-Ne n'en fais pas frérot, je te dois aussi des excuses.
+Ne t'en fais pas, frérot, je te dois aussi des excuses.
 Allons nous promener ensemble comme autrefois et oublions tout ça.
 # qui: hibou
 Quel soulagement, la paix enfin revenue dans mon royaume.
-Grâce à toi, mon meilleur Origamiste royal.
+Grâce à toi, mon meilleur origamiste royal.
 # qui: heros
-Croa croa! Tout le plaisir est pour moi, Votre Majesté le Libou des bois jolis. # flag: histoire_finie
+Crôa crôa ! Tout le plaisir est pour moi, Votre Majesté Le Libou Des Bois Jolis. # flag: histoire_finie
 # fin: histoire
 -> DONE
 
@@ -1345,8 +1345,8 @@ Croa croa! Tout le plaisir est pour moi, Votre Majesté le Libou des bois jolis.
 // Joué automatiquement à la première arrivée dans la scène (CuisineScene.create).
 === cuisine_arrivee ===
 # qui: narrateur
-Hmmmm... Quelle plaisir de retrouver ces bonnes odeurs de cuisine!
-Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Eléphant.
+Hmmmm... Quel plaisir de retrouver ces bonnes odeurs de cuisine !
+Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Éléphant.
 # flag: cuisine_vue
 -> DONE
 
@@ -1360,37 +1360,37 @@ Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Eléph
 {
   - flag_chats_rassasies:
     # qui: elephant
-    Ils n'ont pas laissé une arête dans leur assiete! Ils devaient être affamés.
+    Ils n'ont pas laissé une arête dans leur assiette ! Ils devaient être affamés.
   - flag_chats_invites:
     # qui: elephant
-    J'espère qu'ils vont apprécier mon repas!
+    J'espère qu'ils vont apprécier mon repas !
   - flag_repas_pret:
     # qui: elephant
     C'est prêt, il n'y a plus qu'à faire venir les chats.
   - has_daurade:
     # qui: heros
-    Comme tu me l'a demandé, une daurade royale fraîchement pliée!
+    Comme tu me l'as demandé, une daurade royale fraîchement pliée !
     # qui: elephant
-    Qu'elle a l'air charnue! Les chats vont se régaler avec ça.
-    Donne moi un instant pour la préparer. # drop: daurade
+    Qu'elle a l'air charnue ! Les chats vont se régaler avec ça.
+    Donne-moi un instant pour la préparer. # drop: daurade
     # qui: narrateur
-    En jouant adroitemant de sa trompe, la Cheffe Eléphant sublime la daurade avec diverse épices.
+    En jouant adroitement de sa trompe, la Cheffe Éléphant sublime la daurade avec diverses épices.
     # qui: elephant
     Voilà, une daurade royale digne des chats royaux prête à être dégustée.
     Tu peux faire venir les chats. # flag: repas_pret
   - has_carpe:
     # qui: heros
-    J'ai trouvé ce joli poisson. Les chats vont le trouver apétissants non ?
+    J'ai trouvé ce joli poisson. Les chats vont le trouver appétissant, non ?
     # qui: elephant
-    Mais... c'est une carpe de la fontaine des jardins de Sa Majesté!
+    Mais... c'est une carpe de la fontaine des jardins de Sa Majesté !
     Ça ne se mange pas, c'est un poisson décoratif.
     # qui: heros
-    Ah tu as raison, où avais-je la tête... Je vais le remettre à sa place. # drop: carpe
-    Quel poisson serais plus adapté ?
+    Ah, tu as raison, où avais-je la tête... Je vais le remettre à sa place. # drop: carpe
+    Quel poisson serait plus adapté ?
     # qui: elephant
     Pour les chats de la reine, une daurade royale devrait faire l'affaire.
     # qui: narrateur
-    Je vais retenir l'idée de la daurade royale: ça pourrais me servir. # flag: cheffe_daurade # give: idee_poisson
+    Je vais retenir l'idée de la daurade royale : ça pourrait me servir. # flag: cheffe_daurade # give: idee_poisson
   - flag_cheffe_daurade:
     # qui: elephant
     C'est une daurade royale qu'il me faut. Ces chats sont gâtés et ont le palais fin.
@@ -1399,7 +1399,7 @@ Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Eléph
     Sans poisson, je ne vais pas pouvoir cuisiner grand chose...
   - else:
     # qui: heros
-    Salut Cheffe Elephant! Ça donne faim toutes ces bonnes odeurs! Croa croa
+    Salut, Cheffe Éléphant ! Ça donne faim, toutes ces bonnes odeurs ! Crôa crôa
     # qui: elephant
     Oh, tu es de retour. Hélas, ces bonnes odeurs ne sont qu'un souvenir.
     Sans ingrédients dignes de ce nom, je ne peux rien cuisiner.
@@ -1419,11 +1419,11 @@ Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Eléph
 # qui: narrateur
 Sans prêter attention l'un à l'autre, les chats dévorent le délicat poisson.
 # qui: chat
-Miaou ! Quel festin, quel délice!, / En manquer serait un supplice.
+Miaou ! Quel festin, quel délice ! / En manquer serait un supplice.
 # qui: lune_chat
 Mmmh. Pas mauvais.
 # qui: narrateur
-Maintenant q'ils ont la panse bien remplie, ils seront peux être dans de meilleures dispositions.
+Maintenant qu'ils ont la panse bien remplie, ils seront peut-être dans de meilleures dispositions.
 Les chats retournent dans la salle du trône. # flag: chats_rassasies
 -> DONE
 
@@ -1436,7 +1436,7 @@ Les chats retournent dans la salle du trône. # flag: chats_rassasies
 // Joué automatiquement à la première arrivée dans la scène (JardinScene.create).
 === jardin_arrivee ===
 # qui: heros
-Ahhhhh.... Quel lieu paisible... J'ai envie de faire une petite pause ici et d'oublier toutes ces histoires.
+Ahhhhh... Quel lieu paisible... J'ai envie de faire une petite pause ici et d'oublier toutes ces histoires.
 Tiens ? Une curieuse créature est là à m'observer.
 # flag: jardin_vu
 -> DONE
@@ -1448,19 +1448,19 @@ Tiens ? Une curieuse créature est là à m'observer.
 {
   - has_carpe:
     # qui: heros
-    J'ai déjà une carpe. Je devrait aller voir la Cheffe Élephant.
+    J'ai déjà une carpe. Je devrais aller voir la Cheffe Éléphant.
   - flag_cheffe_daurade:
     # qui: heros
-    Ces carpes sont des poissons d'ornement, les chats n'en voudrons pas.
+    Ces carpes sont des poissons d'ornement, les chats n'en voudront pas.
   - flag_cheffe_poisson:
     # qui: heros
-    Oh! des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit.
+    Oh ! Des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit.
     Si ces poissons sont aussi bons que beaux, les chats vont être ravis.
     # qui: narrateur
     D'un coup de langue, j'attrape une carpe qui passait par là. # give: carpe
   - else:
     # qui: narrateur
-    Oh! des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit.
+    Oh ! Des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit.
 }
 -> DONE
 
@@ -1484,11 +1484,11 @@ Un papier de bonne qualité, légèrement irisé, aux reflets dorés et argenté
 === jardin_poisson_issue ===
 { flag_poisson_resolu:
     # qui: heros
-    Une nageoire par çi, une queue par là... # origami: poisson # flag: poisson_plie # give: daurade # drop: idee_poisson
+    Une nageoire par-ci, une queue par là... # origami: poisson # flag: poisson_plie # give: daurade # drop: idee_poisson
     Une daurade royale toute fraîche !
   - else:
     # qui: heros
-    On distingue à peine les nageoires de la queue... Je rééssaierai plus tard.
+    On distingue à peine les nageoires de la queue... Je réessaierai plus tard.
 }
 -> DONE
 
@@ -1497,7 +1497,7 @@ Un papier de bonne qualité, légèrement irisé, aux reflets dorés et argenté
 // requête de la reine entendue.
 === jardin_papier_couronne ===
 # qui: heros
-Un papier doré serti de gemmes précieuses. 
+Un papier doré serti de gemmes précieuses.
 { not has_idee_couronne:
     -> DONE
 }
@@ -1512,10 +1512,10 @@ Parfait pour la couronne de Sa Majesté.
 { flag_couronne_resolu:
     # qui: heros
     Et un dernier pli pour les pointes... # origami: couronne # flag: couronne_pliee # give: couronne # drop: idee_couronne
-    Une couronne toute rutilante! Voilà qui va faire plaisir à Sa Majesté.
+    Une couronne toute rutilante ! Voilà qui va faire plaisir à Sa Majesté.
   - else:
     # qui: heros
-    Difficile d'imaginer Le Libou Des Bois Jolis avec ça sur la tête. Je réésaierai.
+    Difficile d'imaginer Le Libou Des Bois Jolis avec ça sur la tête. Je réessaierai.
 }
 -> DONE
 
@@ -1535,35 +1535,35 @@ Verte et élastique. Est-ce véritablement ce que Lumière me fait parvenir ?
 Heu... je ne vous suis pas très bien. C'est qui Lumière ?
 # qui: wyvern
 La Lumière apporte la vision verte et élastique. / Le Temps enjoint la Parole.
-La vision verte est élastique est le Flux. / Le Flux est il prêt pour la Parole ?
+La vision verte et élastique est le Flux. / Le Flux est-il prêt pour la Parole ?
 # qui: heros
-Ok, je suppose que c'est moi "verte et élastique". Je vous écoute.
+Ok, je suppose que c'est moi « verte et élastique ». Je vous écoute.
 -> indice_wyvern ->
 # qui: heros
-Okay... Je vous remercie pour cette histoire passionante.
+Okay... Je vous remercie pour cette histoire passionnante.
 # qui: narrateur
 Je vais m'éloigner de ce personnage, il me fait un peu peur... # flag: wyvern_indices
 -> DONE
 
 === revoir_wyvern ===
 # qui: wyvern
-Le Flux reflue vers la Parole. / Le Flux s'est il disputé avec la Mémoire ?
+Le Flux reflue vers la Parole. / Le Flux s'est-il disputé avec la Mémoire ?
 # qui: heros
 + [C'est une façon de voir les choses.]
   -> indice_wyvern ->
   # qui: heros
-  Merci, mysterieux visiteur.
+  Merci, mystérieux visiteur.
 + [Non, mais merci de vous en inquiéter.]
 - -> DONE
 
 
 === indice_wyvern ===
 # qui: wyvern
-Le Flux reçois la Parole. / Le Flux éteindra la Discorde.
+Le Flux reçoit la Parole. / Le Flux éteindra la Discorde.
 Pour que s'épanouisse la Discorde, naquit la Tromperie.
-La Tromperie elle même naquit de trois géniteurs: le Noyau, la Terre et le Ciel.
+La Tromperie elle-même naquit de trois géniteurs : le Noyau, la Terre et le Ciel.
 La Discorde a séparé la Terre et le Ciel du Noyau.
-Le Flux mêlera a nouveau le Ciel et la Terre. / Pour ce faire il créera le Moteur.
+Le Flux mêlera à nouveau le Ciel et la Terre. / Pour ce faire il créera le Moteur.
 Le Moteur pulsera pour mettre fin à la Discorde. / Et brillera des teintes de la Parole.
 Le Flux a reçu la Parole. / La Parole peut s'estomper.
 ->->

@@ -615,7 +615,7 @@ test(
 // Les deux temps se reconnaissent à leur première réplique : à reprendre quand
 // `story.ink` les réécrit.
 const RETROUVAILLES = "capte enfin l'attention des deux chats";
-const AVEUX = 'Les chats fixent le coeur en silence';
+const AVEUX = 'Les chats fixent le cœur en silence';
 test(
   'chapitre-3',
   async (page, dire) => ({
