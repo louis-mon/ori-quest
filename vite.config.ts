@@ -215,13 +215,13 @@ function enregistrerDecoupage(): Plugin {
         let corps = '';
         req.on('data', (bout) => {
           corps += bout;
-          // Une vingtaine de polygones de quelques sommets : au-delà, ce n'est
-          // pas l'éditeur qui parle.
+          // Quelques dizaines de polygones de quelques sommets : au-delà, ce
+          // n'est pas l'éditeur qui parle.
           if (corps.length > 64_000) req.destroy();
         });
-        req.on('end', () => {
+        req.on('end', async () => {
           try {
-            const decoupage = lireCorpsDecoupage(JSON.parse(corps));
+            const decoupage = await lireCorpsDecoupage(JSON.parse(corps));
             writeFileSync(decoupage.fichier, rendreDecoupage(decoupage));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true }));
@@ -244,7 +244,7 @@ function enregistrerDecoupage(): Plugin {
         });
         req.on('end', async () => {
           try {
-            const rapport = await analyserDecoupage(lireCorpsDecoupage(JSON.parse(corps)));
+            const rapport = await analyserDecoupage(await lireCorpsDecoupage(JSON.parse(corps)));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true, ...(rapport as object) }));
           } catch (err) {
@@ -279,13 +279,6 @@ function suivreLesDecoupages(): Plugin {
 // Un nom d'énigme est un identifiant, et rien d'autre : il sert de chemin.
 const NOM_ENIGME = /^[a-z][a-z0-9_]{0,39}$/;
 
-// Alignées sur celles de `tools/lib/decoupage.mjs`.
-const LIMITES_DECOUPAGE = {
-  grille: [2, 24],
-  pieces: [1, 24],
-  sommets: [3, 64],
-} as const;
-
 // Un découpage relu : que des entiers, et une énigme qui existe.
 interface CorpsDecoupage {
   enigme: string;
@@ -297,7 +290,14 @@ interface CorpsDecoupage {
 // Rien de ce qui arrive n'est conservé tel quel : chaque coordonnée est relue en
 // entier borné, et le nom validé avant de servir de chemin. Ce que renvoie cette
 // fonction est la seule chose que voient l'écriture et la vérification.
-function lireCorpsDecoupage(recu: unknown): CorpsDecoupage {
+//
+// Les bornes sont lues dans `tools/lib/decoupage.mjs`, celles-là mêmes qui
+// gardent l'import : une copie ici finirait par écrire un fichier que l'import
+// refuse, ou par refuser ce qu'il accepte.
+async function lireCorpsDecoupage(recu: unknown): Promise<CorpsDecoupage> {
+  const { LIMITES: LIMITES_DECOUPAGE } = (await bibliotheque()) as {
+    LIMITES: Record<'grille' | 'pieces' | 'sommets', readonly [number, number]>;
+  };
   if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
   const { enigme, grille, pieces } = recu as Record<string, unknown>;
 

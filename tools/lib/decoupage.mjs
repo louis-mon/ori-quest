@@ -15,7 +15,7 @@ const DECALAGE_X = 0.37;
 const DECALAGE_Y = 0.61;
 
 // Bornes de bon sens : au-delà, ce n'est plus un découpage.
-export const LIMITES = { grille: [2, 24], pieces: [1, 24], sommets: [3, 64] };
+export const LIMITES = { grille: [2, 24], pieces: [1, 48], sommets: [3, 64] };
 
 // ---------------------------------------------------------------------------
 // Lecture
