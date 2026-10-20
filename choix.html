@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+  Outil de réglage des menus de choix : « Enregistrer » réécrit le bloc
+  `REGLAGES_CHOIX` de src/ui/choix-reglages.ts par le serveur de dev.
+  Uniquement en développement : `vite build` ne connaît que index.html, donc
+  cette page ne part pas sur itch.io.
+
+      npm run dev  puis  http://localhost:5173/choix.html
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ori-Quest — menus de choix</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Les menus de choix</h1>
+        <p class="aide">
+          Les vrais menus de <code>content/story.ink</code>, dans la vraie boîte de dialogue. Tape
+          la réplique pour ouvrir le menu, comme en jeu, puis une option&nbsp;: la grenouille redit
+          celles qu'elle prononce. Un tap dans la boîte à côté des options les fait s'allumer. Les
+          réglages agissent en direct.
+        </p>
+      </header>
+
+      <div class="scene">
+        <div class="cadre">
+          <div id="stage"><div id="ui"></div></div>
+        </div>
+
+        <div class="reglages">
+          <div id="groupes"></div>
+          <div class="actions">
+            <button id="rejouer" type="button">Rejouer</button>
+            <button id="revenir" type="button">Revenir à l'enregistré</button>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-tete">
+          <h2><code>src/ui/choix-reglages.ts</code></h2>
+          <div class="actions">
+            <span id="statut" class="statut"></span>
+            <button id="enregistrer" type="button" class="principal">Enregistrer</button>
+          </div>
+        </div>
+        <pre id="sortie"></pre>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/dev/choix.ts"></script>
+  </body>
+</html>

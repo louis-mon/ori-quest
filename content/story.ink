@@ -14,6 +14,13 @@
 //   # then: <knot>               repart au knot, une fois les tags appliqués
 //   # fin: histoire              clôt l'histoire, l'écran de fin prend la suite
 //
+// Qui parle : `# qui: <personnage>`, rémanent jusqu'au suivant ; sans lui,
+// c'est la narration (src/game/systems/personnages.ts). Un menu de choix est
+// toujours celui du héros. Une option qu'il PRONONCE porte le tag DANS ses
+// crochets — `+ [Tu as du bois ? # qui: heros]` — et la grenouille la redit
+// une fois touchée ; sans tag, l'option est un geste (« plier un pont »), que
+// la réplique suivante suffit à commenter.
+//
 // Les `VAR` ci-dessous sont un miroir en lecture seule de l'état de jeu, poussé
 // par le TS (préfixes `flag_` et `has_`). Les affecter avec `~` n'atteint pas
 // le jeu et ne survit pas à la sauvegarde : un drapeau se lève avec `# flag:`.
@@ -372,12 +379,12 @@ Beaucoup de choses ont changé depuis mon départ...
 -> DONE
 
 === porte_renard_choix ===
-+ { not flag_porte_disparue } [Pourquoi tu restes planté là ? Tu n'as pas un vilain tour à préparer pour embêter le Petit Chat ?]
++ { not flag_porte_disparue } [Pourquoi tu restes planté là ? Tu n'as pas un vilain tour à préparer pour embêter le Petit Chat ? # qui: heros]
     # qui: renard
     Ahah, très drôle. Moi aussi je voudrais bien rentrer. J'étais parti chercher des insectes effrayants pour faire peur au Petit Chat.
     Mais quand je suis revenu, plus de porte. À la place, il y a ce papier.
     # flag: porte_disparue # then: porte_renard_choix
-+ { flag_porte_disparue && not flag_renard_bois_su } [Parle-moi de la porte]
++ { flag_porte_disparue && not flag_renard_bois_su } [Parle-moi de la porte # qui: heros]
     # qui: renard
     Bah, qu'est-ce que tu veux que je te dise...
     # qui: heros
@@ -390,7 +397,7 @@ Beaucoup de choses ont changé depuis mon départ...
     # qui: renard
     Dépêche-toi, je m'inquiète quand même un peu pour le Petit Chat, je ne pourrai plus l'embêter s'il est transformé en feuille de papier.
     # flag: renard_bois_su # then: porte_renard_choix
-+ { flag_renard_bois_su && not has_idee_hache && not flag_hache_pliee } [Tu as du bois ?]
++ { flag_renard_bois_su && not has_idee_hache && not flag_hache_pliee } [Tu as du bois ? # qui: heros]
     # qui: renard
     Non, mais avec une hache tu pourrais couper des arbres pour en trouver.
     # qui: heros
@@ -1548,12 +1555,11 @@ Je vais m'éloigner de ce personnage, il me fait un peu peur... # flag: wyvern_i
 === revoir_wyvern ===
 # qui: wyvern
 Le Flux reflue vers la Parole. / Le Flux s'est-il disputé avec la Mémoire ?
-# qui: heros
-+ [C'est une façon de voir les choses.]
++ [C'est une façon de voir les choses. # qui: heros]
   -> indice_wyvern ->
   # qui: heros
   Merci, mystérieux visiteur.
-+ [Non, mais merci de vous en inquiéter.]
++ [Non, mais merci de vous en inquiéter. # qui: heros]
 - -> DONE
 
 

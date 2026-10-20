@@ -222,6 +222,68 @@ body {
   border-color: var(--accent);
 }
 
+/* Le héros prend la parole sous la question d'un autre : le filet sépare les
+   deux voix, l'en-tête dit à qui sont les options. */
+.dialogue__repondant {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--ui-scale));
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid rgba(242, 236, 225, 0.15);
+  color: var(--accent);
+  font-size: calc(clamp(13px, 2vw, 15px) * var(--ui-scale));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dialogue__repondant img {
+  width: calc(28px * var(--ui-scale));
+  height: calc(28px * var(--ui-scale));
+  padding: 2px;
+  border-radius: 8px;
+  background: rgba(242, 236, 225, 0.08);
+  object-fit: contain;
+}
+
+.dialogue[data-repondant='nom'] .dialogue__repondant img {
+  display: none;
+}
+
+/* Une option que le héros prononce et un geste (« plier un pont ») se
+   distinguent à l'œil : marque de réplique d'un côté, italique de la voix
+   intérieure de l'autre. Valeurs réglées dans choix.html. */
+.dialogue[data-marque='tiret'] .dialogue__choix--replique::before {
+  content: '—\00a0';
+}
+
+.dialogue[data-marque='guillemets'] .dialogue__choix--replique::before {
+  content: '«\00a0';
+}
+
+.dialogue[data-marque='guillemets'] .dialogue__choix--replique::after {
+  content: '\00a0»';
+}
+
+.dialogue[data-geste='italique'] .dialogue__choix--geste {
+  font-style: italic;
+}
+
+/* Un tap dans la boîte à côté des options : ce sont elles qui répondent, de la
+   même couleur que l'appel de la boîte entière. Un seul temps, comme lui. */
+.dialogue__choices--appel button {
+  animation: choix-appel 1s ease-out;
+}
+
+@keyframes choix-appel {
+  12%,
+  50% {
+    border-color: var(--or);
+    background: var(--or-fond);
+    box-shadow: 0 0 14px var(--or-halo);
+  }
+}
+
 /* Dans le flux et non en absolu dans le coin : en absolu, le dernier mot d'une
    ligne qui va jusqu'au bord passait sous la pastille. */
 .dialogue__next {
@@ -312,6 +374,12 @@ body {
     box-shadow:
       0 10px 30px var(--shadow),
       0 0 0 2px var(--or);
+  }
+
+  .dialogue__choices--appel button {
+    animation: none;
+    border-color: var(--or);
+    background: var(--or-fond);
   }
 }
 

@@ -37,6 +37,9 @@ type TagHandler = (value: string, fx: DialogueEffects) => void | string | Promis
 // Identifiants qui rendent la parole à la narration.
 const NARRATION = new Set(['narrateur', '-', 'aucun']);
 
+// Celui à qui appartient tout menu de choix.
+export const HEROS = personnage('heros')!;
+
 const handlers: Record<string, TagHandler> = {
   give: (value, fx) => fx.donner(value),
   drop: (value) => gameState.take(value),
@@ -65,6 +68,17 @@ function parseTag(tag: string): { key: string; value: string } | null {
   const sep = tag.indexOf(':');
   if (sep < 0) return null;
   return { key: tag.slice(0, sep).trim(), value: tag.slice(sep + 1).trim() };
+}
+
+// `undefined` sans `# qui:`, `null` pour la narration.
+export function locuteurDe(tags: string[]): Personnage | null | undefined {
+  let qui: Personnage | null | undefined;
+  for (const tag of tags) {
+    const parsed = parseTag(tag);
+    if (parsed?.key !== 'qui') continue;
+    qui = NARRATION.has(parsed.value.toLowerCase()) ? null : personnage(parsed.value);
+  }
+  return qui;
 }
 
 export class DialogueRunner {
@@ -213,7 +227,16 @@ export class DialogueRunner {
       const choices = this.story.currentChoices;
       if (choices.length === 0) return;
 
-      const picked = await this.overlay.choose(choices.map((c) => c.text));
+      const options = choices.map((c) => ({ texte: c.text, qui: locuteurDe(c.tags ?? []) }));
+      const picked = await this.overlay.choose(options, HEROS);
+      // La réplique choisie est dite : c'est ce retour qui apprend au joueur que
+      // les options sont les mots du héros. Un geste ne se redit pas, la
+      // réplique qui suit le commente déjà.
+      const { texte, qui } = options[picked];
+      if (qui) {
+        this.speaker = qui;
+        await this.overlay.redire(texte, qui);
+      }
       this.story.ChooseChoiceIndex(picked);
     }
   }
@@ -221,12 +244,8 @@ export class DialogueRunner {
   // Le locuteur est rémanent jusqu'au prochain `# qui:` ou la fin du dialogue :
   // une tirade de dix lignes ne demande qu'un seul tag.
   private readSpeaker(tags: string[]) {
-    for (const tag of tags) {
-      const parsed = parseTag(tag);
-      if (parsed?.key !== 'qui') continue;
-      const id = parsed.value.toLowerCase();
-      this.speaker = NARRATION.has(id) ? null : personnage(parsed.value);
-    }
+    const qui = locuteurDe(tags);
+    if (qui !== undefined) this.speaker = qui;
   }
 
   private async applyTags(tags: string[]) {

@@ -345,11 +345,58 @@ jusqu'au prochain `# qui:`. Le registre des personnages (nom, vignette, couleur
 du nom) vit dans `src/game/systems/personnages.ts` ; voir l'en-tête de
 `content/story.ink` pour la syntaxe.
 
+### Un menu de choix appartient au héros
+
+**Tranché.** Les joueurs ne comprenaient ni que les options étaient les mots de
+la grenouille, ni que toucher l'une d'elles faisait avancer. Le menu gardait
+l'en-tête de la dernière réplique — chez la wyverne, ses propres réponses
+s'affichaient sous le nom et la vignette de celle-ci, comme la suite de ce
+qu'elle disait —, et rien ne suivait le tap.
+
+Le genre a deux réponses, les plus répandues, et le jeu prend les deux.
+
+**1. La grenouille s'annonce au-dessus de ses options.** Quand un autre
+personnage vient de parler, sa question reste en haut de la boîte, puisque
+c'est à elle qu'on répond ; un filet la sépare des options, et la grenouille
+s'annonce dessous, nom et petite vignette. Quand c'est elle qui vient de
+parler — tous les menus de pliage —, il n'y a rien à annoncer. Quand le menu
+s'ouvre sans réplique, elle prend l'en-tête de la boîte.
+
+**2. Une option prononcée est redite.** Touchée, elle devient une réplique de
+la grenouille, et l'autre répond ensuite. C'est ce retour, plus que l'en-tête,
+qui apprend au joueur que les options sont ses mots : Monkey Island, Broken
+Sword, Telltale ou Disco Elysium font tous parler le héros après le clic. Elle
+s'affiche d'un coup, sans s'écrire, puisqu'elle vient d'être lue, et coûte un
+tap — c'est le prix de *un dialogue n'avance jamais seul*.
+
+**Gestes et paroles se distinguent.** La plupart des menus du jeu ne sont pas
+des conversations mais des gestes : « plier un pont », « découper le vieil
+arbre », « Partir ». Un geste ne se redit pas, la réplique qui suit le commente
+déjà, et il se distingue d'une réplique à l'œil : il prend l'italique de la voix
+intérieure. C'est la distinction de Disco Elysium, où ce qui se dit est entre
+guillemets et ce qui se fait ne l'est pas.
+
+Côté écriture, une option prononcée porte son `# qui:` **dans ses crochets** —
+`+ [Tu as du bois ? # qui: heros]`. Posé seul avant le menu, le tag reste sans
+effet.
+
+**Un tap dans la boîte, à côté des options, les allume**, du même doré que
+l'appel de la boîte entière. C'est là que le joueur a appris à taper pour
+avancer ; sans réponse, la boîte paraissait figée.
+
+Les valeurs visuelles — tiret ou guillemets, italique des gestes, vignette du
+répondant — se règlent dans `choix.html`, sur le serveur de dev : la page joue
+les vrais menus d'ink dans la vraie boîte et réécrit
+`src/ui/choix-reglages.ts`.
+
+Les menus du tutoriel restent à part : ce sont des questions de l'interface,
+sans répondant.
+
 ## Ce qui reste dans l'interface
 
 | Élément | Statut |
 | --- | --- |
-| Boîte de dialogue + choix | ✅ le texte s'écrit, un tap à côté la rallume |
+| Boîte de dialogue + choix | ✅ le texte s'écrit, un tap à côté la rallume, les choix sont au héros |
 | En-tête de locuteur (nom + vignette) | ✅ implémenté |
 | Marqueur cocotte sur les hotspots | ✅ garder |
 | Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |

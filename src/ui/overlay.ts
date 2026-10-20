@@ -5,6 +5,7 @@ import { mouvementReduit, placerBandeau, volVersLaCase } from './obtention';
 import { vignette } from './vignettes';
 import { urlApercuOrigami } from '../origami/apercu';
 import { typographier } from './typographie';
+import { REGLAGES_CHOIX } from './choix-reglages';
 
 // Le portrait s'affiche à ~56 px ; les photos du registre font 160 px de côté, et
 // un modèle rendu n'a pas de raison d'être plus fin.
@@ -41,6 +42,14 @@ const CARACTERES_PAR_SECONDE = 20;
 
 const BANDEAU_MS = 2000;
 
+// Retirée, style recalculé, remise : sans le recalcul entre les deux,
+// l'animation ne repart pas au tap suivant.
+function rejouer(el: HTMLElement, classe: string) {
+  el.classList.remove(classe);
+  void el.offsetWidth;
+  el.classList.add(classe);
+}
+
 function nomDe(id: string): string {
   return objet(id).nom;
 }
@@ -59,6 +68,20 @@ export interface ApercuOrigami {
   cacher(): void;
 }
 
+// `qui` : celui qui PRONONCE l'option. Absent, c'est un geste (« plier un pont »).
+export interface OptionDeChoix {
+  texte: string;
+  qui?: Personnage | null;
+}
+
+// Les valeurs visuelles des choix, réglées dans choix.html. Le sens de chacune
+// est dans la CSS, sous `.dialogue[data-…]`.
+export interface ReglagesChoix {
+  marque: 'tiret' | 'guillemets' | 'aucune';
+  geste: 'italique' | 'droit';
+  repondant: 'vignette-et-nom' | 'nom';
+}
+
 export class Overlay {
   private root: HTMLElement;
   private dialogue: HTMLElement;
@@ -66,6 +89,8 @@ export class Overlay {
   // Numéro de la dernière demande de portrait ; voir `poserPortrait()`.
   private portraitDemande = 0;
   private dialogueNom: HTMLElement;
+  // Celui dont l'en-tête est affiché ; voir `choose()`.
+  private locuteur: Personnage | null = null;
   private dialogueVu: HTMLElement;
   private dialogueReste: HTMLElement;
   private dialogueChoices: HTMLElement;
@@ -127,6 +152,7 @@ export class Overlay {
     this.dialogueNext = root.querySelector('.dialogue__next')!;
     this.inventory = root.querySelector('.inventory')!;
     this.obtenu = root.querySelector('.obtenu')!;
+    this.reglerLesChoix(REGLAGES_CHOIX);
 
     // Une vignette absente ne doit pas laisser d'icône cassée : le nom porte
     // alors seul l'identité du personnage.
@@ -145,13 +171,29 @@ export class Overlay {
 
   // `qui` à null, c'est la narration.
   say(text: string, qui: Personnage | null = null): Promise<void> {
+    return this.poserReplique(text, qui, true);
+  }
+
+  // L'option qu'on vient de toucher, dite par celui qui la prononce. Posée d'un
+  // coup : elle vient d'être lue sur le bouton, la réécrire lettre à lettre
+  // ferait attendre le joueur sur ses propres mots.
+  redire(text: string, qui: Personnage): Promise<void> {
+    return this.poserReplique(text, qui, false);
+  }
+
+  private poserReplique(text: string, qui: Personnage | null, ecrire: boolean) {
     // Écrit dans le DOM avant de rendre la promesse, et non dans son exécuteur :
     // `DialogueRunner` compte là-dessus pour que le locuteur soit posé au moment
     // de l'appel, pas un tick plus tard.
     this.dialogue.hidden = false;
     this.showSpeaker(qui);
-    this.defiler(typographier(text));
-    this.dialogueChoices.innerHTML = '';
+    if (ecrire) {
+      this.defiler(typographier(text));
+    } else {
+      this.texteEnCours = typographier(text);
+      this.toutMontrer();
+    }
+    this.viderLesChoix();
     return this.attendreUnTap();
   }
 
@@ -232,7 +274,11 @@ export class Overlay {
     return this.lignesEnCours > 0;
   }
 
-  choose(options: string[]): Promise<number> {
+  // Un menu du récit appartient à `repondant`, le héros. Les choix prenaient
+  // l'en-tête de la dernière réplique : sous le nom et la vignette de la
+  // wyverne, ses propres réponses passaient pour la suite de ce qu'elle disait.
+  // Sans répondant, c'est une question de l'interface (le tutoriel).
+  choose(options: OptionDeChoix[], repondant: Personnage | null = null): Promise<number> {
     // Le délai anti-tap compte ici plus qu'ailleurs : un tap de trop arrive pile
     // quand les choix remplacent la réplique. Une ligne sautée se devine à la
     // suivante, un choix pris tout seul emmène le récit ailleurs.
@@ -240,20 +286,38 @@ export class Overlay {
     return new Promise((resolve) => {
       this.dialogue.hidden = false;
       this.dialogueNext.hidden = true;
-      this.dialogueChoices.innerHTML = '';
+      this.viderLesChoix();
       // Le menu s'ouvre sur une réplique déjà payée d'un tap : ce qu'il en
       // reste à écrire s'écrirait sous les options, pendant qu'on les lit.
       this.toutMontrer();
+      // La question reste au-dessus, c'est à elle qu'on répond ; le répondant
+      // s'annonce sous elle. Sans question, il prend l'en-tête de la boîte.
+      if (repondant && !this.texteEnCours) this.showSpeaker(repondant);
+      else if (repondant && this.locuteur !== repondant) {
+        this.dialogueChoices.appendChild(this.enTeteDuRepondant(repondant));
+      }
       this.lignesEnCours++;
       const rendreLesTaps = this.surveillerAilleurs(() => debut);
-      options.forEach((label, i) => {
+
+      // Un tap dans la boîte mais à côté des options : c'est là qu'on a appris à
+      // taper pour avancer. Sans réponse, la boîte paraissait figée.
+      const aCote = (e: Event) => {
+        e.stopPropagation();
+        if (performance.now() - debut < DELAI_ANTI_TAP) return;
+        rejouer(this.dialogueChoices, 'dialogue__choices--appel');
+      };
+      this.dialogue.addEventListener('pointerup', aCote);
+
+      options.forEach(({ texte, qui }, i) => {
         const btn = document.createElement('button');
-        btn.textContent = typographier(label);
+        if (repondant) btn.className = qui ? 'dialogue__choix--replique' : 'dialogue__choix--geste';
+        btn.textContent = typographier(texte);
         btn.addEventListener('pointerup', (e) => {
           e.stopPropagation();
           if (performance.now() - debut < DELAI_ANTI_TAP) return;
           rendreLesTaps();
-          this.dialogueChoices.innerHTML = '';
+          this.dialogue.removeEventListener('pointerup', aCote);
+          this.viderLesChoix();
           this.lignesEnCours--;
           resolve(i);
         });
@@ -262,9 +326,38 @@ export class Overlay {
     });
   }
 
+  private enTeteDuRepondant(qui: Personnage): HTMLElement {
+    const enTete = document.createElement('p');
+    enTete.className = 'dialogue__repondant';
+    if (qui.couleur) enTete.style.color = qui.couleur;
+    // Une photo seulement : un portrait rendu (`modele`) demanderait l'aller-
+    // retour de `poserPortrait()`, et le nom suffit quand la vignette manque.
+    if (qui.portrait) {
+      const image = document.createElement('img');
+      image.alt = '';
+      image.src = qui.portrait;
+      image.addEventListener('error', () => image.remove());
+      enTete.appendChild(image);
+    }
+    enTete.append(qui.nom);
+    return enTete;
+  }
+
+  // La classe d'appel part avec les options : laissée sur un conteneur masqué,
+  // l'animation repartirait au prochain menu, le temps de réafficher.
+  private viderLesChoix() {
+    this.dialogueChoices.innerHTML = '';
+    this.dialogueChoices.classList.remove('dialogue__choices--appel');
+  }
+
+  // Pour choix.html, qui compare les variantes sans recharger.
+  reglerLesChoix({ marque, geste, repondant }: ReglagesChoix) {
+    Object.assign(this.dialogue.dataset, { marque, geste, repondant });
+  }
+
   hideDialogue() {
     this.dialogue.hidden = true;
-    this.dialogueChoices.innerHTML = '';
+    this.viderLesChoix();
     this.dialogue.classList.remove('dialogue--appel');
     // Le texte part avec le reste : un knot qui ouvre directement des choix
     // rouvrait la boîte sur la dernière ligne du dialogue précédent, attribuée à
@@ -336,23 +429,16 @@ export class Overlay {
       // Le rebond du tap qui a ouvert la réplique tombe ici : c'est celui du
       // hotspot qui a lancé la conversation, il n'a rien manqué.
       if (performance.now() - ouvert() < DELAI_ANTI_TAP) return;
-      this.attirerLAttention();
+      rejouer(this.dialogue, 'dialogue--appel');
     };
     window.addEventListener('pointerup', ailleurs);
     return () => window.removeEventListener('pointerup', ailleurs);
   }
 
-  private attirerLAttention() {
-    // Retirée, style recalculé, remise : sans le recalcul entre les deux,
-    // l'animation ne repart pas au tap suivant.
-    this.dialogue.classList.remove('dialogue--appel');
-    void this.dialogue.offsetWidth;
-    this.dialogue.classList.add('dialogue--appel');
-  }
-
   // Sans locuteur, la boîte repasse en narration : la différence entre
   // « quelqu'un parle » et « le jeu décrit » se voit avant d'être lue.
   private showSpeaker(qui: Personnage | null) {
+    this.locuteur = qui;
     this.dialogue.classList.toggle('dialogue--narration', !qui);
     this.dialogueNom.hidden = !qui;
     this.dialogueNom.textContent = qui?.nom ?? '';

@@ -6,6 +6,7 @@ import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 const FICHIER_POSES = 'src/origami/poses.ts';
 const FICHIER_EAU = 'src/game/scenes/eau-reglages.ts';
+const FICHIER_CHOIX = 'src/ui/choix-reglages.ts';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
@@ -78,6 +79,38 @@ function enregistrerEau(): Plugin {
           try {
             const source = readFileSync(FICHIER_EAU, 'utf8');
             writeFileSync(FICHIER_EAU, rendreEau(source, JSON.parse(corps)));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
+          }
+        });
+      });
+    },
+  };
+}
+
+// Les réglages des menus de choix, depuis choix.html. Mêmes garde-fous : rien
+// n'est écrit tel quel, chaque valeur doit figurer dans `CHOIX_PERMIS`.
+function enregistrerChoix(): Plugin {
+  return {
+    name: 'ori-quest:choix',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__choix', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        let corps = '';
+        req.on('data', (bout) => {
+          corps += bout;
+          // Trois mots : au-delà, ce n'est pas l'outil qui parle.
+          if (corps.length > 500) req.destroy();
+        });
+        req.on('end', () => {
+          try {
+            const source = readFileSync(FICHIER_CHOIX, 'utf8');
+            writeFileSync(FICHIER_CHOIX, rendreChoix(source, JSON.parse(corps)));
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ ok: true }));
           } catch (err) {
@@ -432,10 +465,39 @@ function rendreEau(source: string, recu: unknown): string {
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }
 
+// Alignées sur `ReglagesChoix` (src/ui/overlay.ts) et sur src/dev/choix.ts, dans
+// l'ordre du fichier.
+const CHOIX_PERMIS = {
+  marque: ['tiret', 'guillemets', 'aucune'],
+  geste: ['italique', 'droit'],
+  repondant: ['vignette-et-nom', 'nom'],
+} as const;
+
+function rendreChoix(source: string, recu: unknown): string {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const valeurs = recu as Record<string, unknown>;
+
+  const debut = source.indexOf('export const REGLAGES_CHOIX');
+  const accolade = source.indexOf('{', debut);
+  const fin = source.indexOf('\n};', accolade);
+  if (debut < 0 || fin < 0) throw new Error(`${FICHIER_CHOIX} : bloc REGLAGES_CHOIX introuvable`);
+
+  const lignes = Object.entries(CHOIX_PERMIS).map(([cle, permis]) => {
+    const valeur = valeurs[cle];
+    if (!(permis as readonly unknown[]).includes(valeur)) {
+      throw new Error(`${cle} : valeur inconnue ${String(valeur)}`);
+    }
+    return `  ${cle}: '${valeur as string}',`;
+  });
+
+  return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
+}
+
 export default defineConfig({
   plugins: [
     enregistrerPoses(),
     enregistrerEau(),
+    enregistrerChoix(),
     enregistrerDecoupage(),
     suivreLesPlans(),
     suivreLesDecoupages(),

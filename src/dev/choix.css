@@ -1,0 +1,180 @@
+/* Outil de réglage des menus de choix (développement seulement). Mêmes teintes
+   que les outils voisins.
+
+   La page charge la CSS du jeu pour que la boîte soit la vraie : les règles
+   ci-dessous défont ce qu'elle impose à la page entière, et les styles de
+   l'outil restent cantonnés à ses panneaux, sans quoi ils habilleraient aussi
+   les boutons de la boîte. */
+
+:root {
+  color-scheme: dark;
+  --papier: #f2ece1;
+  --fond: #1a1714;
+  --carte: #262019;
+  --trait: rgba(242, 236, 225, 0.14);
+}
+
+html,
+body {
+  height: auto;
+  overflow: auto;
+}
+
+body {
+  padding: 20px;
+  background: var(--fond);
+  font:
+    15px/1.5 system-ui,
+    sans-serif;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-family: Georgia, serif;
+  font-size: 26px;
+}
+
+.aide {
+  max-width: 80ch;
+  margin: 0;
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(242, 236, 225, 0.1);
+  font-size: 0.92em;
+}
+
+.scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .scene {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cadre {
+  overflow: auto;
+}
+
+/* Le cadre du jeu, aux dimensions que `cadrer()` lui donne. Le fond de la
+   porte est livré transparent au-dessus de l'horizon : le dégradé tient lieu
+   de ciel. */
+#stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background:
+    url('/assets/decor/fond-porte.webp') center / cover,
+    linear-gradient(#a9c4dc, #e6dccb);
+}
+
+/* ---------- Réglages ---------- */
+
+.reglages,
+#groupes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 10px 14px 12px;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+}
+
+legend {
+  padding: 0 6px;
+  font-family: Georgia, serif;
+  opacity: 0.85;
+}
+
+.option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions button {
+  padding: 7px 13px;
+  border: 1px solid rgba(242, 236, 225, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  border-color: var(--accent);
+}
+
+.actions button.principal {
+  border-color: var(--accent);
+  background: rgba(196, 85, 61, 0.18);
+}
+
+/* ---------- Sortie ---------- */
+
+.footer-tete {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-tete .actions {
+  align-items: center;
+}
+
+footer h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, serif;
+  font-size: 17px;
+}
+
+pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  font-size: 13px;
+}
+
+.statut {
+  opacity: 0.75;
+  font-size: 13px;
+}
+
+.statut.is-erreur {
+  color: var(--accent);
+  opacity: 1;
+}

@@ -153,7 +153,9 @@ async function choisir(overlay: Overlay): Promise<NomTutoriel | null> {
   // Sans locuteur : c'est une question de l'interface, pas une réplique du
   // héros — qui, lui, parlera bien de sa voix ensuite.
   await overlay.say('Quel tutoriel revoir ?');
-  const choix = await overlay.choose([...noms.map((n) => TUTORIELS[n].titre), 'Fermer']);
+  const choix = await overlay.choose(
+    [...noms.map((n) => TUTORIELS[n].titre), 'Fermer'].map((texte) => ({ texte })),
+  );
   overlay.hideDialogue();
   return noms[choix] ?? null;
 }
@@ -161,7 +163,10 @@ async function choisir(overlay: Overlay): Promise<NomTutoriel | null> {
 // Faux si le joueur préfère passer.
 async function proposer(overlay: Overlay, tuto: Tutoriel): Promise<boolean> {
   await overlay.say(tuto.invite, HEROS);
-  const choix = await overlay.choose(['Lancer le tutoriel', 'Passer le tutoriel']);
+  const choix = await overlay.choose([
+    { texte: 'Lancer le tutoriel' },
+    { texte: 'Passer le tutoriel' },
+  ]);
   if (choix !== 0) overlay.hideDialogue();
   return choix === 0;
 }
