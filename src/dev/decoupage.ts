@@ -57,9 +57,19 @@ let pieces: Morceau[] = [];
 // Pile d'annulation : l'état complet avant chaque coupe.
 const historique: Morceau[][] = [];
 
-// En unités de grille : une coupe n'a pas le droit de les suivre. Chargés à part
-// de l'image, que le navigateur affiche sans nous en dire les points.
+// Une coupe n'a pas le droit de les suivre. Chargés à part de l'image, que le
+// navigateur affiche sans nous en dire les points, et gardés en fraction du
+// côté : la grille peut changer après le chargement, et des plis restés à
+// l'ancienne échelle refusaient des coupes là où l'image ne montre rien.
 let plis: Segment[] = [];
+
+const plisEnGrille = (): Segment[] =>
+  plis.map(({ x1, y1, x2, y2 }) => ({
+    x1: x1 * grille,
+    y1: y1 * grille,
+    x2: x2 * grille,
+    y2: y2 * grille,
+  }));
 
 // Coupe en cours de tracé, la pièce qu'elle fend, et celles qui pourraient
 // encore l'être : tant que le trait n'a qu'un point, toutes celles dont le bord
@@ -154,10 +164,10 @@ async function chargerPlis(nom: string) {
     plis = [...svg.querySelectorAll('line.mo, line.va')].map((ligne) => {
       const n = (attr: string) => Number(ligne.getAttribute(attr));
       return {
-        x1: ((n('x1') - vx) / vw) * grille,
-        y1: ((n('y1') - vy) / vh) * grille,
-        x2: ((n('x2') - vx) / vw) * grille,
-        y2: ((n('y2') - vy) / vh) * grille,
+        x1: (n('x1') - vx) / vw,
+        y1: (n('y1') - vy) / vh,
+        x2: (n('x2') - vx) / vw,
+        y2: (n('y2') - vy) / vh,
       };
     });
   } catch {
@@ -564,7 +574,7 @@ plan.addEventListener('pointerdown', (e) => {
 
   // Refusé au clic, et non à la fin du tracé : on ne laisse pas dessiner trois
   // segments pour annoncer ensuite que le premier ne convenait pas.
-  if (longeUnPli(plis, dernier, cale)) {
+  if (longeUnPli(plisEnGrille(), dernier, cale)) {
     return dire(
       'Ce segment suivrait un pli : il serait fendu en deux et se verrait sur les deux pièces.',
       true,
