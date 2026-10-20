@@ -10,7 +10,7 @@ import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
-import { dessinerFeuille } from './feuille';
+import { imprimerFeuille } from './feuille';
 import { semerHerbe, type SemisHerbe } from './pature';
 
 // Le village — première scène du chapitre 2.
@@ -36,12 +36,12 @@ export class VillageScene extends PointClickScene {
   protected readonly plan = PLAN;
   protected arrivee = { knot: 'village_arrivee', flag: 'village_vu' };
 
-  private feuilleMontagne!: Phaser.GameObjects.Graphics;
+  private feuilleMontagne!: Phaser.GameObjects.Image;
   private montagne!: OrigamiDecor;
-  private feuilleHerbe!: Phaser.GameObjects.Graphics;
+  private feuilleHerbe!: Phaser.GameObjects.Image;
   private herbe!: OrigamiDecor;
   private pature!: SemisHerbe;
-  private feuillePot!: Phaser.GameObjects.Graphics;
+  private feuillePot!: Phaser.GameObjects.Image;
 
   // Le papier à plat et le relief plié n'occupent pas la même place dans leur
   // boîte. Voir `caler()`.
@@ -132,20 +132,18 @@ export class VillageScene extends PointClickScene {
 
     // La montagne du pingouin, au fond : le papier d'abord, le relief ensuite.
     // Deux boîtes, comme au vieil arbre du ravin.
-    this.feuilleMontagne = this.add.graphics();
-    this.empriseFeuilleMontagne = dessinerFeuille(
-      this.feuilleMontagne,
-      boxOf(PLAN, 'hs_montagne'),
-      'montagne',
-    );
+    const feuilleMontagne = imprimerFeuille(this, boxOf(PLAN, 'hs_montagne'), 'montagne');
+    this.feuilleMontagne = feuilleMontagne.image;
+    this.empriseFeuilleMontagne = feuilleMontagne.carre;
     this.montagne = poserOrigami(this, 'montagne', boxOf(PLAN, 'dec_montagne'), (emprise) => {
       this.empriseMontagne = emprise;
       this.refresh();
     });
 
     const pature = boxOf(PLAN, 'hs_herbe');
-    this.feuilleHerbe = this.add.graphics();
-    this.empriseFeuilleHerbe = dessinerFeuille(this.feuilleHerbe, pature, 'herbe');
+    const feuilleHerbe = imprimerFeuille(this, pature, 'herbe');
+    this.feuilleHerbe = feuilleHerbe.image;
+    this.empriseFeuilleHerbe = feuilleHerbe.carre;
     this.herbe = poserOrigami(this, 'herbe', pature, (emprise) => {
       this.empriseHerbe = emprise;
       this.refresh();
@@ -161,8 +159,9 @@ export class VillageScene extends PointClickScene {
     });
 
     // Rien à poser pour le pot : une fois plié, il part dans l'inventaire.
-    this.feuillePot = this.add.graphics();
-    this.caler('pot', dessinerFeuille(this.feuillePot, boxOf(PLAN, 'hs_pot'), 'pot'));
+    const feuillePot = imprimerFeuille(this, boxOf(PLAN, 'hs_pot'), 'pot');
+    this.feuillePot = feuillePot.image;
+    this.caler('pot', feuillePot.carre);
 
     this.caler('pingouin', empriseDe(placeSprite(this, PINGOUIN, boxOf(PLAN, 'hs_pingouin'))));
     this.caler('vache', empriseDe(placeSprite(this, VACHE, boxOf(PLAN, 'hs_vache'))));

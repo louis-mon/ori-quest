@@ -10,7 +10,7 @@ import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
-import { dessinerFeuille, poserFeuille, type FeuilleMobile } from './feuille';
+import { imprimerFeuille, poserFeuille, type FeuilleMobile } from './feuille';
 import { finDuChemin } from './deplacement';
 
 // L'entrée du château — seconde scène du chapitre 2.
@@ -44,7 +44,7 @@ export class EntreeScene extends PointClickScene {
 
   private chat!: Phaser.GameObjects.Image;
   private diplo!: Phaser.GameObjects.Image;
-  private feuilleChien!: Phaser.GameObjects.Graphics;
+  private feuilleChien!: Phaser.GameObjects.Image;
   private chouaf!: OrigamiDecor;
   private os!: FeuilleMobile;
   // Gros Diplo est assis sur le passage : la flèche ne s'allume qu'une fois
@@ -134,11 +134,9 @@ export class EntreeScene extends PointClickScene {
     // La porte du château est dans le fond : le passage n'a rien à dessiner.
     dessinerFond(this, PLAN.fond);
 
-    this.feuilleChien = this.add.graphics();
-    this.caler(
-      'papier_chien',
-      dessinerFeuille(this.feuilleChien, boxOf(PLAN, 'hs_papier_chien'), 'chien'),
-    );
+    const feuilleChien = imprimerFeuille(this, boxOf(PLAN, 'hs_papier_chien'), 'chien');
+    this.feuilleChien = feuilleChien.image;
+    this.caler('papier_chien', feuilleChien.carre);
     this.chouaf = poserOrigami(this, 'chien', boxOf(PLAN, 'hs_chouaf'), () => {
       // L'emprise n'arrive qu'avec le rendu du modèle, et c'est le même calcul
       // que ses bornes : `calerSur` la reprendra à chaque saut.

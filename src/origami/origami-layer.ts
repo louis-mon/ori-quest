@@ -2,7 +2,7 @@ import type * as THREE_NS from 'three';
 import { PREFERENCE_GPU } from '../gpu';
 import { EtoilesPliage } from './etoiles-pliage';
 import { animationOrigami, sampleFold, type FoldAnimation } from './fold-file';
-import { creerMeshOrigami, eclatDe, libererMateriaux } from './papier';
+import { creerMeshOrigami, eclatDe, finitRetourne, libererMateriaux } from './papier';
 import {
   DIRECTION_VUE,
   HAUT_VUE,
@@ -162,6 +162,12 @@ export class OrigamiLayer {
 
     this.balancement = !posee;
     this.poseDepart = posee ? quaternionFeuilleDeFace(this.THREE) : quaternionFeuille(this.THREE);
+    // Le demi-tour se fait autour de l'horizontale de l'écran, et redresse donc
+    // l'image : c'est ce que reproduit la feuille du décor (`composer`).
+    if (finitRetourne(nom)) {
+      const horizontale = new this.THREE.Vector3(1, 0, 0);
+      this.poseDepart.multiply(new this.THREE.Quaternion().setFromAxisAngle(horizontale, Math.PI));
+    }
     this.poseFin = quaternionModele(this.THREE, nom);
     this.pose = this.poseDepart.clone();
     this.axeBalancement ??= new this.THREE.Vector3(HAUT_VUE.x, HAUT_VUE.y, HAUT_VUE.z).normalize();

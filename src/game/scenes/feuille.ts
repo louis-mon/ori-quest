@@ -1,27 +1,16 @@
 import Phaser from 'phaser';
-import { canvasDe, teintesDe, type Degrade } from '../../origami/papier';
+import { canvasDe, finitRetourne } from '../../origami/papier';
 import type { Box } from './layout';
 
-// Carrée, comme toute feuille d'origami. Elle occupe le bas de son emprise : la
-// boîte du plan est dimensionnée pour ce que la feuille deviendra, souvent bien
-// plus haut qu'un carré posé au sol.
-//
-// Sa teinte vient du recto du modèle qu'elle deviendra (`teintesDe`), donc de la
-// même source que la texture 3D : le pliage ne change pas de matériau en route.
-// Dégradé compris, quand le papier en a un.
-//
-// En primitives et pas en 3D : charger three.js pour un carré de papier
-// condamnerait le premier écran du jeu, où rien n'est encore plié.
-//
-// `papier` est le modèle que la feuille deviendra, ou ses teintes quand elle ne
-// deviendra rien. `motif` s'imprime sur le recto, sous le coin rabattu.
+// La feuille en primitives, à des teintes données : celles de la salle du trône,
+// dont la scène peint elle-même le motif (`motif`, sur le recto, sous le coin
+// rabattu) et fait scintiller les éclats. Partout ailleurs, `imprimerFeuille`.
 export function dessinerFeuille(
   g: Phaser.GameObjects.Graphics,
   box: Box,
-  papier: string | Teintes,
+  { recto, verso }: Teintes,
   motif?: (g: Phaser.GameObjects.Graphics, geometrie: GeometrieFeuille) => void,
 ): Box {
-  const { recto, verso, degrades } = typeof papier === 'string' ? teintesDe(papier) : papier;
   const geometrie = geometrieFeuille(box);
   const { x, y, w: cote } = geometrie.carre;
   const [[ax, ay], [bx, by], [cx, cy]] = geometrie.rabat;
@@ -36,8 +25,9 @@ export function dessinerFeuille(
 
   g.clear();
 
-  const { feuille } = geometrie;
-  peindre(g, feuille, recto, degrades?.recto, geometrie.carre);
+  g.fillStyle(recto, 1);
+  polygone(geometrie.feuille);
+  g.fillPath();
 
   // Sans ce coup de lumière, un aplat sur un carré se lit comme un bloc, surtout
   // en papier métallisé. Phaser ne remplit pas en dégradé : deux polygones à
@@ -66,7 +56,9 @@ export function dessinerFeuille(
   motif?.(g, geometrie);
 
   // Le rabat : le dos du papier, puisqu'on le voit à l'envers.
-  peindre(g, geometrie.rabat, verso, degrades?.verso, geometrie.carre);
+  g.fillStyle(verso, 1);
+  polygone(geometrie.rabat);
+  g.fillPath();
   // Son ombre du côté de la pliure : c'est ce qui donne son épaisseur au papier.
   g.fillStyle(0x000000, 0.18);
   polygone([
@@ -78,7 +70,7 @@ export function dessinerFeuille(
 
   // La pliure n'est pas soulignée : c'est un pli, pas une découpe.
   g.lineStyle(1.5, 0x000000, 0.28);
-  polygone(feuille);
+  polygone(geometrie.feuille);
   g.strokePath();
   g.beginPath();
   g.moveTo(ax, ay);
@@ -96,18 +88,33 @@ export function dessinerFeuille(
 //
 // Composée une fois dans un canvas, à la taille de l'écran : Phaser ne sait pas
 // découper une image à un polygone sans masque, le Canvas 2D si.
+//
+// En canvas et pas en 3D : charger three.js pour un carré de papier condamnerait
+// le premier écran du jeu, où rien n'est encore plié.
 export function imprimerFeuille(
   scene: Phaser.Scene,
   box: Box,
   modele: string,
 ): { image: Phaser.GameObjects.Image; carre: Box } {
+  const image = scene.add.image(0, 0, '__DEFAULT');
+  return { image, carre: imprimerSur(image, box, modele) };
+}
+
+// La même, sur une image déjà dans la scène : une touffe de la pâture ne connaît
+// sa place qu'une fois rendue, et sa feuille, créée avec elle, garde ainsi son
+// rang dans le décor.
+export function imprimerSur(image: Phaser.GameObjects.Image, box: Box, modele: string): Box {
   const geometrie = geometrieFeuille(box);
   const { x, y, w: cote } = geometrie.carre;
   const cle = `feuille:${modele}:${cote}`;
-  if (!scene.textures.exists(cle)) scene.textures.addCanvas(cle, composer(geometrie, modele));
+  const { textures } = image.scene;
+  if (!textures.exists(cle)) textures.addCanvas(cle, composer(geometrie, modele));
   // La marge de `composer`, pour que le carré retombe sur le plan.
-  const image = scene.add.image(x - MARGE_TRAIT, y - MARGE_TRAIT, cle).setOrigin(0);
-  return { image, carre: geometrie.carre };
+  image
+    .setTexture(cle)
+    .setOrigin(0)
+    .setPosition(x - MARGE_TRAIT, y - MARGE_TRAIT);
+  return geometrie.carre;
 }
 
 // Le contour déborde du carré de la moitié de son épaisseur.
@@ -136,10 +143,12 @@ function composer(geometrie: GeometrieFeuille, modele: string): HTMLCanvasElemen
   // Retourné de haut en bas : c'est ainsi que la couche de pliage montre la
   // feuille à plat au premier instant (constaté sur les gemmes de la couronne).
   // Droit, les gemmes changeaient de place quand le pliage prenait le relais.
+  // Sauf si le pliage part retourné : son demi-tour redresse l'image.
+  const droit = finitRetourne(modele);
   const imprimer = (papier: HTMLCanvasElement) => {
     ctx.save();
-    ctx.translate(x, y + cote);
-    ctx.scale(1, -1);
+    ctx.translate(x, droit ? y : y + cote);
+    ctx.scale(1, droit ? 1 : -1);
     ctx.drawImage(papier, 0, 0, cote, cote);
     ctx.restore();
   };
@@ -192,83 +201,6 @@ function composer(geometrie: GeometrieFeuille, modele: string): HTMLCanvasElemen
 export interface Teintes {
   recto: number;
   verso: number;
-  degrades?: { recto?: Degrade; verso?: Degrade };
-}
-
-// Phaser ne remplit pas en dégradé : des bandes perpendiculaires à sa direction,
-// assez fines pour ne pas se compter à l'œil, chacune de la couleur que le
-// dégradé de la texture a en son milieu.
-function peindre(
-  g: Phaser.GameObjects.Graphics,
-  contour: readonly Point[],
-  teinte: number,
-  degrade: Degrade | undefined,
-  carre: Box,
-) {
-  if (!degrade) {
-    g.fillStyle(teinte, 1);
-    remplir(g, contour);
-    return;
-  }
-  const dx = degrade.vers[0] * carre.w;
-  const dy = degrade.vers[1] * carre.h;
-  const longueur = Math.hypot(dx, dy);
-  const [ux, uy] = [dx / longueur, dy / longueur];
-  // Sur la feuille, `t` va de 0 à 1 comme les arrêts de la texture.
-  const t = ([px, py]: Point) => ((px - carre.x) * ux + (py - carre.y) * uy) / longueur;
-  const ts = contour.map(t);
-  const debut = Math.min(...ts);
-  const fin = Math.max(...ts);
-  const bandes = Math.max(1, Math.ceil(((fin - debut) * longueur) / 2));
-  const pas = (fin - debut) / bandes;
-  // Chaque bande déborde d'un demi-pixel sur la suivante : bord à bord, le
-  // rendu laisse passer des fils de fond entre elles.
-  const recouvrement = 0.5 / longueur;
-  const travers = carre.w + carre.h;
-  for (let i = 0; i < bandes; i++) {
-    const t0 = debut + i * pas;
-    const t1 = t0 + pas + recouvrement;
-    const point = (tk: number, s: number): Point => [
-      carre.x + ux * tk * longueur - uy * s,
-      carre.y + uy * tk * longueur + ux * s,
-    ];
-    const bande = [
-      point(t0, -travers),
-      point(t1, -travers),
-      point(t1, travers),
-      point(t0, travers),
-    ];
-    g.fillStyle(couleurA(degrade, t0 + pas / 2), 1);
-    remplir(g, decouper(bande, contour));
-  }
-}
-
-function couleurA({ arrets }: Degrade, t: number): number {
-  const rgb = (couleur: string) => {
-    const n = Number.parseInt(couleur.slice(1), 16);
-    return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
-  };
-  const [premier] = arrets;
-  const dernier = arrets[arrets.length - 1];
-  if (t <= premier[0]) return Number.parseInt(premier[1].slice(1), 16);
-  if (t >= dernier[0]) return Number.parseInt(dernier[1].slice(1), 16);
-  const i = arrets.findIndex(([position]) => position > t);
-  const [p0, c0] = arrets[i - 1];
-  const [p1, c1] = arrets[i];
-  const k = (t - p0) / (p1 - p0);
-  const a = rgb(c0);
-  const b = rgb(c1);
-  const [r, v, bl] = a.map((x, j) => Math.round(x + (b[j] - x) * k));
-  return (r << 16) | (v << 8) | bl;
-}
-
-function remplir(g: Phaser.GameObjects.Graphics, points: readonly Point[]) {
-  if (points.length < 3) return;
-  g.beginPath();
-  g.moveTo(points[0][0], points[0][1]);
-  for (const [px, py] of points.slice(1)) g.lineTo(px, py);
-  g.closePath();
-  g.fillPath();
 }
 
 // Sutherland–Hodgman : un polygone découpé par un contour convexe, en sens
@@ -308,6 +240,9 @@ export interface GeometrieFeuille {
   rabat: readonly [Point, Point, Point];
 }
 
+// Carrée, comme toute feuille d'origami. Elle occupe le bas de son emprise : la
+// boîte du plan est dimensionnée pour ce que la feuille deviendra, souvent bien
+// plus haut qu'un carré posé au sol.
 export function geometrieFeuille(box: Box): GeometrieFeuille {
   const cote = Math.min(box.w, box.h);
   const x = box.x + (box.w - cote) / 2;
@@ -342,14 +277,13 @@ export interface FeuilleMobile {
 }
 
 export function poserFeuille(scene: Phaser.Scene, box: Box, modele: string): FeuilleMobile {
-  const dessin = scene.add.graphics();
-  const carre = dessinerFeuille(dessin, box, modele);
+  const { image, carre } = imprimerFeuille(scene, box, modele);
   const depart = { x: carre.x + carre.w / 2, y: carre.y + carre.h / 2 };
 
-  // Le tracé est en coordonnées du plan : on décale le graphique d'autant pour
-  // qu'il retombe au bon endroit une fois le conteneur posé sur le centre.
-  dessin.setPosition(-depart.x, -depart.y);
-  const conteneur = scene.add.container(depart.x, depart.y, [dessin]);
+  // L'image est placée en coordonnées du plan : on la décale d'autant pour
+  // qu'elle retombe au bon endroit une fois le conteneur posé sur le centre.
+  image.setPosition(image.x - depart.x, image.y - depart.y);
+  const conteneur = scene.add.container(depart.x, depart.y, [image]);
 
   return {
     conteneur,

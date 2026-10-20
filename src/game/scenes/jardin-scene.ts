@@ -9,7 +9,7 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerDecorProvisoire } from './decor-provisoire';
-import { dessinerFeuille, imprimerFeuille } from './feuille';
+import { imprimerFeuille } from './feuille';
 import { IMAGES_RETOURNEMENT, poserRetournable } from './retournement';
 
 // Le jardin du château — à droite de la salle du trône, chapitre 3.
@@ -42,7 +42,7 @@ export class JardinScene extends PointClickScene {
   protected arrivee = { knot: 'jardin_arrivee', flag: 'jardin_vu' };
 
   private papierCouronne!: Phaser.GameObjects.Image;
-  private papierPoisson!: Phaser.GameObjects.Graphics;
+  private papierPoisson!: Phaser.GameObjects.Image;
   private carpes: Phaser.GameObjects.Sprite[] = [];
 
   constructor() {
@@ -121,11 +121,9 @@ export class JardinScene extends PointClickScene {
     const papierCouronne = imprimerFeuille(this, boxOf(PLAN, 'hs_papier_couronne'), 'couronne');
     this.papierCouronne = papierCouronne.image;
     this.caler('papier_couronne', papierCouronne.carre);
-    this.papierPoisson = this.add.graphics();
-    this.caler(
-      'papier_poisson',
-      dessinerFeuille(this.papierPoisson, boxOf(PLAN, 'hs_papier_poisson'), 'poisson'),
-    );
+    const papierPoisson = imprimerFeuille(this, boxOf(PLAN, 'hs_papier_poisson'), 'poisson');
+    this.papierPoisson = papierPoisson.image;
+    this.caler('papier_poisson', papierPoisson.carre);
 
     this.caler('wyvern', empriseDe(placeSprite(this, WYVERN, boxOf(PLAN, 'hs_wyvern'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));

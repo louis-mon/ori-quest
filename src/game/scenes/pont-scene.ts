@@ -10,7 +10,7 @@ import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
-import { dessinerFeuille, imprimerFeuille } from './feuille';
+import { imprimerFeuille } from './feuille';
 import { poserEau } from './eau';
 
 // Le ravin — première scène du chapitre 1.
@@ -40,7 +40,7 @@ export class PontScene extends PointClickScene {
 
   private folded!: OrigamiDecor;
   private sheet!: Phaser.GameObjects.Image;
-  private feuilleArbre!: Phaser.GameObjects.Graphics;
+  private feuilleArbre!: Phaser.GameObjects.Image;
   private vieilArbre!: OrigamiDecor;
   private souche!: Phaser.GameObjects.Image;
 
@@ -166,12 +166,9 @@ export class PontScene extends PointClickScene {
 
     // La feuille du vieil arbre, et l'arbre qu'elle devient. Deux boîtes : la
     // boîte donne sa taille au modèle, et l'arbre déborde largement la feuille.
-    this.feuilleArbre = this.add.graphics();
-    this.empriseFeuilleArbre = dessinerFeuille(
-      this.feuilleArbre,
-      boxOf(PLAN, 'hs_feuille_vieil_arbre'),
-      'arbre',
-    );
+    const feuilleArbre = imprimerFeuille(this, boxOf(PLAN, 'hs_feuille_vieil_arbre'), 'arbre');
+    this.feuilleArbre = feuilleArbre.image;
+    this.empriseFeuilleArbre = feuilleArbre.carre;
     this.vieilArbre = poserOrigami(this, 'arbre', boxOf(PLAN, 'dec_vieil_arbre'), (emprise) => {
       this.empriseVieilArbre = emprise;
       this.refresh();

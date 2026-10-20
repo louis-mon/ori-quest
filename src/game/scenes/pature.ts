@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { dessinerFeuille } from './feuille';
+import { imprimerSur } from './feuille';
 import { alea } from './hasard';
 import type { Box, PlanSurface } from './layout';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
@@ -55,7 +55,7 @@ export interface SemisHerbe {
 
 interface Touffe {
   origami: OrigamiDecor;
-  feuille: Phaser.GameObjects.Graphics;
+  feuille: Phaser.GameObjects.Image;
 }
 
 // Tout est tiré dans le terrain, donc le déplacer dans Tiled emmène le semis.
@@ -101,12 +101,12 @@ export function semerHerbe(
       w: place.hauteur,
       h: place.hauteur,
     };
-    const feuille = scene.add.graphics().setVisible(false);
+    const feuille = scene.add.image(0, 0, '__DEFAULT').setVisible(false);
     const origami = poserOrigami(scene, MODELE, box, (emprise) => {
       if (!anime) return;
       // L'emprise réelle, et pas la boîte : la feuille doit tenir sous la touffe
       // qui la remplace, pas sous la place qu'on lui avait réservée.
-      dessinerFeuille(feuille, emprise, MODELE);
+      imprimerSur(feuille, emprise, MODELE);
       plier(scene, { origami, feuille }, rang);
     });
     origami.image.setFlipX(place.miroir);

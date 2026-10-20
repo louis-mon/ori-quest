@@ -438,7 +438,10 @@ rectangulaires sortent de travers.
 **Un modèle peut finir retourné**, sans que le crease pattern le dise — ça se
 constate au rendu. Sans le drapeau `retourne` de `PAPIERS`
 (`src/origami/papier.ts`), la hache sortait en manche marron avec un éclat de
-métal au pli, exactement à l'inverse d'une lame.
+métal au pli, exactement à l'inverse d'une lame. Le pliage **part** alors
+retourné lui aussi (`OrigamiLayer.load`), et la feuille du décor s'imprime
+redressée : sinon le joueur voyait se plier du marron juste après avoir touché
+une feuille de métal.
 
 **Ne jamais montrer un pliage à 100 %.** La pose finale du solveur est souvent
 parfaitement plate — le pont y perd toute épaisseur — et l'image d'un objet plat

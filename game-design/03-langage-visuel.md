@@ -195,12 +195,13 @@ son reflet. Un noir mat et uniforme se lit comme un vide découpé dans le déco
 c'est exactement le piège que l'embrasure vide tendait avant, quand elle n'était
 qu'un rectangle plein.
 
-La **feuille encore dépliée**, elle, est dessinée en primitives — charger
-three.js pour un carré de papier condamnerait le premier écran — mais elle prend
-la teinte du recto de son modèle (`teintesDe`). La grande feuille du vieil arbre
-est donc verte avant même d'être pliée, et le papier de la hache métallisé : le
-pliage ne change pas de matière en cours de route. Et elle est **carrée**, comme
-toute feuille d'origami.
+La **feuille encore dépliée**, elle, est imprimée sur le papier même de son
+modèle (`imprimerFeuille`) : le canvas que lit la texture 3D, découpé en 2D —
+charger three.js pour un carré de papier condamnerait le premier écran. La
+grande feuille du vieil arbre porte donc ses nervures avant même d'être pliée,
+celle du chien ses taches, et le papier de la hache est métallisé : le pliage ne
+change pas de matière en cours de route. Et elle est **carrée**, comme toute
+feuille d'origami.
 
 Les textures sont **peintes au canvas à l'exécution**, pas chargées en PNG :
 quelques dizaines de lignes contre des centaines de kilo-octets, pour un grain de

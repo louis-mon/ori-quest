@@ -7,7 +7,7 @@ import { boxOf, exitsFrom, hotspotsFrom } from './layout';
 import { PointClickScene } from './point-click-scene';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
-import { dessinerFeuille } from './feuille';
+import { imprimerFeuille } from './feuille';
 import { placeHeros, preloadHeros } from './heros';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
 import { dessinerFond, preloadFond } from './fond';
@@ -29,8 +29,8 @@ export class PorteScene extends PointClickScene {
   protected arrivee = { knot: 'porte_arrivee', flag: 'porte_vue' };
 
   private battant!: OrigamiDecor;
-  private feuillePorte!: Phaser.GameObjects.Graphics;
-  private feuilleHache!: Phaser.GameObjects.Graphics;
+  private feuillePorte!: Phaser.GameObjects.Image;
+  private feuilleHache!: Phaser.GameObjects.Image;
 
   constructor() {
     // Même raison que PontScene : c'est `Navigation` qui décide de la scène à
@@ -109,8 +109,9 @@ export class PorteScene extends PointClickScene {
     // Pas de trou dans le mur : une embrasure béante se lisait comme un décor de
     // fond, et le joueur n'avait aucune raison de taper dedans.
     const ouverture = boxOf(PLAN, 'hs_porte');
-    this.feuillePorte = this.add.graphics();
-    this.caler('porte', dessinerFeuille(this.feuillePorte, ouverture, 'porte'));
+    const feuillePorte = imprimerFeuille(this, ouverture, 'porte');
+    this.feuillePorte = feuillePorte.image;
+    this.caler('porte', feuillePorte.carre);
 
     // Une fois posée, c'est elle le passage, donc elle qui porte la zone tactile
     // de la sortie `village`.
@@ -119,11 +120,9 @@ export class PorteScene extends PointClickScene {
       this.refresh();
     });
 
-    this.feuilleHache = this.add.graphics();
-    this.caler(
-      'feuille_hache',
-      dessinerFeuille(this.feuilleHache, boxOf(PLAN, 'hs_feuille_hache'), 'hache'),
-    );
+    const feuilleHache = imprimerFeuille(this, boxOf(PLAN, 'hs_feuille_hache'), 'hache');
+    this.feuilleHache = feuilleHache.image;
+    this.caler('feuille_hache', feuilleHache.carre);
 
     this.caler('renard', empriseDe(placeSprite(this, RENARD, boxOf(PLAN, 'hs_renard'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));

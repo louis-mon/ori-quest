@@ -30,6 +30,8 @@ interface PapierModele {
   // Le pliage finit retourné, ce sont les triangles vus de dos qui se présentent
   // au joueur. Rien dans le crease pattern ne le dit : ça se constate au rendu.
   // Sans ce drapeau, la hache sortait en manche marron avec un éclat de métal.
+  // Il part retourné aussi (`OrigamiLayer.load`), sinon c'est le verso que le
+  // joueur voyait se plier, juste après la feuille de recto posée dans le décor.
   retourne?: boolean;
 }
 
@@ -66,24 +68,17 @@ const DEFAUT: PapierModele = { recto: 'papier', verso: 'papier' };
 const TAILLE = 512;
 
 interface Aspect {
-  // Fond de la texture, et couleur du décor 2D : la feuille encore dépliée est
-  // dessinée en primitives Phaser et doit avoir exactement la couleur du modèle
-  // qu'elle deviendra, sinon la transition saute.
   teinte: string;
   peindre: (ctx: CanvasRenderingContext2D) => void;
   specular: number;
   shininess: number;
   // Les étoiles qui s'y allument, pendant le pliage comme une fois posé.
   eclat?: Eclat;
-  // Le fond, quand il n'est pas uni. La feuille du décor le peint aussi : la
-  // seule `teinte` d'un papier chatoyant donnait un gris-bleu que le modèle plié
-  // ne montre nulle part.
-  degrade?: Degrade;
 }
 
 // Celui d'un `createLinearGradient` de (0, 0) à `vers`, en unités du côté de la
 // feuille, l'origine en haut à gauche.
-export interface Degrade {
+interface Degrade {
   vers: readonly [number, number];
   arrets: readonly (readonly [number, string])[];
 }
@@ -411,10 +406,10 @@ const ASPECTS: Record<Papier, Aspect> = {
     // Le seul papier qui brille vraiment : c'est le reflet qui dit « lame ».
     specular: 0xffffff,
     shininess: 140,
-    // Ce qui fait lire « métal » est le contraste de valeurs le long d'une
-    // direction, pas le gris. L'aplat brossé d'avant tirait vers le carton peint.
-    degrade: DEGRADE_METAL,
     peindre: (ctx) => {
+      // Ce qui fait lire « métal » est le contraste de valeurs le long d'une
+      // direction, pas le gris. L'aplat brossé d'avant tirait vers le carton
+      // peint.
       peindreDegrade(ctx, DEGRADE_METAL);
 
       // Peu nombreux, sinon ils font rayure plutôt que poli.
@@ -523,7 +518,6 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#bcc6cc',
     specular: 0xffffff,
     shininess: 90,
-    degrade: DEGRADE_CHATOYANT,
     peindre: (ctx) => {
       peindreDegrade(ctx, DEGRADE_CHATOYANT);
 
@@ -553,7 +547,6 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#c9a13b',
     specular: 0xffe7a0,
     shininess: 110,
-    degrade: DEGRADE_OR,
     peindre: (ctx) => {
       peindreDegrade(ctx, DEGRADE_OR);
       grain(ctx, 6);
@@ -566,7 +559,6 @@ const ASPECTS: Record<Papier, Aspect> = {
     teinte: '#c9a13b',
     specular: 0xffe7a0,
     shininess: 110,
-    degrade: DEGRADE_OR,
     peindre: (ctx) => {
       ASPECTS.or.peindre(ctx);
       const pierres = ['#b81f35', '#2352b0', '#1d8a57', '#7a3cae'];
@@ -736,20 +728,16 @@ export function creerMeshOrigami(
   return { mesh, geometry, positions };
 }
 
-// En entiers Phaser : le décor 2D est de la même matière que le modèle qu'il
-// deviendra, sans charger three.js.
-export function teintesDe(nom: string): {
-  recto: number;
-  verso: number;
-  degrades: { recto?: Degrade; verso?: Degrade };
-} {
+// En entiers Phaser, pour une feuille dessinée en primitives : la rouge de la
+// salle du trône, qui deviendra le cœur.
+export function teintesDe(nom: string): { recto: number; verso: number } {
   const papier = PAPIERS[nom] ?? DEFAUT;
   const teinte = (p: Papier) => Number.parseInt(ASPECTS[p].teinte.slice(1), 16);
-  return {
-    recto: teinte(papier.recto),
-    verso: teinte(papier.verso),
-    degrades: { recto: ASPECTS[papier.recto].degrade, verso: ASPECTS[papier.verso].degrade },
-  };
+  return { recto: teinte(papier.recto), verso: teinte(papier.verso) };
+}
+
+export function finitRetourne(nom: string): boolean {
+  return PAPIERS[nom]?.retourne ?? false;
 }
 
 // Celui du papier qui fait face au joueur, le seul que voient les étoiles.
