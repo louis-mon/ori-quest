@@ -126,7 +126,6 @@ function charger(nom: string) {
   annulerCoupe();
   oublierLeSurvol();
   ruptures = [];
-  verrouiller(false);
   modifie = false;
   location.hash = nom;
   champGrille.value = String(grille);
@@ -334,9 +333,11 @@ function verifierUnicite(delai = DELAI, relance = 1000, silencieux = false) {
   window.clearTimeout(minuteur);
   const jeton = ++enVol;
 
+  // Tranché à chaque changement, dans les deux sens : une boucle annulée ou
+  // rejointe au bord doit rendre le bouton, sans attendre de changer d'énigme.
   const trous = troues();
+  verrouiller(trous.length > 0);
   if (trous.length) {
-    verrouiller(true);
     dessinerInventaire();
     ecrireVerdict(
       `⚠ Pièce(s) ${trous.join(', ')} trouée(s) : la boucle a détaché son morceau et laissé sa ` +
