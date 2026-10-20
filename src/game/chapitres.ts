@@ -51,7 +51,7 @@ const LIVRES = CHAPITRES;
 // château pose « À suivre… » elle aussi, au lieu d'ouvrir la salle du trône.
 // Le chapitre 2 a son
 // fond peint, mais ses objets ne sont pas encore calés dessus, et le chapitre 3
-// n'a que des décors provisoires — on veut bien qu'on aille les essayer, pas
+// attend le fond de sa cuisine — on veut bien qu'on aille les essayer, pas
 // qu'un joueur du récit y débarque sans l'avoir demandé.
 //
 // Index du premier chapitre qui n'est plus relié au suivant. La narration, elle, ignore tout de

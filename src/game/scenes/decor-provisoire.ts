@@ -32,10 +32,6 @@ const CREUX = 0x2a2622;
 const MEUBLE = 0x7a6246;
 const MEUBLE_DESSUS = 0x98805f;
 
-// Un bassin : sa margelle et l'eau, deux aplats.
-const MARGELLE = 0xb3aea4;
-const EAU = 0x6d9cb5;
-
 export interface PlanProvisoire {
   // Le sol, tel que le plan le donne : son bord haut est l'horizon.
   sol: Box;
@@ -45,7 +41,6 @@ export interface PlanProvisoire {
   creux?: readonly Box[];
   // Posés sur le sol, donc dessinés après lui.
   meubles?: readonly Box[];
-  eaux?: readonly Box[];
 }
 
 export function dessinerDecorProvisoire(scene: Phaser.Scene, plan: PlanProvisoire): void {
@@ -80,14 +75,6 @@ export function dessinerDecorProvisoire(scene: Phaser.Scene, plan: PlanProvisoir
     g.fillRect(meuble.x, meuble.y, meuble.w, meuble.h);
     g.fillStyle(MEUBLE_DESSUS, 1);
     g.fillRect(meuble.x, meuble.y, meuble.w, 8);
-  }
-
-  for (const eau of plan.eaux ?? []) {
-    const bord = 8;
-    g.fillStyle(MARGELLE, 1);
-    g.fillRect(eau.x - bord, eau.y - bord, eau.w + 2 * bord, eau.h + 2 * bord);
-    g.fillStyle(EAU, 1);
-    g.fillRect(eau.x, eau.y, eau.w, eau.h);
   }
 
   // Dit en toutes lettres ce que le joueur a sous les yeux. À supprimer avec

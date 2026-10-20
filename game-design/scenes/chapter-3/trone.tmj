@@ -3,6 +3,20 @@
  "infinite":false,
  "layers":[
         {
+         "class":"fond",
+         "id":3,
+         "image":"..\/..\/..\/public\/assets\/decor\/fond-trone.webp",
+         "imageheight":720,
+         "imagewidth":1280,
+         "locked":true,
+         "name":"fond",
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "draworder":"topdown",
          "id":2,
          "name":"plan",
@@ -29,7 +43,7 @@
                  "visible":true,
                  "width":190,
                  "x":545,
-                 "y":170
+                 "y":254
                 }, 
                 {
                  "height":160,
@@ -90,66 +104,6 @@
                  "width":96,
                  "x":1160,
                  "y":400
-                }, 
-                {
-                 "height":250,
-                 "id":8,
-                 "name":"sol",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":1280,
-                 "x":0,
-                 "y":470
-                }, 
-                {
-                 "height":470,
-                 "id":9,
-                 "name":"mur",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":1280,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "height":170,
-                 "id":10,
-                 "name":"trone",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":160,
-                 "x":560,
-                 "y":300
-                }, 
-                {
-                 "height":240,
-                 "id":11,
-                 "name":"porte_cuisine",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":150,
-                 "x":30,
-                 "y":230
-                }, 
-                {
-                 "height":240,
-                 "id":12,
-                 "name":"porte_jardin",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":150,
-                 "x":1100,
-                 "y":230
                 }, 
                 {
                  "height":160,
@@ -265,7 +219,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
+ "nextlayerid":4,
  "nextobjectid":18,
  "orientation":"orthogonal",
  "renderorder":"right-down",

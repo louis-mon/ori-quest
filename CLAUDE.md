@@ -106,7 +106,7 @@ toucher à la logique.
 C'étaient deux façons de dire la même chose tant que le chapitre 2 restait
 dehors ; `src/game/chapitres.ts` les sépare depuis qu'on veut le faire essayer
 sans le raccorder — les objets de ses deux scènes ne sont pas encore calés sur
-leur fond, le chapitre 3 n'a que des décors provisoires, et un joueur du récit
+leur fond, le chapitre 3 attend le fond de sa cuisine, et un joueur du récit
 n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce que la version
 contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller — et au-delà, aucun
 chapitre ne s'ouvre sur le suivant : atteint par le menu, le chapitre 2 finit

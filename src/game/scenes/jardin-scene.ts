@@ -8,7 +8,7 @@ import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
-import { dessinerDecorProvisoire } from './decor-provisoire';
+import { dessinerFond, preloadFond } from './fond';
 import { imprimerFeuille } from './feuille';
 import { IMAGES_RETOURNEMENT, poserRetournable } from './retournement';
 
@@ -17,8 +17,6 @@ import { IMAGES_RETOURNEMENT, poserRetournable } from './retournement';
 //
 // Deux papiers à plier, la fontaine où l'on pêche la carpe, et la wyvern qui
 // parle du cœur par énigmes.
-//
-// ⚠ Le fond n'est pas encore peint : `decor-provisoire.ts` tient la place.
 
 const PLAN = plan;
 
@@ -52,6 +50,7 @@ export class JardinScene extends PointClickScene {
   protected preloadAssets() {
     preloadHeros(this);
     preloadCiel(this);
+    preloadFond(this, PLAN.fond);
     preloadSprite(this, WYVERN, 'assets/decor/hydre.png');
     preloadSprite(this, CARPE, 'assets/decor/carpe.png');
   }
@@ -65,7 +64,7 @@ export class JardinScene extends PointClickScene {
         knot: 'jardin_fontaine',
       },
       // Sur le PLIAGE et non sur la possession : la couronne se donne à la
-      // reine, et la feuille reviendrait sur le banc à ce moment-là.
+      // reine, et la feuille reviendrait dans l'herbe à ce moment-là.
       papier_couronne: {
         knot: 'jardin_papier_couronne',
         visibleIf: () => !gameState.flag('couronne_pliee'),
@@ -103,13 +102,7 @@ export class JardinScene extends PointClickScene {
     dessinerCiel(this, SOL.y, boxOf(PLAN, 'dec_soleil'));
     semerNuages(this, boxOf(PLAN, 'dec_nuages'), GRAINE_DU_CIEL, 5);
 
-    dessinerDecorProvisoire(this, {
-      sol: SOL,
-      masses: [boxOf(PLAN, 'dec_rempart')],
-      creux: [boxOf(PLAN, 'dec_porte_trone')],
-      meubles: [boxOf(PLAN, 'dec_banc')],
-      eaux: [boxOf(PLAN, 'dec_bassin')],
-    });
+    dessinerFond(this, PLAN.fond);
 
     this.carpes = [];
     const bassin = boxOf(PLAN, 'dec_carpes');

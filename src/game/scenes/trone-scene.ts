@@ -8,7 +8,7 @@ import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
-import { dessinerDecorProvisoire } from './decor-provisoire';
+import { dessinerFond, preloadFond } from './fond';
 import {
   eclatDuCoeur,
   poserFeuillesPrecieuses,
@@ -23,8 +23,6 @@ import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 //
 // Les chats en partent pour la cuisine quand on les invite à manger, et y
 // reviennent rassasiés ; le cœur plié, ils s'en approchent et se réconcilient.
-//
-// ⚠ Le fond n'est pas encore peint : `decor-provisoire.ts` tient la place.
 
 const PLAN = plan;
 
@@ -61,6 +59,7 @@ export class TroneScene extends PointClickScene {
 
   protected preloadAssets() {
     preloadHeros(this);
+    preloadFond(this, PLAN.fond);
     preloadSprite(this, HIBOU, 'assets/decor/hibou.png');
     preloadSprite(this, CHAT, 'assets/decor/chat.png');
     preloadLuneChat(this);
@@ -125,12 +124,7 @@ export class TroneScene extends PointClickScene {
   // ------------------------------------------------------------------
 
   protected drawScenery() {
-    dessinerDecorProvisoire(this, {
-      sol: boxOf(PLAN, 'dec_sol'),
-      masses: [boxOf(PLAN, 'dec_mur')],
-      creux: [boxOf(PLAN, 'dec_porte_cuisine'), boxOf(PLAN, 'dec_porte_jardin')],
-      meubles: [boxOf(PLAN, 'dec_trone')],
-    });
+    dessinerFond(this, PLAN.fond);
 
     // Deux boîtes, comme la montagne du village : la rangée de feuilles et le
     // cœur plié n'ont ni la même forme ni la même place.

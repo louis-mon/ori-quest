@@ -3,6 +3,20 @@
  "infinite":false,
  "layers":[
         {
+         "class":"fond",
+         "id":3,
+         "image":"..\/..\/..\/public\/assets\/decor\/fond-jardin.webp",
+         "imageheight":720,
+         "imagewidth":1280,
+         "locked":true,
+         "name":"fond",
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "draworder":"topdown",
          "id":2,
          "name":"plan",
@@ -28,20 +42,20 @@
                  "type":"hotspot",
                  "visible":true,
                  "width":90,
-                 "x":385,
-                 "y":450
+                 "x":500,
+                 "y":515
                 }, 
                 {
-                 "height":150,
+                 "height":109,
                  "id":3,
                  "name":"fontaine",
                  "opacity":1,
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
-                 "width":330,
-                 "x":580,
-                 "y":460
+                 "width":662,
+                 "x":298,
+                 "y":611
                 }, 
                 {
                  "height":100,
@@ -52,8 +66,8 @@
                  "type":"hotspot",
                  "visible":true,
                  "width":100,
-                 "x":930,
-                 "y":560
+                 "x":975,
+                 "y":600
                 }, 
                 {
                  "height":177,
@@ -80,7 +94,7 @@
                  "y":400
                 }, 
                 {
-                 "height":270,
+                 "height":225,
                  "id":7,
                  "name":"sol",
                  "opacity":1,
@@ -89,10 +103,10 @@
                  "visible":true,
                  "width":1280,
                  "x":0,
-                 "y":450
+                 "y":495
                 }, 
                 {
-                 "height":170,
+                 "height":90,
                  "id":8,
                  "name":"nuages",
                  "opacity":1,
@@ -101,7 +115,7 @@
                  "visible":true,
                  "width":1280,
                  "x":0,
-                 "y":40
+                 "y":4
                 }, 
                 {
                  "height":128,
@@ -112,68 +126,20 @@
                  "type":"decor",
                  "visible":true,
                  "width":130,
-                 "x":1060,
-                 "y":60
-                }, 
-                {
-                 "height":200,
-                 "id":10,
-                 "name":"rempart",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":1280,
-                 "x":0,
-                 "y":250
-                }, 
-                {
-                 "height":170,
-                 "id":11,
-                 "name":"porte_trone",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":150,
-                 "x":30,
-                 "y":280
-                }, 
-                {
-                 "height":55,
-                 "id":12,
-                 "name":"banc",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":220,
-                 "x":320,
-                 "y":540
+                 "x":863,
+                 "y":16
                 }, 
                 {
                  "height":80,
-                 "id":13,
-                 "name":"bassin",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"decor",
-                 "visible":true,
-                 "width":290,
-                 "x":600,
-                 "y":500
-                }, 
-                {
-                 "height":66.8062463851937,
                  "id":14,
                  "name":"carpes",
                  "opacity":1,
                  "rotation":0,
                  "type":"decor",
                  "visible":true,
-                 "width":278,
-                 "x":606,
-                 "y":504
+                 "width":590,
+                 "x":336,
+                 "y":632
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -181,7 +147,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
+ "nextlayerid":4,
  "nextobjectid":15,
  "orientation":"orthogonal",
  "renderorder":"right-down",
