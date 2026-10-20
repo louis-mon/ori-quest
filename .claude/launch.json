@@ -3,12 +3,11 @@
   "configurations": [
     {
       "name": "ori-quest",
-      "//": "Le lanceur ne source pas ~/.zshrc, donc nvm n'y est pas chargé et le PATH peut ne contenir aucun node (ou un node système trop vieux) ; Vite exige >= 18, sinon le serveur meurt sur `Cannot find module 'node:path'`. On force le PATH via /usr/bin/env plutôt que par `bash -c 'nvm use'` — le lanceur démarre dans un répertoire dont bash n'arrive pas à remonter la hiérarchie (~/Documents est protégé par TCC) et .nvmrc y devient introuvable. Pointer le npm de Node 24 en absolu ne suffit pas non plus : le `vite` enfant reprend le `node` du PATH. À mettre à jour si la version de .nvmrc change.",
-      "//tcc": "Si le serveur meurt aussitôt sur `EPERM: process.cwd failed ... uv_cwd`, ce n'est ni node ni le projet : le processus lancé n'a pas le droit de *résoudre* son répertoire de travail. getcwd() remonte la hiérarchie, et ~/Documents est protégé par TCC. La même commande passée à la main marche, ce qui égare. Le correctif est une autorisation à accorder à l'application qui lance le serveur, dans Réglages Système > Confidentialité et sécurité > Fichiers et dossiers (ou Accès complet au disque). `-C` ci-dessous fixe le répertoire mais ne remplace pas cette autorisation : chdir() a le droit d'entrer là où getcwd() n'a pas le droit de remonter.",
+      "//": "Le lanceur ne source pas ~/.zshrc, donc nvm n'y est pas chargé et le PATH peut ne contenir aucun node (ou un node système trop vieux) ; Vite exige >= 18, sinon le serveur meurt sur `Cannot find module 'node:path'`. On force le PATH via /usr/bin/env plutôt que par `bash -c 'nvm use'` — le dossier de départ est sous ~/Documents, protégé par TCC, bash peut ne pas arriver à en remonter la hiérarchie, et .nvmrc y devient introuvable. Pointer le npm de Node 24 en absolu ne suffit pas non plus : le `vite` enfant reprend le `node` du PATH. À mettre à jour si la version de .nvmrc change.",
+      "//tcc": "Si le serveur meurt aussitôt sur `EPERM: process.cwd failed ... uv_cwd`, ce n'est ni node ni le projet : le processus lancé n'a pas le droit de *résoudre* son répertoire de travail. getcwd() remonte la hiérarchie, et ~/Documents est protégé par TCC. La même commande passée à la main marche, ce qui égare. Le correctif est une autorisation à accorder à l'application qui lance le serveur, dans Réglages Système > Confidentialité et sécurité > Fichiers et dossiers (ou Accès complet au disque). Un `-C` vers le projet n'y changerait rien : chdir() a le droit d'entrer là où getcwd() n'a pas le droit de remonter.",
+      "//dossier": "La commande part du dossier de la session — le dépôt principal ou un worktree de .claude/worktrees/ —, si bien que chaque checkout sert son propre code, avec ses propres src/generated/ et dist/. Aucun chemin absolu vers le projet ici, sous peine qu'une session en worktree serve le dépôt principal ; le champ `cwd` du lanceur, lui, n'accepte qu'un chemin relatif à ce dossier.",
       "runtimeExecutable": "/usr/bin/env",
       "runtimeArgs": [
-        "-C",
-        "/Users/louismonestier/Documents/projects/ori-quest",
         "PATH=/Users/louismonestier/.nvm/versions/node/v24.19.0/bin:/usr/bin:/bin",
         "npm",
         "run",
@@ -19,11 +18,9 @@
     },
     {
       "name": "ori-quest (délai de tap)",
-      "//": "Le même serveur, avec le garde anti-double-tap des dialogues actif (il est nul en développement par défaut — voir DELAI_ANTI_TAP dans src/ui/overlay.ts). Pour le régler, changer la valeur ci-dessous. Le PATH et le -C sont là pour les mêmes raisons que dans la configuration voisine.",
+      "//": "Le même serveur, avec le garde anti-double-tap des dialogues actif (il est nul en développement par défaut — voir DELAI_ANTI_TAP dans src/ui/overlay.ts). Pour le régler, changer la valeur ci-dessous. Le PATH et le dossier de départ sont ceux de la configuration voisine, pour les mêmes raisons.",
       "runtimeExecutable": "/usr/bin/env",
       "runtimeArgs": [
-        "-C",
-        "/Users/louismonestier/Documents/projects/ori-quest",
         "PATH=/Users/louismonestier/.nvm/versions/node/v24.19.0/bin:/usr/bin:/bin",
         "VITE_DELAI_TAP=300",
         "npm",
@@ -36,11 +33,9 @@
     },
     {
       "name": "ori-quest (build de production)",
-      "//": "Le build publié sur itch.io : délai anti-tap réel, chapitre 2 absent, fin sur « À suivre… ». `npm run prod` rebâtit dist/ avant de le servir — un `vite preview` seul sert le build précédent, et on croit tester une correction qui n'y est pas. PATH et -C pour les mêmes raisons que les configurations voisines.",
+      "//": "Le build publié sur itch.io : délai anti-tap réel, chapitre 2 absent, fin sur « À suivre… ». `npm run prod` rebâtit dist/ avant de le servir — un `vite preview` seul sert le build précédent, et on croit tester une correction qui n'y est pas. PATH et dossier de départ comme les configurations voisines, pour les mêmes raisons.",
       "runtimeExecutable": "/usr/bin/env",
       "runtimeArgs": [
-        "-C",
-        "/Users/louismonestier/Documents/projects/ori-quest",
         "PATH=/Users/louismonestier/.nvm/versions/node/v24.19.0/bin:/usr/bin:/bin",
         "npm",
         "run",
