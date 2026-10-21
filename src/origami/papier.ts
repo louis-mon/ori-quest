@@ -14,6 +14,7 @@ export type Papier =
   | 'bois'
   | 'boisFonce'
   | 'feuille'
+  | 'feuillage'
   | 'herbe'
   | 'pierre'
   | 'tachete'
@@ -38,7 +39,7 @@ interface PapierModele {
 export const PAPIERS: Record<string, PapierModele> = {
   pont: { recto: 'papier', verso: 'bois' },
   // Le tronc est ce petit triangle de bois qu'un retournement fait apparaître.
-  arbre: { recto: 'feuille', verso: 'boisFonce' },
+  arbre: { recto: 'feuillage', verso: 'boisFonce' },
   hache: { recto: 'metal', verso: 'marron', retourne: true },
   porte: { recto: 'noir', verso: 'boisFonce' },
   // Chapitre 2. Les teintes viennent des fiches de scène, où elles décrivent le
@@ -164,6 +165,18 @@ function veines(
 function fond(ctx: CanvasRenderingContext2D, couleur: string) {
   ctx.fillStyle = couleur;
   ctx.fillRect(0, 0, TAILLE, TAILLE);
+}
+
+// Une amande arrondie à la base et pointue au bout, centrée sur l'origine, la
+// pointe vers +x.
+function petiteFeuille(ctx: CanvasRenderingContext2D, longueur: number) {
+  const l = longueur / 2;
+  const w = longueur * 0.3;
+  ctx.beginPath();
+  ctx.moveTo(-l, 0);
+  ctx.bezierCurveTo(-l * 0.7, -w, l * 0.2, -w, l, 0);
+  ctx.bezierCurveTo(l * 0.2, w, -l * 0.7, w, -l, 0);
+  ctx.closePath();
 }
 
 // L'or des incrustations et des veines des feuilles précieuses, du plus sombre
@@ -320,6 +333,33 @@ const ASPECTS: Record<Papier, Aspect> = {
       }
       ctx.globalAlpha = 1;
       grain(ctx, 18);
+    },
+  },
+
+  // Le papier de l'arbre : plié, c'est une frondaison qu'on doit y lire, pas une
+  // seule grande feuille. Les plus claires sont posées en dernier, devant. Plus
+  // petites, elles tournaient au moucheté sur la feuille posée au ravin.
+  feuillage: {
+    teinte: '#4f8f3a',
+    specular: 0x2e3a20,
+    shininess: 26,
+    peindre: (ctx) => {
+      fond(ctx, '#2f5e24');
+      ctx.save();
+      // Le liseré sombre qui détache chaque feuille de celles qu'elle recouvre.
+      ctx.shadowColor = 'rgba(15, 35, 10, 0.55)';
+      ctx.shadowBlur = 3;
+      for (const vert of ['#3d772d', '#478534', '#4f8f3a', '#5c9c43', '#6caa4d']) {
+        ctx.fillStyle = vert;
+        for (let i = 0; i < 170; i++) {
+          ctx.setTransform(1, 0, 0, 1, Math.random() * TAILLE, Math.random() * TAILLE);
+          ctx.rotate(Math.random() * Math.PI * 2);
+          petiteFeuille(ctx, 34 + Math.random() * 22);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+      grain(ctx, 14);
     },
   },
 
