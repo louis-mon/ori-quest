@@ -116,7 +116,19 @@
                  "width":160,
                  "x":560,
                  "y":480
-                }, 
+                },
+                {
+                 "height":70,
+                 "id":18,
+                 "name":"couronne",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":84,
+                 "x":598,
+                 "y":282
+                },
                 {
                  "height":0,
                  "id":14,
@@ -220,7 +232,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":18,
+ "nextobjectid":19,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

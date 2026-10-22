@@ -113,6 +113,7 @@ const COEUR_PLIE_CHATS_A_TABLE = etape('cuisine', [
   'jardin_vu',
   'couronne_resolu',
   'couronne_pliee',
+  'libou_couronnee',
   'couronne_rendue',
   'cuisine_vue',
   'cheffe_poisson',

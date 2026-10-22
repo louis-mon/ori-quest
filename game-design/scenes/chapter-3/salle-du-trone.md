@@ -7,7 +7,8 @@ Les chats sont fâchés et ont faim. La but est de plier le coeur pour les récn
 ## Le Libou Des Bois Jolis
 
 La reine du chateau. Au debut elle est énervée car elle a perdu sa couronne, et excédée par les disputes incessantes des chats.
-Une fois la couronne ramenée, elle donne quatre feuilles précieuses, posées au centre de la salle (voir plus bas).
+Une fois la couronne ramenée, le héros la lui pose sur la tête, où elle la garde pour le reste du chapitre, et elle donne
+quatre feuilles précieuses, posées au centre de la salle (voir plus bas).
 
 ## Le Chat Mal Luné
 

@@ -122,6 +122,7 @@ VAR has_idee_couronne = false
 VAR flag_couronne_resolu = false
 VAR flag_couronne_pliee = false
 VAR has_couronne = false
+VAR flag_libou_couronnee = false
 VAR flag_couronne_rendue = false
 VAR flag_chat_faim = false
 VAR flag_lune_chat_parle = false
@@ -1043,7 +1044,7 @@ Je devrais aller saluer Sa Majesté.
     Qu'elle est belle et brille de mille feux !
     Vite, coiffe-moi.
     # qui: narrateur
-    Je dépose la couronne sur la tête royale.
+    Je dépose la couronne sur la tête royale. # flag: libou_couronnee
     # qui: heros
     Vous êtes à nouveau ravissante, Votre Majesté Le Libou Des Bois Jolis.
     # qui: hibou

@@ -41,6 +41,9 @@ export class TroneScene extends PointClickScene {
 
   private chat!: Phaser.GameObjects.Image;
   private luneChat!: LuneChat;
+  private empriseLibou!: Box;
+  private couronne!: OrigamiDecor;
+  private empriseCouronne?: Box;
   private feuilles!: FeuillesPrecieuses;
   private coeur!: OrigamiDecor;
   private empriseCoeur?: Box;
@@ -113,6 +116,15 @@ export class TroneScene extends PointClickScene {
     const emprise = plie ? this.empriseCoeur : this.feuilles?.emprise;
     if (emprise) this.caler('coeur', emprise);
 
+    // Couronnée, elle grandit d'autant : un tap sur la couronne est un tap sur
+    // la reine.
+    const couronnee = gameState.flag('libou_couronnee');
+    this.couronne?.montrer(couronnee);
+    if (this.empriseLibou) {
+      const coiffe = couronnee ? this.empriseCouronne : undefined;
+      this.caler('libou', coiffe ? reunir(this.empriseLibou, coiffe) : this.empriseLibou);
+    }
+
     if (plie && gameState.flag('chats_rassasies') && !gameState.flag('histoire_finie')) {
       this.armerLeDenouement();
     }
@@ -136,7 +148,14 @@ export class TroneScene extends PointClickScene {
       this.refresh();
     });
 
-    this.caler('libou', empriseDe(placeSprite(this, HIBOU, boxOf(PLAN, 'hs_libou'))));
+    this.empriseLibou = empriseDe(placeSprite(this, HIBOU, boxOf(PLAN, 'hs_libou')));
+    this.caler('libou', this.empriseLibou);
+    // Après le hibou, pour être dessinée par-dessus sa tête.
+    this.empriseCouronne = undefined;
+    this.couronne = poserOrigami(this, 'couronne', boxOf(PLAN, 'dec_couronne'), (emprise) => {
+      this.empriseCouronne = emprise;
+      this.refresh();
+    });
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));
     this.calerSur('chat', this.chat);
     this.luneChat = placerLuneChat(this, boxOf(PLAN, 'hs_lune_chat'));
@@ -237,4 +256,15 @@ export class TroneScene extends PointClickScene {
       fermer();
     }
   }
+}
+
+function reunir(a: Box, b: Box): Box {
+  const x = Math.min(a.x, b.x);
+  const y = Math.min(a.y, b.y);
+  return {
+    x,
+    y,
+    w: Math.max(a.x + a.w, b.x + b.w) - x,
+    h: Math.max(a.y + a.h, b.y + b.h) - y,
+  };
 }
