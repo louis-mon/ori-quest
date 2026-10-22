@@ -84,8 +84,12 @@ export function decoupage(nom) {
 // Le bruit du pilote graphique n'est pas du jeu : on ne le compte pas.
 const BRUIT = /GL Driver Message|GPU stall|Phaser v/;
 
-export async function ouvrir(navigateur, url, { sauvegarde = null } = {}) {
-  const contexte = await navigateur.newContext({ viewport: { width: 1280, height: 720 } });
+// `tactile` pour un écran tactile, sans quoi `toucher()` n'a pas de doigt.
+export async function ouvrir(navigateur, url, { sauvegarde = null, tactile = false } = {}) {
+  const contexte = await navigateur.newContext({
+    viewport: { width: 1280, height: 720 },
+    hasTouch: tactile,
+  });
   const page = await contexte.newPage();
 
   // Tout ce que la page crie est une régression en puissance : le gel du renard
@@ -183,6 +187,22 @@ export async function taperSur(page, selecteur) {
   await page.locator(selecteur).click();
   await pause(250);
 }
+
+// Au doigt plutôt qu'à la souris : le navigateur rejoue alors le tap en souris,
+// après coup, sur ce qui se trouve sous le doigt — et c'est ce qu'un clic ne
+// fait jamais. Demande un contexte ouvert avec `tactile`.
+export async function toucher(page, x, y) {
+  const cadre = await page.locator('#game canvas').boundingBox();
+  await pause(delaiTap);
+  compteur.taps++;
+  await page.touchscreen.tap(
+    cadre.x + (x / 1280) * cadre.width,
+    cadre.y + (y / 720) * cadre.height,
+  );
+  await pause(250);
+}
+
+export const toucherZone = (page, scene, id) => toucher(page, ...pointDe(scene, id));
 
 // Avance d'une réplique et attend que le texte change vraiment : un `pause()`
 // fixe suffirait aujourd'hui, mais ferait passer un dialogue gelé pour un

@@ -522,6 +522,18 @@ le bouton, et déclenchait le hotspot dessous. Arrêter la propagation côté DO
 suffit pas, la capture passe avant. Le canvas ne reçoit que des taps — le seul
 glisser du jeu s'appuie sur `setPointerCapture`, dans la couche DOM.
 
+**Au doigt, le tap se rejoue en souris**, et Phaser écoute la souris. Après un
+toucher, le navigateur émet `mousedown` et `mouseup` au même point, sur ce qui
+s'y trouve *à ce moment-là* : le tap qui ferme la boîte de dialogue la retire de
+dessous le doigt, et la souris rejouée tombait sur le hotspot dessous. La
+fontaine du jardin, qui couvre tout le bas du cadre, rouvrait ainsi son dialogue
+à chaque fermeture, sans issue ; le voile du menu laissait passer le même tap.
+`isolerLInterface()` (`src/ui/isolation.ts`) écarte la souris d'un toucher né
+dans l'interface jusqu'au `pointerdown` suivant. Annuler `touchend` ne suffit
+pas — il n'atteint plus l'interface quand sa cible en a été retirée, un bouton de
+choix — et annuler `touchstart` bloquerait le défilement du menu. Un clic ne
+rejoue rien : l'essai `toucher` de `npm run qa` ouvre un écran tactile.
+
 **Le plein écran s'applique à `#app`**, jamais au canvas seul : l'interface vit
 dans des éléments frères et disparaîtrait. Safari sur iPhone n'implémente
 toujours pas l'API pour un élément quelconque, d'où l'entrée de menu masquée

@@ -42,6 +42,7 @@ import {
   taper,
   taperSur,
   taperZone,
+  toucherZone,
   tutoriel,
 } from './lib/pilote.mjs';
 
@@ -358,6 +359,49 @@ test('verification-fausse', async (page, dire) => ({
 
     await resoudreEnigme(page(), 'porte');
     dire("l'énigme se résout après coup", !(await etat(page())).enigme);
+  },
+}));
+
+// Au doigt, le navigateur rejoue chaque tap en souris, après coup et au même
+// point. Le tap qui refermait la boîte de dialogue la retirait de dessous le
+// doigt, et la souris rejouée tombait sur le hotspot qu'elle recouvrait : au
+// jardin, la fontaine rouvrait son dialogue sans fin. Un clic ne rejoue rien,
+// d'où l'écran tactile.
+test('toucher', async (page, dire) => ({
+  sauvegarde: etape('jardin', ['trone_vu', 'libou_parle', 'jardin_vu']),
+  tactile: true,
+  jouer: async () => {
+    await toucherZone(page(), 'jardin', 'fontaine');
+    dire('la fontaine répond au doigt', await attendreLaBoite(page()));
+
+    // La boîte se referme touchée là où elle recouvre la fontaine. Le jour où
+    // elle ne la recouvre plus, l'essai ne prouve plus rien : il doit le dire.
+    const couvre = await page().evaluate(
+      ([x, y]) => {
+        const cadre = document.querySelector('#game canvas').getBoundingClientRect();
+        const sous = document.elementFromPoint(
+          cadre.left + (x / 1280) * cadre.width,
+          cadre.top + (y / 720) * cadre.height,
+        );
+        return !!sous?.closest('.dialogue');
+      },
+      pointDe('jardin', 'fontaine'),
+    );
+    dire('la boîte recouvre la fontaine', couvre);
+
+    // Deux contacts au plus : le premier achève la réplique qui s'écrit.
+    for (let i = 0; i < 2 && (await etat(page())).boite; i++) {
+      await toucherZone(page(), 'jardin', 'fontaine');
+    }
+    await pause(1000);
+    dire('la boîte refermée au doigt ne se rouvre pas', !(await etat(page())).boite);
+
+    // Le voile du menu se retire lui aussi de sous le doigt qui le touche.
+    await page().locator('.menu__button').tap();
+    await toucherZone(page(), 'jardin', 'fontaine');
+    await pause(1000);
+    const e = await etat(page());
+    dire('le voile du menu ne laisse pas passer le doigt', !e.menu && !e.boite);
   },
 }));
 
@@ -975,8 +1019,8 @@ for (const { nom, fn, livre, attendu } of tests) {
     console.log(`   ${ok ? '✓' : '✗'} ${quoi}${detail ? ` — ${detail}` : ''}`);
   };
 
-  const { sauvegarde, jouer } = await fn(() => courante, dire);
-  const { page, contexte, journal } = await ouvrir(navigateur, cible.url, { sauvegarde });
+  const { sauvegarde, tactile, jouer } = await fn(() => courante, dire);
+  const { page, contexte, journal } = await ouvrir(navigateur, cible.url, { sauvegarde, tactile });
   courante = page;
   try {
     await jouer();
