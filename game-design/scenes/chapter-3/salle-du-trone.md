@@ -31,7 +31,8 @@ et aucun choix n'est proposé. Ensuite, un arbre de choix : d'abord la couleur, 
 autres, sous chacune des quatre couleurs —, et seule la rouge le permet. L'indice n'est pas dans l'inventaire :
 c'est au joueur de s'en souvenir. Plié, le cœur prend la place des quatre feuilles.
 
-Une fois le coeur plié, et les chats rassasiés, une cinématique montre les chats qui se rapprochent du coeur et se réconcilient. Le Petit Chat avoue
-qu'il a plusieurs fois caché la couronne de la reine pour accuser le chat mal luné et obtenir les faveurs de la reine, et s'excuse publiquement.
-Le chat mal luné promet qu'il arrêtera de déplier les objets si le petit chat se comporte mieux.
+Une fois le coeur plié, et les chats rassasiés, une cinématique montre les chats qui se rapprochent du coeur et se réconcilient. La reine accuse le
+chat mal luné d'avoir déplié sa couronne : il n'avoue que les origamis, dépliés pour se venger de sa disgrâce. Le Petit Chat
+avoue alors avoir déplié la couronne lui-même, pour en faire accuser le chat mal luné et obtenir les faveurs de la reine, et
+s'excuse publiquement.
 Fin de l'histoire.
