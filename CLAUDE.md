@@ -126,10 +126,10 @@ atteint le chapitre 3.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la
-suite. C'est le seul texte du jeu hors d'ink avec celui des tutoriels, et pour
-une raison voisine : il clôt, il ne raconte pas. La fin de l'histoire passe par
-le même écran, dans sa variante « Fin » : c'est le tag `# fin:` du dernier knot
-qui la pose — la narration sait que l'histoire est finie, l'écran ne fait que le
+suite. C'est le seul texte du jeu hors d'ink avec ce qui se dit pendant une
+énigme, et pour une raison voisine : il clôt, il ne raconte pas. La fin de
+l'histoire passe par le même écran, dans sa variante « Fin » : c'est le tag
+`# fin:` du dernier knot qui la pose — la narration sait que l'histoire est finie, l'écran ne fait que le
 constater.
 
 **Une idée est un objet d'inventaire comme un autre.** Même `# give:`, même
@@ -302,10 +302,11 @@ une énigme dont ce tutoriel n'est pas celui d'origine : un tutoriel explique, i
 ne résout pas. Le vrac étant tiré d'une graine fixe, c'est toujours **la même**
 pièce qui part ; sans cette règle, quatre lectures résolvaient le pont.
 
-**Ce texte-là n'est pas dans ink, et c'est le seul du jeu.** Un tutoriel se joue
-pendant que le récit *attend* le verdict de l'énigme (`# puzzle:`), et
-`DialogueRunner` n'a qu'une instance de `Story` qui refuse d'être relancée
-pendant qu'elle tourne. Déplacé dans `story.ink`, il ne s'afficherait jamais.
+**Ce texte-là n'est pas dans ink**, pas plus que la réplique d'une vérification
+fausse (`src/game/puzzle/erreur.ts`) : tout ce qui se dit pendant une énigme se
+dit pendant que le récit *attend* son verdict (`# puzzle:`), et `DialogueRunner`
+n'a qu'une instance de `Story` qui refuse d'être relancée pendant qu'elle tourne.
+Déplacé dans `story.ink`, il ne s'afficherait jamais.
 
 **Le pli de démonstration est un vrai pliage**, baké comme les autres, et le
 trait bleu est **peint dans la texture du papier** (`papierTrace`, dans
@@ -365,6 +366,11 @@ qu'il enseigne. Pourquoi pas « taper n'importe où fait avancer », qui supprim
 le problème : parce que la surface des taps accidentels deviendrait l'écran
 entier, et qu'une réplique sautée ne se rejoue pas — c'est déjà ce que
 `DELAI_ANTI_TAP` protège.
+
+Ce tap-là est guetté sur `window`, où l'interface ne laisse rien remonter
+(`src/ui/isolation.ts`). Sur une énigme, le décor est couvert par un voile — celui
+du tutoriel, celui d'une vérification fausse — qui porte donc **`data-ailleurs`**
+pour passer quand même : sans lui, la boîte restait muette sur une énigme.
 
 Deux pièges dans le texte qui s'écrit. **Ce qui reste à écrire est dans le DOM**,
 en `visibility: hidden` : écrit dans un seul nœud qui grandit, le texte se

@@ -1,10 +1,11 @@
 // Le texte et l'enchaînement des tutoriels, pas le moteur (`tutoriel.ts`). Voir
 // game-design/07-tutoriel-puzzle-crease-pattern.md.
 //
-// Ce texte n'est pas dans ink — le seul du jeu — parce qu'un tutoriel se joue
-// pendant que le récit attend le verdict de l'énigme (`# puzzle:`) :
-// `DialogueRunner` n'a qu'une instance de `Story` et refuse d'être relancé
-// pendant qu'il tourne. Déplacé dans story.ink, il ne s'afficherait jamais.
+// Ce texte n'est pas dans ink, comme la réplique d'une vérification fausse
+// (`erreur.ts`), parce qu'un tutoriel se joue pendant que le récit attend le
+// verdict de l'énigme (`# puzzle:`) : `DialogueRunner` n'a qu'une instance de
+// `Story` et refuse d'être relancé pendant qu'il tourne. Déplacé dans
+// story.ink, il ne s'afficherait jamais.
 //
 // Une étape est soit une réplique, soit un effet joué entre deux répliques ; les
 // effets sont nommés ici et exécutés dans `tutoriel.ts`. Le `puis` d'un effet

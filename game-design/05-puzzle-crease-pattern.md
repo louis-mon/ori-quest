@@ -43,9 +43,14 @@ ambigus des motifs souvent symétriques.
 
 ## Les règles
 
-**En cas d'échec**, le diagramme clignote en rouge. On réessaie immédiatement,
-**autant de fois qu'on veut** — l'énigme ne se rate pas définitivement, et il n'y
-a **aucune notion de qualité** du pliage : c'est fait ou ce n'est pas fait.
+**En cas d'échec**, le héros le dit dans la boîte de dialogue
+([`erreur.ts`](../src/game/puzzle/erreur.ts)) pendant que le diagramme clignote
+en rouge : le clignotement seul se distinguait mal. La réplique attend un tap,
+comme toutes les autres, et l'énigme reste sourde d'ici là — un tap sur le
+plateau y déplacerait une pièce sous la boîte. On réessaie ensuite
+immédiatement, **autant de fois qu'on veut** — l'énigme ne se rate pas
+définitivement, et il n'y a **aucune notion de qualité** du pliage : c'est fait
+ou ce n'est pas fait.
 
 **En cas de succès**, on voit l'animation du papier qui se plie, et on quitte
 l'énigme pour revenir à la scène précédente.

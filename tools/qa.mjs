@@ -40,6 +40,7 @@ import {
   RACINE,
   resoudreEnigme,
   taper,
+  taperSur,
   taperZone,
   tutoriel,
 } from './lib/pilote.mjs';
@@ -306,6 +307,57 @@ test('redimensionnement', async (page, dire) => ({
 
     await resoudreEnigme(page(), 'porte');
     dire("l'énigme reste résoluble après coup", !(await etat(page())).enigme);
+  },
+}));
+
+// Une vérification fausse se dit dans la boîte de dialogue, par-dessus l'énigme.
+// La réplique attend un tap sur sa boîte : le plateau doit rester sourd d'ici
+// là, la boîte se signaler comme dans une scène, puis l'énigme répondre de
+// nouveau.
+test('verification-fausse', async (page, dire) => ({
+  sauvegarde: BOIS_EN_POCHE,
+  jouer: async () => {
+    await taperZone(page(), 'porte', 'porte');
+    await deroulerDialogue(page());
+    await tutoriel(page(), false);
+
+    await page().locator('.puzzle__check').click();
+    const parle = await attendreLaBoite(page());
+    dire('la vérification fausse est dite', parle && (await etat(page())).enigme);
+
+    // Le voile tient lieu de décor : un tap dessus doit faire se signaler la
+    // boîte, comme dans une scène.
+    await taperSur(page(), '.puzzle__voile');
+    const appel = await page().locator('.dialogue--appel').count();
+    dire('un tap à côté fait se signaler la boîte', appel === 1);
+
+    // Un point sur le papier d'une pièce du bac, voile compris : sous le voile,
+    // c'est elle que le doigt prendrait.
+    const prise = await page().evaluate(() => {
+      const piece = document.querySelector('.puzzle__tray .puzzle__piece');
+      const r = piece.getBoundingClientRect();
+      for (let k = 0; k < 400; k++) {
+        const x = r.left + r.width * ((k * 0.618) % 1);
+        const y = r.top + r.height * ((k * 0.382) % 1);
+        if (document.elementsFromPoint(x, y).some((e) => piece.contains(e))) return [x, y];
+      }
+      return null;
+    });
+    const plateau = await page().locator('.puzzle__board').boundingBox();
+    await page().mouse.move(...prise);
+    await page().mouse.down();
+    await page().mouse.move(plateau.x + plateau.width / 2, plateau.y + plateau.height / 2, {
+      steps: 10,
+    });
+    await page().mouse.up();
+    const posees = await page().locator('.puzzle__board .puzzle__piece').count();
+    dire('le plateau est sourd pendant la réplique', posees === 0, `${posees} pièce(s) posée(s)`);
+
+    const e = await avancer(page());
+    dire("un tap rend la main à l'énigme", !e.boite && e.enigme);
+
+    await resoudreEnigme(page(), 'porte');
+    dire("l'énigme se résout après coup", !(await etat(page())).enigme);
   },
 }));
 

@@ -106,9 +106,9 @@ détail dans [05-puzzle-crease-pattern.md](05-puzzle-crease-pattern.md).
 
 Trois règles tranchées :
 
-- **On ne peut pas le rater définitivement.** Une vérification fausse fait
-  clignoter le diagramme en rouge, et on réessaie immédiatement, autant de fois
-  qu'on veut.
+- **On ne peut pas le rater définitivement.** Une vérification fausse, le héros
+  le dit et le diagramme clignote en rouge ; on réessaie immédiatement, autant
+  de fois qu'on veut.
 - **On peut abandonner** à tout moment et revenir à la scène. La feuille est
   toujours là, l'énigme se rouvre.
 - **Pas de notion de qualité.** Un pliage est fait ou ne l'est pas : ni score,

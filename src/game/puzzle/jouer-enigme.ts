@@ -1,6 +1,7 @@
 import type { Overlay } from '../../ui/overlay';
 import { gameState } from '../systems/state';
 import { runCreasePuzzle } from './crease-puzzle';
+import { signalerErreur } from './erreur';
 import { PUZZLES } from './puzzles';
 import { lanceurTutoriel } from './tutoriel';
 
@@ -17,6 +18,7 @@ export async function jouerEnigme(uiRoot: HTMLElement, overlay: Overlay, nom: st
     overlay.hideDialogue();
     const outcome = await runCreasePuzzle(uiRoot, def, {
       tutoriel: lanceurTutoriel(uiRoot, overlay, def),
+      signalerErreur: () => signalerErreur(overlay),
     });
     gameState.setFlag(`${nom}_resolu`, outcome === 'solved');
   } catch (err) {

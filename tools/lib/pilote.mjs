@@ -175,6 +175,15 @@ export async function taper(page, x, y) {
 
 export const taperZone = (page, scene, id) => taper(page, ...pointDe(scene, id));
 
+// Au centre d'un élément de l'interface, pour ce qui recouvre le décor : là,
+// `taper()` viserait un canvas qu'on ne touche plus.
+export async function taperSur(page, selecteur) {
+  await pause(delaiTap);
+  compteur.taps++;
+  await page.locator(selecteur).click();
+  await pause(250);
+}
+
 // Avance d'une réplique et attend que le texte change vraiment : un `pause()`
 // fixe suffirait aujourd'hui, mais ferait passer un dialogue gelé pour un
 // dialogue lent.

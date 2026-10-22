@@ -77,6 +77,8 @@ export type LanceurTutoriel = (
 
 export interface OptionsPuzzle {
   tutoriel?: LanceurTutoriel;
+  // L'énigme reste sourde tant que la promesse court.
+  signalerErreur?: () => Promise<void>;
 }
 
 // Lent pour un déplacement : c'est une démonstration, le joueur doit avoir le
@@ -148,6 +150,7 @@ export async function runCreasePuzzle(
     <div class="puzzle__zoom" hidden>
       <img class="puzzle__zoom-image" alt="Le pliage une fois terminé, agrandi" />
     </div>
+    <div class="puzzle__voile" data-ailleurs hidden></div>
     <div class="puzzle__confirm" hidden role="alertdialog" aria-modal="true">
       <div class="menu__confirm-box">
         <p class="menu__confirm-text">
@@ -182,6 +185,7 @@ export async function runCreasePuzzle(
   const zoom = el.querySelector<HTMLElement>('.puzzle__zoom')!;
   const confirm = el.querySelector<HTMLElement>('.puzzle__confirm')!;
   const help = el.querySelector<HTMLButtonElement>('.puzzle__help')!;
+  const voile = el.querySelector<HTMLElement>('.puzzle__voile')!;
 
   // Sans lanceur — un appel qui ne passe pas par le jeu, un test — le bouton
   // n'aurait rien à ouvrir : mieux vaut qu'il ne soit pas là.
@@ -469,6 +473,15 @@ export async function runCreasePuzzle(
       // Aucune pénalité : on revérifie autant de fois qu'on veut.
       board.classList.add('is-wrong');
       window.setTimeout(() => board.classList.remove('is-wrong'), FLASH_MS);
+
+      // La réplique attend un tap sur sa boîte : sans le voile, un tap sur le
+      // plateau déplacerait une pièce sous elle.
+      if (options.signalerErreur) {
+        voile.hidden = false;
+        void options.signalerErreur().finally(() => {
+          voile.hidden = true;
+        });
+      }
     });
 
     // Pour atteindre la suite du récit sans refaire l'énigme. Les pièces sont

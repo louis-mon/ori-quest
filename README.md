@@ -387,11 +387,13 @@ Tags disponibles : `give`, `drop`, `flag`, `unflag`, `origami`, `goto`, `puzzle`
 `then`, `qui`, `fin`. En ajouter
 un = une entrée dans `handlers` (`src/game/systems/dialogue.ts`).
 
-**Une exception, et une seule** : le texte des tutoriels d'énigme vit dans
-[`src/game/puzzle/tutoriels.ts`](src/game/puzzle/tutoriels.ts), pas dans ink. Un
-tutoriel se joue pendant que le récit attend le verdict de l'énigme, et
-`DialogueRunner` refuse d'être relancé pendant qu'il tourne — les répliques ne
-s'afficheraient jamais. Sa feuille de démonstration est un vrai pliage :
+**Une exception** : ce qui se dit pendant une énigme n'est pas dans ink — le
+texte des tutoriels vit dans
+[`src/game/puzzle/tutoriels.ts`](src/game/puzzle/tutoriels.ts), la réplique d'une
+vérification fausse dans [`src/game/puzzle/erreur.ts`](src/game/puzzle/erreur.ts).
+Le récit attend alors le verdict de l'énigme, et `DialogueRunner` refuse d'être
+relancé pendant qu'il tourne — les répliques ne s'afficheraient jamais. La
+feuille de démonstration d'un tutoriel est un vrai pliage :
 
 ```bash
 npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 2000

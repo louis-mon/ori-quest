@@ -1334,6 +1334,14 @@ body {
   display: none;
 }
 
+/* Le temps de la réplique d'une vérification fausse. Transparent : c'est le
+   plateau, qui clignote dessous, dont elle parle. */
+.puzzle__voile {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
 /* ---------- Tutoriel d'énigme ---------- */
 
 /* `.tuto` n'est PAS positionné, délibérément : il ferait contexte d'empilement

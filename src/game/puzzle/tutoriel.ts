@@ -245,7 +245,7 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
   const el = document.createElement('div');
   el.className = 'tuto';
   el.innerHTML = `
-    <div class="tuto__voile"></div>
+    <div class="tuto__voile" data-ailleurs></div>
     <svg class="tuto__fleche" viewBox="0 0 48 32" aria-hidden="true" hidden>
       <path d="M1 11 h25 V2 l20 14 -20 14 V21 H1 Z" />
     </svg>
