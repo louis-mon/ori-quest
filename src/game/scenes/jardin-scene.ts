@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/jardin';
@@ -120,15 +119,6 @@ export class JardinScene extends PointClickScene {
 
     this.caler('wyvern', empriseDe(placeSprite(this, WYVERN, boxOf(PLAN, 'hs_wyvern'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
-
-    this.add
-      .text(DESIGN_WIDTH / 2, 40, 'Le jardin', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '26px',
-        color: '#3a3128',
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.6);
   }
 
   // D'un bout à l'autre de la bande, et à chaque bout la carpe se retourne comme

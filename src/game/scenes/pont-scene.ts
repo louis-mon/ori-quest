@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/pont';
@@ -179,14 +178,5 @@ export class PontScene extends PointClickScene {
     // l'artiste et non rendue en 3D — aucun pliage du jeu ne produit une souche,
     // il n'y a donc pas de modèle dont elle pourrait diverger.
     this.souche = placeSprite(this, SOUCHE, boxOf(PLAN, 'dec_souche'));
-
-    this.add
-      .text(DESIGN_WIDTH / 2, 40, 'Le ravin', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '26px',
-        color: '#3a3128',
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.6);
   }
 }

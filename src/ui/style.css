@@ -385,8 +385,6 @@ body {
 
 /* ---------- Inventaire ---------- */
 
-/* Ancré à gauche plutôt qu'au centre : le haut-centre est occupé par le titre
-   de scène, et sur un écran étroit les deux se chevauchent. */
 .inventory {
   /* En colonne : en paysage la hauteur est la ressource rare, une barre
      horizontale mangerait la ligne d'horizon. Ancrée en haut et non centrée,

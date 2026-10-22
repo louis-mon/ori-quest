@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/cuisine';
@@ -105,15 +104,6 @@ export class CuisineScene extends PointClickScene {
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
     this.brancherLesMouvements();
-
-    this.add
-      .text(DESIGN_WIDTH / 2, 40, 'La cuisine', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '26px',
-        color: '#3a3128',
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.6);
   }
 
   private brancherLesMouvements() {

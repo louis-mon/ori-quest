@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/village';
@@ -166,14 +165,5 @@ export class VillageScene extends PointClickScene {
     this.caler('pingouin', empriseDe(placeSprite(this, PINGOUIN, boxOf(PLAN, 'hs_pingouin'))));
     this.caler('vache', empriseDe(placeSprite(this, VACHE, boxOf(PLAN, 'hs_vache'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
-
-    this.add
-      .text(DESIGN_WIDTH / 2, 40, 'Le village', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '26px',
-        color: '#3a3128',
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.6);
   }
 }

@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { DESIGN_WIDTH } from '../config';
 import type { ExitDef, HotspotDef } from '../systems/hotspots';
 import { gameState } from '../systems/state';
 import plan from '../../generated/scenes/porte';
@@ -126,14 +125,5 @@ export class PorteScene extends PointClickScene {
 
     this.caler('renard', empriseDe(placeSprite(this, RENARD, boxOf(PLAN, 'hs_renard'))));
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
-
-    this.add
-      .text(DESIGN_WIDTH / 2, 40, 'La porte', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '26px',
-        color: '#3a3128',
-      })
-      .setOrigin(0.5)
-      .setAlpha(0.6);
   }
 }

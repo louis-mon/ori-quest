@@ -437,7 +437,7 @@ répond maintenant, en un seul endroit (`occupeLeJoueur` dans
 ## Le menu
 
 Bouton en haut à droite — à l'opposé de l'inventaire, pour qu'aucun des deux ne
-recouvre l'autre ni le titre de scène. Il ouvre deux entrées :
+recouvre l'autre. Il ouvre deux entrées :
 
 **Plein écran.** Masqué automatiquement là où le navigateur ne le permet pas,
 plutôt que d'offrir un bouton inerte — c'est le cas de Safari sur iPhone, qui
