@@ -45,7 +45,7 @@ export class Navigation {
   goto = (room: string) => {
     // Deux façons de finir ici plutôt que de changer de scène : une destination
     // que ce build ne contient pas, et une qui sort de la traversée livrée, le
-    // village n'étant atteignable que par le menu (src/game/chapitres.ts). Et
+    // chapitre 3 n'étant atteignable que par le menu (src/game/chapitres.ts). Et
     // surtout sans `goTo()` : la sauvegarde doit rester sur une pièce que ce
     // build sait rouvrir.
     if (!estLivree(room) || sortDeLaTraversee(gameState.room, room)) {

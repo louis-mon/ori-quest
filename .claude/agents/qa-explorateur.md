@@ -19,8 +19,8 @@ npm run build && npx vite preview --port 4173 --strictPort
 ```
 
 Sers-toi ensuite de `http://localhost:4173/`. Ne teste **jamais** le serveur de
-dev : le délai anti-tap y est nul, le chapitre 2 y est présent et l'écran de fin
-inatteignable — la moitié de ce qu'on cherche n'y existe pas.
+dev : le délai anti-tap y est nul, et une bonne part des gels qu'on cherche n'y
+existe pas.
 
 Vérifie que la page est bien `visible` (`document.visibilityState`) : en headless
 elle l'est, mais un navigateur dont l'onglet est masqué met Phaser en pause et te

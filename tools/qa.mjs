@@ -3,8 +3,7 @@
  * Tests de non-régression, joués dans un vrai navigateur.
  *
  * Ils tournent sur le BUILD DE PRODUCTION, et c'est délibéré : la moitié de ce
- * qu'on protège ici n'existe pas ailleurs — le délai anti-tap réel, l'arrêt sur
- * « À suivre… », le menu des étapes réduit au chapitre livré, les chemins
+ * qu'on protège ici n'existe pas ailleurs — le délai anti-tap réel, les chemins
  * relatifs et le découpage en chunks. Le serveur de dev répondrait « tout va
  * bien » sur un jeu qui n'est pas celui qu'on publie.
  *
@@ -509,8 +508,9 @@ test(
 );
 
 // Ce que le build embarque, et jusqu'où il laisse aller. Les deux ne coïncident
-// plus : les chapitres 2 et 3 sont dans le bundle et le menu y mène, mais la
-// traversée s'arrête toujours au bout du premier.
+// pas : les trois chapitres sont dans le bundle et le menu y mène, mais la
+// traversée s'arrête au bout du deuxième (essai `chapitre-2`). La porte du
+// premier, elle, doit ouvrir le village.
 test(
   'fin-de-chapitre',
   async (page, dire) => ({
@@ -538,10 +538,12 @@ test(
 
       await taperZone(page(), 'porte', 'village');
       await deroulerDialogue(page());
-      await pause(1800);
+      // Le village s'ouvre sur son dialogue d'arrivée : c'est lui qu'on attend,
+      // pas une durée.
+      dire('le village prend la parole', await attendreLaBoite(page()));
       const e = await etat(page());
-      dire('« À suivre… » clôt la partie', e.fin);
-      dire('la sauvegarde reste sur une pièce livrée', e.piece === 'porte', `room=${e.piece}`);
+      dire('la porte ne finit pas la partie', !e.fin);
+      dire('la sauvegarde passe au village', e.piece === 'village', `room=${e.piece}`);
     },
   }),
   { livre: true },

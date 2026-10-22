@@ -102,29 +102,27 @@ qu'elle se paie.
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
 
-**Le build embarque tous les chapitres, la traversée s'arrête au premier.**
-C'étaient deux façons de dire la même chose tant que le chapitre 2 restait
-dehors ; `src/game/chapitres.ts` les sépare depuis qu'on veut le faire essayer
-sans le raccorder — les objets de ses deux scènes ne sont pas encore calés sur
-leur fond, le chapitre 3 attend le fond de sa cuisine, et un joueur du récit
-n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce que la version
-contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller — et au-delà, aucun
-chapitre ne s'ouvre sur le suivant : atteint par le menu, le chapitre 2 finit
-lui aussi sur « À suivre… » à la porte du château.
+**Le build embarque tous les chapitres, la traversée s'arrête au deuxième**,
+pour l'instant. `src/game/chapitres.ts` sépare les deux parce qu'on veut faire
+essayer le chapitre 3 sans le raccorder : il attend le fond de sa cuisine, et
+un joueur du récit n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce
+que la version contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller : la
+porte du château finit sur « À suivre… », que le texte de `src/ui/fin.ts`
+présente comme la fin du chapitre 2 — les deux bougent ensemble.
 
 `goto()` (`src/game/navigation.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour
 les deux raisons : destination absente du build, ou franchissement hors
 traversée — **sans l'écrire dans la sauvegarde**, qui doit rester sur une pièce
-que ce build sait rouvrir. Le test porte sur le franchissement et non sur la seule destination : le village est
-hors traversée, mais y revenir depuis l'entrée du château est un déplacement
-interne au chapitre 2, et finir la partie là-dessus enfermerait le testeur.
+que ce build sait rouvrir. Le test porte sur le franchissement et non sur la seule destination : la salle du trône est
+hors traversée, mais y revenir depuis la cuisine est un déplacement
+interne au chapitre 3, et finir la partie là-dessus enfermerait le testeur.
 
 **Le menu des points d'étape est livré lui aussi**, tant que la page itch.io est
 en Draft (`ETAPES_LIVREES`, dans `src/game/systems/etapes.ts`) : un testeur ne
 retraverse pas le chapitre pour en atteindre la fin. Il ne propose que les
 chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin avec
 les drapeaux du chapitre suivant levés. C'est par lui, et par lui seul, qu'on
-atteint les chapitres 2 et 3.
+atteint le chapitre 3.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la
@@ -544,8 +542,8 @@ Playwright : traversée du chapitre, quatre énigmes résolues au glisser-dépos
 tutoriel, rotation, rechargement — nu, puis en pleine conversation —, perte de
 contexte WebGL. Il bâtit `dist/` et le
 sert lui-même — **sur le build livré, et c'est le propos** : le délai anti-tap
-réel, l'arrêt sur « À suivre… » et le menu réduit au chapitre livré n'existent
-que là, et c'est en production qu'on a trouvé les deux gels de cette session. Le
+réel n'existe que là, et c'est en production qu'on a trouvé les deux gels de
+cette session. Le
 dev répondrait « tout va bien » sur un jeu qui n'est pas celui qu'on publie.
 `npm run qa-local` vise le `npm run dev` d'à côté, quand on met un essai au point
 et qu'on veut des piles d'appels lisibles : ni build ni attente, et les essais

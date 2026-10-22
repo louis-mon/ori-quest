@@ -14,12 +14,11 @@ export type RaisonDeFin = 'version' | 'histoire';
 const TEXTES: Record<RaisonDeFin, { titre: string; texte: string }> = {
   version: {
     titre: 'À suivre…',
-    texte: 'Fin du chapitre 1. La suite nécessite encore quelques plis...',
+    texte: 'Fin du chapitre 2. La suite nécessite encore quelques plis...',
   },
-  // [A ECRIRE]
   histoire: {
     titre: 'Fin',
-    texte: 'Les chats sont réconciliés, et le château retrouve ses plis. Merci d’avoir joué !',
+    texte: 'La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir joué !',
   },
 };
 

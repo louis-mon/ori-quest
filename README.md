@@ -406,12 +406,11 @@ npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 200
 
 ## Publier sur itch.io
 
-Ce qui part en ligne s'arrête **à la fin du chapitre 1**, sur « À suivre… » : le
-chapitre 2 se joue en développement et son texte est écrit, mais les objets de
-ses deux scènes ne sont pas encore calés sur leur fond ; le chapitre 3 attend
-le fond de sa cuisine, et son texte est un premier jet. Les deux ne s'atteignent que
-par le menu des points d'étape. La frontière tient en une ligne de
-[`src/game/chapitres.ts`](src/game/chapitres.ts) — la narration, elle, ignore
+Ce qui part en ligne s'arrête **à la fin du chapitre 2**, sur « À suivre… » : le
+chapitre 3 attend le fond de sa cuisine, et ne s'atteint que par le menu des
+points d'étape. La frontière tient en une ligne de
+[`src/game/chapitres.ts`](src/game/chapitres.ts), et le texte de l'écran
+(`src/ui/fin.ts`) nomme le chapitre qu'elle clôt — la narration, elle, ignore
 quels chapitres ont été compilés.
 
 ### Une fois pour toutes
@@ -455,9 +454,8 @@ itch.io sert le jeu depuis un sous-dossier arbitraire.
 
 ### Voir le build avant de l'envoyer
 
-`npm run preview` sert `dist/` tel qu'il sera livré : délai anti-tap réel,
-traversée arrêtée au chapitre 1, fin sur « À suivre… ». Le serveur de dev ne
-montre aucune de ces trois choses.
+`npm run preview` sert `dist/` tel qu'il sera livré, avec le délai anti-tap
+réel, que le serveur de dev n'a pas.
 
 ## Orientation
 
@@ -474,13 +472,10 @@ pour que le plein écran parte dans le bon sens.
 - Les deux scènes du **chapitre 2** ont leur fond peint, mais **leurs objets ne
   sont pas encore calés dessus** : zones, repères et chemins sont restés là où
   le décor provisoire les avait mis. Le recalage est un passage dans Tiled, rien
-  à toucher dans le code. C'est ce qui garde le chapitre hors de la traversée
-  livrée (`DERNIER_TRAVERSE`, `src/game/chapitres.ts`) — son texte, lui, est
-  écrit.
-- Le **chapitre 3** se joue de bout en bout, mais il n'est pas fini : la
-  cuisine attend encore son fond (`decor-provisoire.ts`), et son texte, ses
-  découpages d'énigme et quelques noms sont des premiers jets
-  (`grep -rn "A ECRIRE"`).
+  à toucher dans le code.
+- Le **chapitre 3** se joue de bout en bout, mais la cuisine attend encore son
+  fond (`decor-provisoire.ts`) : c'est ce qui le garde hors de la traversée
+  livrée (`DERNIER_TRAVERSE`, `src/game/chapitres.ts`).
 - **Rien ne remet l'état à zéro entre deux chapitres**, alors que le game design
   le prévoit (voir [game-design/02-chapitres-et-scenes.md](game-design/02-chapitres-et-scenes.md)).
   Sans conséquence tant que les drapeaux d'un chapitre ne servent pas au suivant.
