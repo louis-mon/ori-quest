@@ -587,12 +587,13 @@ body {
 
 /* ---------- Menu ---------- */
 
-/* Fenêtre des points d'étape : même boîte que la confirmation de remise à zéro,
-   avec une liste qui défile si le chapitre est long. */
+/* Fenêtre de liste — étapes d'un chapitre, outils de développement : même boîte
+   que la confirmation de remise à zéro, avec une liste qui défile si elle est
+   longue. */
 /* Flex et non grid, comme `.puzzle__zoom` : sur une piste dimensionnée par son
    contenu, le `max-height: 100%` de la boîte est circulaire et le navigateur le
    laisse tomber. En flex, le pourcentage se résout sur le conteneur. */
-.menu__etapes {
+.menu__liste {
   position: absolute;
   inset: 0;
   z-index: 8;
@@ -603,19 +604,19 @@ body {
   background: rgba(16, 14, 12, 0.72);
 }
 
-.menu__etapes[hidden] {
+.menu__liste[hidden] {
   display: none;
 }
 
 /* La boîte se borne au cadre, la liste absorbe ce qui dépasse. `min-height: 0`
    autorise l'enfant flex à rétrécir : sans lui, `overflow-y` ne défile pas. */
-.menu__etapes .menu__confirm-box {
+.menu__liste .menu__confirm-box {
   display: flex;
   flex-direction: column;
   max-height: 100%;
 }
 
-.menu__etapes-liste {
+.menu__liste-entrees {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -624,7 +625,7 @@ body {
   overflow-y: auto;
 }
 
-/* Intertitre du sélecteur de points d'étape (développement seulement). */
+/* Intertitre d'une section du panneau : points d'étape, outils de réglage. */
 .menu__label {
   margin: calc(6px * var(--ui-scale)) 0 calc(2px * var(--ui-scale));
   padding: 0 calc(10px * var(--ui-scale));

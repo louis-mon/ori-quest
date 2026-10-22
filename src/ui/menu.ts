@@ -1,7 +1,9 @@
 import { gameState } from '../game/systems/state';
 import { allerA, chapitresAtteignables, ETAPES_LIVREES } from '../game/systems/etapes';
+import { listerOutils, ouvrirOutil } from '../dev/outils';
 
-// Menu du jeu : plein écran et remise à zéro de la progression.
+// Menu du jeu : plein écran et remise à zéro de la progression — et, en
+// développement, les pages de réglage.
 
 // Le plein écran s'applique à `#app` et pas au canvas : l'interface vit dans des
 // éléments frères et resterait dehors.
@@ -60,6 +62,19 @@ function etapesHtml(): string {
   return `<p class="menu__label">Reprendre à…</p>${items}`;
 }
 
+// Même élagage, sur `import.meta.env.DEV` : hors développement les pages de
+// réglage n'existent pas, `vite build` ne connaissant qu'index.html.
+function outilsHtml(): string {
+  if (!import.meta.env.DEV) return '';
+  return `<p class="menu__label">Développement</p>
+    <button class="menu__item" data-action="outils">Outils de réglage</button>`;
+}
+
+interface Entree {
+  nom: string;
+  choisir: () => void;
+}
+
 export interface MenuOptions {
   // Appelé après une entrée ou une sortie de plein écran.
   onLayoutChange: () => void;
@@ -75,10 +90,11 @@ export class Menu {
   private panel: HTMLElement;
   private fullscreenItem: HTMLButtonElement;
   private confirm: HTMLElement;
-  private etapes: HTMLElement;
+  // Les étapes d'un chapitre, ou les outils de développement.
+  private liste: HTMLElement;
   // Transparent, plein cadre : il absorbe les taps pendant que le menu est ouvert.
   private voile: HTMLElement;
-  // Panneau, confirmation et fenêtre des étapes : trois surfaces, un seul état.
+  // Panneau, confirmation et fenêtre de liste : trois surfaces, un seul état.
   // Le panneau se referme en ouvrant une fenêtre, et s'en tenir à lui relancerait
   // la scène derrière la confirmation.
   private gele = false;
@@ -100,13 +116,14 @@ export class Menu {
           Recommencer
         </button>
         ${etapesHtml()}
+        ${outilsHtml()}
       </div>
-      <div class="menu__etapes" hidden role="dialog" aria-modal="true">
+      <div class="menu__liste" hidden role="dialog" aria-modal="true">
         <div class="menu__confirm-box">
-          <p class="menu__confirm-text menu__etapes-titre"></p>
-          <div class="menu__etapes-liste"></div>
+          <p class="menu__confirm-text menu__liste-titre"></p>
+          <div class="menu__liste-entrees"></div>
           <div class="menu__confirm-actions">
-            <button class="menu__item" data-action="cancel-etapes">Fermer</button>
+            <button class="menu__item" data-action="cancel-liste">Fermer</button>
           </div>
         </div>
       </div>
@@ -131,7 +148,7 @@ export class Menu {
     this.panel = el.querySelector('.menu__panel')!;
     this.fullscreenItem = el.querySelector('[data-action="fullscreen"]')!;
     this.confirm = el.querySelector('.menu__confirm')!;
-    this.etapes = el.querySelector('.menu__etapes')!;
+    this.liste = el.querySelector('.menu__liste')!;
     this.voile = el.querySelector('.menu__voile')!;
 
     if (!fullscreenSupported()) this.fullscreenItem.hidden = true;
@@ -176,7 +193,7 @@ export class Menu {
   }
 
   private signalerGel() {
-    const ouvert = !this.panel.hidden || !this.confirm.hidden || !this.etapes.hidden;
+    const ouvert = !this.panel.hidden || !this.confirm.hidden || !this.liste.hidden;
     if (ouvert === this.gele) return;
     this.gele = ouvert;
     this.options.onGel(ouvert);
@@ -195,8 +212,22 @@ export class Menu {
       case 'cancel':
         this.confirm.hidden = true;
         break;
-      case 'cancel-etapes':
-        this.etapes.hidden = true;
+      case 'cancel-liste':
+        this.liste.hidden = true;
+        break;
+      case 'outils':
+        // Le test ici aussi, pour la même raison que celui des étapes : la
+        // référence au module suffirait à le garder dans le bundle.
+        if (import.meta.env.DEV) {
+          const outils = await listerOutils().catch((err) => {
+            console.warn('[menu] pages de réglage introuvables', err);
+            return [];
+          });
+          this.ouvrirListe(
+            'Outils de réglage',
+            outils.map(({ nom, page }) => ({ nom, choisir: () => ouvrirOutil(page) })),
+          );
+        }
         break;
       case 'confirm':
         this.confirm.hidden = true;
@@ -206,29 +237,35 @@ export class Menu {
     this.signalerGel();
   }
 
-  // La liste est construite à l'ouverture : elle ne sert qu'à ce moment-là, et
-  // la reconstruire évite d'entretenir des écouteurs sur des boutons cachés.
   private ouvrirEtapes(index: number) {
     if (!ETAPES_LIVREES) return;
     const chapitre = chapitresAtteignables()[index];
     if (!chapitre) return;
+    this.ouvrirListe(
+      chapitre.nom,
+      chapitre.etapes.map((etape) => ({ nom: etape.nom, choisir: () => allerA(etape) })),
+    );
+  }
 
+  // La liste est construite à l'ouverture : elle ne sert qu'à ce moment-là, et
+  // la reconstruire évite d'entretenir des écouteurs sur des boutons cachés.
+  private ouvrirListe(titre: string, entrees: Entree[]) {
     this.close();
-    this.etapes.querySelector('.menu__etapes-titre')!.textContent = chapitre.nom;
+    this.liste.querySelector('.menu__liste-titre')!.textContent = titre;
 
-    const liste = this.etapes.querySelector('.menu__etapes-liste')!;
-    liste.innerHTML = '';
-    for (const etape of chapitre.etapes) {
+    const conteneur = this.liste.querySelector('.menu__liste-entrees')!;
+    conteneur.innerHTML = '';
+    for (const entree of entrees) {
       const bouton = document.createElement('button');
       bouton.className = 'menu__item';
-      bouton.textContent = etape.nom;
+      bouton.textContent = entree.nom;
       bouton.addEventListener('pointerup', (e) => {
         e.stopPropagation();
-        allerA(etape);
+        entree.choisir();
       });
-      liste.appendChild(bouton);
+      conteneur.appendChild(bouton);
     }
-    this.etapes.hidden = false;
+    this.liste.hidden = false;
     this.signalerGel();
   }
 

@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
@@ -186,6 +186,34 @@ function suivreLaNarration(): Plugin {
       });
     },
   };
+}
+
+// Les pages de réglage, pour le menu du jeu : toute page HTML à la racine en est
+// une, `index.html` mis à part, et son nom est son `<title>`. Une page neuve y
+// paraît donc sans qu'on pense à l'inscrire nulle part.
+function listerLesOutils(): Plugin {
+  return {
+    name: 'ori-quest:outils',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__outils', (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        const outils = readdirSync('.')
+          .filter((page) => page.endsWith('.html') && page !== 'index.html')
+          .map((page) => ({ page, nom: nomDeLaPage(page) }))
+          .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(outils));
+      });
+    },
+  };
+}
+
+// « Ori-Quest — l'eau du ravin » donne « L'eau du ravin ».
+function nomDeLaPage(page: string): string {
+  const titre = /<title>([^<]*)<\/title>/.exec(readFileSync(page, 'utf8'))?.[1].trim();
+  const nom = titre?.replace(/^Ori-Quest\s*—\s*/, '') || page;
+  return nom.charAt(0).toUpperCase() + nom.slice(1);
 }
 
 // Même dispositif et mêmes garde-fous que pour les poses : `apply: 'serve'`,
@@ -522,6 +550,7 @@ export default defineConfig({
     enregistrerChoix(),
     enregistrerTorches(),
     enregistrerDecoupage(),
+    listerLesOutils(),
     suivreLesPlans(),
     suivreLesDecoupages(),
     suivreLaNarration(),
