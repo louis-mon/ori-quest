@@ -43,7 +43,7 @@
                  "visible":true,
                  "width":190,
                  "x":545,
-                 "y":254
+                 "y":342
                 }, 
                 {
                  "height":160,
@@ -55,7 +55,7 @@
                  "visible":true,
                  "width":120,
                  "x":330,
-                 "y":400
+                 "y":437
                 }, 
                 {
                  "height":300,
@@ -79,7 +79,7 @@
                  "visible":true,
                  "width":386,
                  "x":447,
-                 "y":562
+                 "y":587
                 }, 
                 {
                  "height":190,
@@ -123,18 +123,18 @@
                  "name":"sortie_chat",
                  "opacity":1,
                  "polyline":[
-                       {
-                        "x":0,
-                        "y":0
-                       }, 
-                       {
-                        "x":-140,
-                        "y":-60
-                       }, 
-                       {
-                        "x":-330,
-                        "y":-90
-                       }],
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":-140,
+                         "y":-60
+                        }, 
+                        {
+                         "x":-330,
+                         "y":-90
+                        }],
                  "rotation":0,
                  "type":"chemin",
                  "visible":true,
@@ -148,22 +148,22 @@
                  "name":"sortie_lune_chat",
                  "opacity":1,
                  "polyline":[
-                       {
-                        "x":0,
-                        "y":0
-                       }, 
-                       {
-                        "x":-170,
-                        "y":-90
-                       }, 
-                       {
-                        "x":-630,
-                        "y":-90
-                       }, 
-                       {
-                        "x":-870,
-                        "y":-90
-                       }],
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":-170,
+                         "y":-90
+                        }, 
+                        {
+                         "x":-630,
+                         "y":-90
+                        }, 
+                        {
+                         "x":-870,
+                         "y":-90
+                        }],
                  "rotation":0,
                  "type":"chemin",
                  "visible":true,
@@ -177,14 +177,14 @@
                  "name":"rapprochement_chat",
                  "opacity":1,
                  "polyline":[
-                       {
-                        "x":0,
-                        "y":0
-                       }, 
-                       {
-                        "x":130,
-                        "y":80
-                       }],
+                        {
+                         "x":3.17276708254155,
+                         "y":40.1883830455259
+                        }, 
+                        {
+                         "x":130,
+                         "y":80
+                        }],
                  "rotation":0,
                  "type":"chemin",
                  "visible":true,
@@ -198,14 +198,14 @@
                  "name":"rapprochement_lune_chat",
                  "opacity":1,
                  "polyline":[
-                       {
-                        "x":0,
-                        "y":0
-                       }, 
-                       {
-                        "x":-160,
-                        "y":80
-                       }],
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":-160,
+                         "y":80
+                        }],
                  "rotation":0,
                  "type":"chemin",
                  "visible":true,
