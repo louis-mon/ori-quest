@@ -9,10 +9,10 @@ export const REGLAGES_EAU: ReglagesEau = {
   relief: 1,
   plis: 1,
   defilement: 20,
-  vagues: 0.4,
+  vagues: 0.72,
   amplitude: 6.5,
   longueur: 70,
-  reflet: 0.18,
+  reflet: 0.2,
   berges: 0.3,
   inclinaison: 60,
 };
