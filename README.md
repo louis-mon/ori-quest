@@ -42,9 +42,13 @@ Pages de réglage, en développement uniquement (hors build) :
 - `http://localhost:5173/eau.html` — l'eau du ravin : teinte du papier, courant,
   vagues, inclinaison du plan d'eau. Sa place, elle, se dessine dans Tiled
   (zone `eau` du plan du ravin).
+- `http://localhost:5173/torches.html` — la lumière des torches de la salle du
+  trône : teinte, portée, vacillement. Les flammes, elles, se dessinent dans
+  Tiled (`flamme_gauche` et `flamme_droite` du plan de la salle).
 
 Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
-`game-design/enigmes/<nom>.json`, `src/game/scenes/eau-reglages.ts`) par un point d'entrée du serveur de dev défini
+`game-design/enigmes/<nom>.json`, `src/game/scenes/eau-reglages.ts`,
+`src/game/scenes/torches-reglages.ts`) par un point d'entrée du serveur de dev défini
 dans `vite.config.ts` — qui n'existe qu'en développement et ne garde que des
 nombres bornés.
 

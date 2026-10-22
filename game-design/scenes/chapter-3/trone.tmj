@@ -224,6 +224,30 @@
                  "width":0,
                  "x":930,
                  "y":560
+                }, 
+                {
+                 "height":36,
+                 "id":19,
+                 "name":"flamme_gauche",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":56,
+                 "x":400,
+                 "y":96
+                }, 
+                {
+                 "height":36,
+                 "id":20,
+                 "name":"flamme_droite",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"decor",
+                 "visible":true,
+                 "width":56,
+                 "x":786,
+                 "y":104
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -232,7 +256,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":19,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

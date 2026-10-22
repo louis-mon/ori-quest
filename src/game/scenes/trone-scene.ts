@@ -16,6 +16,7 @@ import {
 } from './feuilles-precieuses';
 import { finDuChemin } from './deplacement';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
+import { allumerLesTorches } from './torches';
 
 // La salle du trône — point d'entrée du chapitre 3, entre la cuisine (à gauche)
 // et le jardin (à droite). Voir game-design/scenes/chapter-3/salle-du-trone.md.
@@ -136,6 +137,7 @@ export class TroneScene extends PointClickScene {
 
   protected drawScenery() {
     dessinerFond(this, PLAN.fond);
+    allumerLesTorches(this, [boxOf(PLAN, 'dec_flamme_gauche'), boxOf(PLAN, 'dec_flamme_droite')]);
 
     // Deux boîtes, comme la montagne du village : la rangée de feuilles et le
     // cœur plié n'ont ni la même forme ni la même place.

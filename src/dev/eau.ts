@@ -1,4 +1,4 @@
-import './eau.css';
+import './reglages.css';
 import Phaser from 'phaser';
 import plan from '../generated/scenes/pont';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../game/config';

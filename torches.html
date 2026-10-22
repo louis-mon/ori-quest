@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  Outil de réglage des torches de la salle du trône : « Enregistrer » réécrit le
+  bloc `REGLAGES_TORCHES` de src/game/scenes/torches-reglages.ts par le serveur
+  de dev. Uniquement en développement : `vite build` ne connaît que index.html,
+  donc cette page ne part pas sur itch.io.
+
+      npm run dev  puis  http://localhost:5173/torches.html
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ori-Quest — les torches de la salle du trône</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Les torches de la salle du trône</h1>
+        <p class="aide">
+          Le rendu passe par le même code que la scène&nbsp;: ce qui brille ici brille dans le jeu.
+          Les curseurs agissent en direct. La <em>place</em> des flammes ne se règle pas ici mais
+          dans Tiled, sur le plan de la salle&nbsp;: ce sont les zones <code>flamme_gauche</code> et
+          <code>flamme_droite</code>, et la lumière part de leur centre.
+        </p>
+      </header>
+
+      <div class="scene">
+        <div class="apercu" id="apercu"></div>
+
+        <div class="reglages">
+          <div id="curseurs"></div>
+          <div class="actions">
+            <button id="revenir" type="button">Revenir à l'enregistré</button>
+            <button id="gros-plan" type="button" aria-pressed="false">Gros plan</button>
+            <button id="eteindre" type="button" aria-pressed="false">Éteindre</button>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-tete">
+          <h2><code>src/game/scenes/torches-reglages.ts</code></h2>
+          <div class="actions">
+            <span id="statut" class="statut"></span>
+            <button id="enregistrer" type="button" class="principal">Enregistrer</button>
+          </div>
+        </div>
+        <pre id="sortie"></pre>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/dev/torches.ts"></script>
+  </body>
+</html>

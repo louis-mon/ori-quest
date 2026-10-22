@@ -7,6 +7,7 @@ import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 const FICHIER_POSES = 'src/origami/poses.ts';
 const FICHIER_EAU = 'src/game/scenes/eau-reglages.ts';
 const FICHIER_CHOIX = 'src/ui/choix-reglages.ts';
+const FICHIER_TORCHES = 'src/game/scenes/torches-reglages.ts';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
@@ -32,28 +33,9 @@ function enregistrerPoses(): Plugin {
     name: 'ori-quest:poses',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/__poses', (req, res, next) => {
-        if (req.method !== 'POST') return next();
-
-        let corps = '';
-        req.on('data', (bout) => {
-          corps += bout;
-          // Le fichier fait quelques centaines d'octets : au-delà, ce n'est pas
-          // l'outil qui parle.
-          if (corps.length > 16_000) req.destroy();
-        });
-        req.on('end', () => {
-          try {
-            const source = readFileSync(FICHIER_POSES, 'utf8');
-            writeFileSync(FICHIER_POSES, rendreFichier(source, JSON.parse(corps)));
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: true }));
-          } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
-          }
-        });
-      });
+      // Le fichier fait quelques centaines d'octets : au-delà, ce n'est pas
+      // l'outil qui parle.
+      reecrire(server, '/__poses', 16_000, FICHIER_POSES, rendreFichier);
     },
   };
 }
@@ -66,27 +48,8 @@ function enregistrerEau(): Plugin {
     name: 'ori-quest:eau',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/__eau', (req, res, next) => {
-        if (req.method !== 'POST') return next();
-
-        let corps = '';
-        req.on('data', (bout) => {
-          corps += bout;
-          // Neuf valeurs : au-delà, ce n'est pas l'outil qui parle.
-          if (corps.length > 2_000) req.destroy();
-        });
-        req.on('end', () => {
-          try {
-            const source = readFileSync(FICHIER_EAU, 'utf8');
-            writeFileSync(FICHIER_EAU, rendreEau(source, JSON.parse(corps)));
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: true }));
-          } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
-          }
-        });
-      });
+      // Neuf valeurs : au-delà, ce n'est pas l'outil qui parle.
+      reecrire(server, '/__eau', 2_000, FICHIER_EAU, rendreEau);
     },
   };
 }
@@ -98,29 +61,54 @@ function enregistrerChoix(): Plugin {
     name: 'ori-quest:choix',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/__choix', (req, res, next) => {
-        if (req.method !== 'POST') return next();
-
-        let corps = '';
-        req.on('data', (bout) => {
-          corps += bout;
-          // Trois mots : au-delà, ce n'est pas l'outil qui parle.
-          if (corps.length > 500) req.destroy();
-        });
-        req.on('end', () => {
-          try {
-            const source = readFileSync(FICHIER_CHOIX, 'utf8');
-            writeFileSync(FICHIER_CHOIX, rendreChoix(source, JSON.parse(corps)));
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: true }));
-          } catch (err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
-          }
-        });
-      });
+      // Trois mots : au-delà, ce n'est pas l'outil qui parle.
+      reecrire(server, '/__choix', 500, FICHIER_CHOIX, rendreChoix);
     },
   };
+}
+
+// Les réglages des torches de la salle du trône, depuis torches.html. Mêmes
+// garde-fous que pour l'eau.
+function enregistrerTorches(): Plugin {
+  return {
+    name: 'ori-quest:torches',
+    apply: 'serve',
+    configureServer(server) {
+      // Huit valeurs : au-delà, ce n'est pas l'outil qui parle.
+      reecrire(server, '/__torches', 1_000, FICHIER_TORCHES, rendreTorches);
+    },
+  };
+}
+
+// Le point d'entrée commun aux outils à curseurs : le fichier est relu, `rendre`
+// le refabrique à partir de ce qui arrive — en refusant le moindre écart —, et
+// rien n'est écrit si elle lève.
+function reecrire(
+  server: ViteDevServer,
+  route: string,
+  taille: number,
+  fichier: string,
+  rendre: (source: string, recu: unknown) => string,
+) {
+  server.middlewares.use(route, (req, res, next) => {
+    if (req.method !== 'POST') return next();
+
+    let corps = '';
+    req.on('data', (bout) => {
+      corps += bout;
+      if (corps.length > taille) req.destroy();
+    });
+    req.on('end', () => {
+      try {
+        writeFileSync(fichier, rendre(readFileSync(fichier, 'utf8'), JSON.parse(corps)));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, erreur: String(err) }));
+      }
+    });
+  });
 }
 
 // Relance un outil de build quand une source change, et laisse Vite recharger la
@@ -465,6 +453,40 @@ function rendreEau(source: string, recu: unknown): string {
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }
 
+// Alignées sur les curseurs de src/dev/torches.ts, et dans l'ordre du fichier.
+const LIMITES_TORCHES = {
+  portee: [1, 10],
+  chaleur: [0, 1],
+  lueur: [0, 1],
+  halo: [0, 1],
+  vacillement: [0, 1],
+  rafales: [0, 1],
+  vitesse: [0, 5],
+} as const;
+
+function rendreTorches(source: string, recu: unknown): string {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const valeurs = recu as Record<string, unknown>;
+
+  const debut = source.indexOf('export const REGLAGES_TORCHES');
+  const accolade = source.indexOf('{', debut);
+  const fin = source.indexOf('\n};', accolade);
+  if (debut < 0 || fin < 0) {
+    throw new Error(`${FICHIER_TORCHES} : bloc REGLAGES_TORCHES introuvable`);
+  }
+
+  const { teinte } = valeurs;
+  if (typeof teinte !== 'string' || !TEINTE.test(teinte)) {
+    throw new Error(`teinte invalide : ${String(teinte)}`);
+  }
+  const lignes = [`  teinte: '${teinte.toLowerCase()}',`];
+  for (const [cle, [min, max]] of Object.entries(LIMITES_TORCHES)) {
+    lignes.push(`  ${cle}: ${nombre(valeurs[cle], min, max, cle)},`);
+  }
+
+  return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
+}
+
 // Alignées sur `ReglagesChoix` (src/ui/overlay.ts) et sur src/dev/choix.ts, dans
 // l'ordre du fichier.
 const CHOIX_PERMIS = {
@@ -498,6 +520,7 @@ export default defineConfig({
     enregistrerPoses(),
     enregistrerEau(),
     enregistrerChoix(),
+    enregistrerTorches(),
     enregistrerDecoupage(),
     suivreLesPlans(),
     suivreLesDecoupages(),

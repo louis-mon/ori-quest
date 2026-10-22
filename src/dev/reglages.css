@@ -1,5 +1,6 @@
-/* Outil de réglage de l'eau du ravin (développement seulement). Mêmes teintes
-   que l'outil d'orientation : les deux pages se passent le relais. */
+/* Outils de réglage à curseurs — l'eau du ravin, les torches de la salle du
+   trône (développement seulement). Mêmes teintes que l'outil d'orientation :
+   les pages se passent le relais. */
 
 :root {
   color-scheme: dark;
