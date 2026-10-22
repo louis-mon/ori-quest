@@ -469,10 +469,6 @@ pour que le plein écran parte dans le bon sens.
 
 ## Points ouverts
 
-- Les deux scènes du **chapitre 2** ont leur fond peint, mais **leurs objets ne
-  sont pas encore calés dessus** : zones, repères et chemins sont restés là où
-  le décor provisoire les avait mis. Le recalage est un passage dans Tiled, rien
-  à toucher dans le code.
 - Le **chapitre 3** se joue de bout en bout, mais la cuisine attend encore son
   fond (`decor-provisoire.ts`) : c'est ce qui le garde hors de la traversée
   livrée (`DERNIER_TRAVERSE`, `src/game/chapitres.ts`).
