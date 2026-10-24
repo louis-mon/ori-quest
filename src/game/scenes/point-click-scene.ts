@@ -16,6 +16,7 @@ import {
   ZOOM_MS,
 } from '../systems/marqueur-papier';
 import { createExitMarker, preloadFleche } from '../systems/exit-marker';
+import { cocottesMontrees, suivreLesCocottes } from '../systems/cocottes-montrees';
 import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
@@ -141,8 +142,10 @@ export abstract class PointClickScene extends Phaser.Scene {
     // `subscribe` rend sa fonction de désabonnement : sans l'appeler, chaque
     // passage laisserait un abonné de plus, accroché à des objets détruits.
     const unsubscribe = gameState.subscribe(() => this.refresh());
+    const neSuivrePlus = suivreLesCocottes(() => this.appliquerVisibilite());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       unsubscribe();
+      neSuivrePlus();
       // Une scène quittée ne doit rien retenir.
       this.attentes.clear();
       this.enRoute.clear();
@@ -500,8 +503,11 @@ export abstract class PointClickScene extends Phaser.Scene {
     for (const { def, zone } of this.montees) {
       const visible = def.visibleIf ? def.visibleIf() : true;
       const enRoute = this.enRoute.has(def.id);
+      // Les flèches ne se masquent pas : au bord du cadre elles ne couvrent rien,
+      // et rien dans le décor ne dit que la pièce continue au-delà.
+      const signale = 'sortie' in def || cocottesMontrees();
       const marqueur = this.markers.get(def.id);
-      if (marqueur) montrerMarqueur(marqueur, visible && !enRoute && !this.retires);
+      if (marqueur) montrerMarqueur(marqueur, visible && !enRoute && !this.retires && signale);
       // `enabled` plutôt que `setInteractive()` : appelé sans argument, celui-ci
       // refabrique une zone d'écoute rectangulaire et efface donc le contour des
       // zones polygonales.

@@ -912,6 +912,22 @@ test('langue', async (page, dire) => ({
   },
 }));
 
+// Les cocottes sont masquées par défaut, et une case des options les rappelle.
+// Réglage de l'appareil et non de la partie : il survit au rechargement.
+test('cocottes', async (page, dire) => ({
+  sauvegarde: AU_RAVIN,
+  jouer: async () => {
+    const case_ = '.ecran [data-action="cocottes"]';
+    const cochee = async () => (await page().getAttribute(case_, 'aria-pressed')) === 'true';
+    dire('les cocottes sont masquées par défaut', !(await cochee()));
+    await taperSur(page(), case_);
+    dire('la case se coche', await cochee());
+    await page().reload({ waitUntil: 'networkidle' });
+    await pause(2000);
+    dire('le choix survit au rechargement', await cochee());
+  },
+}));
+
 // La traversée complète : le seul test qui éprouve les quatre énigmes, le
 // tutoriel joué en entier, les pliages, l'inventaire et les deux scènes.
 test('traversee', async (page, dire) => ({

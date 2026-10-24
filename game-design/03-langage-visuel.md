@@ -6,14 +6,15 @@ Sur écran tactile, **le survol n'existe pas**. Dans un point & click classique,
 c'est le curseur qui change de forme au passage sur un objet qui apprend au
 joueur ce qui est actif. Ce retour disparaît complètement sur téléphone.
 
-Il faut donc que les éléments interactifs se signalent d'eux-mêmes, en
-permanence, sans transformer la scène en sapin de Noël.
+Il faut donc un signe qui dise ce qui est actif, sans transformer la scène en
+sapin de Noël ni couvrir le dessin qu'il désigne. La flèche reste toujours à
+l'écran ; la cocotte est une aide, que le joueur rappelle s'il en a besoin.
 
 ## Deux signes, deux fonctions
 
 | Signe | Signifie | Où |
 | --- | --- | --- |
-| **Cocotte en papier** | ici, on peut analyser | sur les objets et les feuilles |
+| **Cocotte en papier** | ici, on peut analyser | sur les objets et les feuilles, si le joueur la demande |
 | **Flèche pliée** | ici, on change de scène | sur les bords gauche et droit |
 
 Ces deux signes ne se mélangent jamais. Un joueur doit pouvoir distinguer, d'un
@@ -41,6 +42,34 @@ Le marqueur bat lentement — échelle, opacité et une légère bascule d'angle
 1,4 s. **Le battement doit rester discret.** Une scène contient jusqu'à cinq
 hotspots ; si chacun clignote fort, la scène devient illisible et le joueur ne
 regarde plus le décor. Le marqueur signale, il ne réclame pas.
+
+### Masquée par défaut, rappelée au besoin
+
+**Tranché : la cocotte ne paraît que si le joueur la demande.** Posée sur son
+sujet, elle couvrait exactement ce que le dessin montre — le torse de la
+grenouille, le feuillage de l'arbre, le ventre du pingouin —, et ses battements
+simultanés tiraient l'œil hors du décor. Or la plupart des zones se signalent
+déjà d'elles-mêmes : dans un point & click on touche un personnage par réflexe,
+et le coin corné des feuilles est le signe du jeu.
+
+**Une case la rappelle**, « Montrer les zones cliquables », sur l'écran d'accueil
+et de pause (voir [04-interface.md](04-interface.md)). Le choix tient à
+l'appareil, comme la langue, et pas à la partie : recommencer l'aventure ne
+retire pas une aide qu'on a demandée.
+
+**La flèche ne se masque pas** : au bord du cadre elle ne couvre rien, et rien
+dans le décor ne dit que la pièce continue au-delà.
+
+**Écartées** : la cocotte **perchée** au bord haut de son sujet, qui libère le
+dessin mais invite à taper à côté ; et la **transparence**, qui baisse la gêne et
+le signal d'autant — un oiseau blanc translucide disparaît sur un papier clair
+au soleil, et reste une tache sur le dessin.
+
+**À regarder au prochain playtest** : sans cocotte, le joueur trouve-t-il les
+zones qui ne sont ni un personnage ni une feuille — le précipice, la montagne ?
+Sinon, la piste suivante est le **tap dans le vide** : un tap qui ne touche
+aucune zone ferait paraître les cocottes un instant, seule réponse que ce tap-là
+puisse recevoir.
 
 ## Les flèches de navigation
 

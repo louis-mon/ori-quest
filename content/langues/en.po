@@ -2881,6 +2881,11 @@ msgstr "Language"
 
 #. interface
 #: src/ui/menu.ts
+msgid "Montrer les zones cliquables"
+msgstr "Show clickable areas"
+
+#. interface
+#: src/ui/menu.ts
 msgid "Plein écran"
 msgstr "Fullscreen"
 

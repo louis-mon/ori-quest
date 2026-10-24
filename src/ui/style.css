@@ -856,7 +856,7 @@ body {
 /* Deux lignes : la langue seule sur la sienne, puis le reste. Mêlée aux autres,
    rien ne la séparait d'un réglage d'affichage. Les options elles-mêmes vont en
    ligne et non en colonne : en paysage sur téléphone, c'est la hauteur qui
-   manque. Celles à venir — difficulté, crédits — rejoindront la seconde. */
+   manque. Celles à venir — les crédits — rejoindront la seconde. */
 .ecran__options {
   display: flex;
   flex-direction: column;
@@ -933,6 +933,39 @@ body {
 .ecran__langue[aria-pressed='true']::after {
   content: '\00a0✓';
   color: var(--accent-clair);
+}
+
+/* La case dit que l'option se coche avant qu'on la touche : sans elle,
+   « Montrer les zones cliquables » se lirait comme une action, au même titre
+   que « Plein écran ». Cochée, elle prend l'accent comme la langue en cours. */
+.ecran__bascule {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(10px * var(--ui-scale));
+}
+
+.ecran__bascule::before {
+  content: '';
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: calc(18px * var(--ui-scale));
+  height: calc(18px * var(--ui-scale));
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 2px rgba(242, 236, 225, 0.6);
+  font-size: calc(13px * var(--ui-scale));
+  line-height: 1;
+}
+
+.ecran__bascule[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px var(--accent-clair);
+}
+
+.ecran__bascule[aria-pressed='true']::before {
+  content: '✓';
+  background: var(--accent-clair);
+  box-shadow: none;
+  color: var(--ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

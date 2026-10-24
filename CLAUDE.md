@@ -255,6 +255,12 @@ la sienne, dont le nom est ambigu ou qui n'est pas un point : un lien tenu par u
 convention de nommage doit être vérifié, sinon il se défait en silence le jour où
 l'on renomme une zone.
 
+**Les cocottes sont masquées par défaut** : posées sur leur sujet, elles
+couvraient le dessin. Une case de l'écran de pause les rappelle
+(`src/game/systems/cocottes-montrees.ts`), réglage de l'appareil comme la
+langue, **pas de la sauvegarde** — recommencer ne retire pas une aide demandée.
+Les flèches de sortie, elles, restent toujours.
+
 **La carte Tiled est la source de vérité de la géométrie**, et déplacer ou
 redimensionner quoi que ce soit de visible s'y corrige, jamais dans la scène.
 Chaque scène a un plan dans `game-design/scenes/`, dessiné à l'échelle 1280×720 ;

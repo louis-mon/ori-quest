@@ -1,5 +1,6 @@
 import { gameState } from '../game/systems/state';
 import { allerA, chapitresAtteignables, ETAPES_LIVREES } from '../game/systems/etapes';
+import { cocottesMontrees, montrerLesCocottes } from '../game/systems/cocottes-montrees';
 import type { Rideau } from '../game/rideau';
 import { listerOutils, ouvrirOutil } from '../dev/outils';
 import { choisirLaLangue, langue, LANGUES, nomDeLaLangue } from '../langues/langue';
@@ -86,6 +87,7 @@ export class Menu {
   private principal: HTMLButtonElement;
   private recommencer: HTMLButtonElement;
   private pleinEcran: HTMLButtonElement;
+  private cocottes: HTMLButtonElement;
   private confirm: HTMLElement;
   // Les points d'étape, ou les outils de développement.
   private liste: HTMLElement;
@@ -127,6 +129,8 @@ export class Menu {
             ${languesHtml()}
           </div>
           <div class="ecran__ligne">
+            <button class="ecran__option ecran__bascule" data-action="cocottes"
+              aria-pressed="${cocottesMontrees()}">${t('Montrer les zones cliquables')}</button>
             <button class="ecran__option" data-action="fullscreen">${t('Plein écran')}</button>
             ${etapesHtml()}
             ${outilsHtml()}
@@ -165,6 +169,7 @@ export class Menu {
     this.principal = el.querySelector('[data-action="principal"]')!;
     this.recommencer = el.querySelector('[data-action="reset"]')!;
     this.pleinEcran = el.querySelector('[data-action="fullscreen"]')!;
+    this.cocottes = el.querySelector('[data-action="cocottes"]')!;
     this.confirm = el.querySelector('.menu__confirm')!;
     this.liste = el.querySelector('.menu__liste')!;
 
@@ -203,6 +208,10 @@ export class Menu {
       case 'principal':
         this.fermer();
         if (this.mode === 'accueil') this.options.rideau.lever();
+        break;
+      case 'cocottes':
+        montrerLesCocottes(!cocottesMontrees());
+        this.cocottes.setAttribute('aria-pressed', String(cocottesMontrees()));
         break;
       case 'fullscreen':
         await basculerLePleinEcran();

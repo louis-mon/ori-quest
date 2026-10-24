@@ -398,7 +398,7 @@ sans répondant.
 | --- | --- |
 | Boîte de dialogue + choix | ✅ le texte s'écrit, un tap à côté la rallume, les choix sont au héros |
 | En-tête de locuteur (nom + vignette) | ✅ implémenté |
-| Marqueur cocotte sur les hotspots | ✅ garder |
+| Marqueur cocotte sur les hotspots | ✅ masqué par défaut, rappelé par une case des options |
 | Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |
 | Écran d'accueil et de pause (options, recommencer) | ✅ implémenté |
 | Menu de verbes | ✅ retiré (verbe unique `analyser`) |
@@ -502,8 +502,13 @@ cochée. Toucher une autre langue l'applique aussitôt, sans confirmation : rien
 ne se perd, la page se recharge sur la même pièce. Sans choix, le jeu prend la
 langue du navigateur, et l'anglais s'il ne la parle pas.
 
-**Sur la seconde ligne**, les autres options ; la difficulté et les crédits
-viendront s'y ranger.
+**Sur la seconde ligne**, les autres options ; les crédits viendront s'y ranger.
+
+**Montrer les zones cliquables.** Les cocottes sont masquées par défaut (voir
+[03-langage-visuel.md](03-langage-visuel.md)), et cette case les rappelle. Une
+case et pas un simple bouton : à côté de « Plein écran », un libellé à
+l'infinitif se lirait comme une action. Cochée, elle prend l'accent comme la
+langue en cours, et vaut sans recharger la page.
 
 **Plein écran.** Masqué automatiquement là où le navigateur ne le permet pas,
 plutôt que d'offrir un bouton inerte — c'est le cas de Safari sur iPhone, qui
