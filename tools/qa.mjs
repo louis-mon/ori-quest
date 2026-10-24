@@ -621,10 +621,9 @@ test(
   { livre: true },
 );
 
-// Ce que le build embarque, et jusqu'où il laisse aller. Les deux ne coïncident
-// pas : les trois chapitres sont dans le bundle et le menu y mène, mais la
-// traversée s'arrête au bout du deuxième (essai `chapitre-2`). La porte du
-// premier, elle, doit ouvrir le village.
+// Ce que le build embarque, et jusqu'où il laisse aller : les trois chapitres
+// sont dans le bundle, le menu mène à chacun, et la porte du premier doit ouvrir
+// le village — celle du deuxième, la salle du trône (essai `chapitre-2`).
 test(
   'fin-de-chapitre',
   async (page, dire) => ({
@@ -713,12 +712,13 @@ test(
       await taperZone(page(), 'entree', 'chateau');
       dire('le passage vers le château est ouvert', (await etat(page())).boite);
 
-      // Le chapitre 3 n'est pas raccordé : la porte du château finit la partie.
+      // La salle du trône s'ouvre sur son dialogue d'arrivée : c'est lui qu'on
+      // attend, pas une durée.
       await deroulerDialogue(page());
-      await pause(1800);
+      dire('la salle du trône prend la parole', await attendreLaBoite(page()));
       const e = await etat(page());
-      dire('« À suivre… » à la porte du château', e.fin);
-      dire('la sauvegarde reste sur l’entrée', e.piece === 'entree', `room=${e.piece}`);
+      dire('la porte du château ne finit pas la partie', !e.fin);
+      dire('la sauvegarde passe à la salle du trône', e.piece === 'trone', `room=${e.piece}`);
     },
   }),
   { livre: true },

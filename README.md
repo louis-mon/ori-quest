@@ -383,7 +383,7 @@ src/
     overlay.ts               dialogues, inventaire, menu de verbes (DOM)
     cadre.ts                 recale l'UI sur le canvas letterboxé (syncStage)
     isolation.ts             un tap né dans l'UI ne remonte pas jusqu'au jeu
-    fin.ts                   « À suivre… » quand le chapitre suivant n'est pas livré
+    fin.ts                   « Fin », ou « À suivre… » hors de la traversée livrée
     vignettes.ts             image d'un objet d'inventaire
     style.css
   dev/
@@ -455,11 +455,10 @@ npm run bake -- content/origami/vallee.svg --name vallee --frames 16 --steps 200
 
 ## Publier sur itch.io
 
-Ce qui part en ligne s'arrête **à la fin du chapitre 2**, sur « À suivre… » : le
-chapitre 3 attend le fond de sa cuisine, et ne s'atteint que par le menu des
-points d'étape. La frontière tient en une ligne de
-[`src/game/chapitres.ts`](src/game/chapitres.ts), et le texte de l'écran
-(`src/ui/fin.ts`) nomme le chapitre qu'elle clôt — la narration, elle, ignore
+Ce qui part en ligne se joue **jusqu'à la fin de l'histoire**, au bout du
+chapitre 3. Pour faire essayer un chapitre sans le raccorder, la frontière tient
+en une ligne de [`src/game/chapitres.ts`](src/game/chapitres.ts) : la traversée
+s'arrête alors sur « À suivre… » (`src/ui/fin.ts`) — la narration, elle, ignore
 quels chapitres ont été compilés.
 
 ### Une fois pour toutes
@@ -518,9 +517,6 @@ pour que le plein écran parte dans le bon sens.
 
 ## Points ouverts
 
-- Le **chapitre 3** se joue de bout en bout, mais la cuisine attend encore son
-  fond (`decor-provisoire.ts`) : c'est ce qui le garde hors de la traversée
-  livrée (`DERNIER_TRAVERSE`, `src/game/chapitres.ts`).
 - **Rien ne remet l'état à zéro entre deux chapitres**, alors que le game design
   le prévoit (voir [game-design/02-chapitres-et-scenes.md](game-design/02-chapitres-et-scenes.md)).
   Sans conséquence tant que les drapeaux d'un chapitre ne servent pas au suivant.

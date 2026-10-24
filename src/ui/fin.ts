@@ -15,7 +15,7 @@ export type RaisonDeFin = 'version' | 'histoire';
 const TEXTES: Record<RaisonDeFin, { titre: string; texte: string }> = {
   version: {
     titre: t('À suivre…'),
-    texte: t('Fin du chapitre 2. La suite nécessite encore quelques plis...'),
+    texte: t('La suite nécessite encore quelques plis...'),
   },
   histoire: {
     titre: t('Fin'),

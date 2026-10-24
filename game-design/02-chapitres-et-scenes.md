@@ -70,9 +70,8 @@ dans le SVG, et la scène dit vers quelle pièce elle mène. Le registre de
 chapitres, lui, existe (`src/game/chapitres.ts`), mais il ne dit encore que deux
 choses : quelles scènes chaque chapitre contient, et **jusqu'où va la
 traversée**. Les trois chapitres sont embarqués — le menu des points d'étape mène
-à chacun —, mais la traversée s'arrête pour l'instant au bout du deuxième, sur
-« À suivre… » à la porte du château : le chapitre 3 attend le fond de sa
-cuisine. ⚠ Il reste à ce registre un point d'entrée par
+à chacun — et raccordés : la traversée va jusqu'au bout. Un chapitre qu'on
+embarque sans le raccorder la finit sur « À suivre… ». ⚠ Il reste à ce registre un point d'entrée par
 chapitre, et avec lui la remise à zéro de l'inventaire et des drapeaux au passage
 d'un chapitre au suivant : rien ne l'effectue aujourd'hui.
 

@@ -2841,8 +2841,8 @@ msgstr "To be continued…"
 
 #. interface
 #: src/ui/fin.ts
-msgid "Fin du chapitre 2. La suite nécessite encore quelques plis..."
-msgstr "End of chapter 2. The rest still needs a few more folds..."
+msgid "La suite nécessite encore quelques plis..."
+msgstr "The rest still needs a few more folds..."
 
 #. interface
 #: src/ui/fin.ts

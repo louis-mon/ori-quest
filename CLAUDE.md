@@ -139,27 +139,25 @@ en anglais.
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans
 toucher à la logique.
 
-**Le build embarque tous les chapitres, la traversée s'arrête au deuxième**,
-pour l'instant. `src/game/chapitres.ts` sépare les deux parce qu'on veut faire
-essayer le chapitre 3 sans le raccorder : il attend le fond de sa cuisine, et
-un joueur du récit n'a rien à y faire, alors qu'un testeur si. `LIVRES` dit ce
-que la version contient, `DERNIER_TRAVERSE` jusqu'où elle laisse aller : la
-porte du château finit sur « À suivre… », que le texte de `src/ui/fin.ts`
-présente comme la fin du chapitre 2 — les deux bougent ensemble.
+**Le build embarque tous les chapitres, et la traversée va jusqu'au bout.**
+`src/game/chapitres.ts` sépare quand même les deux, pour pouvoir faire essayer
+un chapitre sans le raccorder : un joueur du récit n'a rien à y faire, alors
+qu'un testeur si. `LIVRES` dit ce que la version contient, `DERNIER_TRAVERSE`
+jusqu'où elle laisse aller ; au-delà, la porte finit sur « À suivre… ».
 
 `goto()` (`src/game/navigation.ts`) pose l'écran de fin (`src/ui/fin.ts`) pour
 les deux raisons : destination absente du build, ou franchissement hors
 traversée — **sans l'écrire dans la sauvegarde**, qui doit rester sur une pièce
-que ce build sait rouvrir. Le test porte sur le franchissement et non sur la seule destination : la salle du trône est
-hors traversée, mais y revenir depuis la cuisine est un déplacement
-interne au chapitre 3, et finir la partie là-dessus enfermerait le testeur.
+que ce build sait rouvrir. Le test porte sur le franchissement et non sur la
+seule destination : dans un chapitre hors traversée, revenir à sa première pièce
+depuis la deuxième est un déplacement interne, et finir la partie là-dessus
+enfermerait le testeur.
 
 **Le menu des points d'étape est livré lui aussi**, tant que la page itch.io est
 en Draft (`ETAPES_LIVREES`, dans `src/game/systems/etapes.ts`) : un testeur ne
 retraverse pas le chapitre pour en atteindre la fin. Il ne propose que les
 chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin avec
-les drapeaux du chapitre suivant levés. C'est par lui, et par lui seul, qu'on
-atteint le chapitre 3.
+les drapeaux du chapitre suivant levés.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la

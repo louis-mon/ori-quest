@@ -36,8 +36,8 @@ sans double-clic, sans glisser-déposer.
 
 Ces documents décrivent la cible. L'implémentation couvre aujourd'hui les trois
 chapitres — sept scènes, la navigation, l'inventaire, le minijeu et l'animation
-de pliage —, le dernier hors de la traversée publiée : il attend le fond de sa
-cuisine. Les écarts sont signalés par **⚠ pas encore implémenté**.
+de pliage —, et la traversée publiée va de la première scène à la fin de
+l'histoire. Les écarts sont signalés par **⚠ pas encore implémenté**.
 
 Les questions non tranchées sont marquées **❓ à décider** — ce sont des
 décisions qui attendent, pas des oublis. Il n'en reste aucune : le mauvais choix
