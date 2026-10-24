@@ -8,6 +8,10 @@ import type { Box } from './layout';
 // Sa boîte de plan reste une emprise au sol, comme les autres : le bas est le
 // point d'appui, là où se pose l'ombre, et le pliage flotte au-dessus. C'est ce
 // point que `deplacer()` emmène, et d'où partent ses chemins.
+//
+// Un chemin qui monte le fait s'élever, puisque derrière lui il n'y a que le
+// mur : l'ombre reste alors au sol. Un chemin qui descend l'emmène vers l'avant
+// de la pièce, et l'ombre le suit.
 
 const TEXTURE = 'lune_chat';
 const FICHIER = 'assets/decor/lune_chat.png';
@@ -19,6 +23,10 @@ const ECART = 0.2;
 // Lent, pour ne pas disputer l'attention aux marqueurs.
 const AMPLITUDE = 0.035;
 const PERIODE_MS = 2600;
+// La hauteur, en fraction de la sienne, où il ne porte plus d'ombre. Assez basse
+// pour qu'elle soit partie avant que la sortie de la salle du trône ne passe
+// au-dessus du trône, où elle se poserait sur le siège.
+const DISPARITION = 0.3;
 
 export interface LuneChat {
   // Ce qu'on déplace, montre ou cache.
@@ -39,8 +47,27 @@ export function placerLuneChat(scene: Phaser.Scene, box: Box): LuneChat {
   const vol = h * ECART;
 
   const ombre = scene.add.image(0, 0, ombreDouce(scene)).setDisplaySize(w * 0.8, h * 0.09);
+  // Un conteneur à elle pour l'altitude : le flottement anime déjà son échelle
+  // et son alpha, et les deux se disputeraient les mêmes propriétés.
+  const auSol = scene.add.container(0, 0, [ombre]);
   const chat = scene.add.image(0, -vol, TEXTURE).setOrigin(0.5, 1).setScale(echelle);
-  const conteneur = scene.add.container(box.x + box.w / 2, box.y + box.h, [ombre, chat]);
+  const conteneur = scene.add.container(box.x + box.w / 2, box.y + box.h, [auSol, chat]);
+
+  const sol = conteneur.y;
+  const resterAuSol = () => {
+    const altitude = Math.max(0, sol - conteneur.y);
+    const f = Math.min(1, altitude / (h * DISPARITION));
+    auSol
+      .setPosition(0, altitude)
+      .setAlpha(1 - f)
+      .setScale(1 - f / 2, 1);
+  };
+  // Après les tweens, dont ceux de `deplacer()` : sinon l'ombre suit avec une
+  // image de retard.
+  scene.events.on(Phaser.Scenes.Events.POST_UPDATE, resterAuSol);
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+    scene.events.off(Phaser.Scenes.Events.POST_UPDATE, resterAuSol);
+  });
 
   // Des tweens et non un écouteur d'`update` : ils meurent avec la scène.
   const flottement = {
