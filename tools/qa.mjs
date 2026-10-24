@@ -578,7 +578,12 @@ test(
       await pause(60);
       await page().mouse.click(640, 660);
       await pause(600);
-      const l2 = (await etat(page())).texte;
+      const e2 = await etat(page());
+      const l2 = e2.texte;
+      // Avalé, et non dépensé à écrire la réplique qu'il vient d'ouvrir : sans
+      // quoi l'avancée unique ne tient qu'au défilement, et une réplique posée
+      // d'un coup (`redire()`) se ferait sauter.
+      dire('le second contact est avalé : la nouvelle réplique s’écrit encore', e2.defile);
       await avancer(page());
       const l3 = (await etat(page())).texte;
       dire('un double contact n’avance que d’une réplique', l1 !== l2 && l2 !== l3 && l1 !== l3);
