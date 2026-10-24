@@ -39,14 +39,16 @@ export function preloadLuneChat(scene: Phaser.Scene): void {
   preloadSprite(scene, TEXTURE, FICHIER);
 }
 
-export function placerLuneChat(scene: Phaser.Scene, box: Box): LuneChat {
+// L'ombre se règle à la surface où elle tombe : la texture est peinte pour le
+// pavé, le plus chargé des deux sols.
+export function placerLuneChat(scene: Phaser.Scene, box: Box, opaciteOmbre = 1): LuneChat {
   const source = scene.textures.get(TEXTURE).getSourceImage();
   const echelle = Math.min(box.w / source.width, box.h / (source.height * (1 + ECART)));
   const w = source.width * echelle;
   const h = source.height * echelle;
   const vol = h * ECART;
 
-  const ombre = scene.add.image(0, 0, ombreDouce(scene)).setDisplaySize(w * 0.8, h * 0.09);
+  const ombre = scene.add.image(0, 0, ombreDouce(scene)).setDisplaySize(w * 0.8, h * 0.125);
   // Un conteneur à elle pour l'altitude : le flottement anime déjà son échelle
   // et son alpha, et les deux se disputeraient les mêmes propriétés.
   const auSol = scene.add.container(0, 0, [ombre]);
@@ -59,7 +61,7 @@ export function placerLuneChat(scene: Phaser.Scene, box: Box): LuneChat {
     const f = Math.min(1, altitude / (h * DISPARITION));
     auSol
       .setPosition(0, altitude)
-      .setAlpha(1 - f)
+      .setAlpha(opaciteOmbre * (1 - f))
       .setScale(1 - f / 2, 1);
   };
   // Après les tweens, dont ceux de `deplacer()` : sinon l'ombre suit avec une
@@ -87,6 +89,8 @@ export function placerLuneChat(scene: Phaser.Scene, box: Box): LuneChat {
 }
 
 // Floue, parce qu'une ombre nette collerait au sol ce qui doit en être détaché.
+// Mais dense au cœur : sur le pavé de la salle du trône, déjà strié d'ombres, un
+// simple dégradé à 0,5 ne se voyait plus.
 // Peinte une fois : les textures survivent au changement de pièce.
 function ombreDouce(scene: Phaser.Scene): string {
   if (scene.textures.exists(OMBRE)) return OMBRE;
@@ -102,7 +106,8 @@ function ombreDouce(scene: Phaser.Scene): string {
     taille / 2,
     taille / 2,
   );
-  halo.addColorStop(0, 'rgba(26, 23, 20, 0.5)');
+  halo.addColorStop(0, 'rgba(26, 23, 20, 0.85)');
+  halo.addColorStop(0.5, 'rgba(26, 23, 20, 0.6)');
   halo.addColorStop(1, 'rgba(26, 23, 20, 0)');
   ctx.fillStyle = halo;
   ctx.fillRect(0, 0, taille, taille);

@@ -97,7 +97,9 @@ export class CuisineScene extends PointClickScene {
     this.caler('cheffe', empriseDe(placeSprite(this, ELEPHANT, boxOf(PLAN, 'hs_cheffe'))));
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));
     this.calerSur('chat', this.chat);
-    this.luneChat = placerLuneChat(this, boxOf(PLAN, 'hs_lune_chat'));
+    // Il flotte au-dessus de l'assise de la chaise, lisse : l'ombre réglée pour
+    // le pavé de la salle du trône y faisait tache.
+    this.luneChat = placerLuneChat(this, boxOf(PLAN, 'hs_lune_chat'), 0.6);
     this.calerSur('lune_chat', this.luneChat.conteneur, this.luneChat.emprise);
     this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
 
