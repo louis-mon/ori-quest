@@ -555,6 +555,10 @@ test(
     jouer: async () => {
       await commencer(page());
       await attendreLaBoite(page());
+      // L'attente s'ouvre avec la boîte, que `attendreLaBoite()` voit paraître :
+      // un clic qui n'attend pas son délai est avalé, et c'est le suivant qui
+      // achève l'écriture — sans plus aucun rebond derrière lui à éprouver.
+      await pause(DELAI_LIVRE);
       const l1 = (await etat(page())).texte;
       // Le tap qui achève l'écriture rouvre le délai : sinon le rebond
       // emporterait la réplique qu'il vient tout juste de finir d'écrire — la
