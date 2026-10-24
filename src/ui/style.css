@@ -265,6 +265,16 @@ body {
   content: '\00a0»';
 }
 
+/* Les guillemets et leurs espaces sont français : `lang` est posé par
+   src/langues/page.ts. */
+:root:not(:lang(fr)) .dialogue[data-marque='guillemets'] .dialogue__choix--replique::before {
+  content: '“';
+}
+
+:root:not(:lang(fr)) .dialogue[data-marque='guillemets'] .dialogue__choix--replique::after {
+  content: '”';
+}
+
 .dialogue[data-geste='italique'] .dialogue__choix--geste {
   font-style: italic;
 }
@@ -747,6 +757,20 @@ body {
 .menu__item--danger:active {
   background: var(--accent);
   color: var(--paper);
+}
+
+/* La langue en cours : la seule entrée des options qui ne fait rien, et la
+   seule qu'il faut voir d'un coup d'œil — c'est elle qui dit où l'on est. */
+.menu__langue[aria-pressed='true'] {
+  background: transparent;
+  color: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--or);
+  cursor: default;
+}
+
+.menu__langue[aria-pressed='true']::after {
+  content: '\00a0✓';
+  color: var(--or);
 }
 
 /* ---------- Confirmation de remise à zéro ---------- */

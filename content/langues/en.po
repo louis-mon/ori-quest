@@ -1,0 +1,2920 @@
+# Ori-Quest — traduction (en).
+#
+# Tenu par `npm run langues` : il ajoute ce qui est nouveau, retire ce qui
+# a disparu et réécrit le contexte. À la main, on ne remplit que les msgstr
+# — et les commentaires « # », qui sont conservés.
+#
+# « #, fuzzy » : le français a changé depuis la traduction, rappelée en
+# « #| msgid ». Revoir le msgstr, puis retirer la ligne « #, fuzzy ».
+msgid ""
+msgstr ""
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. dit par : heros
+#: pont_arrivee
+msgid "Pfiou... ce voyage de retour dans mon pays natal a été épuisant. Crôa crôa"
+msgstr "Phew... that journey back to my homeland wore me out. Ribbit ribbit"
+
+#. dit par : heros
+#: pont_arrivee
+msgid "J'ai hâte de retrouver tous mes amis !"
+msgstr "I can't wait to see all my friends again!"
+
+#. dit par : heros
+#: pont_arrivee
+msgid "Tiens, il me semblait qu'on pouvait traverser ce ravin avant, qu'est-ce qu'il s'est passé ?"
+msgstr "Hang on, I thought you used to be able to cross this ravine. What happened?"
+
+#. dit par : heros
+#: pont_precipice
+msgid "Il devait y avoir un pont, mais plus aucune trace."
+msgstr "There must have been a bridge here, but there's no trace of it anymore."
+
+#. dit par : heros
+#: pont_pont
+msgid "Ok, heureusement que je ne suis pas trop lourd et que j'ai pas trop le vertige... On va y aller doucement, c'est pas rassurant."
+msgstr "OK, good thing I'm not too heavy and not too scared of heights... Let's take it slow, this isn't very reassuring."
+
+#. narration
+#: pont_feuille
+msgid "Une feuille de papier est posée devant le précipice."
+msgstr "A sheet of paper lies in front of the precipice."
+
+#. dit par : heros
+#: pont_feuille
+msgid "Je devrais bien pouvoir en faire quelque chose."
+msgstr "I'm sure I can make something out of this."
+
+#. option du héros : un geste
+#: pont_feuille
+msgid "plier une catapulte"
+msgstr "fold a catapult"
+
+#. option du héros : un geste
+#: pont_feuille
+msgid "plier un pont"
+msgstr "fold a bridge"
+
+#. option du héros : un geste
+#: pont_feuille
+msgid "plier un avion"
+msgstr "fold a plane"
+
+#. option du héros : un geste
+#: pont_feuille
+msgid "se moucher avec"
+msgstr "blow my nose with it"
+
+#. dit par : heros
+#: pont_feuille
+msgid "Si je traverse en catapulte, je risque de finir en pâté de grenouille..."
+msgstr "If I cross by catapult, I might end up as frog pâté..."
+
+#. dit par : heros
+#: pont_feuille
+msgid "Essayons de remettre ce pont en place."
+msgstr "Let's try to put this bridge back where it belongs."
+
+#. dit par : heros
+#: pont_feuille
+msgid "Ça a l'air rigolo, mais j'ai bien peur de ne pas savoir piloter un tel engin..."
+msgstr "It looks fun, but I'm afraid I wouldn't know how to fly such a contraption..."
+
+#. dit par : heros
+#: pont_feuille
+msgid "J'ai attrapé froid avec ce voyage, mais cette feuille a l'air utile. Je trouverai bien des mouchoirs en rentrant."
+msgstr "I caught a cold on this trip, but this sheet looks useful. I'm sure I'll find some tissues back home."
+
+#. dit par : heros
+#: pont_enigme
+msgid "Je vais pouvoir mettre en pratique mes talents d'origamiste ! Revoyons les bases."
+msgstr "Time to put my origami skills into practice! Let's go over the basics."
+
+#. narration
+#: pont_enigme_issue
+msgid "Je n'ai pas trop perdu la main. Bon, ce n'était que deux plis."
+msgstr "I haven't lost my touch. Well, it was only two folds."
+
+#. narration
+#: pont_enigme_issue
+msgid "Le pont se positionne pile au-dessus du vide, je vais pouvoir rentrer chez moi !"
+msgstr "The bridge settles right over the gap. I'll be able to get home!"
+
+#. narration
+#: pont_enigme_issue
+msgid "Hmm je crois avoir le syndrome de la page blanche..."
+msgstr "Hmm, I think I've got folder's block..."
+
+#. narration
+#: pont_arbre
+msgid "Un jeune chêne qui a l'air triste."
+msgstr "A young oak that looks sad."
+
+#. dit par : heros
+#: pont_arbre
+msgid "Salut l'ami, tu as bien grandi depuis la dernière fois ! Tu n'étais qu'une jeune pousse."
+msgstr "Hi there, friend, you've grown so much since last time! You were just a sapling."
+
+#. dit par : arbre
+#. dit par : lune_chat
+#: pont_arbre trone_reconciliation
+msgid "..."
+msgstr "..."
+
+#. dit par : heros
+#: pont_arbre
+msgid "Ça n'a pas l'air d'être la grande forme, tu fais une gueule d'enterrement, qu'est-ce qui t'arrive ? Crôa crôa"
+msgstr "You don't look too great, you've got a face like a funeral. What's wrong? Ribbit ribbit"
+
+#. dit par : arbre
+#: pont_arbre
+msgid "Snif... Mon père, le vieux chêne vénérable, n'est plus. Je ne peux même pas honorer sa dépouille comme il se doit, il a disparu."
+msgstr "Sniff... My father, the venerable old oak, is no more. I can't even honor his remains properly, he's vanished."
+
+#. dit par : heros
+#: pont_arbre
+msgid "Oh quel gâchis, on aurait pu en faire de belles armoires..."
+msgstr "Oh, what a waste, we could have made such lovely wardrobes out of him..."
+
+#. dit par : arbre
+#: pont_arbre
+msgid "Oui quelle tristesse... Snif"
+msgstr "Yes, so sad... Sniff"
+
+#. narration
+#: pont_arbre
+msgid "Mémorisons la forme de l'arbre : ça pourrait être utile."
+msgstr "Let's memorize the shape of the tree: it might come in handy."
+
+#. dit par : arbre
+#: pont_arbre_revoir
+msgid "J'espère qu'il fera de beaux meubles !"
+msgstr "I hope he'll make fine furniture!"
+
+#. dit par : heros
+#: pont_arbre_revoir
+msgid "J'ai replié ton père, le vieux chêne vénérable ! Tu vas pouvoir te recueillir. En plus le pont est à nouveau là."
+msgstr "I've folded your father back, the venerable old oak! You'll be able to pay your respects. And the bridge is back too."
+
+#. dit par : arbre
+#: pont_arbre_revoir
+msgid "Oh, je suis tellement content ! Peut-être qu'il pourra devenir une magnifique armoire maintenant."
+msgstr "Oh, I'm so happy! Maybe he can become a magnificent wardrobe now."
+
+#. dit par : heros
+#: pont_arbre_revoir
+msgid "Justement... J'ai besoin de réparer une porte."
+msgstr "About that... I need to repair a door."
+
+#. dit par : arbre
+#: pont_arbre_revoir
+msgid "Bon, j'imagine que c'est déjà ça. Ça fera un bel hommage."
+msgstr "Well, I suppose that's something. It'll be a fine tribute."
+
+#. dit par : heros
+#: pont_arbre_revoir
+msgid "Merci, s'il reste des planches on pourra peut-être faire de beaux meubles au château."
+msgstr "Thanks. If there are planks left over, maybe we can make some nice furniture for the castle."
+
+#. dit par : arbre
+#: pont_arbre_revoir
+msgid "Merci, Maître Origamiste, d'avoir restauré le pont et feu mon vieux père."
+msgstr "Thank you, Master Origamist, for restoring the bridge and my late father."
+
+#. dit par : arbre
+#: pont_arbre_revoir
+msgid "Les voyageurs qui se retrouvaient bloqués ici cesseront de m'importuner, et l'ombre de mon père m'évitera les coups de soleil."
+msgstr "The travelers who kept getting stuck here will stop pestering me, and my father's shade will spare me from sunburn."
+
+#. dit par : arbre
+#: pont_arbre_revoir
+msgid "Snif... Mon père me manque terriblement..."
+msgstr "Sniff... I miss my father terribly..."
+
+#. dit par : heros
+#: pont_feuille_vieil_arbre
+msgid "Une grande feuille aux teintes de... feuille. Je ne sais pas quoi en faire pour le moment."
+msgstr "A large sheet in shades of... leaf. I don't know what to do with it for now."
+
+#. dit par : heros
+#: pont_feuille_vieil_arbre
+msgid "Ça doit être là que se trouvait le vieil arbre. Je peux le faire revenir."
+msgstr "This must be where the old tree used to stand. I can bring him back."
+
+#. dit par : heros
+#: pont_arbre_enigme
+msgid "Essayons de reproduire ce modèle d'arbre."
+msgstr "Let's try to reproduce this tree model."
+
+#. dit par : heros
+#: pont_arbre_enigme_issue
+msgid "Le papier se souvient de lui."
+msgstr "The paper remembers him."
+
+#. dit par : heros
+#: pont_arbre_enigme_issue
+msgid "Je n'arrive pas à en tirer quoi que ce soit."
+msgstr "I can't get anything out of it."
+
+#. narration
+#: pont_vieil_arbre_plie
+msgid "Le majestueux vieux chêne se dresse au bord du vide."
+msgstr "The majestic old oak stands tall at the edge of the void."
+
+#. dit par : heros
+#: pont_vieil_arbre_plie
+msgid "Je pourrais couper l'arbre avec ma hache pour réparer la porte, mais je ne veux pas commettre un arbricide, c'est un peu comme si je l'avais ressuscité en le pliant à nouveau."
+msgstr "I could cut the tree down with my axe to repair the door, but I don't want to commit arboricide. It's a bit as if I brought him back to life by folding him again."
+
+#. dit par : heros
+#: pont_vieil_arbre_plie
+msgid "Je devrais demander l'autorisation à son fils d'abord."
+msgstr "I should ask his son for permission first."
+
+#. dit par : heros
+#: pont_vieil_arbre_plie
+msgid "Je suis un peu ému à l'idée de transformer en planches ce respectable voisin que je connais depuis mon enfance..."
+msgstr "I'm a little moved at the thought of turning this respectable neighbor I've known since childhood into planks..."
+
+#. option du héros : un geste
+#: pont_vieil_arbre_plie
+msgid "découper le vieil arbre"
+msgstr "chop down the old tree"
+
+#. option du héros : un geste
+#: pont_vieil_arbre_plie
+msgid "le laisser debout"
+msgstr "leave it standing"
+
+#. narration
+#: pont_vieil_arbre_plie
+msgid "La hache travaille vaillamment et je me retrouve épuisé. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête !"
+msgstr "The axe works valiantly and I end up exhausted. A pleasant smell of sawdust fills the air, and a pile of fine planks is ready!"
+
+#. dit par : heros
+#: pont_vieil_arbre_plie
+msgid "Je n'ai pas le coeur à faire ça pour l'instant..."
+msgstr "I don't have the heart to do it just yet..."
+
+#. dit par : heros
+#: porte_arrivee
+msgid "Me voici arrivé devant le village fortifié du château. Mais je ne vois plus de porte... Encore un mystère à élucider."
+msgstr "Here I am in front of the castle's fortified village. But I can't see a door anymore... Another mystery to solve."
+
+#. dit par : renard
+#: porte_renard
+msgid "Mais voici notre origamiste royal de retour !"
+msgstr "Well, if it isn't our royal origamist, back at last!"
+
+#. dit par : heros
+#: porte_renard
+msgid "Content de te revoir, Monsieur le Renard Futé !"
+msgstr "Good to see you again, Mister Sly Fox!"
+
+#. dit par : heros
+#: porte_renard
+msgid "Même si tu n'as pas l'air malin coincé ici."
+msgstr "Even if you don't look so sly, stuck out here."
+
+#. dit par : heros
+#: porte_renard
+msgid "Dis-moi, tu n'as pas une idée de ce qu'il se passe ici ? D'abord le pont avait disparu et j'ai dû le replier, ensuite impossible de rentrer en ville, il y a juste une muraille."
+msgstr "Tell me, do you have any idea what's going on here? First the bridge was gone and I had to fold it back, then there's no way into town, there's just a wall."
+
+#. dit par : heros
+#: porte_renard
+msgid "Beaucoup de choses ont changé depuis mon départ..."
+msgstr "A lot has changed since I left..."
+
+#. dit par : renard
+#: porte_renard_suite
+msgid "La porte est de retour ! Le Petit Chat ne sait pas ce qui l'attend, héhé..."
+msgstr "The door is back! Little Cat has no idea what's coming, heh heh..."
+
+#. option prononcée par : heros
+#: porte_renard_choix
+msgid "Pourquoi tu restes planté là ? Tu n'as pas un vilain tour à préparer pour embêter le Petit Chat ?"
+msgstr "Why are you just standing there? Don't you have some nasty trick to cook up to annoy Little Cat?"
+
+#. option prononcée par : heros
+#: porte_renard_choix
+msgid "Parle-moi de la porte"
+msgstr "Tell me about the door"
+
+#. option prononcée par : heros
+#: porte_renard_choix
+msgid "Tu as du bois ?"
+msgstr "Do you have any wood?"
+
+#. option du héros : un geste
+#: porte_renard_choix
+msgid "Partir"
+msgstr "Leave"
+
+#. dit par : renard
+#: porte_renard_choix
+msgid "Ahah, très drôle. Moi aussi je voudrais bien rentrer. J'étais parti chercher des insectes effrayants pour faire peur au Petit Chat."
+msgstr "Ha ha, very funny. I'd like to get back in too. I'd gone off looking for scary bugs to frighten Little Cat."
+
+#. dit par : renard
+#: porte_renard_choix
+msgid "Mais quand je suis revenu, plus de porte. À la place, il y a ce papier."
+msgstr "But when I came back, the door was gone. In its place, there's this paper."
+
+#. dit par : renard
+#: porte_renard_choix
+msgid "Bah, qu'est-ce que tu veux que je te dise..."
+msgstr "Bah, what do you want me to say..."
+
+#. dit par : heros
+#: porte_renard_choix
+msgid "Je suis parti pendant longtemps, je me rappelle plus bien comment elle était, cette porte."
+msgstr "I've been away for a long time, I don't really remember what it looked like, that door."
+
+#. dit par : heros
+#: porte_renard_choix
+msgid "La réparer serait utile, mais aide moi à me souvenir."
+msgstr "Fixing it would help, but help me remember."
+
+#. dit par : renard
+#: porte_renard_choix
+msgid "C'était une porte en bois rectangulaire, je sais pas quoi te dire de plus..."
+msgstr "It was a rectangular wooden door, I don't know what else to tell you..."
+
+#. dit par : heros
+#: porte_renard_choix
+msgid "Bon, ça ira, je vais voir ce que je peux faire."
+msgstr "Well, that'll do, I'll see what I can do."
+
+#. dit par : renard
+#: porte_renard_choix
+msgid "Dépêche-toi, je m'inquiète quand même un peu pour le Petit Chat, je ne pourrai plus l'embêter s'il est transformé en feuille de papier."
+msgstr "Hurry up. I'm still a bit worried about Little Cat: I won't be able to tease him anymore if he gets turned into a sheet of paper."
+
+#. dit par : renard
+#: porte_renard_choix
+msgid "Non, mais avec une hache tu pourrais couper des arbres pour en trouver."
+msgstr "No, but with an axe you could chop down some trees to get some."
+
+#. dit par : heros
+#: porte_renard_choix
+msgid "Je suis origamiste, pas bûcheron, mais merci pour l'idée."
+msgstr "I'm an origamist, not a lumberjack, but thanks for the idea."
+
+#. dit par : heros
+#: porte_porte
+msgid "Je vais pouvoir reconstruire la porte avec ces magnifiques planches de bois."
+msgstr "I'll be able to rebuild the door with these magnificent wooden planks."
+
+#. dit par : heros
+#: porte_porte
+msgid "J'ai besoin de bois pour fabriquer la porte."
+msgstr "I need wood to make the door."
+
+#. dit par : heros
+#: porte_porte
+msgid "Je crois qu'il y avait une porte ici avant, mais je ne me rappelle plus trop comment elle était."
+msgstr "I think there used to be a door here, but I don't quite remember what it looked like."
+
+#. narration
+#: porte_enigme_issue
+msgid "La feuille de papier se transforme en une imposante porte."
+msgstr "The sheet of paper turns into an imposing door."
+
+#. dit par : heros
+#: porte_enigme_issue
+msgid "Je vais pouvoir retourner au village !"
+msgstr "I'll be able to get back to the village!"
+
+#. dit par : heros
+#: porte_enigme_issue
+msgid "J'ai un trou de mémoire..."
+msgstr "My mind's gone blank..."
+
+#. narration
+#: porte_feuille_hache
+msgid "Une feuille de papier légèrement métallisée. Quoi faire avec ?"
+msgstr "A sheet of slightly metallic paper. What to do with it?"
+
+#. dit par : heros
+#: porte_feuille_hache
+msgid "Voilà un papier parfait pour plier une hache. Le côté métallisé fera une belle lame bien tranchante."
+msgstr "Now that's the perfect paper for folding an axe. The metallic side will make a nice, sharp blade."
+
+#. dit par : heros
+#: porte_hache_enigme_issue
+msgid "Celui-là était plus complexe."
+msgstr "That one was trickier."
+
+#. dit par : heros
+#: porte_hache_enigme_issue
+msgid "Je vais pouvoir faire de belles planches avec cette hache toute neuve !"
+msgstr "I'll be able to make fine planks with this brand-new axe!"
+
+#. dit par : heros
+#: porte_hache_enigme_issue
+msgid "Je réessayerai plus tard..."
+msgstr "I'll try again later..."
+
+#. dit par : heros
+#: porte_fin_chapitre
+msgid "Hâte de retourner à la maison ! Je suis quand même un peu inquiet de ce qui m'attend là-bas, j'espère que je ne vais pas voir un tas de feuilles dépliées à la place."
+msgstr "Can't wait to get back home! Still, I'm a little worried about what awaits me there. I hope I won't find a pile of unfolded sheets instead."
+
+#. dit par : heros
+#: village_arrivee
+msgid "Me voici arrivé au village. C'est moins chaotique que ce que je craignais, il reste des habitants."
+msgstr "Here I am in the village. It's less chaotic than I feared, there are still people living here."
+
+#. dit par : heros
+#: village_arrivee
+msgid "Je vais sûrement pouvoir en apprendre plus sur ce qu'il se passe ici."
+msgstr "I should be able to learn more about what's going on here."
+
+#. dit par : heros
+#: village_pingouin
+msgid "Salut Pingouin Glagla ! Tu n'as pas l'air dans ton assiette, qu'est-ce qui t'arrive ?"
+msgstr "Hi, Penguin Brrbrr! You look a bit under the weather, what's wrong?"
+
+#. dit par : heros
+#: village_pingouin
+msgid "On dirait que tu vas nous faire un malaise."
+msgstr "Looks like you're about to pass out on us."
+
+#. dit par : pingouin
+#: village_pingouin
+msgid "J'ai chaud... trop chaud..."
+msgstr "I'm hot... too hot..."
+
+#. dit par : heros
+#: village_pingouin
+msgid "Oh, je vois ça, tu sues à grosses gouttes, ma pauvre. Désolé, le réchauffement climatique et tout ça..."
+msgstr "Oh, I can see that, you're sweating buckets, you poor thing. Sorry, global warming and all that..."
+
+#. dit par : pingouin
+#: village_pingouin
+msgid "Ma neige... disparue... Mon délicat plumage... tout sec... Mon maquillage... tout coulé de partout..."
+msgstr "My snow... gone... My delicate plumage... all dry... My makeup... running everywhere..."
+
+#. dit par : heros
+#: village_pingouin
+msgid "Elle délire, je vais trouver de quoi régler ça avant qu'elle nous fasse une syncope."
+msgstr "She's delirious. I'd better find a way to fix this before she faints on us."
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "Je respire mieux avec mes neiges éternelles. Mais mon petit Chouaf me manque, il devait être devant le château."
+msgstr "I can breathe better with my eternal snows. But I miss my little Shwoof, he was supposed to be in front of the castle."
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "Oh, que lui est-il arrivé ? Aide-moi, je t'en conjure !"
+msgstr "Oh, what has happened to him? Help me, I beg you!"
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "Ahh, ça fait plaisir cette neige et ce froid. Merci du fond du coeur."
+msgstr "Ahh, this snow and this cold feel so good. Thank you from the bottom of my heart."
+
+#. dit par : heros
+#: village_pingouin_revoir
+msgid "Tu m'as fait peur dans cet état, content que tu sois revenue parmi nous !"
+msgstr "You scared me, in that state. Glad to have you back with us!"
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "J'ai toujours pas compris comment ma montagne a pu disparaître. D'ailleurs, mon petit Chouaf n'est plus là non plus."
+msgstr "I still don't understand how my mountain could have disappeared. And my little Shwoof is gone too."
+
+#. dit par : heros
+#: village_pingouin_revoir
+msgid "C'est qui ça, Chouaf ?"
+msgstr "Who's Shwoof?"
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "Mon petit chien adoré. Il aboie un peu trop et ça effraie les autres villageois, mais c'est pas une raison pour le kidnapper, non ?"
+msgstr "My darling little dog. He barks a bit too much and it scares the other villagers, but that's no reason to kidnap him, is it?"
+
+#. dit par : heros
+#: village_pingouin_revoir
+msgid "Euh, je sais pas, à vrai dire j'ai un peu peur des chiens, je peux comprendre..."
+msgstr "Er, I don't know. To be honest, I'm a bit scared of dogs myself, I can understand..."
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "Ah, je vois, c'est toi qui l'as séquestré ! Moi qui pensais que tu étais un bon crapaud."
+msgstr "Ah, I see, you're the one who locked him up! And to think I thought you were a good toad."
+
+#. dit par : heros
+#: village_pingouin_revoir
+msgid "Non mais on se calme, déjà je suis une grenouille, pas un crapaud. Crôa crôa."
+msgstr "Whoa, calm down. First of all, I'm a frog, not a toad. Ribbit ribbit."
+
+#. dit par : heros
+#: village_pingouin_revoir
+msgid "Je vais te le retrouver, ton sac à puces, sinon tu vas nous refaire une scène."
+msgstr "I'll find your flea bag for you, before you throw another fit."
+
+#. narration
+#: village_pingouin_revoir
+msgid "Mémorisons la forme du chien : ça pourrait être utile."
+msgstr "Let's memorize the shape of the dog: it might come in handy."
+
+#. dit par : pingouin
+#: village_pingouin_revoir
+msgid "Chaud... De la neige, de la glace, de l'ombre..."
+msgstr "Hot... Snow, ice, shade..."
+
+#. dit par : heros
+#: village_montagne
+msgid "Une grande feuille grise et blanche au fond du village. Je ne vois pas à quoi elle pourrait servir."
+msgstr "A large gray and white sheet at the back of the village. I can't see what it could be used for."
+
+#. dit par : heros
+#: village_montagne
+msgid "Une grande feuille grise et blanche au fond du village. Je pourrais l'utiliser pour aider Pingouin Glagla ?"
+msgstr "A large gray and white sheet at the back of the village. Could I use it to help Penguin Brrbrr?"
+
+#. option du héros : un geste
+#: village_montagne
+msgid "plier un frigo"
+msgstr "fold a fridge"
+
+#. option du héros : un geste
+#: village_montagne
+msgid "plier un bonhomme de neige"
+msgstr "fold a snowman"
+
+#. option du héros : un geste
+#: village_montagne
+msgid "plier une montagne"
+msgstr "fold a mountain"
+
+#. option du héros : un geste
+#: village_montagne
+msgid "plier un éventail"
+msgstr "fold a fan"
+
+#. dit par : heros
+#: village_montagne
+msgid "Un frigo aurait pu être une bonne idée, mais elle ne m'a pas demandé un cercueil, et en plus y'a pas de prise."
+msgstr "A fridge might have been a good idea, but she didn't ask for a coffin, and besides, there's no outlet."
+
+#. dit par : heros
+#: village_montagne
+msgid "Un bonhomme de neige ? Mouais. Si c'est pour qu'il fonde et se plaigne encore plus que le pingouin, non merci."
+msgstr "A snowman? Meh. If it's just going to melt and complain even more than the penguin, no thanks."
+
+#. dit par : heros
+#: village_montagne
+msgid "Ça va prendre de la place, une montagne, mais au moins elle aura autant de neige qu'elle veut."
+msgstr "A mountain will take up some space, but at least she'll have all the snow she wants."
+
+#. dit par : heros
+#: village_montagne
+msgid "Pingouin Glagla tient à peine debout, elle ne va pas faire grand-chose avec cet éventail."
+msgstr "Penguin Brrbrr can barely stand, she won't do much with this fan."
+
+#. dit par : heros
+#: village_montagne
+msgid "Et j'ai autre chose à faire que de rester là à l'éventer."
+msgstr "And I have better things to do than stand here fanning her."
+
+#. dit par : heros
+#: village_montagne_enigme
+msgid "Ça ne va pas être facile de plier un si grand papier, mais on va essayer."
+msgstr "It won't be easy to fold such a big sheet, but let's give it a try."
+
+#. dit par : heros
+#: village_montagne_issue
+msgid "Et voilà le travail."
+msgstr "Job done."
+
+#. dit par : heros
+#: village_montagne_issue village_montagne_pliee
+msgid "Glace et ombre à volonté pour Madame Glagla !"
+msgstr "Ice and shade galore for Madam Brrbrr!"
+
+#. dit par : heros
+#: village_montagne_issue
+msgid "Pourquoi un simple pli montagne ne suffit pas..."
+msgstr "Why isn't a simple mountain fold enough..."
+
+#. dit par : heros
+#: village_montagne_pliee
+msgid "Une montagne enneigée. Je ne sais pas trop comment j'ai pu la faire tenir dans le village..."
+msgstr "A snow-capped mountain. I'm not quite sure how I managed to fit it into the village..."
+
+#. dit par : heros
+#: village_vache
+msgid "Quel plaisir de te revoir, Vache à Lait ! Tiens, c'est la première fois que je te vois et que tu n'es pas en train de brouter."
+msgstr "So good to see you again, Milky Cow! Hey, this is the first time I've ever seen you not grazing."
+
+#. dit par : vache
+#: village_vache
+msgid "Meuh. T'en vois de l'herbe dans l'coin, toi ?"
+msgstr "Moo. See any grass 'round here, do ya?"
+
+#. dit par : heros
+#: village_vache
+msgid "Ah, je me disais bien que c'était pas normal. Tu peux pas sortir du village ? Ça te changerait, elle est peut-être meilleure dehors."
+msgstr "Ah, I figured something wasn't right. Can't you leave the village? It'd make a change, maybe the grass is better outside."
+
+#. dit par : vache
+#: village_vache
+msgid "Meeeeuuuh... La flemme, c'est trop loin, j'suis fatiguée. J'ai faim."
+msgstr "Moooooo... Can't be bothered, it's too far, I'm tired. I'm hungry."
+
+#. dit par : heros
+#: village_vache
+msgid "Oh là là, quelle feignasse, cette Vache à Lait ! Je vais peut-être pouvoir faire quelque chose."
+msgstr "Oh my, what a lazybones, that Milky Cow! Maybe I can do something about it."
+
+#. dit par : heros
+#: village_vache_revoir
+msgid "Et voilà un pot à lait tout neuf ! Crôa crôa"
+msgstr "And here's a brand-new milk jug! Ribbit ribbit"
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "T'as bien mérité un peu de mon lait frais. Pose-le là-d'ssous et tire !"
+msgstr "You've earned a bit o' my fresh milk. Put it under there and pull!"
+
+#. dit par : heros
+#: village_vache_revoir
+msgid "Pouah ! Y'a une sacrée odeur, mais j'en connais un qui va être heureux. Merci !"
+msgstr "Yuck! That's quite a smell, but I know someone who'll be happy. Thanks!"
+
+#. narration
+#: village_vache_revoir
+msgid "Le pot est plein à ras bord de bon lait frais."
+msgstr "The jug is filled to the brim with good fresh milk."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Meuh ! D'la bonne herbe toute verte ! Si appétissante !"
+msgstr "Moo! Lovely green grass! So tasty-lookin'!"
+
+#. dit par : heros
+#: village_vache_revoir
+msgid "Régale-toi, ma bonne vache !"
+msgstr "Enjoy, my good cow!"
+
+#. narration
+#: village_vache_revoir
+msgid "La Vache à Lait déguste l'herbe d'un air ravi."
+msgstr "Milky Cow savors the grass with a delighted look."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Miam, c'est d'la bonne herbe, ça ! J'te dois bien une faveur."
+msgstr "Yum, now that's proper grass! I owe ya a favor."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "J'peux te donner un peu de mon bon lait frais, mais il te faudrait de quoi le transporter."
+msgstr "I can give ya some o' my good fresh milk, but you'd need somethin' to carry it in."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Y'avait des pots à lait par ici, avant."
+msgstr "There used to be milk jugs 'round here."
+
+#. dit par : heros
+#: village_vache_revoir
+msgid "C'est gentil, ça ! Je vais voir ce que je peux trouver dans le coin."
+msgstr "That's kind of you! I'll see what I can find around here."
+
+#. narration
+#: village_vache_revoir
+msgid "Mémorisons la forme du pot à lait : ça pourrait être utile."
+msgstr "Let's memorize the shape of the milk jug: it might come in handy."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Meuh... J'espère qu'tu vas t'régaler avec mon bon lait frais."
+msgstr "Moo... Hope ya enjoy my good fresh milk."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Moi j'chuis contente avec tout'cette herbe."
+msgstr "Me, I'm happy with all this grass."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Meuh. Reviens quand tu auras trouvé un pot à lait."
+msgstr "Moo. Come back when ya've found a milk jug."
+
+#. dit par : vache
+#: village_vache_revoir
+msgid "Où est ma bonne herbe verte ? Meuuuh"
+msgstr "Where's my lovely green grass? Moooo"
+
+#. dit par : heros
+#: village_herbe
+msgid "Un papier d'un vert végétal, abandonné dans la terre sèche."
+msgstr "A leafy-green paper, abandoned on the dry earth."
+
+#. dit par : heros
+#: village_herbe
+msgid "Un papier d'un vert végétal, abandonné dans la terre sèche. Ça me serait sûrement utile."
+msgstr "A leafy-green paper, abandoned on the dry earth. It would surely come in handy."
+
+#. option du héros : un geste
+#: village_herbe
+msgid "plier un lézard vert"
+msgstr "fold a green lizard"
+
+#. option du héros : un geste
+#: village_herbe
+msgid "plier de l'herbe"
+msgstr "fold some grass"
+
+#. option du héros : un geste
+#: village_herbe
+msgid "plier une fleur"
+msgstr "fold a flower"
+
+#. dit par : heros
+#: village_herbe
+msgid "Ils seraient mignons, ces petits lézards, mais ça ne résoudrait pas vraiment les problèmes des habitants."
+msgstr "They'd be cute, these little lizards, but they wouldn't really solve the villagers' problems."
+
+#. dit par : heros
+#: village_herbe
+msgid "Des brins d'herbe vont mettre un peu de vie sur cette place désolée, et ravir Vache à Lait."
+msgstr "A few blades of grass will bring some life to this desolate square, and delight Milky Cow."
+
+#. dit par : heros
+#: village_herbe
+msgid "Ça serait joli, mais pas sûr que ça soit au goût de Vache à Lait."
+msgstr "It would be pretty, but I'm not sure it's to Milky Cow's taste."
+
+#. dit par : heros
+#: village_herbe_enigme
+msgid "Ça devrait être simple à plier."
+msgstr "That should be easy to fold."
+
+#. dit par : heros
+#: village_herbe_issue
+msgid "Faisons quelques plis..."
+msgstr "A few folds..."
+
+#. dit par : heros
+#: village_herbe_issue
+msgid "Un peu de verdure sur cette terre aride. Vache à Lait va se régaler."
+msgstr "A bit of greenery on this barren land. Milky Cow is going to love it."
+
+#. dit par : heros
+#: village_herbe_issue
+msgid "L'herbe va devoir attendre un peu."
+msgstr "The grass will have to wait a little."
+
+#. dit par : heros
+#: village_herbe_pliee
+msgid "De la bonne herbe bien grasse."
+msgstr "Nice, lush grass."
+
+#. dit par : heros
+#: village_pot
+msgid "Un papier crème et épais. Je ne sais pas quoi en faire pour le moment."
+msgstr "A thick, cream-colored paper. I don't know what to do with it for now."
+
+#. dit par : heros
+#: village_pot
+msgid "Ce solide papier couleur crème serait parfait pour plier le pot à lait."
+msgstr "This sturdy cream-colored paper would be perfect for folding the milk jug."
+
+#. dit par : heros
+#: village_pot_issue
+msgid "C'est plié !"
+msgstr "All folded!"
+
+#. dit par : heros
+#: village_pot_issue
+msgid "Il ne reste plus qu'à le remplir."
+msgstr "Now all that's left is to fill it."
+
+#. dit par : heros
+#: village_pot_issue
+msgid "Je n'arrive pas à lui donner la bonne forme. On verra plus tard."
+msgstr "I can't get it into the right shape. We'll see later."
+
+#. dit par : heros
+#: entree_arrivee
+msgid "Je peux voir d'ici l'entrée du château. Crôa crôa"
+msgstr "From here I can see the castle entrance. Ribbit ribbit"
+
+#. dit par : heros
+#: entree_arrivee
+msgid "Mais Gros Diplo a décidé d'assiéger le château, on dirait. Je devrais aller voir ce qui lui arrive."
+msgstr "But it looks like Big Diplo has decided to lay siege to the castle. I should go and see what's up with him."
+
+#. dit par : heros
+#: entree_arrivee
+msgid "Et Petit Chat a l'air dans tous ses états. Il faut que j'aille voir ça de plus près."
+msgstr "And Little Cat looks all worked up. I need to take a closer look."
+
+#. dit par : chat
+#: entree_chat
+msgid "Miaou. Si tu n'as pas de lait à me faire laper, / Alors je te prie de décamper."
+msgstr "Meow. If there's no milk for me to drink, / Then kindly leave me, quick as a wink."
+
+#. dit par : heros
+#: entree_chat
+msgid "Mais c'est notre Petit Chat adoré ! Viens là que je te fasse un câlin."
+msgstr "Why, it's our darling Little Cat! Come here and let me give you a hug."
+
+#. dit par : chat
+#: entree_chat
+msgid "Miaou ! Où sont mes laquais ? / Personne ici ne daigne me donner du lait."
+msgstr "Meow! Where are my lackeys, pray? / No one deigns to bring me milk today."
+
+#. dit par : chat
+#: entree_chat
+msgid "Il n'y a ici que de l'eau, / Et je ne puis regagner ma demeure au Château."
+msgstr "There's naught but water here, alas, / And to my Castle home I cannot pass."
+
+#. dit par : chat
+#: entree_chat
+msgid "Ce Gros Diplo m'empêche de rentrer, / Il dit que c'est pour ma sécurité."
+msgstr "That Big Diplo won't let me through, / He claims it's for my safety too."
+
+#. dit par : chat
+#: entree_chat
+msgid "Le Chat Mal Luné a perdu l'esprit, / Qu'est-ce qui lui a pris ?"
+msgstr "Moody Mooncat has lost his wits, / What could have thrown him into fits?"
+
+#. dit par : heros
+#: entree_chat
+msgid "Petit Chat ! Toujours aussi mignon, et toujours aussi insolent."
+msgstr "Little Cat! As cute as ever, and as cheeky as ever."
+
+#. dit par : heros
+#: entree_chat
+msgid "Peux-tu me dire ce qu'il se passe ? Pourquoi Gros Diplo ne veut pas te laisser entrer ?"
+msgstr "Can you tell me what's going on? Why won't Big Diplo let you in?"
+
+#. dit par : chat
+#: entree_chat
+msgid "Miaou ! Du lait d'abord, je t'en conjure ! / Ou je commets un parjure."
+msgstr "Meow! Milk first, I do implore! / Or I'll break every oath I swore."
+
+#. dit par : heros
+#: entree_chat
+msgid "Il divague. Je ferais mieux de trouver du lait avant de me transformer en pâté pour chat."
+msgstr "He's rambling. I'd better find some milk before I end up as cat food."
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "Tiens, mon Petit Chat. Du bon lait frais. Tu pourras remercier la Vache à Lait."
+msgstr "Here you go, my Little Cat. Good fresh milk. You can thank Milky Cow."
+
+#. narration
+#: entree_chat_lait
+msgid "Le Petit Chat lape goulûment le lait ; le pot se retrouve vide en quelques secondes."
+msgstr "Little Cat greedily laps up the milk; the jug is empty in a matter of seconds."
+
+#. narration
+#: entree_chat_lait
+msgid "Il étend ses pattes et miaule de satisfaction."
+msgstr "He stretches his paws and meows with satisfaction."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Maaw ! Merci, mon cher Maître Origamiste ! / Sans toi je serais bien triste."
+msgstr "Maaw! My thanks, dear Master Origamist! / Without you, my sorrow would persist."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Ici hélas rien ne va plus. / Pourra-t-on trouver le salut ?"
+msgstr "Alas, here all has gone astray. / Will salvation come our way?"
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "Calme-toi, Petit Chat. Je comprends à moitié ce que tu dis. Enfin, ça ne change pas vraiment d'avant."
+msgstr "Calm down, Little Cat. I only understand half of what you're saying. Then again, that's nothing new."
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "Raconte-moi ce qui s'est passé au château."
+msgstr "Tell me what happened at the castle."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Quels terribles actes nous a infligés / Le Chat Mal Luné pour se venger !"
+msgstr "Such dreadful deeds he's put us through, / Moody Mooncat, for revenge, it's true!"
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Les petits oiseaux, les jolies fleurs / Dépliés, disparus, oh quelle douleur !"
+msgstr "The little birds, the pretty flowers, / Unfolded, gone... oh, bitter hours!"
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "C'est terrible ! Pourquoi ferait-il une chose pareille ?"
+msgstr "That's terrible! Why would he do such a thing?"
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Le Chat Mal Luné est mesquin / Aussi méchant et vil qu'un requin."
+msgstr "Moody Mooncat is petty and mean, / The vilest shark you've ever seen."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Il va continuer à déplier / Tout ce que tu as jadis plié."
+msgstr "He'll go on unfolding, I am told, / All the things you used to fold."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Je dois de ce pas et de manière ferme / Au Château y mettre un terme."
+msgstr "I must, at once and firmly, go / To the Castle, and end this woe."
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "Crôa crôa. Je crois que tu ne me racontes pas tout."
+msgstr "Ribbit ribbit. I don't think you're telling me everything."
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "Encore une de vos disputes qui a mal tourné."
+msgstr "Another one of your squabbles gone wrong."
+
+#. dit par : heros
+#: entree_chat_lait
+msgid "Pour l'instant, aide-moi à revenir au château, on va essayer de régler ça."
+msgstr "For now, help me get back to the castle, and we'll try to sort this out."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Au Château j'aimerais tant / Y revenir à temps."
+msgstr "Back to the Castle I so yearn / To make, in time, my swift return."
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Ce papier accroché là-haut / Peut-être est-ce ce qu'il nous faut."
+msgstr "That paper hanging way up high / Could be just what we need. Let's try!"
+
+#. dit par : chat
+#: entree_chat_lait
+msgid "Voici ma modeste contribution / À ce que ce problème trouve une solution."
+msgstr "Here's my modest contribution / Toward this problem's resolution."
+
+#. dit par : chat
+#: entree_chat_apres
+msgid "Hélas, Gros Diplo n'a pas daigné se mouvoir. / J'aimerais tellement ne plus le voir."
+msgstr "Alas, Big Diplo has not deigned to budge. / Out of my sight I wish he'd trudge."
+
+#. dit par : chat
+#: entree_chat_apres
+msgid "Allons de ce pas régler ça. / Au Château rentrons fissa."
+msgstr "Let's go and settle this, posthaste. / To the Castle, no time to waste!"
+
+#. dit par : heros
+#: entree_papier_chien
+msgid "Ce papier est tout doux et parsemé de taches brunes. Je ne sais pas quoi en faire pour le moment."
+msgstr "This paper is very soft and dotted with brown spots. I don't know what to do with it for now."
+
+#. dit par : heros
+#: entree_papier_chien
+msgid "Ce papier est tout doux et parsemé de taches brunes. Ça doit être Chouaf !"
+msgstr "This paper is very soft and dotted with brown spots. It must be Shwoof!"
+
+#. dit par : heros
+#: entree_chien_issue
+msgid "Un dernier pli pour le museau..."
+msgstr "One last fold for the snout..."
+
+#. dit par : chien
+#: entree_chien_issue
+msgid "Chouaf Chouaf !"
+msgstr "Shwoof Shwoof!"
+
+#. dit par : heros
+#: entree_chien_issue
+msgid "Euh, il est un peu mutant, ce chien... Je devrais repartir de zéro."
+msgstr "Er, this dog looks a bit mutant... I should start over from scratch."
+
+#. dit par : heros
+#: entree_papier_os
+msgid "Un papier blanc est accroché là-haut. Même moi, je ne saute pas assez haut pour le décrocher."
+msgstr "A white paper is hanging up there. Even I can't jump high enough to get it down."
+
+#. dit par : heros
+#: entree_papier_os
+msgid "C'est un papier blanc un peu abîmé. Et il y a... de la bave ? Pouah !"
+msgstr "It's a slightly damaged white paper. And there's... drool on it? Yuck!"
+
+#. dit par : heros
+#: entree_papier_os
+msgid "Il a l'air de beaucoup intéresser Chouaf."
+msgstr "Shwoof seems very interested in it."
+
+#. option du héros : un geste
+#: entree_papier_os
+msgid "plier une laisse"
+msgstr "fold a leash"
+
+#. option du héros : un geste
+#: entree_papier_os
+msgid "plier un os"
+msgstr "fold a bone"
+
+#. option du héros : un geste
+#: entree_papier_os
+msgid "plier une gamelle"
+msgstr "fold a bowl"
+
+#. dit par : heros
+#: entree_papier_os
+msgid "Le pauvre, je ne vais pas l'attacher. Et pour être honnête, je ne saurais même pas comment m'y prendre sans y perdre une patte."
+msgstr "Poor thing, I'm not going to tie him up. And to be honest, I wouldn't even know how to go about it without losing a leg."
+
+#. dit par : heros
+#: entree_papier_os
+msgid "Un jouet pour Chouaf ? Pourquoi pas."
+msgstr "A toy for Shwoof? Why not."
+
+#. dit par : heros
+#: entree_papier_os
+msgid "Je n'ai pas de quoi la remplir. Et je ne suis pas aussi tordu que le Renard Futé pour lui faire cette mauvaise blague."
+msgstr "I have nothing to fill it with. And I'm not as twisted as Sly Fox, to play such a nasty trick on him."
+
+#. dit par : heros
+#: entree_os_issue
+msgid "Un nouveau joujou pour le toutou."
+msgstr "A brand-new toy for the good boy."
+
+#. dit par : heros
+#: entree_os_issue
+msgid "Avec un peu d'imagination, peut-être un os réduit en bouillie... Non, ça ne doit pas être ça."
+msgstr "With a bit of imagination, maybe a bone smashed to a pulp... No, that can't be it."
+
+#. dit par : chien
+#: entree_chouaf
+msgid "Chouaf ! Ouaf Ouaf !"
+msgstr "Shwoof! Woof woof!"
+
+#. dit par : heros
+#: entree_chouaf
+msgid "Bon chien. Non, ne t'approche pas trop."
+msgstr "Good dog. No, don't come too close."
+
+#. dit par : heros
+#: entree_chouaf
+msgid "Pingouin Glagla te cherche partout, va donc étaler ta bave là-bas."
+msgstr "Penguin Brrbrr is looking everywhere for you, go spread your drool over there."
+
+#. narration
+#: entree_chouaf
+msgid "Je vais essayer de ne pas me faire mordre..."
+msgstr "I'll try not to get bitten..."
+
+#. dit par : heros
+#: entree_chouaf
+msgid "Bon chien ? Chouaf ? Regarde ce que j'ai apporté pour toi !"
+msgstr "Good dog? Shwoof? Look what I brought for you!"
+
+#. dit par : chien
+#: entree_chouaf
+msgid "WOUAF ! OUAF OUAF OUAF !"
+msgstr "WOOF! WOOF WOOF WOOF!"
+
+#. narration
+#: entree_chouaf
+msgid "Je lance l'os vers Gros Diplo en m'excusant intérieurement."
+msgstr "I throw the bone toward Big Diplo, apologizing inwardly."
+
+#. narration
+#: entree_chouaf
+msgid "Chouaf est tout excité et saute partout."
+msgstr "Shwoof is all excited and jumps around everywhere."
+
+#. dit par : chien
+#: entree_chouaf
+msgid "Chouaf ?"
+msgstr "Shwoof?"
+
+#. narration
+#: entree_chouaf
+msgid "Il n'a pas l'air si terrible, je pourrais même me servir de lui pour arriver à mes fins..."
+msgstr "He doesn't look so terrible. I could even use him to get what I want..."
+
+#. narration
+#: entree_chouaf
+msgid "Faisons attention quand même."
+msgstr "Let's be careful, though."
+
+#. dit par : heros
+#: entree_chouaf
+msgid "Tu veux jouer, c'est ça ? Attends, je vais trouver quelque chose qui va beaucoup te plaire !"
+msgstr "You want to play, is that it? Wait, I'll find something you're going to love!"
+
+#. dit par : chien
+#: entree_chouaf
+msgid "Ouaf Ouaf !"
+msgstr "Woof woof!"
+
+#. narration
+#: entree_diplo_ecarte
+msgid "Mon plan machiavélique fonctionne, et Gros Diplo s'éloigne de cette boule de dents surexcitée."
+msgstr "My Machiavellian plan is working, and Big Diplo is backing away from that overexcited ball of teeth."
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "QU'EST-CE QUE TU FAIS LÀ ? TU N'AS PAS COMPRIS ? C'EST DANGEREUX ICI !"
+msgstr "WHAT ARE YOU DOING HERE? DIDN'T YOU GET IT? IT'S DANGEROUS HERE!"
+
+#. dit par : heros
+#: entree_diplo
+msgid "Ok, ça va, pas la peine de me crier dessus..."
+msgstr "OK, OK, no need to shout at me..."
+
+#. dit par : heros
+#: entree_diplo
+msgid "Gros Diplo ? Je crois que tu m'empêches de rentrer chez moi."
+msgstr "Big Diplo? I think you're stopping me from getting home."
+
+#. dit par : heros
+#: entree_diplo
+msgid "Ça t'ennuierait de te pousser un peu ?"
+msgstr "Would you mind moving over a bit?"
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "OH, L'ORIGAMISTE. JE CROIS PAS QUE ÇA SOIT POSSIBLE, NON."
+msgstr "OH, THE ORIGAMIST. I DON'T THINK THAT'S POSSIBLE, NO."
+
+#. narration
+#: entree_diplo
+msgid "J'avais oublié qu'il parlait un peu fort, celui-là. Je vais devenir sourd."
+msgstr "I'd forgotten he talks a bit loud, that one. I'm going to go deaf."
+
+#. dit par : heros
+#: entree_diplo
+msgid "Mais je veux rentrer ! Et tu me fais mal aux tympans !"
+msgstr "But I want to go home! And you're hurting my eardrums!"
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "C'EST POUR TA SÉCURITÉ. DÉSOLÉ, JE NE PEUX PAS PARLER MOINS FORT."
+msgstr "IT'S FOR YOUR SAFETY. SORRY, I CAN'T TALK ANY QUIETER."
+
+#. dit par : heros
+#: entree_diplo
+msgid "Ma sécurité ? Tout le village est devenu fou, je vais être plus en sécurité chez moi, je crois."
+msgstr "My safety? The whole village has gone mad, I think I'll be safer at home."
+
+#. dit par : heros
+#: entree_diplo
+msgid "Allez, pousse-toi un peu, mon Gros Diplo."
+msgstr "Come on, scoot over a bit, Big Diplo old pal."
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "LE CHAT MAL LUNÉ EST À L'INTÉRIEUR, JE NE PEUX PAS LE FAIRE SORTIR."
+msgstr "MOODY MOONCAT IS INSIDE, I CAN'T GET HIM OUT."
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "ET JE DOIS EMPÊCHER QUICONQUE DE L'APPROCHER."
+msgstr "AND I HAVE TO STOP ANYONE FROM GETTING NEAR HIM."
+
+#. dit par : heros
+#: entree_diplo
+msgid "Qu'est-ce qu'il a fait encore, le Chat Mal Luné ? C'est en lien avec tous les objets dépliés ?"
+msgstr "What has Moody Mooncat done this time? Does it have something to do with all the unfolded things?"
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "J'EN SAIS RIEN, MOI. SA MAJESTÉ LE LIBOU DES BOIS JOLIS M'A DIT DE LE TENIR À L'ÉCART DU VILLAGE."
+msgstr "HOW SHOULD I KNOW? HER MAJESTY THE OWLLY OF THE CHARMING WOODS TOLD ME TO KEEP HIM AWAY FROM THE VILLAGE."
+
+#. dit par : diplodocus
+#: entree_diplo
+msgid "J'OBÉIS. ALLEZ, DU BALAI."
+msgstr "I OBEY. NOW, SHOO."
+
+#. narration
+#: entree_diplo
+msgid "Faut que je trouve un moyen de l'éloigner, il est têtu comme une mule géante. Et je suis en train de devenir sourd."
+msgstr "I've got to find a way to move him. He's as stubborn as a giant mule. And I'm going deaf."
+
+#. dit par : diplodocus
+#: entree_diplo_pousse
+msgid "PARDON, MA REINE ! MAUDIT CHIEN, J'AI FAILLI À MON DEVOIR."
+msgstr "FORGIVE ME, MY QUEEN! CURSED DOG, I HAVE FAILED IN MY DUTY."
+
+#. dit par : heros
+#: entree_diplo_pousse
+msgid "C'est vrai qu'il peut être terrifiant, ce Chouaf."
+msgstr "It's true he can be terrifying, that Shwoof."
+
+#. dit par : heros
+#: entree_diplo_pousse
+msgid "Sur ce, j'ai des choses à régler au château."
+msgstr "And with that, I have things to sort out at the castle."
+
+#. dit par : diplodocus
+#: entree_diplo_pousse
+msgid "NON ! NE T'APPROCHE PAS DU CHAT MAL LUNÉ !"
+msgstr "NO! DON'T GO NEAR MOODY MOONCAT!"
+
+#. dit par : heros
+#: entree_fin_chapitre
+msgid "Il est temps de retrouver Sa Majesté Le Libou Des Bois Jolis et de confronter le Chat Mal Luné."
+msgstr "It's time to see Her Majesty The Owlly Of The Charming Woods again and confront Moody Mooncat."
+
+#. dit par : heros
+#: entree_fin_chapitre
+msgid "J'appréhende un peu..."
+msgstr "I'm a little nervous..."
+
+#. dit par : heros
+#: trone_arrivee
+msgid "Qu'il est bon de revenir chez soi. Crôa crôa"
+msgstr "How good it is to be home. Ribbit ribbit"
+
+#. dit par : heros
+#: trone_arrivee
+msgid "Mais l'ambiance a l'air particulièrement tendue."
+msgstr "But the atmosphere seems particularly tense."
+
+#. narration
+#: trone_arrivee
+msgid "Chacun d'un côté de la salle, le Petit Chat et le Chat Mal Luné se toisent en feulant, le poil hérissé."
+msgstr "On opposite sides of the hall, Little Cat and Moody Mooncat stare each other down, hissing, fur on end."
+
+#. narration
+#: trone_arrivee
+msgid "La reine est perchée sur son trône et semble excédée au plus haut point."
+msgstr "The queen is perched on her throne and looks exasperated beyond words."
+
+#. dit par : heros
+#: trone_arrivee
+msgid "Je devrais aller saluer Sa Majesté."
+msgstr "I should go and greet Her Majesty."
+
+#. dit par : heros
+#: trone_libou
+msgid "Votre Majesté, j'ai retrouvé et replié votre couronne."
+msgstr "Your Majesty, I found and refolded your crown."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Hou hou ! Ma magnifique couronne toute rutilante !"
+msgstr "Hoo hoo! My magnificent, gleaming crown!"
+
+#. dit par : hibou
+#: trone_libou
+msgid "Qu'elle est belle et brille de mille feux !"
+msgstr "How beautiful it is, how brightly it shines!"
+
+#. dit par : hibou
+#: trone_libou
+msgid "Vite, coiffe-moi."
+msgstr "Quick, put it on me."
+
+#. narration
+#: trone_libou
+msgid "Je dépose la couronne sur la tête royale."
+msgstr "I place the crown on the royal head."
+
+#. dit par : heros
+#: trone_libou
+msgid "Vous êtes à nouveau ravissante, Votre Majesté Le Libou Des Bois Jolis."
+msgstr "You look ravishing once again, Your Majesty The Owlly Of The Charming Woods."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Qu'entends-je ? Je n'étais pas ravissante avant ?"
+msgstr "What do I hear? I wasn't ravishing before?"
+
+#. dit par : hibou
+#: trone_libou
+msgid "Ton voyage t'a fait oublier les bonnes manières, Grenouille."
+msgstr "Your journey has made you forget your manners, Frog."
+
+#. dit par : heros
+#: trone_libou
+msgid "Non non, excusez cette maladresse. Je voulais souligner que la beauté de Votre Magnificence s'accorde à merveille à vos accessoires."
+msgstr "No, no, forgive my clumsiness. I meant to say that Your Magnificence's beauty goes wonderfully with your accessories."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Tu t'enfonces, mon cher origamiste. Mais ce n'est pas grave, tu es doué, je vais t'excuser pour cette fois."
+msgstr "You're digging yourself deeper, my dear origamist. But never mind, you're talented, I'll forgive you this once."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Et je voudrais te témoigner ma reconnaissance pour ton aide à résoudre tous ces problèmes."
+msgstr "And I would like to show my gratitude for your help in solving all these problems."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Choisis donc parmi mes papiers d'origami les plus précieux."
+msgstr "So choose from among my most precious origami papers."
+
+#. narration
+#: trone_libou
+msgid "Sa Majesté Le Libou Des Bois Jolis sort d'un coffre finement ouvragé quatre feuilles scintillantes et les dépose au centre de la pièce."
+msgstr "Her Majesty The Owlly Of The Charming Woods takes four sparkling sheets out of a finely crafted chest and lays them in the middle of the room."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Peut-être pourrais-tu en faire quelque chose pour apaiser toute cette tension."
+msgstr "Perhaps you could make something with them to ease all this tension."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Fais bon usage de ces papiers d'origami, ce sont les plus précieux du royaume."
+msgstr "Make good use of these origami papers, they are the most precious in the kingdom."
+
+#. dit par : hibou
+#: trone_libou
+msgid "Hou hou... Où est ma couronne ? Je suis perdue sans elle. À l'aide, mon cher origamiste."
+msgstr "Hoo hoo... Where is my crown? I'm lost without it. Help, my dear origamist."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "Je vous salue avec le plus grand respect, Votre Majesté Le Libou Des Bois Jolis."
+msgstr "I greet you with the utmost respect, Your Majesty The Owlly Of The Charming Woods."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "Me voici rentré de voyage et je suis très heureux de vous retrouver."
+msgstr "I'm back from my travels and very happy to see you again."
+
+#. dit par : hibou
+#: trone_libou_rencontre
+msgid "Hou hou ! Il était grand temps ! J'ai besoin de ton aide, tout va mal ici."
+msgstr "Hoo hoo! About time! I need your help, everything is going wrong here."
+
+#. dit par : hibou
+#: trone_libou_rencontre
+msgid "Je n'ai plus de couronne, et les deux chats se disputent sans cesse."
+msgstr "I've lost my crown, and the two cats never stop fighting."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "Crôa crôa. Je constate en effet une certaine agitation depuis mon retour."
+msgstr "Ribbit ribbit. I do notice a certain agitation since my return."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "Accessoirement, si je puis me permettre, Votre Majesté, un certain chaos règne à l'extérieur du château."
+msgstr "Incidentally, if I may, Your Majesty, a certain chaos reigns outside the castle."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "J'ai pu régler une partie de la situation, mais vous devriez aller vérifier."
+msgstr "I managed to sort out part of the situation, but you should go and check."
+
+#. dit par : hibou
+#: trone_libou_rencontre
+msgid "Quelle insolence ! Tu sous-entends peut-être que je gouverne mal mon royaume ?"
+msgstr "How insolent! Are you perhaps implying that I rule my kingdom badly?"
+
+#. dit par : hibou
+#: trone_libou_rencontre
+msgid "Sans ma couronne je ne peux rien faire de toute façon."
+msgstr "Without my crown I can't do anything anyway."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "Veuillez excuser ma formulation, Votre Majesté Le Libou Des Bois Jolis."
+msgstr "Please excuse my wording, Your Majesty The Owlly Of The Charming Woods."
+
+#. dit par : heros
+#: trone_libou_rencontre
+msgid "Bien sûr, il vous faut vos attributs royaux, sans cela que penseraient les habitants ?"
+msgstr "Of course, you need your royal regalia. Without them, what would your subjects think?"
+
+#. dit par : hibou
+#: trone_libou_rencontre
+msgid "Hou hou ! Aide-moi donc à retrouver ma couronne pour te faire pardonner, au lieu de marmonner de plates excuses."
+msgstr "Hoo hoo! Then help me find my crown to earn my forgiveness, instead of mumbling feeble apologies."
+
+#. narration
+#: trone_libou_rencontre
+msgid "Je pense me rappeler à quoi ressemble la fameuse couronne."
+msgstr "I think I remember what the famous crown looks like."
+
+#. dit par : chat
+#: trone_chat
+msgid "Je suis à nouveau pleinement rassasié, / Mais je dois toujours supporter ce tas de fumier."
+msgstr "I'm fully fed and satisfied, / But that dung heap's still at my side."
+
+#. dit par : heros
+#: trone_chat
+msgid "Ce tas de fumier ? Ce n'est pas en appelant comme ça le Chat Mal Luné que vous allez vous réconcilier."
+msgstr "That dung heap? Calling Moody Mooncat names like that won't help you two make up."
+
+#. dit par : chat
+#: trone_chat
+msgid "Miaou... J'ai l'estomac dans les coussinets. / Donne-moi quelque chose, même du panais."
+msgstr "Meow... I'm so hungry my paws feel hollow. / Bring me something, even parsnips I'd swallow."
+
+#. dit par : chat
+#: trone_chat
+msgid "Miaou ! Regarde donc cet individu malsain ! / Qui complote de noirs desseins."
+msgstr "Meow! Look at that villain over there! / Plotting dark schemes, I declare!"
+
+#. dit par : chat
+#: trone_chat
+msgid "Et j'ai si faim ! Que fait donc le service ? / A-t-il lui aussi été gagné par le vice ?"
+msgstr "And I'm so hungry! Where is the staff? / Has vice claimed them too, on his behalf?"
+
+#. dit par : heros
+#: trone_chat
+msgid "Mais tu viens de t'enfiler tout un pot de lait ? Ton appétit n'a donc pas de limites ?"
+msgstr "But you just guzzled a whole jug of milk! Does your appetite have no limits?"
+
+#. dit par : heros
+#: trone_chat
+msgid "Ne veux-tu pas t'expliquer avec le Chat Mal Luné pour régler cette situation ?"
+msgstr "Don't you want to talk things out with Moody Mooncat to settle this?"
+
+#. dit par : chat
+#: trone_chat
+msgid "Ce n'est pas ça qui va me remplir l'estomac. / Vite, avant que je ne tombe dans le coma."
+msgstr "Talking won't fill my tummy, you know. / Hurry, before into a coma I go!"
+
+#. narration
+#: trone_chat
+msgid "Il n'entendra pas raison avant d'avoir avalé quelque chose."
+msgstr "He won't listen to reason until he's eaten something."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "Je me suis régalé. Tu es peut-être plus utile que je ne le pensais."
+msgstr "That was a feast. Maybe you're more useful than I thought."
+
+#. dit par : heros
+#: trone_lune_chat
+msgid "Tu vas essayer de parler au Petit Chat pour vous expliquer ?"
+msgstr "Will you try talking to Little Cat to clear things up?"
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "C'est à lui d'arrêter de faire le beau et de venir vers moi."
+msgstr "It's up to him to stop showing off and come to me."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "Va-t'en. Sauf si tu m'apportes à manger."
+msgstr "Go away. Unless you're bringing me food."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "Kshhhh ! Tiens, tiens, tiens, mais qui voilà ? Tu viens m'apporter mon repas ?"
+msgstr "Hsss! Well, well, well, look who it is. Have you come to bring me my meal?"
+
+#. dit par : heros
+#: trone_lune_chat
+msgid "C'est une curieuse façon de me saluer, Chat Mal Luné !"
+msgstr "That's a funny way to greet me, Moody Mooncat!"
+
+#. dit par : heros
+#: trone_lune_chat
+msgid "Vas-tu cesser tes enfantillages et remettre un peu d'ordre ?"
+msgstr "Will you stop your childish games and restore a little order?"
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "Tsss... J'arrêterai peut-être quand ce précieux petit chouchou fera moins le malin."
+msgstr "Tsss... Maybe I'll stop when that precious little teacher's pet stops being such a smart aleck."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "Regarde-le, là, à se dandiner aux pieds de la reine. Il obtient toutes ses faveurs et moi je n'ai rien."
+msgstr "Look at him there, prancing at the queen's feet. He gets all her favors and I get nothing."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "J'ai même pas eu mon repas, j'ai les crocs."
+msgstr "I didn't even get my meal, I'm starving."
+
+#. dit par : heros
+#: trone_lune_chat
+msgid "Et tu crois que c'est comme ça que la reine va mieux t'apprécier ? En dépliant tous ses origamis ?"
+msgstr "And you think that's how you'll get the queen to like you more? By unfolding all her origami?"
+
+#. dit par : heros
+#: trone_lune_chat
+msgid "D'ailleurs, si tu n'as pas ton repas, c'est à cause du bazar que tu as causé. Le Petit Chat a aussi l'air de trépigner."
+msgstr "Besides, if you didn't get your meal, it's because of the mess you made. Little Cat looks impatient too."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "J'ai pas besoin de tes leçons de morale, la grenouille."
+msgstr "I don't need your moral lectures, frog."
+
+#. dit par : lune_chat
+#: trone_lune_chat
+msgid "Maintenant déguerpis avant que ça soit toi, mon repas. Kshhhhh !"
+msgstr "Now scram, before you end up being my meal. Hssss!"
+
+#. dit par : heros
+#: trone_invitation
+msgid "Le repas est prêt, mes chatons ! La Cheffe Éléphant vous attend à la cuisine."
+msgstr "Dinner's ready, kitties! Chef Elephant is waiting for you in the kitchen."
+
+#. dit par : chat
+#: trone_invitation
+msgid "Hummm, quelle délicieuse odeur de poisson ! / Vite, avant un larcin de ce vilain garçon."
+msgstr "Mmm, what a delicious smell of fish! / Quick, before that rascal steals my dish!"
+
+#. dit par : lune_chat
+#: trone_invitation
+msgid "Hé toi, pas intérêt à me piquer ma part !"
+msgstr "Hey you, don't you dare steal my share!"
+
+#. dit par : heros
+#: trone_invitation
+msgid "Calmez-vous, va y en avoir pour tout le monde."
+msgstr "Calm down, there'll be enough for everyone."
+
+#. dit par : heros
+#: trone_coeur
+msgid "Les papiers d'origami les plus précieux de Sa Majesté. Il ne faut pas les gâcher."
+msgstr "Her Majesty's most precious origami papers. I mustn't waste them."
+
+#. option du héros : un geste
+#: trone_feuilles
+msgid "vert éclat argenté"
+msgstr "green with a silver sheen"
+
+#. option du héros : un geste
+#: trone_feuilles
+msgid "rouge avec paillettes scintillantes"
+msgstr "red with sparkling glitter"
+
+#. option du héros : un geste
+#: trone_feuilles
+msgid "bleu veiné d'or"
+msgstr "blue veined with gold"
+
+#. option du héros : un geste
+#: trone_feuilles
+msgid "mauve effet diamant"
+msgstr "mauve with a diamond finish"
+
+#. narration
+#: trone_feuille
+msgid "Un vert émeraude strié d'argent. Que faire avec ?"
+msgstr "An emerald green streaked with silver. What to do with it?"
+
+#. narration
+#: trone_feuille
+msgid "Un rouge éclatant incrusté d'éclats dorés. Que faire avec ?"
+msgstr "A brilliant red studded with golden flecks. What to do with it?"
+
+#. narration
+#: trone_feuille
+msgid "Un bleu profond veiné d'or. Que faire avec ?"
+msgstr "A deep blue veined with gold. What to do with it?"
+
+#. narration
+#: trone_feuille
+msgid "Du mauve, taillé comme un diamant. Que faire avec ?"
+msgstr "Mauve, cut like a diamond. What to do with it?"
+
+#. option du héros : un geste
+#: trone_feuille
+msgid "plier de l'herbe à chat"
+msgstr "fold some catnip"
+
+#. option du héros : un geste
+#: trone_feuille
+msgid "plier des oiseaux"
+msgstr "fold some birds"
+
+#. option du héros : un geste
+#: trone_feuille
+msgid "plier un cœur"
+msgstr "fold a heart"
+
+#. option du héros : un geste
+#: trone_feuille
+msgid "plier une pelote de laine"
+msgstr "fold a ball of yarn"
+
+#. narration
+#: trone_feuille
+msgid "Ça les détendrait bien, mais ça ne va pas régler le fond du problème."
+msgstr "That would calm them down, but it won't solve the real problem."
+
+#. narration
+#: trone_feuille
+msgid "Les pauvres oiseaux, ils vont se faire plumer par ces deux-là."
+msgstr "Poor birds, those two would have them plucked in no time."
+
+#. narration
+#: trone_feuille
+msgid "Heureusement qu'ils n'osent pas s'en prendre à la reine, d'ailleurs."
+msgstr "Good thing they don't dare go after the queen, by the way."
+
+#. narration
+#: trone_feuille
+msgid "Un cœur scintillant pour symboliser la paix qui devrait les réunir."
+msgstr "A sparkling heart to symbolize the peace that should bring them together."
+
+#. narration
+#: trone_feuille
+msgid "Ça part d'une bonne idée, mais il y a quelque chose qui ne va pas."
+msgstr "It's a good idea to start with, but something isn't right."
+
+#. narration
+#: trone_feuille
+msgid "Ils joueraient ensemble... ou risqueraient de se chamailler pour l'avoir. C'est un peu risqué."
+msgstr "They'd play together... or they might squabble over it. It's a bit risky."
+
+#. dit par : heros
+#: trone_coeur_issue
+msgid "J'ai pris mon temps pour ne pas gâcher ce beau papier."
+msgstr "I took my time so as not to waste this beautiful paper."
+
+#. dit par : heros
+#: trone_coeur_issue
+msgid "Un cœur qui palpite d'amour."
+msgstr "A heart throbbing with love."
+
+#. dit par : heros
+#: trone_coeur_issue
+msgid "Encore faut-il attirer l'attention des chats dessus. Ils n'ont pas la tête à ça pour l'instant."
+msgstr "Now I just need to get the cats to notice it. Their minds are elsewhere for now."
+
+#. dit par : heros
+#: trone_coeur_issue
+msgid "Le cœur n'y est pas... plus tard peut-être."
+msgstr "My heart's not in it... maybe later."
+
+#. narration
+#: trone_coeur_plie
+msgid "Le cœur rouge incrusté d'or étincelant attend que les chats finissent leur repas."
+msgstr "The red heart studded with sparkling gold waits for the cats to finish their meal."
+
+#. narration
+#: trone_coeur_plie
+msgid "Le cœur rouge incrusté d'or étincelant est pour l'instant ignoré par les deux chats."
+msgstr "For now, the red heart studded with sparkling gold is being ignored by both cats."
+
+#. narration
+#: trone_retrouvailles
+msgid "Le cœur rouge incrusté d'or étincelant capte enfin l'attention des deux chats."
+msgstr "The red heart studded with sparkling gold finally catches both cats' attention."
+
+#. narration
+#: trone_reconciliation
+msgid "Les chats fixent le cœur en silence un petit moment. Ils n'osent pas encore se regarder en face."
+msgstr "The cats stare at the heart in silence for a little while. They don't dare look each other in the face yet."
+
+#. narration
+#: trone_reconciliation
+msgid "De temps à autre, l'un risque un coup d'œil furtif vers l'autre."
+msgstr "Every now and then, one of them risks a furtive glance at the other."
+
+#. narration
+#: trone_reconciliation
+msgid "Je vais leur laisser prendre le temps qu'il faudra."
+msgstr "I'll let them take all the time they need."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Miaou... Le Maître Origamiste nous a réunis. / Mais en bonnes paroles me voici démuni."
+msgstr "Meow... The Master Origamist has brought us together. / But for kind words I'm at the end of my tether."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Votre Majesté. Expliquez-moi donc la raison de votre rejet."
+msgstr "Your Majesty. Explain to me, then, why you rejected me."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Profitons de cette atmosphère apaisée pour nous expliquer."
+msgstr "Let's make the most of this calmer mood to talk things through."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Hou hou ! Tu as déplié ma couronne et mes origamis préférés ! Et tu oses encore rôder dans ce château."
+msgstr "Hoo hoo! You unfolded my crown and my favorite origami! And you still dare to prowl around this castle."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "J'admets avoir déplié les origamis dans un moment de colère, mais pas la couronne, comme je vous l'avais déjà dit."
+msgstr "I admit I unfolded the origami in a fit of anger, but not the crown, as I already told you."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Je continuerai à déplier tout ce royaume s'il le faut, tant qu'on me traitera comme ça."
+msgstr "I'll keep unfolding this whole kingdom if I have to, as long as I'm treated like this."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Hou hou ! Des menaces ! Comment oses-tu ! Gardes, enfermez ce malotru !"
+msgstr "Hoo hoo! Threats! How dare you! Guards, lock up this lout!"
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Ha ha ! Je les ai dépliés, les gardes, et Gros Diplo a peur d'un petit chien."
+msgstr "Ha ha! I unfolded them, the guards, and Big Diplo is scared of a little dog."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Un cœur scintillant ne va pas suffire à laver l'affront."
+msgstr "A sparkly heart won't be enough to wash away the insult."
+
+#. narration
+#: trone_reconciliation
+msgid "Une lueur maléfique dans le regard, le Chat Mal Luné s'apprête à partir."
+msgstr "A wicked gleam in his eye, Moody Mooncat gets ready to leave."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Non ! Attends, je t'en conjure, mon frère adoré ! / C'est ma faute si cette situation s'est détériorée."
+msgstr "No! Wait, I beg you, my brother so dear! / It's all my fault that things went wrong here."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Kshhh ! J'ai assez attendu, Petit Chat. Tes mots doux et belles paroles ne valent plus grand-chose."
+msgstr "Hss! I've waited long enough, Little Cat. Your sweet words and fine speeches aren't worth much anymore."
+
+#. dit par : heros
+#: trone_reconciliation
+msgid "Je ne savais pas que vous étiez frères ! Chat Mal Luné, écoutons ce qu'a à dire le Petit Chat."
+msgstr "I didn't know you were brothers! Moody Mooncat, let's hear what Little Cat has to say."
+
+#. dit par : heros
+#: trone_reconciliation
+msgid "Cette fois, j'ai l'impression qu'il a quelque chose d'important à exprimer."
+msgstr "This time, I have a feeling he has something important to say."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Très bien. Viens-en au fait, alors, et évite-nous tes tournures alambiquées."
+msgstr "Very well. Get to the point, then, and spare us your convoluted turns of phrase."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Je ne vais pas le cacher plus longtemps. / De vous dire la vérité, il est grand temps."
+msgstr "I'll keep it hidden no more, it's true. / It's high time I told the truth to you."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Chat Mal Luné, je dois l'avouer, j'ai fauté. / Une grande injustice je dois maintenant ôter."
+msgstr "Moody Mooncat, I must confess I've done wrong. / A great injustice I must right; it's been too long."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Kshhhhh ! Cesse ton bavardage et crache le morceau, tu me fais tourner en bourrique."
+msgstr "Hssss! Stop your chatter and spit it out, you're driving me up the wall."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Hou hou ! Sois gentil avec le Petit Chat, je t'en prie !"
+msgstr "Hoo hoo! Be nice to Little Cat, I beg you!"
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Petit Chat, il est vrai qu'il est maintenant temps de nous éclairer."
+msgstr "Little Cat, it is true that the time has come to enlighten us."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Même ma patience a ses limites."
+msgstr "Even my patience has its limits."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "D'accord, d'accord, ne vous fâchez pas ! / Je vais accomplir votre volonté de ce pas !"
+msgstr "All right, all right, don't be cross with me! / I'll do as you wish, at once, you'll see!"
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Votre Majesté, la couronne disparue / Et d'autres mystères incongrus..."
+msgstr "Your Majesty, the crown that went astray / And other mysteries along the way..."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Le Chat Mal Luné est innocent en réalité / C'est à moi que revient la faute en vérité !"
+msgstr "Moody Mooncat is innocent, in fact. / It was I who committed every act!"
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Comment !!! Qu'entends-je ? Hou hou hou !"
+msgstr "What!!! What do I hear? Hoo hoo hoo!"
+
+#. narration
+#: trone_reconciliation
+msgid "Le Chat Mal Luné observe en silence, le regard sévère."
+msgstr "Moody Mooncat watches in silence, his gaze stern."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "J'avais déplié ces objets précieux / Afin de semer le doute à vos yeux"
+msgstr "I had unfolded those precious things / To sow the doubt suspicion brings"
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Et instiller le soupçon, par l'exercice de mes talents de conteur, / Que ces méfaits, le Chat Mal Luné puisse en être l'auteur."
+msgstr "And plant the thought, with all my storyteller's art, / That Moody Mooncat had played the villain's part."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Vous allez maintenant me demander / Pourquoi avoir eu pareille idée."
+msgstr "And now, no doubt, you'll want to know / Why I would ever stoop so low."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "J'espère que tu as de bonnes explications à fournir."
+msgstr "I hope you have a good explanation to give."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "À mes demandes de tendresse et d'amour / Tout le château était désespérément sourd."
+msgstr "To all my pleas for love and care, / The castle turned a deaf ear everywhere."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Sur lui était braquée toute la lumière / Du haut de sa lune il faisait le fier."
+msgstr "All the light was turned his way, / Up on his moon he'd preen all day."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "C'est ainsi que, rongé par ce préjudice, / J'ai voulu mettre fin à cette injustice."
+msgstr "And so, consumed by this unfair plight, / I set out to set the injustice right."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Le faire tomber de sa lune / Pour alléger mon infortune."
+msgstr "To knock him down from off his moon, / And lighten my misfortune soon."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Kshhhh... C'est bon, on a compris, Petit Chat."
+msgstr "Hsss... All right, we get it, Little Cat."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Je reconnais que j'avais un peu tendance à attirer l'attention sur moi."
+msgstr "I admit I did tend to draw attention to myself a bit."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Hou hou ! La faute me revient aussi, à vrai dire."
+msgstr "Hoo hoo! The fault is mine as well, to tell the truth."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Je devrais vous considérer de manière plus juste à l'avenir."
+msgstr "I should treat you both more fairly in the future."
+
+#. dit par : chat
+#: trone_reconciliation
+msgid "Miaou... Pardonne-moi, mon ami de toujours, / De t'avoir joué ce mauvais tour."
+msgstr "Meow... Forgive me, my friend forever true, / For the nasty trick I played on you."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Ne t'en fais pas, frérot, je te dois aussi des excuses."
+msgstr "Don't worry about it, bro, I owe you an apology too."
+
+#. dit par : lune_chat
+#: trone_reconciliation
+msgid "Allons nous promener ensemble comme autrefois et oublions tout ça."
+msgstr "Let's go for a walk together like old times and forget all about it."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Quel soulagement, la paix enfin revenue dans mon royaume."
+msgstr "What a relief, peace has returned to my kingdom at last."
+
+#. dit par : hibou
+#: trone_reconciliation
+msgid "Grâce à toi, mon meilleur origamiste royal."
+msgstr "Thanks to you, my finest royal origamist."
+
+#. dit par : heros
+#: trone_reconciliation
+msgid "Crôa crôa ! Tout le plaisir est pour moi, Votre Majesté Le Libou Des Bois Jolis."
+msgstr "Ribbit ribbit! The pleasure is all mine, Your Majesty The Owlly Of The Charming Woods."
+
+#. narration
+#: cuisine_arrivee
+msgid "Hmmmm... Quel plaisir de retrouver ces bonnes odeurs de cuisine !"
+msgstr "Mmmmm... How nice to smell these good kitchen smells again!"
+
+#. narration
+#: cuisine_arrivee
+msgid "Je ferais bien une petite pause avec un bon encas préparé par la Cheffe Éléphant."
+msgstr "I could do with a little break and a nice snack made by Chef Elephant."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Ils n'ont pas laissé une arête dans leur assiette ! Ils devaient être affamés."
+msgstr "They didn't leave a single bone on their plates! They must have been starving."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "J'espère qu'ils vont apprécier mon repas !"
+msgstr "I hope they'll enjoy my meal!"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "C'est prêt, il n'y a plus qu'à faire venir les chats."
+msgstr "It's ready, all that's left is to bring the cats."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "Comme tu me l'as demandé, une daurade royale fraîchement pliée !"
+msgstr "Just as you asked, a freshly folded gilthead bream!"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Qu'elle a l'air charnue ! Les chats vont se régaler avec ça."
+msgstr "So plump! The cats are going to love this."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Donne-moi un instant pour la préparer."
+msgstr "Give me a moment to prepare it."
+
+#. narration
+#: cuisine_cheffe
+msgid "En jouant adroitement de sa trompe, la Cheffe Éléphant sublime la daurade avec diverses épices."
+msgstr "Skillfully wielding her trunk, Chef Elephant elevates the sea bream with an assortment of spices."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Voilà, une daurade royale digne des chats royaux, prête à être dégustée."
+msgstr "There, a gilthead bream worthy of royal cats, ready to be savored."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Tu peux faire venir les chats."
+msgstr "You can bring the cats."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "J'ai trouvé ce joli poisson. Les chats vont le trouver appétissant, non ?"
+msgstr "I found this pretty fish. The cats will find it tasty, won't they?"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Mais... c'est une carpe de la fontaine des jardins de Sa Majesté !"
+msgstr "But... that's a carp from the fountain in Her Majesty's gardens!"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Ça ne se mange pas, c'est un poisson décoratif."
+msgstr "You can't eat that, it's an ornamental fish."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "Ah, tu as raison, où avais-je la tête... Je vais le remettre à sa place."
+msgstr "Ah, you're right, what was I thinking... I'll put it back where it belongs."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "Quel poisson serait plus adapté ?"
+msgstr "Which fish would be more suitable?"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Pour les chats de la reine, une daurade royale devrait faire l'affaire."
+msgstr "For the queen's cats, a gilthead bream should do the trick."
+
+#. narration
+#: cuisine_cheffe
+msgid "Je vais retenir l'idée de la daurade royale : ça pourrait me servir."
+msgstr "I'll remember the idea of the gilthead bream: it might come in handy."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "C'est une daurade royale qu'il me faut. Ces chats sont gâtés et ont le palais fin."
+msgstr "It's a gilthead bream I need. These cats are spoiled and have refined palates."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Sans poisson, je ne vais pas pouvoir cuisiner grand-chose..."
+msgstr "Without fish, I won't be able to cook much of anything..."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "Salut, Cheffe Éléphant ! Ça donne faim, toutes ces bonnes odeurs ! Crôa crôa"
+msgstr "Hi, Chef Elephant! All these good smells are making me hungry! Ribbit ribbit"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Oh, tu es de retour. Hélas, ces bonnes odeurs ne sont plus que des restes."
+msgstr "Oh, you're back. Alas, these good smells are all that's left."
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Sans ingrédients dignes de ce nom, je ne peux rien cuisiner."
+msgstr "Without proper ingredients, I can't cook anything."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "C'est un problème. Les chats vont avoir faim. Une idée de ce qui leur plairait ?"
+msgstr "That's a problem. The cats are going to be hungry. Any idea what they'd like?"
+
+#. dit par : elephant
+#: cuisine_cheffe
+msgid "Avec du bon poisson, je pourrais trouver de l'inspiration..."
+msgstr "With some good fish, I might find some inspiration..."
+
+#. dit par : heros
+#: cuisine_cheffe
+msgid "D'accord, je vais regarder où je peux trouver ça."
+msgstr "All right, I'll look around for some."
+
+#. narration
+#: cuisine_chats
+msgid "Sans prêter attention l'un à l'autre, les chats dévorent le délicat poisson."
+msgstr "Paying no attention to each other, the cats devour the delicate fish."
+
+#. dit par : chat
+#: cuisine_chats
+msgid "Miaou ! Quel festin, quel délice ! / En manquer serait un supplice."
+msgstr "Meow! What a feast, what pure delight! / To miss it would be torture outright."
+
+#. dit par : lune_chat
+#: cuisine_chats
+msgid "Mmmh. Pas mauvais."
+msgstr "Mmmh. Not bad."
+
+#. narration
+#: cuisine_chats
+msgid "Maintenant qu'ils ont la panse bien remplie, ils seront peut-être dans de meilleures dispositions."
+msgstr "Now that their bellies are full, they might be in a better mood."
+
+#. narration
+#: cuisine_chats
+msgid "Les chats retournent dans la salle du trône."
+msgstr "The cats head back to the throne room."
+
+#. dit par : heros
+#: jardin_arrivee
+msgid "Ahhhhh... Quel lieu paisible... J'ai envie de faire une petite pause ici et d'oublier toutes ces histoires."
+msgstr "Ahhhhh... What a peaceful place... I feel like taking a little break here and forgetting about all this business."
+
+#. dit par : heros
+#: jardin_arrivee
+msgid "Tiens ? Une curieuse créature est là à m'observer."
+msgstr "Hm? A curious creature is over there, watching me."
+
+#. dit par : heros
+#: jardin_fontaine
+msgid "J'ai déjà une carpe. Je devrais aller voir la Cheffe Éléphant."
+msgstr "I already have a carp. I should go and see Chef Elephant."
+
+#. dit par : heros
+#: jardin_fontaine
+msgid "Ces carpes sont des poissons d'ornement, les chats n'en voudront pas."
+msgstr "These carp are ornamental fish, the cats won't want them."
+
+#. dit par : heros
+#: jardin_fontaine
+msgid "Oh ! Des carpes bariolées agrémentent le bassin, ajoutant au charme de l'endroit."
+msgstr "Oh! Colorful carp adorn the pond, adding to the charm of the place."
+
+#. dit par : heros
+#: jardin_fontaine
+msgid "Si ces poissons sont aussi bons que beaux, les chats vont être ravis."
+msgstr "If these fish taste as good as they look, the cats will be delighted."
+
+#. narration
+#: jardin_fontaine
+msgid "D'un coup de langue, j'attrape une carpe qui passait par là."
+msgstr "With a flick of my tongue, I catch a carp that was swimming by."
+
+#. dit par : heros
+#: jardin_papier_poisson
+msgid "Un papier de bonne qualité, légèrement irisé, aux reflets dorés et argentés."
+msgstr "A good-quality paper, slightly iridescent, with gold and silver highlights."
+
+#. dit par : heros
+#: jardin_papier_poisson
+msgid "Ça devrait faire l'affaire pour une daurade royale."
+msgstr "That should do nicely for a gilthead bream."
+
+#. dit par : heros
+#: jardin_poisson_issue
+msgid "Une nageoire par-ci, une queue par là..."
+msgstr "A fin here, a tail there..."
+
+#. dit par : heros
+#: jardin_poisson_issue
+msgid "Une daurade royale toute fraîche !"
+msgstr "A nice fresh gilthead bream!"
+
+#. dit par : heros
+#: jardin_poisson_issue
+msgid "On distingue à peine les nageoires de la queue... Je réessaierai plus tard."
+msgstr "You can barely tell the fins from the tail... I'll try again later."
+
+#. dit par : heros
+#: jardin_papier_couronne
+msgid "Un papier doré serti de gemmes précieuses."
+msgstr "A golden paper set with precious gems."
+
+#. dit par : heros
+#: jardin_papier_couronne
+msgid "Parfait pour la couronne de Sa Majesté."
+msgstr "Perfect for Her Majesty's crown."
+
+#. dit par : heros
+#: jardin_couronne_issue
+msgid "Et un dernier pli pour les pointes..."
+msgstr "And one last fold for the points..."
+
+#. dit par : heros
+#: jardin_couronne_issue
+msgid "Une couronne toute rutilante ! Voilà qui va faire plaisir à Sa Majesté."
+msgstr "A gleaming crown! Her Majesty is going to love this."
+
+#. dit par : heros
+#: jardin_couronne_issue
+msgid "Difficile d'imaginer Le Libou Des Bois Jolis avec ça sur la tête. Je réessaierai."
+msgstr "Hard to picture The Owlly Of The Charming Woods with that on her head. I'll try again."
+
+#. dit par : heros
+#: jardin_wyvern
+msgid "Crôa crôa ? Bonjour, mystérieux visiteur. Je ne crois pas avoir déjà eu le plaisir de vous rencontrer au château ?"
+msgstr "Ribbit ribbit? Hello, mysterious visitor. I don't believe I've had the pleasure of meeting you at the castle before?"
+
+#. dit par : wyvern
+#: jardin_wyvern
+msgid "Verte et élastique. Est-ce véritablement ce que Lumière me fait parvenir ?"
+msgstr "Green and elastic. Is this truly what Light sends my way?"
+
+#. dit par : heros
+#: jardin_wyvern
+msgid "Heu... je ne vous suis pas très bien. C'est qui Lumière ?"
+msgstr "Er... I'm not quite following you. Who's Light?"
+
+#. dit par : wyvern
+#: jardin_wyvern
+msgid "La Lumière apporte la vision verte et élastique. / Le Temps enjoint la Parole."
+msgstr "The Light brings the green and elastic vision. / Time summons the Word."
+
+#. dit par : wyvern
+#: jardin_wyvern
+msgid "La vision verte et élastique est le Flux. / Le Flux est-il prêt pour la Parole ?"
+msgstr "The green and elastic vision is the Flux. / Is the Flux ready for the Word?"
+
+#. dit par : heros
+#: jardin_wyvern
+msgid "Ok, je suppose que c'est moi « verte et élastique ». Je vous écoute."
+msgstr "OK, I suppose I'm the “green and elastic” one. I'm listening."
+
+#. dit par : heros
+#: jardin_wyvern
+msgid "Heu... d'accord. Je vous remercie pour cette histoire passionnante."
+msgstr "Er... all right. Thank you for that fascinating story."
+
+#. narration
+#: jardin_wyvern
+msgid "Je vais m'éloigner de ce personnage, il me fait un peu peur..."
+msgstr "I'll keep my distance from this character. A little scary..."
+
+#. dit par : wyvern
+#: revoir_wyvern
+msgid "Le Flux reflue vers la Parole. / Le Flux s'est-il disputé avec la Mémoire ?"
+msgstr "The Flux flows back toward the Word. / Has the Flux quarreled with Memory?"
+
+#. option prononcée par : heros
+#: revoir_wyvern
+msgid "C'est une façon de voir les choses."
+msgstr "That's one way of looking at it."
+
+#. option prononcée par : heros
+#: revoir_wyvern
+msgid "Non, mais merci de vous en inquiéter."
+msgstr "No, but thank you for your concern."
+
+#. dit par : heros
+#: revoir_wyvern
+msgid "Merci, mystérieux visiteur."
+msgstr "Thank you, mysterious visitor."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "Le Flux reçoit la Parole. / Le Flux éteindra la Discorde."
+msgstr "The Flux receives the Word. / The Flux shall extinguish Discord."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "Pour que s'épanouisse la Discorde, naquit la Tromperie."
+msgstr "That Discord might flourish, Deceit was born."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "La Tromperie elle-même naquit de trois géniteurs : le Noyau, la Terre et le Ciel."
+msgstr "Deceit itself was born of three progenitors: the Core, the Earth and the Sky."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "La Discorde a séparé la Terre et le Ciel du Noyau."
+msgstr "Discord has torn the Earth and the Sky away from the Core."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "Le Flux mêlera à nouveau le Ciel et la Terre. / Pour ce faire il créera le Moteur."
+msgstr "The Flux shall mingle the Sky and the Earth once more. / To do so, it shall create the Engine."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "Le Moteur pulsera pour mettre fin à la Discorde. / Et brillera des teintes de la Parole."
+msgstr "The Engine shall pulse to put an end to Discord. / And shine with the hues of the Word."
+
+#. dit par : wyvern
+#: indice_wyvern
+msgid "Le Flux a reçu la Parole. / La Parole peut s'estomper."
+msgstr "The Flux has received the Word. / The Word may now fade."
+
+#. dit par : heros
+#: heros
+msgid "Je reviens d'un long voyage à l'étranger et je suis épuisé. Hâte de retrouver le confort du château !"
+msgstr "I'm back from a long trip abroad and I'm exhausted. Can't wait to get back to the comforts of the castle!"
+
+#. dit par : heros
+#: heros
+msgid "Je suis l'origamiste royal de Sa Majesté Le Libou Des Bois Jolis."
+msgstr "I am the royal origamist of Her Majesty The Owlly Of The Charming Woods."
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "pli vallée"
+msgstr "valley fold"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "pli montagne"
+msgstr "mountain fold"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Agrandir le pliage terminé"
+msgstr "Enlarge the finished model"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Le pliage une fois terminé"
+msgstr "The finished model"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Revoir un tutoriel"
+msgstr "Replay a tutorial"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Abandonner"
+msgstr "Give up"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Vérifier la solution"
+msgstr "Check the solution"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Le pliage une fois terminé, agrandi"
+msgstr "The finished model, enlarged"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Abandonner l'énigme ?"
+msgstr "Give up the puzzle?"
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts
+msgid "Les pièces déjà posées retourneront dans le tas."
+msgstr "The pieces already placed will go back to the pile."
+
+#. interface
+#: src/game/puzzle/crease-puzzle.ts src/game/puzzle/tutoriel.ts src/ui/overlay.ts
+msgid "Continuer"
+msgstr "Continue"
+
+#. interface
+#: src/game/puzzle/erreur.ts
+msgid "Ça ne semble pas être ça, j'ai dû me tromper quelque part..."
+msgstr "That doesn't seem right, I must have made a mistake somewhere..."
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "Le pont"
+msgstr "The bridge"
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "Le vieil arbre"
+msgstr "The old tree"
+
+#. interface
+#: src/game/puzzle/puzzles.ts src/game/systems/objets.ts
+msgid "La hache"
+msgstr "The axe"
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "La porte"
+msgstr "The door"
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "La montagne"
+msgstr "The mountain"
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "L'herbe"
+msgstr "The grass"
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "Le pot à lait"
+msgstr "The milk jug"
+
+#. interface
+#: src/game/puzzle/puzzles.ts src/game/systems/personnages.ts
+msgid "Chouaf"
+msgstr "Shwoof"
+
+#. interface
+#: src/game/puzzle/puzzles.ts src/game/systems/objets.ts
+msgid "L'os"
+msgstr "The bone"
+
+#. interface
+#: src/game/puzzle/puzzles.ts src/game/systems/objets.ts
+msgid "La couronne"
+msgstr "The crown"
+
+#. interface
+#: src/game/puzzle/puzzles.ts src/game/systems/objets.ts
+msgid "La daurade"
+msgstr "The sea bream"
+
+#. interface
+#: src/game/puzzle/puzzles.ts
+msgid "Le cœur"
+msgstr "The heart"
+
+#. interface
+#: src/game/puzzle/tutoriel.ts
+msgid "Quel tutoriel revoir ?"
+msgstr "Which tutorial do you want to replay?"
+
+#. interface
+#: src/game/puzzle/tutoriel.ts src/ui/menu.ts
+msgid "Fermer"
+msgstr "Close"
+
+#. interface
+#: src/game/puzzle/tutoriel.ts
+msgid "Lancer le tutoriel"
+msgstr "Start the tutorial"
+
+#. interface
+#: src/game/puzzle/tutoriel.ts
+msgid "Passer le tutoriel"
+msgstr "Skip the tutorial"
+
+#. interface
+#: src/game/puzzle/tutoriel.ts
+msgid "Passer"
+msgstr "Skip"
+
+#. interface
+#: src/game/puzzle/tutoriel.ts
+msgid "Passer le tutoriel ?"
+msgstr "Skip the tutorial?"
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Le pli vallée"
+msgstr "The valley fold"
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Ça fait longtemps que je n'ai pas exercé mon art d'origamiste. Un rappel des bases ne ferait pas de mal."
+msgstr "It's been a long time since I practiced my origami art. A refresher on the basics wouldn't hurt."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Je vais devoir retrouver les plis nécessaires pour remettre ce pont en place."
+msgstr "I'll need to find the right folds to put this bridge back in place."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Pour l'instant je n'ai besoin que d'un type de pli : le pli vallée."
+msgstr "For now I only need one type of fold: the valley fold."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Il apparaît en bleu sur les pièces : tout ce que j'ai à faire, c'est remettre les pièces en place dans le carré."
+msgstr "It shows up in blue on the pieces: all I have to do is put the pieces back where they belong in the square."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Cette pièce semble bien placée, il faut maintenant mettre les autres."
+msgstr "This piece seems to be in the right place. Now the others need to go in."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Mais tu te demandes peut-être ce que signifie « pli vallée » ? Laisse-moi t'expliquer."
+msgstr "But you may be wondering what a “valley fold” is? Let me explain."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Voici une feuille de papier d'origami. Je vais faire un pli vallée dessus."
+msgstr "Here's a sheet of origami paper. I'm going to make a valley fold on it."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "J'ai ajouté le pli sur la feuille, en bleu. Voyons ce que ça donne en action."
+msgstr "I've added the fold to the sheet, in blue. Let's see what it looks like in action."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Voilà ce qu'est un pli vallée. Un bon moyen mnémotechnique pour s'en souvenir : vallée comme la vallée d'une montagne."
+msgstr "That's what a valley fold is. An easy way to remember it: the paper dips down, like a valley between two mountains."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Tu peux rejouer ce tutoriel à tout moment avec ce bouton."
+msgstr "You can replay this tutorial at any time with this button."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "À nous de jouer maintenant."
+msgstr "Now it's our turn."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Le pli montagne"
+msgstr "The mountain fold"
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Celui-là semble plus compliqué : il n'y a pas que des plis vallée."
+msgstr "This one looks more complicated: it's not just valley folds."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Un autre type de pli est nécessaire pour plier ce modèle : le pli montagne."
+msgstr "Another type of fold is needed to fold this model: the mountain fold."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Comme son nom l'indique, c'est une montagne — l'inverse du pli vallée."
+msgstr "As its name suggests, it's a mountain — the opposite of the valley fold."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Je vais te montrer en pratique."
+msgstr "Let me show you how it works."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "En rouge le pli montagne, là où le pli vallée était en bleu."
+msgstr "The mountain fold in red, where the valley fold was in blue."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Voilà un pli montagne. Le même trait que tout à l'heure, et le papier part de l'autre côté."
+msgstr "That's a mountain fold. The same line as before, and the paper goes the other way."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simples de les combiner."
+msgstr "An origami model usually combines both. Let me show you the “water bomb” base, one of the simplest ways to combine them."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes."
+msgstr "Here are the folds of the “water bomb” base: two valleys, two mountains."
+
+#. interface
+#: src/game/puzzle/tutoriels.ts
+msgid "Et voilà. Je crois qu'on a tout ce qu'il faut pour s'attaquer aux modèles les plus compliqués."
+msgstr "There we go. I think we have everything we need to tackle the most complicated models."
+
+#. interface
+#: src/game/scenes/decor-provisoire.ts
+msgid "décor provisoire"
+msgstr "temporary scenery"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Chapitre 1 — le ravin et la porte"
+msgstr "Chapter 1 — the ravine and the door"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Début du chapitre"
+msgstr "Start of the chapter"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Pont posé"
+msgstr "Bridge in place"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Devant la porte"
+msgstr "In front of the door"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Le renard a parlé"
+msgstr "The fox has talked"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Hache en main"
+msgstr "Axe in hand"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Vieil arbre plié"
+msgstr "Old tree folded"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Bois en poche"
+msgstr "Wood in the bag"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Porte pliée (fin)"
+msgstr "Door folded (end)"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Chapitre 2 — le village et le château"
+msgstr "Chapter 2 — the village and the castle"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Le pingouin a chaud"
+msgstr "The penguin is too hot"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Montagne pliée"
+msgstr "Mountain folded"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Idée du chien"
+msgstr "The dog idea"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Herbe pliée"
+msgstr "Grass folded"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Pot à lait plié"
+msgstr "Milk jug folded"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Devant le château"
+msgstr "In front of the castle"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Le papier de l'os est tombé"
+msgstr "The bone paper has fallen"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Chouaf plié, l'os en main"
+msgstr "Shwoof folded, bone in hand"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Le passage est libre (fin)"
+msgstr "The way is clear (end)"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Chapitre 3 — la salle du trône"
+msgstr "Chapter 3 — the throne room"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "La reine a perdu sa couronne"
+msgstr "The queen has lost her crown"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Couronne pliée"
+msgstr "Crown folded"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Les feuilles de la reine sont posées"
+msgstr "The queen's sheets are laid out"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Idée de la daurade"
+msgstr "The sea bream idea"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Daurade pliée"
+msgstr "Sea bream folded"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Le repas est prêt"
+msgstr "The meal is ready"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Cœur plié, chats à table"
+msgstr "Heart folded, cats at the table"
+
+#. interface
+#: src/game/systems/etapes.ts
+msgid "Avant le cœur (fin)"
+msgstr "Before the heart (end)"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Idée : l'arbre"
+msgstr "Idea: the tree"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une idée de comment plier l'arbre."
+msgstr "An idea of how to fold the tree."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Idée : la hache"
+msgstr "Idea: the axe"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une idée de comment plier la hache."
+msgstr "An idea of how to fold the axe."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une hache de papier bien tranchante. Attention en la manipulant!"
+msgstr "A very sharp paper axe. Careful how you handle it!"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Du bois"
+msgstr "Some wood"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "De belles planches de bois. Merci vieux chêne."
+msgstr "Lovely wooden planks. Thank you, old oak."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Idée : le chien"
+msgstr "Idea: the dog"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une idée de comment plier Chouaf, le chien du pingouin."
+msgstr "An idea of how to fold Shwoof, the penguin's dog."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Idée : le pot"
+msgstr "Idea: the jug"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une idée de comment plier un pot à lait."
+msgstr "An idea of how to fold a milk jug."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Le pot"
+msgstr "The jug"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Un pot à lait vide. Il serait plus utile rempli"
+msgstr "An empty milk jug. It would be more useful filled"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Du lait"
+msgstr "Some milk"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Un pot de lait tout frais. Attention à ne pas le renverser"
+msgstr "A jug of fresh milk. Careful not to spill it"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Un os un peu abîmé et tout baveux. Pouah!"
+msgstr "A slightly damaged, very drooly bone. Yuck!"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Idée : la couronne"
+msgstr "Idea: the crown"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une idée de comment plier une couronne digne de Sa Majesté."
+msgstr "An idea of how to fold a crown worthy of Her Majesty."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une couronne de papier doré, sertie de gemmes."
+msgstr "A crown of golden paper, set with gems."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une carpe"
+msgstr "A carp"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une carpe pêchée dans la fontaine. Elle gigote encore."
+msgstr "A carp caught in the fountain. It's still wriggling."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Idée : la daurade"
+msgstr "Idea: the sea bream"
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une idée de comment plier une daurade royale."
+msgstr "An idea of how to fold a gilthead bream."
+
+#. interface
+#: src/game/systems/objets.ts
+msgid "Une daurade royale aux reflets chatoyants."
+msgstr "A gilthead bream with shimmering highlights."
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "La grenouille"
+msgstr "The frog"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Le renard"
+msgstr "The fox"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Le Libou Des Bois Jolis"
+msgstr "The Owlly Of The Charming Woods"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Le jeune arbre"
+msgstr "The young tree"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Pingouin Glagla"
+msgstr "Penguin Brrbrr"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Vache à Lait"
+msgstr "Milky Cow"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Petit Chat"
+msgstr "Little Cat"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Gros Diplo"
+msgstr "Big Diplo"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Chat Mal Luné"
+msgstr "Moody Mooncat"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Wyverne énigmatique"
+msgstr "Puzzling Wyvern"
+
+#. interface
+#: src/game/systems/personnages.ts
+msgid "Cheffe Éléphant"
+msgstr "Chef Elephant"
+
+#. interface
+#: src/langues/page.ts
+msgid "Tourne ton téléphone"
+msgstr "Rotate your phone"
+
+#. interface
+#: src/ui/fin.ts
+msgid "À suivre…"
+msgstr "To be continued…"
+
+#. interface
+#: src/ui/fin.ts
+msgid "Fin du chapitre 2. La suite nécessite encore quelques plis..."
+msgstr "End of chapter 2. The rest still needs a few more folds..."
+
+#. interface
+#: src/ui/fin.ts
+msgid "Fin"
+msgstr "The End"
+
+#. interface
+#: src/ui/fin.ts
+msgid "La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir joué !"
+msgstr "Peace has returned to the Origami Kingdom, thanks to you! Thank you for playing!"
+
+#. interface
+#: src/ui/fin.ts src/ui/menu.ts
+msgid "Recommencer"
+msgstr "Start over"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Reprendre à…"
+msgstr "Resume at…"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Menu"
+msgstr "Menu"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Plein écran"
+msgstr "Fullscreen"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Options"
+msgstr "Options"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Langue"
+msgstr "Language"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Effacer toute ta progression et repartir du début ?"
+msgstr "Erase all your progress and start over from the beginning?"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Cette action est définitive."
+msgstr "This cannot be undone."
+
+#. interface
+#: src/ui/menu.ts
+msgid "Annuler"
+msgstr "Cancel"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Tout effacer"
+msgstr "Erase everything"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Quitter le plein écran"
+msgstr "Exit fullscreen"
+
+#. interface
+#: src/ui/overlay.ts
+msgid "Nouvelle {nom}"
+msgstr "New {nom}"
+
+#. interface
+#: src/ui/overlay.ts
+msgid "Obtenu : {nom}"
+msgstr "Obtained: {nom}"

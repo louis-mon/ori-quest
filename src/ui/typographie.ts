@@ -1,3 +1,5 @@
+import { langue } from '../langues/langue';
+
 // La typographie française met une espace devant `! ? ; :`, et elle doit être
 // insécable : sur une boîte de dialogue étroite, une espace ordinaire laisse la
 // ponctuation partir seule en tête de la ligne suivante.
@@ -17,9 +19,10 @@ const INSECABLE = ' '; // insécable pleine : devant :
 // en `white-space: pre-line`.
 const COUPE_DE_VERS = / +\/ +/g;
 
+// Les espaces sont une règle du français, la coupe une convention du jeu : elle
+// vaut dans toutes les langues, et une traduction écrit ses vers de la même façon.
 export function typographier(texte: string): string {
-  return texte
-    .replace(COUPE_DE_VERS, '\n')
-    .replace(/ +([!?;])/g, `${FINE}$1`)
-    .replace(/ +:/g, `${INSECABLE}:`);
+  const coupe = texte.replace(COUPE_DE_VERS, '\n');
+  if (langue !== 'fr') return coupe;
+  return coupe.replace(/ +([!?;])/g, `${FINE}$1`).replace(/ +:/g, `${INSECABLE}:`);
 }

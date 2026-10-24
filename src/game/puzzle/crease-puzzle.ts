@@ -14,6 +14,7 @@
 // symétriques.
 
 import { urlApercuOrigami } from '../../origami/apercu';
+import { t } from '../../langues/traduire';
 import type { NomTutoriel } from './tutoriels';
 import {
   boite,
@@ -113,16 +114,16 @@ export async function runCreasePuzzle(
   el.className = 'puzzle';
   el.style.setProperty('--grid', String(grille));
   const legend = [
-    folds.valley ? { cls: 'va', label: 'pli vallée' } : null,
-    folds.mountain ? { cls: 'mo', label: 'pli montagne' } : null,
+    folds.valley ? { cls: 'va', label: t('pli vallée') } : null,
+    folds.mountain ? { cls: 'mo', label: t('pli montagne') } : null,
   ].filter((entry) => entry !== null);
 
   el.innerHTML = `
-    <button class="puzzle__goal" type="button" aria-label="Agrandir le pliage terminé">
-      <img class="puzzle__goal-image" alt="Le pliage une fois terminé" />
+    <button class="puzzle__goal" type="button" aria-label="${t('Agrandir le pliage terminé')}">
+      <img class="puzzle__goal-image" alt="${t('Le pliage une fois terminé')}" />
     </button>
     <div class="puzzle__panel">
-      <button class="puzzle__help" type="button" aria-label="Revoir un tutoriel">?</button>
+      <button class="puzzle__help" type="button" aria-label="${t('Revoir un tutoriel')}">?</button>
       <h2 class="puzzle__title"></h2>
       <!-- Au-dessus du plateau : sous lui, la légende tombe derrière la boîte
            de dialogue, qui occupe le bas du cadre. -->
@@ -143,24 +144,24 @@ export async function runCreasePuzzle(
            boutons étaient l'un sous l'autre, à portée du même pouce — un tap
            qui glissait d'un cran abandonnait l'énigme. -->
       <div class="puzzle__actions">
-        <button class="puzzle__quit" type="button">Abandonner</button>
-        <button class="puzzle__check" type="button">Vérifier la solution</button>
+        <button class="puzzle__quit" type="button">${t('Abandonner')}</button>
+        <button class="puzzle__check" type="button">${t('Vérifier la solution')}</button>
       </div>
     </div>
     <div class="puzzle__zoom" hidden>
-      <img class="puzzle__zoom-image" alt="Le pliage une fois terminé, agrandi" />
+      <img class="puzzle__zoom-image" alt="${t('Le pliage une fois terminé, agrandi')}" />
     </div>
     <div class="puzzle__voile" data-ailleurs hidden></div>
     <div class="puzzle__confirm" hidden role="alertdialog" aria-modal="true">
       <div class="menu__confirm-box">
         <p class="menu__confirm-text">
-          Abandonner l'énigme ?
-          <strong>Les pièces déjà posées retourneront dans le tas.</strong>
+          ${t("Abandonner l'énigme ?")}
+          <strong>${t('Les pièces déjà posées retourneront dans le tas.')}</strong>
         </p>
         <div class="menu__confirm-actions">
-          <button class="menu__item" data-action="continuer">Continuer</button>
+          <button class="menu__item" data-action="continuer">${t('Continuer')}</button>
           <button class="menu__item menu__item--danger" data-action="abandonner">
-            Abandonner
+            ${t('Abandonner')}
           </button>
         </div>
       </div>

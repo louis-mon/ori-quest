@@ -85,10 +85,19 @@ export function decoupage(nom) {
 const BRUIT = /GL Driver Message|GPU stall|Phaser v/;
 
 // `tactile` pour un écran tactile, sans quoi `toucher()` n'a pas de doigt.
-export async function ouvrir(navigateur, url, { sauvegarde = null, tactile = false } = {}) {
+//
+// `langue` est celle du navigateur, dont le jeu tire la sienne. Le français par
+// défaut, et pas celui de la machine : les essais choisissent les options par
+// leur texte, et Chromium sans consigne se dit anglais.
+export async function ouvrir(
+  navigateur,
+  url,
+  { sauvegarde = null, tactile = false, langue = 'fr-FR' } = {},
+) {
   const contexte = await navigateur.newContext({
     viewport: { width: 1280, height: 720 },
     hasTouch: tactile,
+    locale: langue,
   });
   const page = await contexte.newPage();
 

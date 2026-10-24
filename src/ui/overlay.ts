@@ -6,6 +6,8 @@ import { vignette } from './vignettes';
 import { urlApercuOrigami } from '../origami/apercu';
 import { typographier } from './typographie';
 import { REGLAGES_CHOIX } from './choix-reglages';
+import { langue } from '../langues/langue';
+import { t } from '../langues/traduire';
 
 // Le portrait s'affiche à ~56 px ; les photos du registre font 160 px de côté, et
 // un modèle rendu n'a pas de raison d'être plus fin.
@@ -57,10 +59,13 @@ function nomDe(id: string): string {
 // Le nom brut donnait « Obtenu : Idée : l'arbre », deux fois deux-points dans
 // une phrase. Minuscule parce que le nom est écrit pour commencer la ligne d'une
 // case ; ici il la finit.
+//
+// ⚠ Une langue qui garde la majuscule aux noms communs — l'allemand — devra
+// sortir de cette règle.
 function annonceDe(id: string): string {
   const nom = nomDe(id);
-  const suite = nom.charAt(0).toLocaleLowerCase('fr') + nom.slice(1);
-  return estIdee(id) ? `Nouvelle ${suite}` : `Obtenu : ${suite}`;
+  const suite = nom.charAt(0).toLocaleLowerCase(langue) + nom.slice(1);
+  return estIdee(id) ? t('Nouvelle {nom}', { nom: suite }) : t('Obtenu : {nom}', { nom: suite });
 }
 
 export interface ApercuOrigami {
@@ -140,7 +145,7 @@ export class Overlay {
           <p class="dialogue__text"><span class="dialogue__vu"></span><span class="dialogue__reste"></span></p>
           <div class="dialogue__choices"></div>
         </div>
-        <button class="dialogue__next" aria-label="Continuer" hidden>▶</button>
+        <button class="dialogue__next" aria-label="${t('Continuer')}" hidden>▶</button>
       </div>
     `;
     this.dialogue = root.querySelector('.dialogue')!;

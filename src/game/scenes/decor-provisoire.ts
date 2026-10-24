@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DESIGN_HEIGHT, DESIGN_WIDTH } from '../config';
+import { t } from '../../langues/traduire';
 import type { Box } from './layout';
 
 // Le décor des scènes dont le fond n'est pas encore peint. Il tient la place, et
@@ -80,7 +81,7 @@ export function dessinerDecorProvisoire(scene: Phaser.Scene, plan: PlanProvisoir
   // Dit en toutes lettres ce que le joueur a sous les yeux. À supprimer avec
   // l'appel le jour où le fond arrive.
   scene.add
-    .text(DESIGN_WIDTH - 16, DESIGN_HEIGHT - 14, 'décor provisoire', {
+    .text(DESIGN_WIDTH - 16, DESIGN_HEIGHT - 14, t('décor provisoire'), {
       fontFamily: 'Georgia, serif',
       fontSize: '15px',
       color: '#f2ece1',

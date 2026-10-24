@@ -11,6 +11,7 @@ const FICHIER_TORCHES = 'src/game/scenes/torches-reglages.ts';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
+const LANGUES = 'content/langues';
 
 // Bornes de sécurité. Au-delà, ce n'est plus un réglage, c'est une erreur.
 const LIMITES = {
@@ -162,10 +163,10 @@ function suivreLesPlans(): Plugin {
   };
 }
 
-// Même raison que pour les plans. `src/generated/story.json` étant importé par
-// `main.ts`, le réécrire suffit à déclencher le rechargement ; et comme le
-// compilateur sort en erreur SANS écrire, un ink cassé laisse en place la
-// dernière version valide.
+// Même raison que pour les plans. `src/generated/story.json` et les récits
+// traduits étant importés par le jeu (src/langues/catalogues.ts), les réécrire
+// suffit à déclencher le rechargement ; et comme le compilateur sort en erreur
+// SANS écrire, un ink cassé laisse en place la dernière version valide.
 //
 // On guette le dossier et pas le seul `story.ink` : le jour où la narration se
 // découpe en `INCLUDE`, les morceaux sont suivis sans rien changer ici.
@@ -183,6 +184,14 @@ function suivreLaNarration(): Plugin {
         extension: '.ink',
         script: 'tools/compile-ink.mjs',
         echec: '[ink] compilation refusée, story.json inchangé',
+      });
+      // Les catalogues de traduction passent par le même compilateur : le récit
+      // de chaque langue est le JSON français à ses textes près.
+      relancerSurChangement(server, {
+        dossier: LANGUES,
+        extension: '.po',
+        script: 'tools/compile-ink.mjs',
+        echec: '[langues] catalogue refusé, récits traduits inchangés',
       });
     },
   };

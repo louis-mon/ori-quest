@@ -1,4 +1,5 @@
 import { gameState } from '../game/systems/state';
+import { t } from '../langues/traduire';
 
 // L'écran de fin, pour deux raisons. La version : le build publié s'arrête au
 // dernier chapitre livré (src/game/chapitres.ts) et le dit, plutôt que
@@ -13,12 +14,12 @@ export type RaisonDeFin = 'version' | 'histoire';
 
 const TEXTES: Record<RaisonDeFin, { titre: string; texte: string }> = {
   version: {
-    titre: 'À suivre…',
-    texte: 'Fin du chapitre 2. La suite nécessite encore quelques plis...',
+    titre: t('À suivre…'),
+    texte: t('Fin du chapitre 2. La suite nécessite encore quelques plis...'),
   },
   histoire: {
-    titre: 'Fin',
-    texte: 'La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir joué !',
+    titre: t('Fin'),
+    texte: t('La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir joué !'),
   },
 };
 
@@ -38,7 +39,7 @@ export function montrerFin(root: HTMLElement, raison: RaisonDeFin = 'version'): 
   el.innerHTML = `
     <p class="fin__titre">${titre}</p>
     <p class="fin__texte">${texte}</p>
-    <button class="fin__bouton" type="button">Recommencer</button>
+    <button class="fin__bouton" type="button">${t('Recommencer')}</button>
   `;
   root.appendChild(el);
 

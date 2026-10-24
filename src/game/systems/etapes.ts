@@ -1,5 +1,6 @@
 import { estLivree } from '../chapitres';
 import { gameState } from './state';
+import { t } from '../../langues/traduire';
 
 // Points d'étape du chapitre : reconstituer un moment de la partie sans la
 // rejouer.
@@ -31,28 +32,28 @@ export const ETAPES_LIVREES = true;
 // recommencer se noyaient.
 export const CHAPITRES: Chapitre[] = [
   {
-    nom: 'Chapitre 1 — le ravin et la porte',
+    nom: t('Chapitre 1 — le ravin et la porte'),
     etapes: [
       {
-        nom: 'Début du chapitre',
+        nom: t('Début du chapitre'),
         piece: 'pont',
         drapeaux: [],
         objets: [],
       },
       {
-        nom: 'Pont posé',
+        nom: t('Pont posé'),
         piece: 'pont',
         drapeaux: ['pont_vu', 'pont_resolu', 'pont_plie'],
         objets: [],
       },
       {
-        nom: 'Devant la porte',
+        nom: t('Devant la porte'),
         piece: 'porte',
         drapeaux: ['pont_vu', 'pont_resolu', 'pont_plie', 'porte_vue'],
         objets: [],
       },
       {
-        nom: 'Le renard a parlé',
+        nom: t('Le renard a parlé'),
         piece: 'porte',
         drapeaux: [
           'pont_vu',
@@ -65,7 +66,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['idee_hache'],
       },
       {
-        nom: 'Hache en main',
+        nom: t('Hache en main'),
         piece: 'porte',
         drapeaux: [
           'pont_vu',
@@ -84,7 +85,7 @@ export const CHAPITRES: Chapitre[] = [
         // Volontairement SANS `arbre_demande` : c'est l'étape où il reste à
         // repasser voir le fils pour obtenir son accord, sans quoi la découpe
         // reste fermée.
-        nom: 'Vieil arbre plié',
+        nom: t('Vieil arbre plié'),
         piece: 'pont',
         drapeaux: [
           'pont_vu',
@@ -102,7 +103,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['hache'],
       },
       {
-        nom: 'Bois en poche',
+        nom: t('Bois en poche'),
         piece: 'porte',
         drapeaux: [
           'pont_vu',
@@ -123,7 +124,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['bois'],
       },
       {
-        nom: 'Porte pliée (fin)',
+        nom: t('Porte pliée (fin)'),
         piece: 'porte',
         drapeaux: [
           'pont_vu',
@@ -147,28 +148,28 @@ export const CHAPITRES: Chapitre[] = [
     ],
   },
   {
-    nom: 'Chapitre 2 — le village et le château',
+    nom: t('Chapitre 2 — le village et le château'),
     etapes: [
       {
-        nom: 'Début du chapitre',
+        nom: t('Début du chapitre'),
         piece: 'village',
         drapeaux: [],
         objets: [],
       },
       {
-        nom: 'Le pingouin a chaud',
+        nom: t('Le pingouin a chaud'),
         piece: 'village',
         drapeaux: ['village_vu', 'pingouin_chaud'],
         objets: [],
       },
       {
-        nom: 'Montagne pliée',
+        nom: t('Montagne pliée'),
         piece: 'village',
         drapeaux: ['village_vu', 'pingouin_chaud', 'montagne_resolu', 'montagne_pliee'],
         objets: [],
       },
       {
-        nom: 'Idée du chien',
+        nom: t('Idée du chien'),
         piece: 'village',
         drapeaux: [
           'village_vu',
@@ -180,7 +181,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['idee_chien'],
       },
       {
-        nom: 'Herbe pliée',
+        nom: t('Herbe pliée'),
         piece: 'village',
         drapeaux: [
           'village_vu',
@@ -197,7 +198,7 @@ export const CHAPITRES: Chapitre[] = [
       {
         // Le pot est plié mais encore vide : c'est l'étape d'où l'on repart
         // voir la vache.
-        nom: 'Pot à lait plié',
+        nom: t('Pot à lait plié'),
         piece: 'village',
         drapeaux: [
           'village_vu',
@@ -216,7 +217,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['idee_chien', 'pot'],
       },
       {
-        nom: 'Devant le château',
+        nom: t('Devant le château'),
         piece: 'entree',
         drapeaux: [
           'village_vu',
@@ -237,7 +238,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['idee_chien', 'lait'],
       },
       {
-        nom: "Le papier de l'os est tombé",
+        nom: t("Le papier de l'os est tombé"),
         piece: 'entree',
         drapeaux: [
           'village_vu',
@@ -262,7 +263,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['idee_chien'],
       },
       {
-        nom: "Chouaf plié, l'os en main",
+        nom: t("Chouaf plié, l'os en main"),
         piece: 'entree',
         drapeaux: [
           'village_vu',
@@ -292,7 +293,7 @@ export const CHAPITRES: Chapitre[] = [
       },
       {
         // L'os est parti au chien, qui a fait fuir le dinosaure.
-        nom: 'Le passage est libre (fin)',
+        nom: t('Le passage est libre (fin)'),
         piece: 'entree',
         drapeaux: [
           'village_vu',
@@ -324,28 +325,28 @@ export const CHAPITRES: Chapitre[] = [
     ],
   },
   {
-    nom: 'Chapitre 3 — la salle du trône',
+    nom: t('Chapitre 3 — la salle du trône'),
     etapes: [
       {
-        nom: 'Début du chapitre',
+        nom: t('Début du chapitre'),
         piece: 'trone',
         drapeaux: [],
         objets: [],
       },
       {
-        nom: 'La reine a perdu sa couronne',
+        nom: t('La reine a perdu sa couronne'),
         piece: 'trone',
         drapeaux: ['trone_vu', 'libou_parle'],
         objets: ['idee_couronne'],
       },
       {
-        nom: 'Couronne pliée',
+        nom: t('Couronne pliée'),
         piece: 'jardin',
         drapeaux: ['trone_vu', 'libou_parle', 'jardin_vu', 'couronne_resolu', 'couronne_pliee'],
         objets: ['couronne'],
       },
       {
-        nom: 'Les feuilles de la reine sont posées',
+        nom: t('Les feuilles de la reine sont posées'),
         piece: 'trone',
         drapeaux: [
           'trone_vu',
@@ -361,7 +362,7 @@ export const CHAPITRES: Chapitre[] = [
       {
         // La carpe a été refusée : c'est l'étape d'où l'on repart plier la
         // daurade.
-        nom: 'Idée de la daurade',
+        nom: t('Idée de la daurade'),
         piece: 'jardin',
         drapeaux: [
           'trone_vu',
@@ -378,7 +379,7 @@ export const CHAPITRES: Chapitre[] = [
         objets: ['idee_poisson'],
       },
       {
-        nom: 'Daurade pliée',
+        nom: t('Daurade pliée'),
         piece: 'jardin',
         drapeaux: [
           'trone_vu',
@@ -399,7 +400,7 @@ export const CHAPITRES: Chapitre[] = [
       {
         // Le repas est prêt, les chats sont encore là : les inviter les fait
         // partir vers la cuisine.
-        nom: 'Le repas est prêt',
+        nom: t('Le repas est prêt'),
         piece: 'trone',
         drapeaux: [
           'trone_vu',
@@ -421,7 +422,7 @@ export const CHAPITRES: Chapitre[] = [
       {
         // L'autre ordre du dénouement : le cœur est déjà plié, et ce sont les
         // chats qui le découvrent en rentrant de la cuisine.
-        nom: 'Cœur plié, chats à table',
+        nom: t('Cœur plié, chats à table'),
         piece: 'cuisine',
         drapeaux: [
           'trone_vu',
@@ -447,7 +448,7 @@ export const CHAPITRES: Chapitre[] = [
       {
         // Les chats repus sont revenus, les feuilles attendent au centre de la
         // salle : plier le cœur mène droit à la fin.
-        nom: 'Avant le cœur (fin)',
+        nom: t('Avant le cœur (fin)'),
         piece: 'trone',
         drapeaux: [
           'trone_vu',

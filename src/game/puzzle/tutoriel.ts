@@ -19,6 +19,7 @@ import type { Overlay } from '../../ui/overlay';
 import { OrigamiLayer } from '../../origami/origami-layer';
 import { papierTrace, type PapierTrace, type TracePli } from '../../origami/papier';
 import { pliageDe } from '../../origami/vue';
+import { t } from '../../langues/traduire';
 import { personnage } from '../systems/personnages';
 import { gameState } from '../systems/state';
 import type { ControlePuzzle, CreasePuzzleDef, LanceurTutoriel } from './crease-puzzle';
@@ -152,9 +153,9 @@ async function choisir(overlay: Overlay): Promise<NomTutoriel | null> {
   const noms = Object.keys(TUTORIELS) as NomTutoriel[];
   // Sans locuteur : c'est une question de l'interface, pas une réplique du
   // héros — qui, lui, parlera bien de sa voix ensuite.
-  await overlay.say('Quel tutoriel revoir ?');
+  await overlay.say(t('Quel tutoriel revoir ?'));
   const choix = await overlay.choose(
-    [...noms.map((n) => TUTORIELS[n].titre), 'Fermer'].map((texte) => ({ texte })),
+    [...noms.map((n) => TUTORIELS[n].titre), t('Fermer')].map((texte) => ({ texte })),
   );
   overlay.hideDialogue();
   return noms[choix] ?? null;
@@ -164,8 +165,8 @@ async function choisir(overlay: Overlay): Promise<NomTutoriel | null> {
 async function proposer(overlay: Overlay, tuto: Tutoriel): Promise<boolean> {
   await overlay.say(tuto.invite, HEROS);
   const choix = await overlay.choose([
-    { texte: 'Lancer le tutoriel' },
-    { texte: 'Passer le tutoriel' },
+    { texte: t('Lancer le tutoriel') },
+    { texte: t('Passer le tutoriel') },
   ]);
   if (choix !== 0) overlay.hideDialogue();
   return choix === 0;
@@ -249,13 +250,13 @@ function monter(root: HTMLElement, overlay: Overlay, controle: ControlePuzzle): 
     <svg class="tuto__fleche" viewBox="0 0 48 32" aria-hidden="true" hidden>
       <path d="M1 11 h25 V2 l20 14 -20 14 V21 H1 Z" />
     </svg>
-    <button class="tuto__passer" type="button" hidden>Passer</button>
+    <button class="tuto__passer" type="button" hidden>${t('Passer')}</button>
     <div class="tuto__confirm" hidden role="alertdialog" aria-modal="true">
       <div class="menu__confirm-box">
-        <p class="menu__confirm-text">Passer le tutoriel ?</p>
+        <p class="menu__confirm-text">${t('Passer le tutoriel ?')}</p>
         <div class="menu__confirm-actions">
-          <button class="menu__item" data-action="continuer">Continuer</button>
-          <button class="menu__item menu__item--danger" data-action="passer">Passer</button>
+          <button class="menu__item" data-action="continuer">${t('Continuer')}</button>
+          <button class="menu__item menu__item--danger" data-action="passer">${t('Passer')}</button>
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import './ui/style.css';
 
-import storyJson from './generated/story.json';
 import { debloquerLAudioAuPremierGeste } from './audio';
 import { donner, effetsDuRecit } from './game/effets-du-recit';
 import { figerLeJeu } from './game/gel';
@@ -10,6 +9,8 @@ import { Navigation } from './game/navigation';
 import { DialogueRunner } from './game/systems/dialogue';
 import { sauverALaSortie } from './game/systems/sauvegarde-a-la-sortie';
 import { gameState } from './game/systems/state';
+import { traduireLaPage } from './langues/page';
+import { recitDansLaLangue } from './langues/traduire';
 import { CoucheDuRecit } from './origami/couche-du-recit';
 import { suivreLeCadre } from './ui/cadre';
 import { isolerLInterface } from './ui/isolation';
@@ -22,6 +23,8 @@ if (import.meta.env.DEV) {
   const { installHiddenPageRaf } = await import('./dev/hidden-page-raf');
   installHiddenPageRaf();
 }
+
+traduireLaPage();
 
 const uiRoot = document.getElementById('ui')!;
 isolerLInterface(uiRoot);
@@ -37,7 +40,7 @@ overlay.brancherApercu(couche.apercu);
 // navigation démarre ont besoin du récit : celle-ci le lit au démarrage.
 const navigation: Navigation = new Navigation(game, uiRoot, () => ({ overlay, dialogue }));
 const dialogue: DialogueRunner = new DialogueRunner(
-  storyJson,
+  recitDansLaLangue(),
   overlay,
   effetsDuRecit(uiRoot, overlay, couche, navigation),
 );

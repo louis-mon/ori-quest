@@ -437,12 +437,21 @@ répond maintenant, en un seul endroit (`occupeLeJoueur` dans
 ## Le menu
 
 Bouton en haut à droite — à l'opposé de l'inventaire, pour qu'aucun des deux ne
-recouvre l'autre. Il ouvre deux entrées :
+recouvre l'autre. Il ouvre trois entrées :
 
 **Plein écran.** Masqué automatiquement là où le navigateur ne le permet pas,
 plutôt que d'offrir un bouton inerte — c'est le cas de Safari sur iPhone, qui
 réserve encore l'API plein écran aux vidéos. Sur itch.io, le lecteur fournit de
 toute façon son propre bouton.
+
+**Options.** Une fenêtre, et pour l'instant un seul réglage : la langue. Chaque
+langue s'y écrit dans sa propre langue — « English », « Français » —, puisque
+c'est sous ce nom que la cherche celui qui ne lit pas la langue en cours ; et
+« Options » se dit pareil dans les deux, ce qui guide celui que le navigateur a
+mal deviné. La langue en cours est cochée. Toucher une autre langue l'applique
+aussitôt, sans confirmation : rien ne se perd, la page se recharge sur la même
+pièce. Sans choix, le jeu prend la langue du navigateur, et l'anglais s'il ne la
+parle pas.
 
 **Recommencer.** Passe par une confirmation explicite (« Cette action est
 définitive »), puis écrase la sauvegarde et recharge la page.

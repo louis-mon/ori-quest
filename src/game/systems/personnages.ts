@@ -1,3 +1,5 @@
+import { t } from '../../langues/traduire';
+
 // Qui parle. Un identifiant absent de ce registre reste jouable — le dialogue
 // l'affiche tel quel et prévient en console — pour qu'on puisse écrire les
 // répliques avant que le graphisme n'existe.
@@ -24,28 +26,28 @@ export interface Personnage {
 //     sips -Z 160 assets-src/graphisme_origami/renard.png \
 //          --out public/assets/personnages/renard.png
 export const PERSONNAGES: Record<string, Personnage> = {
-  grenouille: { nom: 'La grenouille', portrait: 'assets/personnages/grenouille.png' },
-  renard: { nom: 'Le renard', portrait: 'assets/personnages/renard.png' },
-  hibou: { nom: 'Le Libou Des Bois Jolis', portrait: 'assets/personnages/hibou.png' },
+  grenouille: { nom: t('La grenouille'), portrait: 'assets/personnages/grenouille.png' },
+  renard: { nom: t('Le renard'), portrait: 'assets/personnages/renard.png' },
+  hibou: { nom: t('Le Libou Des Bois Jolis'), portrait: 'assets/personnages/hibou.png' },
   // Sa vignette est le pliage que la scène du pont pose dans le décor : celui
   // qui parle et celui qu'on voit au bord du ravin doivent être le même.
-  arbre: { nom: 'Le jeune arbre', portrait: 'assets/personnages/arbre.png' },
+  arbre: { nom: t('Le jeune arbre'), portrait: 'assets/personnages/arbre.png' },
   // Chapitre 2. Les noms sont ceux des fiches de scène : le joueur ne lit jamais
   // « le pingouin » mais « Pingouin Glagla ».
-  pingouin: { nom: 'Pingouin Glagla', portrait: 'assets/personnages/pingouin.png' },
-  vache: { nom: 'Vache à Lait', portrait: 'assets/personnages/vache.png' },
-  chat: { nom: 'Petit Chat', portrait: 'assets/personnages/chat.png' },
-  diplodocus: { nom: 'Gros Diplo', portrait: 'assets/personnages/diplodocus.png' },
+  pingouin: { nom: t('Pingouin Glagla'), portrait: 'assets/personnages/pingouin.png' },
+  vache: { nom: t('Vache à Lait'), portrait: 'assets/personnages/vache.png' },
+  chat: { nom: t('Petit Chat'), portrait: 'assets/personnages/chat.png' },
+  diplodocus: { nom: t('Gros Diplo'), portrait: 'assets/personnages/diplodocus.png' },
   // Le seul personnage que le joueur plie lui-même, et donc le seul rendu :
   // « rien de ce qui se plie n'est dessiné » vaut ici comme ailleurs, et son
   // portrait doit être le pliage qui sort de l'énigme, pas une photo qui
   // finirait par en différer. Les autres sont photographiés parce qu'aucun
   // ne sort d'une énigme.
-  chien: { nom: 'Chouaf', modele: 'chien' },
+  chien: { nom: t('Chouaf'), modele: 'chien' },
   // Chapitre 3. Les fichiers gardent le nom que l'artiste leur a donné.
-  lune_chat: { nom: 'Chat Mal Luné', portrait: 'assets/personnages/lune_chat.png' },
-  wyvern: { nom: 'Wyverne énigmatique', portrait: 'assets/personnages/hydre.png' },
-  elephant: { nom: 'Cheffe Éléphant', portrait: 'assets/personnages/elephant_humain.png' },
+  lune_chat: { nom: t('Chat Mal Luné'), portrait: 'assets/personnages/lune_chat.png' },
+  wyvern: { nom: t('Wyverne énigmatique'), portrait: 'assets/personnages/hydre.png' },
+  elephant: { nom: t('Cheffe Éléphant'), portrait: 'assets/personnages/elephant_humain.png' },
 };
 
 // Noms de rôle acceptés dans ink, à côté des identifiants d'espèce. Le jour où

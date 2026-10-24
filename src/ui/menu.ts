@@ -1,9 +1,11 @@
 import { gameState } from '../game/systems/state';
 import { allerA, chapitresAtteignables, ETAPES_LIVREES } from '../game/systems/etapes';
 import { listerOutils, ouvrirOutil } from '../dev/outils';
+import { choisirLaLangue, langue, LANGUES, nomDeLaLangue } from '../langues/langue';
+import { t } from '../langues/traduire';
 
-// Menu du jeu : plein écran et remise à zéro de la progression — et, en
-// développement, les pages de réglage.
+// Menu du jeu : plein écran, options et remise à zéro de la progression — et,
+// en développement, les pages de réglage.
 
 // Le plein écran s'applique à `#app` et pas au canvas : l'interface vit dans des
 // éléments frères et resterait dehors.
@@ -59,7 +61,17 @@ function etapesHtml(): string {
         `<button class="menu__item" data-action="chapitre" data-chapitre="${i}">${chapitre.nom}</button>`,
     )
     .join('');
-  return `<p class="menu__label">Reprendre à…</p>${items}`;
+  return `<p class="menu__label">${t('Reprendre à…')}</p>${items}`;
+}
+
+// Chaque langue sous son propre nom, et `lang` pour que le navigateur la lise
+// comme telle : « English » n'a pas à se prononcer à la française.
+function languesHtml(): string {
+  return LANGUES.map(
+    (code) =>
+      `<button class="menu__item menu__langue" data-langue="${code}" lang="${code}"` +
+      ` aria-pressed="${code === langue}">${nomDeLaLangue(code)}</button>`,
+  ).join('');
 }
 
 // Même élagage, sur `import.meta.env.DEV` : hors développement les pages de
@@ -92,9 +104,10 @@ export class Menu {
   private confirm: HTMLElement;
   // Les étapes d'un chapitre, ou les outils de développement.
   private liste: HTMLElement;
+  private fenetreOptions: HTMLElement;
   // Transparent, plein cadre : il absorbe les taps pendant que le menu est ouvert.
   private voile: HTMLElement;
-  // Panneau, confirmation et fenêtre de liste : trois surfaces, un seul état.
+  // Panneau et fenêtres — confirmation, liste, options : un seul état.
   // Le panneau se referme en ouvrant une fenêtre, et s'en tenir à lui relancerait
   // la scène derrière la confirmation.
   private gele = false;
@@ -107,13 +120,14 @@ export class Menu {
     el.className = 'menu';
     el.innerHTML = `
       <div class="menu__voile" hidden></div>
-      <button class="menu__button" aria-label="Menu" aria-expanded="false">
+      <button class="menu__button" aria-label="${t('Menu')}" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
       <div class="menu__panel" hidden>
-        <button class="menu__item" data-action="fullscreen">Plein écran</button>
+        <button class="menu__item" data-action="fullscreen">${t('Plein écran')}</button>
+        <button class="menu__item" data-action="options">${t('Options')}</button>
         <button class="menu__item menu__item--danger" data-action="reset">
-          Recommencer
+          ${t('Recommencer')}
         </button>
         ${etapesHtml()}
         ${outilsHtml()}
@@ -123,20 +137,30 @@ export class Menu {
           <p class="menu__confirm-text menu__liste-titre"></p>
           <div class="menu__liste-entrees"></div>
           <div class="menu__confirm-actions">
-            <button class="menu__item" data-action="cancel-liste">Fermer</button>
+            <button class="menu__item" data-action="cancel-liste">${t('Fermer')}</button>
+          </div>
+        </div>
+      </div>
+      <div class="menu__liste menu__options" hidden role="dialog" aria-modal="true">
+        <div class="menu__confirm-box">
+          <p class="menu__confirm-text menu__liste-titre">${t('Options')}</p>
+          <p class="menu__label">${t('Langue')}</p>
+          <div class="menu__liste-entrees">${languesHtml()}</div>
+          <div class="menu__confirm-actions">
+            <button class="menu__item" data-action="fermer-options">${t('Fermer')}</button>
           </div>
         </div>
       </div>
       <div class="menu__confirm" hidden role="alertdialog" aria-modal="true">
         <div class="menu__confirm-box">
           <p class="menu__confirm-text">
-            Effacer toute ta progression et repartir du début ?
-            <strong>Cette action est définitive.</strong>
+            ${t('Effacer toute ta progression et repartir du début ?')}
+            <strong>${t('Cette action est définitive.')}</strong>
           </p>
           <div class="menu__confirm-actions">
-            <button class="menu__item" data-action="cancel">Annuler</button>
+            <button class="menu__item" data-action="cancel">${t('Annuler')}</button>
             <button class="menu__item menu__item--danger" data-action="confirm">
-              Tout effacer
+              ${t('Tout effacer')}
             </button>
           </div>
         </div>
@@ -149,6 +173,7 @@ export class Menu {
     this.fullscreenItem = el.querySelector('[data-action="fullscreen"]')!;
     this.confirm = el.querySelector('.menu__confirm')!;
     this.liste = el.querySelector('.menu__liste')!;
+    this.fenetreOptions = el.querySelector('.menu__options')!;
     this.voile = el.querySelector('.menu__voile')!;
 
     if (!fullscreenSupported()) this.fullscreenItem.hidden = true;
@@ -172,6 +197,10 @@ export class Menu {
             return;
           }
         }
+        if (item.dataset.langue) {
+          choisirLaLangue(item.dataset.langue);
+          return;
+        }
         void this.onAction(item.dataset.action);
       });
     });
@@ -193,7 +222,11 @@ export class Menu {
   }
 
   private signalerGel() {
-    const ouvert = !this.panel.hidden || !this.confirm.hidden || !this.liste.hidden;
+    const ouvert =
+      !this.panel.hidden ||
+      !this.confirm.hidden ||
+      !this.liste.hidden ||
+      !this.fenetreOptions.hidden;
     if (ouvert === this.gele) return;
     this.gele = ouvert;
     this.options.onGel(ouvert);
@@ -214,6 +247,13 @@ export class Menu {
         break;
       case 'cancel-liste':
         this.liste.hidden = true;
+        break;
+      case 'options':
+        this.close();
+        this.fenetreOptions.hidden = false;
+        break;
+      case 'fermer-options':
+        this.fenetreOptions.hidden = true;
         break;
       case 'outils':
         // Le test ici aussi, pour la même raison que celui des étapes : la
@@ -299,7 +339,9 @@ export class Menu {
   }
 
   private syncFullscreenLabel = () => {
-    this.fullscreenItem.textContent = isFullscreen() ? 'Quitter le plein écran' : 'Plein écran';
+    this.fullscreenItem.textContent = isFullscreen()
+      ? t('Quitter le plein écran')
+      : t('Plein écran');
     // Le passage en plein écran change les dimensions du canvas : la couche DOM
     // doit être recalée dessus, sinon elle reste à l'ancienne taille.
     this.options.onLayoutChange();

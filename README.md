@@ -23,7 +23,9 @@ le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 | --- | --- |
 | `npm run dev` | serveur de dev (compile ink et les plans de scène, puis les suit) |
 | `npm run build` | typecheck + build de production dans `dist/` |
-| `npm run ink` | compile `content/story.ink` -> `src/generated/story.json` |
+| `npm run ink` | compile `content/story.ink` -> `src/generated/story.json`, et le récit de chaque langue |
+| `npm run langues` | met les catalogues `content/langues/*.po` d'accord avec les textes du jeu |
+| `npm run check-langues` | échoue si une langue n'est pas complète (tourne en CI) |
 | `npm run scenes` | cartes Tiled `game-design/scenes/` -> `src/generated/scenes/` |
 | `npm run enigmes` | découpages `game-design/enigmes/` -> `src/generated/enigmes.ts` |
 | `npm run check-puzzle [-- <nom>]` | un découpage a-t-il bien une solution unique ? |
@@ -56,6 +58,31 @@ Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 `src/game/scenes/torches-reglages.ts`, `src/ui/choix-reglages.ts`) par un point
 d'entrée du serveur de dev défini dans `vite.config.ts` — qui n'existe qu'en
 développement et ne garde que des nombres bornés.
+
+### Traduire
+
+Le jeu s'écrit en français ; chaque autre langue est un catalogue gettext,
+`content/langues/<code>.po`, qui s'ouvre dans un éditeur de texte comme dans
+Poedit. La clé d'une entrée est le texte français lui-même, et son contexte
+(knot, personnage qui parle, fichier) est noté au-dessus.
+
+- **Après avoir écrit ou retouché du texte** — dans `story.ink` ou dans un
+  `t('…')` du code —, `npm run langues` : les textes nouveaux arrivent vides, un
+  texte retouché revient marqué `#, fuzzy` avec son ancienne traduction, ce qui a
+  disparu est retiré. Remplir les `msgstr`, retirer les `#, fuzzy` relus. En
+  attendant, un texte vide s'affiche en français, un texte à revoir dans son
+  ancienne traduction.
+- **`npm run check-langues`** échoue tant qu'une langue a un trou, et signale
+  tout texte d'interface affiché sans passer par `t()`. La CI le joue à chaque
+  poussée.
+- **Ajouter une langue** : créer `content/langues/<code>.po` vide, puis
+  `npm run langues`. Elle apparaît dans le menu, sous « Options », dès le
+  `npm run ink` suivant.
+
+La langue du jeu est celle choisie dans les options, sinon celle du navigateur,
+sinon l'anglais. Les partis pris de la traduction anglaise — noms, cris,
+registres — sont dans [`content/langues/en-lexique.md`](content/langues/en-lexique.md),
+qu'une réplique ajoutée doit suivre.
 
 ### Intégrer un origami de l'artiste
 
@@ -308,12 +335,18 @@ targets glTF) — le format runtime est le même.
 
 ```
 content/story.ink            narration (éditable sans toucher au code)
+content/langues/*.po         traductions, une langue par fichier (clé : le français)
 content/origami/*.svg        crease patterns sources
 game-design/scenes/*.tmj     géométrie des scènes (Tiled) — fait foi
 game-design/enigmes/*.json   découpage des énigmes (decoupage.html) — fait foi
 public/assets/origami/*.origami  animations bakées
 src/
   main.ts                    assemble les modules ci-dessous, sans logique propre
+  langues/
+    langue.ts                la langue de la partie : options, navigateur, repli
+    traduire.ts              `t('…')` pour l'interface, et le récit traduit
+    catalogues.ts            les langues compilées par `npm run ink`
+    page.ts                  `lang` et textes d'index.html
   audio.ts                   déblocage de l'audio au premier geste (iOS)
   game/
     config.ts                résolution logique, seuil tactile, palette
@@ -357,7 +390,9 @@ src/
     couper.ts                fendre une pièce le long d'un trait
 tools/
   bake-origami.mjs           CP -> .origami
-  compile-ink.mjs            .ink -> .json
+  compile-ink.mjs            .ink -> .json, pour chaque langue
+  langues.mjs                tient et vérifie les catalogues de traduction
+  lib/langues.mjs            ce qui est à traduire, et sa substitution (partagé)
   import-decoupage.mjs       découpages -> src/generated/enigmes.ts
   lib/decoupage.mjs          pavage, unicité de la solution (partagé)
   lib/dist-itch.mjs          ce que dist/ doit respecter pour itch.io (partagé)

@@ -1,3 +1,5 @@
+import { t } from '../../langues/traduire';
+
 // Une idée est un objet comme un autre : même inventaire, même `# give:`, même
 // condition `has_`. Seul l'affichage les distingue, à partir du préfixe `idee_`.
 // C'est ce qui évite deux mécanismes parallèles pour « savoir plier une hache »
@@ -21,23 +23,23 @@ export interface Objet {
 
 export const OBJETS: Record<string, Objet> = {
   idee_arbre: {
-    nom: "Idée : l'arbre",
-    description: "Une idée de comment plier l'arbre.",
+    nom: t("Idée : l'arbre"),
+    description: t("Une idée de comment plier l'arbre."),
     modele: 'arbre',
   },
   idee_hache: {
-    nom: 'Idée : la hache',
-    description: 'Une idée de comment plier la hache.',
+    nom: t('Idée : la hache'),
+    description: t('Une idée de comment plier la hache.'),
     modele: 'hache',
   },
   hache: {
-    nom: 'La hache',
-    description: 'Une hache de papier bien tranchante. Attention en la manipulant!',
+    nom: t('La hache'),
+    description: t('Une hache de papier bien tranchante. Attention en la manipulant!'),
     modele: 'hache',
   },
   bois: {
-    nom: 'Du bois',
-    description: 'De belles planches de bois. Merci vieux chêne.',
+    nom: t('Du bois'),
+    description: t('De belles planches de bois. Merci vieux chêne.'),
     // Le seul objet du chapitre qui ne soit pas un pliage, d'où une vignette
     // dessinée.
     dessin: 'bois',
@@ -45,57 +47,57 @@ export const OBJETS: Record<string, Objet> = {
 
   // Chapitre 2 — le village et l'entrée du château.
   idee_chien: {
-    nom: 'Idée : le chien',
-    description: 'Une idée de comment plier Chouaf, le chien du pingouin.',
+    nom: t('Idée : le chien'),
+    description: t('Une idée de comment plier Chouaf, le chien du pingouin.'),
     modele: 'chien',
   },
   idee_pot: {
-    nom: 'Idée : le pot',
-    description: 'Une idée de comment plier un pot à lait.',
+    nom: t('Idée : le pot'),
+    description: t('Une idée de comment plier un pot à lait.'),
     modele: 'pot',
   },
   // `pot` puis `lait` partagent le modèle, et c'est exact : c'est le même pot,
   // rempli entre-temps. Seul le nom du bandeau dit ce qui a changé.
   pot: {
-    nom: 'Le pot',
-    description: 'Un pot à lait vide. Il serait plus utile rempli',
+    nom: t('Le pot'),
+    description: t('Un pot à lait vide. Il serait plus utile rempli'),
     modele: 'pot',
   },
   lait: {
-    nom: 'Du lait',
-    description: 'Un pot de lait tout frais. Attention à ne pas le renverser',
+    nom: t('Du lait'),
+    description: t('Un pot de lait tout frais. Attention à ne pas le renverser'),
     modele: 'pot',
   },
   os: {
-    nom: "L'os",
-    description: 'Un os un peu abîmé et tout baveux. Pouah!',
+    nom: t("L'os"),
+    description: t('Un os un peu abîmé et tout baveux. Pouah!'),
     modele: 'os',
   },
 
   // Chapitre 3 — la salle du trône, la cuisine et le jardin.
   idee_couronne: {
-    nom: 'Idée : la couronne',
-    description: 'Une idée de comment plier une couronne digne de Sa Majesté.',
+    nom: t('Idée : la couronne'),
+    description: t('Une idée de comment plier une couronne digne de Sa Majesté.'),
     modele: 'couronne',
   },
   couronne: {
-    nom: 'La couronne',
-    description: 'Une couronne de papier doré, sertie de gemmes.',
+    nom: t('La couronne'),
+    description: t('Une couronne de papier doré, sertie de gemmes.'),
     modele: 'couronne',
   },
   carpe: {
-    nom: 'Une carpe',
-    description: 'Une carpe pêchée dans la fontaine. Elle gigote encore.',
+    nom: t('Une carpe'),
+    description: t('Une carpe pêchée dans la fontaine. Elle gigote encore.'),
     photo: 'assets/decor/carpe.png',
   },
   idee_poisson: {
-    nom: 'Idée : la daurade',
-    description: 'Une idée de comment plier une daurade royale.',
+    nom: t('Idée : la daurade'),
+    description: t('Une idée de comment plier une daurade royale.'),
     modele: 'poisson',
   },
   daurade: {
-    nom: 'La daurade',
-    description: 'Une daurade royale aux reflets chatoyants.',
+    nom: t('La daurade'),
+    description: t('Une daurade royale aux reflets chatoyants.'),
     modele: 'poisson',
   },
 };

@@ -18,6 +18,8 @@ import { JardinScene } from './scenes/jardin-scene';
 type ClasseDeScene = new () => Phaser.Scene;
 
 interface Chapitre {
+  // Pour qui lit ce fichier : le joueur ne le voit nulle part. Les noms qu'affiche
+  // le menu des points d'étape sont ceux de src/game/systems/etapes.ts.
   nom: string;
   // Clé Phaser -> classe, dans l'ordre de traversée : la première scène est le
   // point d'entrée du chapitre.
@@ -26,15 +28,15 @@ interface Chapitre {
 
 const CHAPITRES: Chapitre[] = [
   {
-    nom: 'Le ravin et la porte',
+    nom: 'Le ravin et la porte', // hors traduction
     scenes: { pont: PontScene, porte: PorteScene },
   },
   {
-    nom: 'Le village et le château',
+    nom: 'Le village et le château', // hors traduction
     scenes: { village: VillageScene, entree: EntreeScene },
   },
   {
-    nom: 'La salle du trône',
+    nom: 'La salle du trône', // hors traduction
     scenes: { trone: TroneScene, cuisine: CuisineScene, jardin: JardinScene },
   },
 ];

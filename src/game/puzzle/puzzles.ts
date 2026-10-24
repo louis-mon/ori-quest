@@ -1,5 +1,6 @@
 import { DECOUPAGES } from '../../generated/enigmes';
 import type { CreasePuzzleDef } from './crease-puzzle';
+import { t } from '../../langues/traduire';
 
 // Les énigmes du jeu, en données ; la clé est le nom écrit dans la narration
 // (`# puzzle: pont`).
@@ -13,7 +14,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/pont/solution.svg',
     modele: 'pont',
     decoupage: DECOUPAGES.pont,
-    title: 'Le pont',
+    title: t('Le pont'),
     // La première énigme du jeu : c'est elle qui apprend le pli vallée, et son
     // motif n'a justement que des vallées.
     tutoriel: 'vallee',
@@ -24,7 +25,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/arbre/solution.svg',
     modele: 'arbre',
     decoupage: DECOUPAGES.arbre,
-    title: 'Le vieil arbre',
+    title: t('Le vieil arbre'),
     // Le pli montagne est porté par l'arbre ET par la hache, pas par une seule
     // des deux : elles s'ouvrent dans n'importe quel ordre, et le drapeau
     // `tuto_montagne_vu` fait que c'est la première ouverte qui le propose. La
@@ -38,7 +39,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/hache/solution.svg',
     modele: 'hache',
     decoupage: DECOUPAGES.hache,
-    title: 'La hache',
+    title: t('La hache'),
     tutoriel: 'montagne',
   },
 
@@ -47,7 +48,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/porte/solution.svg',
     modele: 'porte',
     decoupage: DECOUPAGES.porte,
-    title: 'La porte',
+    title: t('La porte'),
   },
 
   // ⚠ Aucune énigme du chapitre 2 ne porte de `tutoriel`, pour la même raison
@@ -60,7 +61,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/montagne/solution.svg',
     modele: 'montagne',
     decoupage: DECOUPAGES.montagne,
-    title: 'La montagne',
+    title: t('La montagne'),
   },
 
   // game-design/scenes/chapter-2/le-village.md — l'herbe de la vache.
@@ -68,7 +69,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/herbe/solution.svg',
     modele: 'herbe',
     decoupage: DECOUPAGES.herbe,
-    title: "L'herbe",
+    title: t("L'herbe"),
   },
 
   // game-design/scenes/chapter-2/le-village.md — le pot à lait.
@@ -76,7 +77,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/pot/solution.svg',
     modele: 'pot',
     decoupage: DECOUPAGES.pot,
-    title: 'Le pot à lait',
+    title: t('Le pot à lait'),
   },
 
   // game-design/scenes/chapter-2/entree-chateau.md — Chouaf. Le dossier de
@@ -85,7 +86,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/chien/solution.svg',
     modele: 'chien',
     decoupage: DECOUPAGES.chien,
-    title: 'Chouaf',
+    title: t('Chouaf'),
   },
 
   // game-design/scenes/chapter-2/entree-chateau.md — l'os.
@@ -97,7 +98,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/os/solution.svg',
     modele: 'os',
     decoupage: DECOUPAGES.os,
-    title: "L'os",
+    title: t("L'os"),
   },
 
   // game-design/scenes/chapter-3/jardin.md — la couronne de la reine.
@@ -105,7 +106,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/couronne/solution.svg',
     modele: 'couronne',
     decoupage: DECOUPAGES.couronne,
-    title: 'La couronne',
+    title: t('La couronne'),
   },
 
   // game-design/scenes/chapter-3/jardin.md — la daurade. L'énigme porte le nom
@@ -114,7 +115,7 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/poisson/solution.svg',
     modele: 'poisson',
     decoupage: DECOUPAGES.poisson,
-    title: 'La daurade',
+    title: t('La daurade'),
   },
 
   // game-design/scenes/chapter-3/salle-du-trone.md — le cœur qui réconcilie.
@@ -122,6 +123,6 @@ export const PUZZLES: Record<string, CreasePuzzleDef> = {
     svg: 'assets/enigmes/coeur/solution.svg',
     modele: 'coeur',
     decoupage: DECOUPAGES.coeur,
-    title: 'Le cœur',
+    title: t('Le cœur'),
   },
 };

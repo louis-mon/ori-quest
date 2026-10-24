@@ -4,7 +4,8 @@ Jeu **point & click** en HTML5, jouable au navigateur **mobile**, destiné à ê
 publié sur **itch.io**. Particularité : les animations d'origami sont générées
 automatiquement à partir de crease patterns, pas modélisées à la main.
 
-Le jeu est en **français**. Code, commentaires et documentation aussi.
+Le jeu est écrit en **français**, et traduit : l'anglais d'abord
+(`content/langues/`). Code, commentaires et documentation restent en français.
 
 ## À lire avant de coder
 
@@ -29,6 +30,8 @@ npm run scenes                   # cartes Tiled des scènes -> src/generated/sce
 npm run enigmes                  # découpages des énigmes -> src/generated/enigmes.ts
 npm run check-puzzle             # un découpage a-t-il une solution unique ?
 npm run check-story              # un menu de dialogue peut-il se vider ?
+npm run langues                  # catalogues de traduction <- textes du jeu
+npm run check-langues            # une langue est-elle complète ? (CI)
 npm run qa                       # non-régression, jouée dans un navigateur
 npm run qa-local                 # la même, sur le `npm run dev` déjà lancé
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
@@ -97,6 +100,40 @@ entier, énigme comprise. C'est le bon prix — rejouer un dialogue coûte des t
 un état impossible coûte la partie. Ça suppose qu'aucun effet de jeu ne
 contourne `gameState` : c'est déjà la règle des tags ci-dessus, et c'est ici
 qu'elle se paie.
+
+**Le français est la langue source, et son texte sert de clé** — la façon de
+gettext. Une langue est un catalogue `content/langues/<code>.po` ; `npm run
+langues` le tient d'accord avec le jeu, `npm run check-langues` refuse ce qui
+manque et tourne en CI. Une réplique retouchée en français perd donc sa
+traduction, et c'est voulu : une traduction restée accrochée à une ligne qui a
+changé de sens est l'oubli qu'on ne voit pas. Elle revient à revoir (`fuzzy`),
+l'ancienne traduction en brouillon. Ne pas passer à des identifiants.
+
+Deux sources, un seul catalogue (`tools/lib/langues.mjs`). **Le récit se lit
+dans le JSON compilé**, pas dans `story.ink` : chaque texte affichable y est un
+fragment `^…`, et le récit d'une autre langue est ce même JSON à ses textes près
+— knots, conditions, tags et chaînes de logique (`trone_feuille("rouge")`)
+inchangés, donc tout ce que le jeu attend du récit vaut dans toutes les langues.
+`compile-ink.mjs` écrit les deux ensemble, sans quoi un story.json neuf côtoierait
+un récit traduit d'avant. Conséquence à connaître : une condition posée **au
+milieu** d'une phrase la coupe en fragments que la traduction reçoit séparément
+— écrire plutôt la phrase entière dans chaque branche. **L'interface passe par
+`t('…')`** (`src/langues/traduire.ts`), toujours sur un littéral, ce qui varie
+par un champ `{nom}` ; la vérification refuse un `t()` calculé, et repère un texte
+affiché qui n'y passe pas — gabarit HTML, `aria-label`, `textContent`, champs
+`nom`/`titre`…, chaîne d'allure française. Ce qui ne s'affiche jamais s'en
+exempte par un commentaire `// hors traduction`.
+
+**La langue est fixée au chargement** (`src/langues/langue.ts`) : le choix des
+options, sinon le navigateur, sinon l'anglais. Les textes d'interface sont
+traduits à l'évaluation des modules et l'instance `Story` naît sur un seul
+récit, donc changer de langue **recharge la page** — la sauvegarde ne connaît
+que des identifiants, et une conversation en cours se rejoue comme après tout
+rechargement. La typographie suit (`typographie.ts`) : les espaces insécables
+devant `! ? ; :` sont une règle du français, la coupe de vers ` / ` vaut
+partout. **`npm run qa` joue en `fr-FR`** (`ouvrir()`, dans `pilote.mjs`) parce
+que ses essais choisissent les options par leur texte ; l'essai `langue` joue
+en anglais.
 
 **Les scènes sont pilotées par des données.** Les hotspots sont une liste
 d'objets, pas du code impératif : c'est ce qui rend le contenu ajoutable sans

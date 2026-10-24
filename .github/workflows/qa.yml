@@ -37,6 +37,9 @@ jobs:
       # traversée.
       - run: npm run check-story
       - run: npm run check-puzzle
+      # Une langue livrée à moitié traduite, ou un texte d'interface affiché sans
+      # passer par t() : tools/langues.mjs dit lequel et où.
+      - run: npm run check-langues
 
       # Bâtit dist/ (typecheck compris), le sert et le joue.
       - run: npm run qa

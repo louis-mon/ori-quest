@@ -783,6 +783,61 @@ test(
   { livre: true },
 );
 
+// Un navigateur anglais trouve le jeu en anglais — récit, options et interface —,
+// et les options le rendent au français. La console fait le reste : un texte
+// affiché sans traduction s'y signale (src/langues/traduire.ts).
+test('langue', async (page, dire) => ({
+  sauvegarde: AU_RAVIN,
+  langue: 'en-US',
+  jouer: async () => {
+    dire("le dialogue d'arrivée se joue", await attendreLaBoite(page()));
+    let e = await etat(page());
+    dire('le navigateur anglais donne le récit anglais', /^Phew/.test(e.texte), e.texte);
+    dire('les noms aussi', e.qui === 'The frog', e.qui);
+    dire(
+      'la page se dit anglaise',
+      (await page().evaluate(() => document.documentElement.lang)) === 'en',
+    );
+    // « I can't wait to see all my friends again! » : les espaces insécables
+    // sont une règle du français, pas de l'anglais.
+    e = await avancer(page());
+    dire('pas d’espace avant la ponctuation', /[^\s\u202f\u00a0]!/.test(e.texte), e.texte);
+    await deroulerDialogue(page());
+
+    await taperZone(page(), 'pont', 'feuille');
+    e = await deroulerDialogue(page());
+    dire(
+      'les options du récit sont traduites',
+      e.choix.includes('fold a bridge'),
+      e.choix.join(' | '),
+    );
+    await choisir(page(), 'fold a catapult');
+    await deroulerDialogue(page());
+
+    await taperSur(page(), '.menu__button');
+    await taperSur(page(), '[data-action="options"]');
+    dire(
+      'les options montrent la langue en cours',
+      (await page().getAttribute('.menu__langue[data-langue="en"]', 'aria-pressed')) === 'true',
+    );
+    await Promise.all([
+      page().waitForEvent('load'),
+      taperSur(page(), '.menu__langue[data-langue="fr"]'),
+    ]);
+    await pause(2500);
+    dire(
+      'le choix survit au navigateur',
+      (await page().evaluate(() => document.documentElement.lang)) === 'fr',
+    );
+    await taperZone(page(), 'pont', 'precipice');
+    await attendreLaBoite(page());
+    e = await etat(page());
+    dire('le récit repasse en français', /^Il devait y avoir un pont/.test(e.texte), e.texte);
+    await deroulerDialogue(page());
+    dire('la partie continue là où elle était', (await etat(page())).piece === 'pont');
+  },
+}));
+
 // La traversée complète : le seul test qui éprouve les quatre énigmes, le
 // tutoriel joué en entier, les pliages, l'inventaire et les deux scènes.
 test('traversee', async (page, dire) => ({
@@ -1019,8 +1074,12 @@ for (const { nom, fn, livre, attendu } of tests) {
     console.log(`   ${ok ? '✓' : '✗'} ${quoi}${detail ? ` — ${detail}` : ''}`);
   };
 
-  const { sauvegarde, tactile, jouer } = await fn(() => courante, dire);
-  const { page, contexte, journal } = await ouvrir(navigateur, cible.url, { sauvegarde, tactile });
+  const { sauvegarde, tactile, langue, jouer } = await fn(() => courante, dire);
+  const { page, contexte, journal } = await ouvrir(navigateur, cible.url, {
+    sauvegarde,
+    tactile,
+    langue,
+  });
   courante = page;
   try {
     await jouer();

@@ -7,8 +7,9 @@
 
 import type { Overlay } from '../../ui/overlay';
 import { personnage } from '../systems/personnages';
+import { t } from '../../langues/traduire';
 
-const REPLIQUE = "Ça ne semble pas être ça, j'ai dû me tromper quelque part...";
+const REPLIQUE = t("Ça ne semble pas être ça, j'ai dû me tromper quelque part...");
 
 const HEROS = personnage('heros');
 

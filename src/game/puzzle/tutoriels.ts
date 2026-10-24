@@ -12,6 +12,7 @@
 // commente ce qu'on vient de voir, et n'est dit que si l'effet a eu lieu.
 
 import type { TracePli } from '../../origami/papier';
+import { t } from '../../langues/traduire';
 
 // Ce qui se passe à l'écran entre deux répliques.
 export type Effet =
@@ -109,60 +110,71 @@ const FEUILLE_BOMBE: Feuille = {
 
 export const TUTORIELS = {
   vallee: {
-    titre: 'Le pli vallée',
-    invite:
+    titre: t('Le pli vallée'),
+    invite: t(
       "Ça fait longtemps que je n'ai pas exercé mon art d'origamiste. Un rappel des bases ne ferait pas de mal.",
+    ),
     etapes: [
-      'Je vais devoir retrouver les plis nécessaires pour remettre ce pont en place.',
-      "Pour l'instant je n'ai besoin que d'un type de pli : le pli vallée.",
-      "Il apparaît en bleu sur les pièces : tout ce que j'ai à faire, c'est remettre les pièces en place dans le carré.",
+      t('Je vais devoir retrouver les plis nécessaires pour remettre ce pont en place.'),
+      t("Pour l'instant je n'ai besoin que d'un type de pli : le pli vallée."),
+      t(
+        "Il apparaît en bleu sur les pièces : tout ce que j'ai à faire, c'est remettre les pièces en place dans le carré.",
+      ),
       {
         faire: 'poser-une-piece',
         // Sautée avec l'effet : sur un plateau déjà entamé, aucune pièce ne
         // bouge, et « cette pièce » ne désignerait rien.
-        puis: 'Cette pièce semble bien placée, il faut maintenant mettre les autres.',
+        puis: t('Cette pièce semble bien placée, il faut maintenant mettre les autres.'),
       },
-      "Mais tu te demandes peut-être ce que signifie « pli vallée » ? Laisse-moi t'expliquer.",
+      t("Mais tu te demandes peut-être ce que signifie « pli vallée » ? Laisse-moi t'expliquer."),
       { faire: 'montrer-feuille', feuille: FEUILLE_VALLEE },
-      "Voici une feuille de papier d'origami. Je vais faire un pli vallée dessus.",
+      t("Voici une feuille de papier d'origami. Je vais faire un pli vallée dessus."),
       { faire: 'tracer-pli' },
-      "J'ai ajouté le pli sur la feuille, en bleu. Voyons ce que ça donne en action.",
+      t("J'ai ajouté le pli sur la feuille, en bleu. Voyons ce que ça donne en action."),
       { faire: 'plier' },
-      "Voilà ce qu'est un pli vallée. Un bon moyen mnémotechnique pour s'en souvenir : vallée comme la vallée d'une montagne.",
+      t(
+        "Voilà ce qu'est un pli vallée. Un bon moyen mnémotechnique pour s'en souvenir : vallée comme la vallée d'une montagne.",
+      ),
       { faire: 'cacher-feuille' },
       // La réplique avant la flèche : un effet laisse à l'écran la ligne qui le
       // précède, et c'est elle qui lui sert de légende.
-      'Tu peux rejouer ce tutoriel à tout moment avec ce bouton.',
+      t('Tu peux rejouer ce tutoriel à tout moment avec ce bouton.'),
       { faire: 'designer-aide' },
-      'À nous de jouer maintenant.',
+      t('À nous de jouer maintenant.'),
     ],
   },
 
   montagne: {
-    titre: 'Le pli montagne',
-    invite: "Celui-là semble plus compliqué : il n'y a pas que des plis vallée.",
+    titre: t('Le pli montagne'),
+    invite: t("Celui-là semble plus compliqué : il n'y a pas que des plis vallée."),
     etapes: [
-      'Un autre type de pli est nécessaire pour plier ce modèle : le pli montagne.',
-      "Comme son nom l'indique, c'est une montagne — l'inverse du pli vallée.",
-      'Je vais te montrer en pratique.',
+      t('Un autre type de pli est nécessaire pour plier ce modèle : le pli montagne.'),
+      t("Comme son nom l'indique, c'est une montagne — l'inverse du pli vallée."),
+      t('Je vais te montrer en pratique.'),
       { faire: 'montrer-feuille', feuille: FEUILLE_MONTAGNE },
       // La leçon est que le MÊME carré, plié dans l'autre sens, donne l'autre
       // pli : tracer le trait rouge aussitôt ne laisserait pas le temps de
       // reconnaître la feuille d'avant.
       { faire: 'un-temps' },
       { faire: 'tracer-pli' },
-      'En rouge le pli montagne, là où le pli vallée était en bleu.',
+      t('En rouge le pli montagne, là où le pli vallée était en bleu.'),
       { faire: 'plier' },
-      "Voilà un pli montagne. Le même trait que tout à l'heure, et le papier part de l'autre côté.",
-      'Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simples de les combiner.',
+      t(
+        "Voilà un pli montagne. Le même trait que tout à l'heure, et le papier part de l'autre côté.",
+      ),
+      t(
+        'Un origami combine en général les deux. Je vais te montrer la base de la « bombe à eau », une des façons les plus simples de les combiner.',
+      ),
       // Remplace la feuille pliée sans rendre l'énigme au joueur.
       { faire: 'montrer-feuille', feuille: FEUILLE_BOMBE },
       { faire: 'tracer-pli' },
-      'Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes.',
+      t('Voilà les plis de la base de la « bombe à eau » : deux vallées, deux montagnes.'),
       { faire: 'plier' },
       // La réplique AVANT de ranger la feuille : c'est elle qui tient le pliage
       // à l'écran. L'effacer d'abord, c'était commenter une place vide.
-      "Et voilà. Je crois qu'on a tout ce qu'il faut pour s'attaquer aux modèles les plus compliqués.",
+      t(
+        "Et voilà. Je crois qu'on a tout ce qu'il faut pour s'attaquer aux modèles les plus compliqués.",
+      ),
       { faire: 'cacher-feuille' },
     ],
   },

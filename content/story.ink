@@ -1142,7 +1142,7 @@ Je pense me rappeler à quoi ressemble la fameuse couronne. # flag: libou_parle 
     Va-t'en. Sauf si tu m'apportes à manger.
   - else:
     # qui: lune_chat
-    Maww ! Tiens, tiens, tiens, mais qui voilà ? Tu viens m'apporter mon repas ?
+    Kshhhh ! Tiens, tiens, tiens, mais qui voilà ? Tu viens m'apporter mon repas ?
     # qui: heros
     C'est une curieuse façon de me saluer, Chat Mal Luné !
     Vas-tu cesser tes enfantillages et remettre un peu d'ordre ?
@@ -1155,7 +1155,7 @@ Je pense me rappeler à quoi ressemble la fameuse couronne. # flag: libou_parle 
     D'ailleurs, si tu n'as pas ton repas, c'est à cause du bazar que tu as causé. Le Petit Chat a aussi l'air de trépigner.
     # qui: lune_chat
     J'ai pas besoin de tes leçons de morale, la grenouille.
-    Maintenant déguerpis avant que ça soit toi, mon repas. Mawww ! # flag: lune_chat_parle
+    Maintenant déguerpis avant que ça soit toi, mon repas. Kshhhhh ! # flag: lune_chat_parle
 }
 -> DONE
 
@@ -1288,7 +1288,7 @@ Une lueur maléfique dans le regard, le Chat Mal Luné s'apprête à partir.
 # qui: chat
 Non ! Attends, je t'en conjure, mon frère adoré ! / C'est ma faute si cette situation s'est détériorée.
 # qui: lune_chat
-Maw ! J'ai assez attendu, Petit Chat. Tes mots doux et belles paroles ne valent plus grand-chose.
+Kshhh ! J'ai assez attendu, Petit Chat. Tes mots doux et belles paroles ne valent plus grand-chose.
 # qui: heros
 Je ne savais pas que vous étiez frères ! Chat Mal Luné, écoutons ce qu'a à dire le Petit Chat.
 Cette fois, j'ai l'impression qu'il a quelque chose d'important à exprimer.
@@ -1298,7 +1298,7 @@ Très bien. Viens-en au fait, alors, et évite-nous tes tournures alambiquées.
 Je ne vais pas le cacher plus longtemps. / De vous dire la vérité, il est grand temps.
 Chat Mal Luné, je dois l'avouer, j'ai fauté. / Une grande injustice je dois maintenant ôter.
 # qui: lune_chat
-Mawww ! Cesse ton bavardage et crache le morceau, tu me fais tourner en bourrique.
+Kshhhhh ! Cesse ton bavardage et crache le morceau, tu me fais tourner en bourrique.
 # qui: hibou
 Hou hou ! Sois gentil avec le Petit Chat, je t'en prie !
 Petit Chat, il est vrai qu'il est maintenant temps de nous éclairer.
@@ -1325,7 +1325,7 @@ Sur lui était braquée toute la lumière / Du haut de sa lune il faisait le fie
 C'est ainsi que, rongé par ce préjudice, / J'ai voulu mettre fin à cette injustice.
 Le faire tomber de sa lune / Pour alléger mon infortune.
 # qui: lune_chat
-Maww... C'est bon, on a compris, Petit Chat.
+Kshhhh... C'est bon, on a compris, Petit Chat.
 Je reconnais que j'avais un peu tendance à attirer l'attention sur moi.
 # qui: hibou
 Hou hou ! La faute me revient aussi, à vrai dire.
