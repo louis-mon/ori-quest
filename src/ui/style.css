@@ -8,6 +8,11 @@
   --pierre: #e2e0da;
   --ink: #1a1714;
   --accent: #c4553d;
+  /* Le même terracotta, éclairci pour ce qui se pose SUR du sombre : texte,
+     filet, coche. L'accent plein n'y tient pas — ni 4,5:1 en texte, ni 3:1 en
+     repère, et en protanopie, qui assombrit les rouges, il disparaît presque.
+     `--accent` reste pour les aplats sous un texte clair. */
+  --accent-clair: #d68b7a;
   --shadow: rgba(0, 0, 0, 0.45);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   /* Convention ORIPA, dans la palette du jeu : montagne = accent, vallée = bleu. */
@@ -164,7 +169,7 @@ body {
 
 .dialogue__nom {
   margin: 0 0 calc(4px * var(--ui-scale));
-  color: var(--accent);
+  color: var(--accent-clair);
   font-size: calc(clamp(13px, 2vw, 15px) * var(--ui-scale));
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -237,7 +242,7 @@ body {
   margin: 0;
   padding-top: 10px;
   border-top: 1px solid rgba(242, 236, 225, 0.15);
-  color: var(--accent);
+  color: var(--accent-clair);
   font-size: calc(clamp(13px, 2vw, 15px) * var(--ui-scale));
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -699,8 +704,8 @@ body {
 
 .menu__item--danger {
   background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
+  color: var(--accent-clair);
+  border: 1px solid var(--accent-clair);
 }
 
 .menu__item--danger:active {
@@ -831,7 +836,7 @@ body {
   padding: 0 calc(22px * var(--ui-scale));
   border: 0;
   border-radius: 12px;
-  background: rgba(26, 23, 20, 0.72);
+  background: rgba(26, 23, 20, 0.85);
   color: var(--paper);
   font: inherit;
   font-weight: 600;
@@ -881,7 +886,7 @@ body {
   padding: 0 calc(16px * var(--ui-scale));
   border: 0;
   border-radius: 10px;
-  background: rgba(26, 23, 20, 0.72);
+  background: rgba(26, 23, 20, 0.85);
   color: var(--paper);
   font: inherit;
   font-weight: 600;
@@ -917,15 +922,17 @@ body {
 
 /* La langue en cours : la seule option qui ne fait rien, et la seule qu'il faut
    voir d'un coup d'œil — c'est elle qui dit où l'on est. À l'accent, comme tout
-   ce que les menus marquent : le doré est réservé à l'appel de la boîte. */
+   ce que les menus marquent — le doré est réservé à l'appel de la boîte —, dans
+   sa version claire : la pastille est sombre, et assez opaque pour que le décor
+   coloré dessous n'en ronge pas le contraste. */
 .ecran__langue[aria-pressed='true'] {
-  box-shadow: inset 0 0 0 2px var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent-clair);
   cursor: default;
 }
 
 .ecran__langue[aria-pressed='true']::after {
   content: '\00a0✓';
-  color: var(--accent);
+  color: var(--accent-clair);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -968,7 +975,7 @@ body {
 .menu__confirm-text strong {
   display: block;
   margin-top: 6px;
-  color: var(--accent);
+  color: var(--accent-clair);
 }
 
 .menu__confirm-actions {
@@ -1491,8 +1498,8 @@ body {
 
 .puzzle__quit {
   background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
+  color: var(--accent-clair);
+  border: 1px solid var(--accent-clair);
 }
 
 .puzzle__quit:active {

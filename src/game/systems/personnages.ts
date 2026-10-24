@@ -15,7 +15,8 @@ export interface Personnage {
   // vol comme l'inventaire et le but de l'énigme le font déjà. Un `portrait`
   // l'emporte, le jour où l'artiste en photographie un.
   modele?: string;
-  // Par défaut l'accent du jeu.
+  // Par défaut l'accent clair du jeu (`--accent-clair`) : un nom se lit sur la
+  // boîte sombre, et une couleur propre doit y tenir 4,5:1 elle aussi.
   couleur?: string;
 }
 

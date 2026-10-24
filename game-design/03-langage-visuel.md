@@ -173,6 +173,20 @@ Définie dans `src/game/config.ts`.
 L'accent terracotta sert aux **traits de pli** dans les crease patterns comme aux
 **boutons pressés** : c'est la couleur de ce qui se plie et de ce qui réagit.
 
+**Il a deux tons, dans l'interface** (`:root` de `src/ui/style.css`). L'accent
+plein pour les aplats sous un texte clair — bouton pressé, flèche de la boîte
+de dialogue. L'accent clair (`--accent-clair`) pour ce qui se pose sur du
+sombre : nom du locuteur, texte et bouton de danger, langue en cours. L'accent
+plein n'y tient ni 4,5:1 en texte ni 3:1 en repère, et la protanopie, qui
+assombrit les rouges, l'y efface presque. Tout nouvel usage sur fond sombre
+prend le ton clair, et se vérifie en simulant les trois daltonismes.
+
+**Le doré (`--or`) n'a qu'un usage** : l'appel de la boîte de dialogue, quand un
+tap tombe à côté. Il n'appartient pas aux menus, qui marquent à l'accent.
+
+**Le titre** de l'écran d'accueil prend les tons du décor : le vert de la
+grenouille, relevé sur sa photo, cerné du gris clair de la pierre (`--pierre`).
+
 ## Le papier des origamis
 
 Une feuille d'origami a **deux faces qui ne se ressemblent pas**, et c'est ce qui
