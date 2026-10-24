@@ -296,6 +296,13 @@ Seul le menu reste atteignable, et il **fige la scène** (`figerLeJeu`, dans
 panneau. Tout se relève à la fin du trajet **et au shutdown** — des attentes restées
 ouvertes rendraient la pièce sourde pour de bon.
 
+**Ce qui couvre tout le décor arrête Phaser, rendu compris** (`couvrirLeJeu()`,
+même fichier) : l'énigme, et le menu de pause. Dessous, il redessinait à chaque
+image une scène que personne ne voit, et c'est ce qui faisait ramer les pièces.
+Le canvas garde sa dernière image. Rien de ce qui se joue pendant une énigme ne
+doit donc compter sur l'horloge de Phaser : tutoriel, réplique d'erreur et
+pliage de démonstration vivent en DOM ou dans leur propre couche 3D.
+
 **Pendant un dialogue ou une cinématique, les marqueurs se retirent** d'un zoom,
 et l'inventaire reste à l'écran sans répondre — `Overlay.marquerLeRecit()`,
 tenu par `DialogueRunner.run()`, couvre aussi les moments où le récit travaille
@@ -567,6 +574,16 @@ l'instance sur pied pour que la faute suivante ne coûte plus que son knot.
 
 **Hotspots qui se chevauchent** : la profondeur est assignée par surface
 croissante, sinon la grande zone avale les taps destinés au détail posé dessus.
+
+**Un `Graphics` de Phaser se retriangule à chaque image**, qu'il ait changé ou
+non. Les feuilles précieuses du trône saturaient ainsi le processeur d'un
+téléphone : ce qui ne bouge pas se fige en texture (`figer()`, dans
+`feuilles-precieuses.ts`), et une lumière qui bouge se peint dans un canvas 2D
+découpé à la feuille.
+
+**Un canvas qu'on relit se crée avec `willReadFrequently`**, sinon il vit sur le
+GPU et chaque `getImageData` attend la carte : c'était le plus long du montage
+d'une pièce (`grain()`, dans `papier.ts`).
 
 **`input.windowEvents: false` est indispensable, ne pas le retirer.** Par défaut
 Phaser double ses écouteurs de pointeur sur `window` en phase de *capture* : un

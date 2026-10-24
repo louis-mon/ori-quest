@@ -3,7 +3,7 @@ import './ui/style.css';
 
 import { debloquerLAudioAuPremierGeste } from './audio';
 import { donner, effetsDuRecit } from './game/effets-du-recit';
-import { figerLeJeu } from './game/gel';
+import { couvrirLeJeu, figerLeJeu } from './game/gel';
 import { creerLeMoteur } from './game/moteur';
 import { Navigation } from './game/navigation';
 import { Rideau } from './game/rideau';
@@ -49,7 +49,7 @@ const navigation: Navigation = new Navigation(game, uiRoot, () => ({
 const dialogue: DialogueRunner = new DialogueRunner(
   recitDansLaLangue(),
   overlay,
-  effetsDuRecit(uiRoot, overlay, couche, navigation),
+  effetsDuRecit(uiRoot, overlay, couche, navigation, () => couvrirLeJeu(game)),
 );
 
 const menu = new Menu(uiRoot, {

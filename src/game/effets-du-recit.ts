@@ -7,16 +7,18 @@ import { objet } from './systems/objets';
 import { gameState } from './systems/state';
 
 // Ce que chaque tag ink fait au jeu, branché sur le système qui le joue.
+// `couvrir` : voir `couvrirLeJeu()` (`gel.ts`).
 export function effetsDuRecit(
   uiRoot: HTMLElement,
   overlay: Overlay,
   couche: CoucheDuRecit,
   navigation: Navigation,
+  couvrir: () => () => void,
 ): DialogueEffects {
   return {
     origami: couche.plier,
     rangerLePliage: couche.ranger,
-    puzzle: (nom) => jouerEnigme(uiRoot, overlay, nom),
+    puzzle: (nom) => jouerEnigme(uiRoot, overlay, nom, couvrir),
     goto: navigation.goto,
     donner: (item) => {
       const { modele } = objet(item);

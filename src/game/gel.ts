@@ -18,4 +18,32 @@ export function figerLeJeu(game: Phaser.Game, gele: boolean) {
       game.scene.resume(cle);
     }
   }
+  // Une scène en pause est redessinée quand même, à l'identique, et le flou du
+  // menu se recalcule sur chacune de ces images.
+  couvrir(game, 'gel', gele);
+}
+
+// Ce qui couvre tout le décor arrête Phaser, rendu compris : sous l'énigme, il
+// redessinait à chaque image une scène que personne ne voit, et c'était l'essentiel
+// du travail du GPU pendant qu'on glisse une pièce — sans compter les effets de
+// la pièce, qui saturaient le processeur sur celle du cœur. Le canvas garde sa
+// dernière image.
+//
+// `game.pause()` et non `loop.sleep()` : Phaser réveille sa boucle quand
+// l'onglet redevient visible, il ne touche pas à sa pause. Le cadre suit
+// toujours la fenêtre, Phaser se redimensionnant sur l'événement lui-même.
+export function couvrirLeJeu(game: Phaser.Game): () => void {
+  const jeton = {};
+  couvrir(game, jeton, true);
+  return () => couvrir(game, jeton, false);
+}
+
+// Le menu peut s'ouvrir sur l'énigme : le jeu ne repart qu'une fois tout levé.
+const couvertures = new Set<unknown>();
+
+function couvrir(game: Phaser.Game, raison: unknown, couvert: boolean) {
+  if (couvert) couvertures.add(raison);
+  else couvertures.delete(raison);
+  if (couvertures.size > 0) game.pause();
+  else game.resume();
 }

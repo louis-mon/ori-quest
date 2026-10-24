@@ -23,8 +23,7 @@ export function dessinerFeuille(
     g.closePath();
   };
 
-  g.clear();
-
+  // Pas de `clear()` : il effacerait le décalage que `figer()` pose avant.
   g.fillStyle(recto, 1);
   polygone(geometrie.feuille);
   g.fillPath();

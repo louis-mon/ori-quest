@@ -8,12 +8,21 @@ import { lanceurTutoriel } from './tutoriel';
 // Le tag `# puzzle:`. Publie l'issue dans un drapeau `<nom>_resolu`, que la
 // narration relit juste après. Montée dans la couche DOM, ce qui permet un
 // glisser-déposer fiable malgré `input.windowEvents: false`.
-export async function jouerEnigme(uiRoot: HTMLElement, overlay: Overlay, nom: string) {
+//
+// `couvrir` arrête le décor le temps de l'énigme, qui le recouvre en entier ; il
+// rend de quoi le relancer.
+export async function jouerEnigme(
+  uiRoot: HTMLElement,
+  overlay: Overlay,
+  nom: string,
+  couvrir: () => () => void,
+) {
   const def = PUZZLES[nom];
   if (!def) {
     console.error(`[puzzle] énigme inconnue : "${nom}"`);
     return;
   }
+  const decouvrir = couvrir();
   try {
     overlay.hideDialogue();
     const outcome = await runCreasePuzzle(uiRoot, def, {
@@ -26,5 +35,7 @@ export async function jouerEnigme(uiRoot: HTMLElement, overlay: Overlay, nom: st
     // d'un abandon, la narration a déjà une branche pour ça.
     console.error(`[puzzle] "${nom}" n'a pas pu s'ouvrir`, err);
     gameState.setFlag(`${nom}_resolu`, false);
+  } finally {
+    decouvrir();
   }
 }

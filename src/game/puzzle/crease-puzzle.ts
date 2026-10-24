@@ -107,7 +107,7 @@ export async function runCreasePuzzle(
   def: CreasePuzzleDef,
   options: OptionsPuzzle = {},
 ): Promise<PuzzleOutcome> {
-  const { viewBox, inner, folds } = await loadPattern(def.svg);
+  const { viewBox, plisDans, folds } = await loadPattern(def.svg);
   const grille = def.decoupage.grille;
 
   const el = document.createElement('div');
@@ -230,7 +230,7 @@ export async function runCreasePuzzle(
       `<defs><clipPath id="${coupe}" clipPathUnits="userSpaceOnUse">` +
       `<path d="${d}" /></clipPath></defs>` +
       `<path class="puzzle__paper" d="${d}" />` +
-      `<g clip-path="url(#${coupe})">${inner}</g>` +
+      `<g clip-path="url(#${coupe})">${plisDans({ x: vx, y: vy, w: vw, h: vh })}</g>` +
       `</svg>`;
 
     return { el: piece, boite: b, masque: masque(points) };
@@ -734,13 +734,63 @@ async function loadPattern(url: string) {
 
   const [x, y, w, h] = (svg.getAttribute('viewBox') ?? '0 0 1000 1000').split(/[\s,]+/).map(Number);
 
+  // Le trait est en pixels d'écran (`non-scaling-stroke`) : un pli qui longe la
+  // fenêtre par l'extérieur peut encore mordre sur la pièce. La marge couvre son
+  // demi-trait tant que le plateau dépasse la centaine de pixels.
+  const marge = w * 0.02;
+
   // La légende se construit à partir du motif : le pont n'a que des plis vallée,
   // et annoncer un pli montagne enverrait chercher une couleur introuvable.
   return {
     viewBox: { x, y, w, h },
-    inner: svg.innerHTML,
+    // Seuls les plis qui traversent la fenêtre de la pièce : avec le motif
+    // entier sous chaque détourage, l'os alignait des milliers de traits dans
+    // le document, que l'on repeignait à chaque pièce prise ou posée.
+    plisDans(fenetre: Boite): string {
+      const large = {
+        x: fenetre.x - marge,
+        y: fenetre.y - marge,
+        w: fenetre.w + 2 * marge,
+        h: fenetre.h + 2 * marge,
+      };
+      // Une copie vide de la racine, pour que les enfants se sérialisent dans
+      // son espace de noms au lieu de répéter chacun le leur.
+      const copie = svg.cloneNode(false) as Element;
+      for (const enfant of Array.from(svg.children)) {
+        if (enfant.localName === 'line' && !traverse(enfant, large)) continue;
+        copie.appendChild(enfant.cloneNode(true));
+      }
+      return copie.innerHTML;
+    },
     folds: { valley: !!svg.querySelector('.va'), mountain: !!svg.querySelector('.mo') },
   };
+}
+
+// Liang–Barsky : le segment entre-t-il dans le rectangle ?
+function traverse(ligne: Element, { x, y, w, h }: Boite): boolean {
+  const n = (attribut: string) => Number(ligne.getAttribute(attribut) ?? 0);
+  const x1 = n('x1');
+  const y1 = n('y1');
+  const dx = n('x2') - x1;
+  const dy = n('y2') - y1;
+  let t0 = 0;
+  let t1 = 1;
+  for (const [p, q] of [
+    [-dx, x1 - x],
+    [dx, x + w - x1],
+    [-dy, y1 - y],
+    [dy, y + h - y1],
+  ]) {
+    if (p === 0) {
+      if (q < 0) return false;
+      continue;
+    }
+    const t = q / p;
+    if (p < 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if (t0 > t1) return false;
+  }
+  return true;
 }
 
 // Le retour d'une pièce au bac, joué plutôt que sauté. N'anime que `transform`,

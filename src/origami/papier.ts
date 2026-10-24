@@ -656,11 +656,19 @@ const peints = new Map<Papier, HTMLCanvasElement>();
 function canvasPeint(papier: Papier): HTMLCanvasElement {
   let canvas = peints.get(papier);
   if (!canvas) {
-    canvas = document.createElement('canvas');
-    canvas.width = canvas.height = TAILLE;
-    ASPECTS[papier].peindre(canvas.getContext('2d')!);
+    canvas = peindreLePapier(papier);
     peints.set(papier, canvas);
   }
+  return canvas;
+}
+
+// `grain()` relit les pixels : sans `willReadFrequently`, le canvas vit sur le
+// GPU et chaque relecture attend la carte. C'était le plus long du montage
+// d'une pièce, et il se payait à chaque papier neuf.
+function peindreLePapier(papier: Papier): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = TAILLE;
+  ASPECTS[papier].peindre(canvas.getContext('2d', { willReadFrequently: true })!);
   return canvas;
 }
 
@@ -854,9 +862,7 @@ export function papierTrace(
 }
 
 function faceTracee(THREE: typeof THREE_NS, papier: Papier, traces: readonly TracePli[]) {
-  const nu = document.createElement('canvas');
-  nu.width = nu.height = TAILLE;
-  ASPECTS[papier].peindre(nu.getContext('2d')!);
+  const nu = peindreLePapier(papier);
 
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = TAILLE;

@@ -76,6 +76,12 @@ const ETINCELLE = 'eclat-etincelle';
 const DIAMANT = 'eclat-diamant';
 const HALO = 'eclat-halo';
 const LUMIERE_COEUR = 'eclat-lumiere-coeur';
+const LUMIERE = 'eclat-lumiere';
+const DESSIN = 'feuille-precieuse';
+
+// Le dessin figé l'est à deux fois la définition du jeu, puis réduit : posé sur
+// une position fractionnaire, il serait flou à la définition exacte.
+const FINESSE = 2;
 
 export interface FeuillesPrecieuses {
   // Les quatre, qu'on montre ou cache ensemble.
@@ -116,13 +122,17 @@ function poserFeuille(
   const feuille = scene.add.container(0, 0);
 
   const lueur = allumerLaLueur(scene, LUEURS[precieuse], cote * 2, cote * 1.7, hasard);
-  const dessin = scene.add.graphics();
+  const dessin = scene.add.image(0, 0, '__DEFAULT');
   feuille.add([lueur, dessin]);
   const imprimer = (motif: (g: Phaser.GameObjects.Graphics) => void) =>
-    dessinerFeuille(dessin, geo.carre, TEINTES[precieuse], motif);
+    figer(scene, dessin, `${DESSIN}-${precieuse}-${cote}`, geo.carre, (g) =>
+      dessinerFeuille(g, geo.carre, TEINTES[precieuse], motif),
+    );
   // Posé avant les étoiles : c'est le papier qu'elles éclairent, pas elles.
   const eclairage =
-    precieuse === 'vert' ? undefined : eclairer(scene, groupe, feuille, geo, LUMIERES[precieuse]);
+    precieuse === 'vert'
+      ? undefined
+      : eclairer(scene, groupe, feuille, geo, LUMIERES[precieuse], `${LUMIERE}-${precieuse}`);
 
   switch (precieuse) {
     case 'rouge':
@@ -624,43 +634,98 @@ function eclairage(scene: Phaser.Scene, dessiner: (sources: Iterable<Source>) =>
   };
 }
 
+// Peinte dans un canvas découpé à la feuille, comme celle du cœur plié : en
+// disques emboîtés découpés au contour, chaque étoile allumée coûtait une
+// douzaine de polygones à recalculer et trianguler à chaque image, de quoi
+// saturer le processeur d'un téléphone sur la salle du trône.
 function eclairer(
   scene: Phaser.Scene,
   groupe: Phaser.GameObjects.Container,
   feuille: Phaser.GameObjects.Container,
   geo: GeometrieFeuille,
   reglage: { rayon: number; force: number },
+  cle: string,
 ): Eclairage {
-  const lumiere = scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
-  feuille.add(lumiere);
-  const rayon = geo.carre.w * reglage.rayon;
-  // Des disques emboîtés, du plus large au plus serré : un dégradé radial que
-  // Phaser ne sait pas remplir d'un coup. À cinq, les anneaux se voyaient.
-  const ANNEAUX = 12;
-  const COTES = 20;
+  const { x, y, w } = geo.carre;
+  // La texture survit au changement de pièce, l'image qui la montrait non.
+  if (scene.textures.exists(cle)) scene.textures.remove(cle);
+  const texture = scene.textures.createCanvas(cle, Math.ceil(w), Math.ceil(w));
+  const ctx = texture?.getContext();
+  if (!texture || !ctx) return { poser() {} };
+  feuille.add(scene.add.image(x, y, cle).setOrigin(0).setBlendMode(Phaser.BlendModes.ADD));
+  const rayon = w * reglage.rayon;
+  let allumee = false;
 
   return eclairage(scene, (sources) => {
-    lumiere.clear();
-    if (!groupe.visible) return;
-    for (const { x, y, force, teinte } of sources) {
-      if (force < 0.02) continue;
-      for (let k = ANNEAUX; k >= 1; k--) {
-        const r = (rayon * k) / ANNEAUX;
-        const disque: Point[] = [];
-        for (let c = 0; c < COTES; c++) {
-          const a = (c / COTES) * Math.PI * 2;
-          disque.push([x + Math.cos(a) * r, y + Math.sin(a) * r]);
-        }
-        lumiere.fillStyle(teinte, (reglage.force * force) / ANNEAUX);
-        remplir(lumiere, decouper(disque, geo.feuille));
+    // Cachées, les étoiles continuent de tourner : la texture, elle, n'a pas à
+    // repartir au GPU à chaque image.
+    if (!groupe.visible && !allumee) return;
+    ctx.clearRect(0, 0, texture.width, texture.height);
+    allumee = groupe.visible;
+    if (allumee) {
+      ctx.save();
+      ctx.translate(-x, -y);
+      ctx.beginPath();
+      ctx.moveTo(geo.feuille[0][0], geo.feuille[0][1]);
+      for (const [px, py] of geo.feuille.slice(1)) ctx.lineTo(px, py);
+      ctx.closePath();
+      ctx.clip();
+      // Les sources s'additionnent. Le dégradé linéaire est celui que les
+      // disques emboîtés approchaient par paliers.
+      ctx.globalCompositeOperation = 'lighter';
+      for (const { x: sx, y: sy, force, teinte } of sources) {
+        if (force < 0.02) continue;
+        const { r, g, b } = Phaser.Display.Color.IntegerToRGB(teinte);
+        const flaque = ctx.createRadialGradient(sx, sy, 0, sx, sy, rayon);
+        flaque.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${reglage.force * force})`);
+        flaque.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        ctx.fillStyle = flaque;
+        ctx.fillRect(sx - rayon, sy - rayon, rayon * 2, rayon * 2);
       }
+      ctx.restore();
     }
+    texture.refresh();
   });
 }
 
-// La même lumière sur le cœur plié, dont le contour n'est pas un polygone
-// convexe que `decouper` saurait suivre : elle est peinte dans un canvas, puis
-// gommée hors du modèle par son propre rendu. `rayon` est ici en pixels.
+// Ce qui ne bouge pas, figé une fois en texture : laissé en `Graphics`, Phaser
+// retriangule chaque forme à chaque image. Le dessin se refait quand même à
+// chaque passage, la texture restant d'une visite à l'autre : il consomme le
+// même hasard que les étoiles, qui sans lui changeraient de place au retour.
+//
+// Le décalage est dans les commandes, la position du `Graphics` restant nulle :
+// `generateTexture` la compense ou non selon l'état de sa caméra interne.
+function figer(
+  scene: Phaser.Scene,
+  image: Phaser.GameObjects.Image,
+  cle: string,
+  carre: Box,
+  dessiner: (g: Phaser.GameObjects.Graphics) => void,
+) {
+  // Ce qui déborde du carré : le contour, et les traits et éclats posés près
+  // du bord.
+  const marge = carre.w * 0.05 + 2;
+  const x = carre.x - marge;
+  const y = carre.y - marge;
+  const cote = carre.w + marge * 2;
+
+  const g = scene.make.graphics({}, false);
+  g.setScale(FINESSE).translateCanvas(-x, -y);
+  dessiner(g);
+  if (!scene.textures.exists(cle)) {
+    g.generateTexture(cle, Math.ceil(cote * FINESSE), Math.ceil(cote * FINESSE));
+  }
+  g.destroy();
+  image
+    .setTexture(cle)
+    .setOrigin(0)
+    .setPosition(x, y)
+    .setScale(1 / FINESSE);
+}
+
+// La même lumière sur le cœur plié, dont le contour n'est pas un polygone :
+// elle est gommée hors du modèle par son propre rendu. `rayon` est ici en
+// pixels.
 function eclairerLaSilhouette(
   scene: Phaser.Scene,
   eclats: Phaser.GameObjects.Container,

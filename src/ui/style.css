@@ -1236,12 +1236,7 @@ body {
   min-height: 0;
 }
 
-/* `--w` et `--h` portent la BOÎTE de la pièce, en cellules ; le papier n'en
-   occupe qu'une partie, c'est un polygone tracé dans le SVG. D'où `drop-shadow`
-   et non `box-shadow` : le filtre suit l'alpha, donc la découpe, là où l'ombre
-   de boîte trahirait le rectangle dès que deux pièces se chevauchent. */
 .puzzle__piece {
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)) drop-shadow(0 4px 7px rgba(0, 0, 0, 0.3));
   cursor: grab;
   /* Indispensable au tactile : sans ça le navigateur interprète le glisser
      comme un défilement et ne délivre jamais les pointermove. */
@@ -1266,13 +1261,25 @@ body {
   z-index: 20;
   cursor: grabbing;
   will-change: transform;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55));
 }
 
+/* `--w` et `--h` portent la BOÎTE de la pièce, en cellules ; le papier n'en
+   occupe qu'une partie, c'est un polygone tracé dans le SVG. D'où `drop-shadow`
+   et non `box-shadow` : le filtre suit l'alpha, donc la découpe, là où l'ombre
+   de boîte trahirait le rectangle dès que deux pièces se chevauchent.
+
+   Sur le SVG et non sur la pièce : posé sur l'élément qui a sa propre couche
+   pendant le glisser, le filtre était refait par le compositeur à chaque image ;
+   sur son enfant, il est peint une fois avec elle. */
 .puzzle__piece svg {
   display: block;
   width: 100%;
   height: 100%;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)) drop-shadow(0 4px 7px rgba(0, 0, 0, 0.3));
+}
+
+.puzzle__piece.is-dragging svg {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55));
 }
 
 /* Le papier lui-même : la silhouette découpée, qui porte la couleur, le bord de
