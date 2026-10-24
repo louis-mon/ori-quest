@@ -19,7 +19,7 @@ import {
 // L'accueil ne se rouvre pas : on n'y revient qu'en recommençant, ce qui
 // recharge la page sur une partie neuve.
 
-const NOM_DU_JEU = 'Oriquest'; // hors traduction
+const NOM_DU_JEU = 'Orifable'; // hors traduction
 
 // Celui de la transition de `.ecran`, dans style.css.
 const FONDU_MS = 320;
