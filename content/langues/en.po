@@ -2855,14 +2855,14 @@ msgid "La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir 
 msgstr "Peace has returned to the Origami Kingdom, thanks to you! Thank you for playing!"
 
 #. interface
-#: src/ui/fin.ts src/ui/menu.ts
+#: src/ui/fin.ts
 msgid "Recommencer"
 msgstr "Start over"
 
 #. interface
 #: src/ui/menu.ts
-msgid "Reprendre à…"
-msgstr "Resume at…"
+msgid "Points d’étape"
+msgstr "Checkpoints"
 
 #. interface
 #: src/ui/menu.ts
@@ -2871,18 +2871,18 @@ msgstr "Menu"
 
 #. interface
 #: src/ui/menu.ts
-msgid "Plein écran"
-msgstr "Fullscreen"
-
-#. interface
-#: src/ui/menu.ts
-msgid "Options"
-msgstr "Options"
+msgid "Recommencer l’aventure"
+msgstr "Restart the adventure"
 
 #. interface
 #: src/ui/menu.ts
 msgid "Langue"
 msgstr "Language"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Plein écran"
+msgstr "Fullscreen"
 
 #. interface
 #: src/ui/menu.ts
@@ -2903,6 +2903,21 @@ msgstr "Cancel"
 #: src/ui/menu.ts
 msgid "Tout effacer"
 msgstr "Erase everything"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Pause"
+msgstr "Paused"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Commencer à plier"
+msgstr "Start folding"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Reprendre"
+msgstr "Resume"
 
 #. interface
 #: src/ui/menu.ts

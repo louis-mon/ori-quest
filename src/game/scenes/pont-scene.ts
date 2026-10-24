@@ -5,6 +5,7 @@ import plan from '../../generated/scenes/pont';
 import { boxOf, exitsFrom, hotspotsFrom, type Box } from './layout';
 import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
+import { poserHorsCadre, type Position } from './deplacement';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { dessinerCiel, preloadCiel, semerNuages } from './ciel';
@@ -33,6 +34,10 @@ const GRAINE_DU_CIEL = 1907;
 
 const SOL = boxOf(PLAN, 'dec_sol');
 
+// Trois bonds environ depuis le bord du cadre. À régler à l'œil.
+const BONDS_DU_HEROS = { longueur: 110, hauteur: 46 };
+const VITESSE_DU_HEROS = 210;
+
 export class PontScene extends PointClickScene {
   protected readonly plan = PLAN;
   protected arrivee = { knot: 'pont_arrivee', flag: 'pont_vu' };
@@ -42,6 +47,8 @@ export class PontScene extends PointClickScene {
   private feuilleArbre!: Phaser.GameObjects.Image;
   private vieilArbre!: OrigamiDecor;
   private souche!: Phaser.GameObjects.Image;
+  private heros!: Phaser.GameObjects.Image;
+  private placeDuHeros!: Position;
 
   // Emprise de la grande feuille à plat, et celle de l'arbre une fois plié.
   private empriseFeuilleArbre?: Box;
@@ -126,6 +133,15 @@ export class PontScene extends PointClickScene {
     if (emprise) this.caler('feuille_vieil_arbre', emprise);
   }
 
+  // Elle arrive par la gauche, en sautant : sa première réplique parle du
+  // voyage de retour qu'elle vient de finir.
+  protected entrerEnScene() {
+    return this.deplacer(this.heros, this.placeDuHeros, {
+      bonds: BONDS_DU_HEROS,
+      vitesse: VITESSE_DU_HEROS,
+    });
+  }
+
   // ------------------------------------------------------------------
   // Décor
   // ------------------------------------------------------------------
@@ -141,7 +157,11 @@ export class PontScene extends PointClickScene {
 
     // La zone tactile suit l'emprise réelle du sprite, pas la boîte du plan.
     this.caler('arbre', empriseDe(placeSprite(this, JEUNE_ARBRE, boxOf(PLAN, 'hs_arbre'))));
-    this.caler('heros', empriseDe(placeHeros(this, boxOf(PLAN, 'hs_heros'))));
+    this.heros = placeHeros(this, boxOf(PLAN, 'hs_heros'));
+    this.caler('heros', empriseDe(this.heros));
+    this.placeDuHeros = { x: this.heros.x, y: this.heros.y };
+    // Derrière l'écran d'accueil, la grenouille n'est pas encore arrivée.
+    if (this.services.rideau.baisse) poserHorsCadre(this.heros, 'gauche');
 
     // Calé au CENTRE de son emprise : c'est le seul élément du décor qui ne
     // repose sur rien, et le caler par le bas le faisait glisser selon la hauteur

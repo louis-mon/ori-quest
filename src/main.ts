@@ -6,6 +6,7 @@ import { donner, effetsDuRecit } from './game/effets-du-recit';
 import { figerLeJeu } from './game/gel';
 import { creerLeMoteur } from './game/moteur';
 import { Navigation } from './game/navigation';
+import { Rideau } from './game/rideau';
 import { DialogueRunner } from './game/systems/dialogue';
 import { sauverALaSortie } from './game/systems/sauvegarde-a-la-sortie';
 import { gameState } from './game/systems/state';
@@ -36,19 +37,30 @@ const syncStage = suivreLeCadre(game, document.getElementById('stage')!);
 const couche = new CoucheDuRecit(document.getElementById('origami-canvas') as HTMLCanvasElement);
 overlay.brancherApercu(couche.apercu);
 
+const rideau = new Rideau();
+
 // Le récit a besoin de la navigation (`# goto:`), et les scènes que la
 // navigation démarre ont besoin du récit : celle-ci le lit au démarrage.
-const navigation: Navigation = new Navigation(game, uiRoot, () => ({ overlay, dialogue }));
+const navigation: Navigation = new Navigation(game, uiRoot, () => ({
+  overlay,
+  dialogue,
+  rideau,
+}));
 const dialogue: DialogueRunner = new DialogueRunner(
   recitDansLaLangue(),
   overlay,
   effetsDuRecit(uiRoot, overlay, couche, navigation),
 );
 
-new Menu(uiRoot, { onLayoutChange: syncStage, onGel: (gele) => figerLeJeu(game, gele) });
+const menu = new Menu(uiRoot, {
+  rideau,
+  onLayoutChange: syncStage,
+  onGel: (gele) => figerLeJeu(game, gele),
+});
 
 game.events.once(Phaser.Core.Events.READY, () => {
   gameState.load();
+  if (!gameState.commencee) menu.accueillir();
   navigation.demarrer();
 });
 

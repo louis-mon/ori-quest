@@ -400,7 +400,7 @@ sans répondant.
 | En-tête de locuteur (nom + vignette) | ✅ implémenté |
 | Marqueur cocotte sur les hotspots | ✅ garder |
 | Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |
-| Menu (plein écran, recommencer) | ✅ implémenté |
+| Écran d'accueil et de pause (options, recommencer) | ✅ implémenté |
 | Menu de verbes | ✅ retiré (verbe unique `analyser`) |
 | Inventaire (objets + idées) | ✅ colonne à gauche, tap = description |
 | Carnet d'idées | ✅ c'est l'inventaire — pas d'écran séparé |
@@ -434,27 +434,45 @@ deux fichiers, et il en manquait forcément un. C'est l'interface elle-même qui
 répond maintenant, en un seul endroit (`occupeLeJoueur` dans
 [`overlay.ts`](../src/ui/overlay.ts)).
 
-## Le menu
+## L'écran d'accueil, qui est aussi la pause
 
-Bouton en haut à droite — à l'opposé de l'inventaire, pour qu'aucun des deux ne
-recouvre l'autre. Il ouvre trois entrées :
+**Un seul écran pour deux moments.** Une partie neuve s'ouvre dessus : le titre,
+« Oriquest », courbé en arche, et au milieu, en gros, « Commencer à plier ».
+Pendant la partie, le bouton du coin haut-droit — à l'opposé de l'inventaire,
+pour qu'aucun des deux ne recouvre l'autre — rouvre le même écran, sous
+« Pause » et avec « Reprendre ». Même disposition, mêmes options : le joueur
+n'apprend qu'un écran.
 
-**Plein écran.** Masqué automatiquement là où le navigateur ne le permet pas,
-plutôt que d'offrir un bouton inerte — c'est le cas de Safari sur iPhone, qui
-réserve encore l'API plein écran aux vidéos. Sur itch.io, le lecteur fournit de
-toute façon son propre bouton.
+**Le titre est vert et gris**, les tons végétaux du décor : le vert de la
+grenouille, relevé sur sa photo, cerné du gris clair de la pierre. C'est la
+première chose que voit le joueur, et elle doit déjà ressembler au jeu. Le
+contraste tient à la clarté, pas à la teinte — un vert sombre sur un gris
+clair —, si bien qu'un daltonien le lit aussi bien que les autres ; vérifié en
+simulant protanopie, deutéranopie et tritanopie.
 
-**Options.** Une fenêtre, et pour l'instant un seul réglage : la langue. Chaque
-langue s'y écrit dans sa propre langue — « English », « Français » —, puisque
-c'est sous ce nom que la cherche celui qui ne lit pas la langue en cours ; et
-« Options » se dit pareil dans les deux, ce qui guide celui que le navigateur a
-mal deviné. La langue en cours est cochée. Toucher une autre langue l'applique
-aussitôt, sans confirmation : rien ne se perd, la page se recharge sur la même
-pièce. Sans choix, le jeu prend la langue du navigateur, et l'anglais s'il ne la
-parle pas.
+**La pièce reste dessous**, floutée, ses couleurs atténuées : reculée, pas
+éteinte — en noir et blanc, l'écran devient triste. À l'accueil, c'est la première
+pièce, et elle vit — les nuages passent, l'eau coule —, mais elle est vide : la
+grenouille n'est pas encore arrivée. « Commencer à plier » lève l'écran, et elle
+entre par la gauche en sautant avant de dire sa première réplique, celle du
+voyage de retour qui s'achève. Le jeu commence par un mouvement, pas par une
+boîte de texte. En pause, la pièce est celle où l'on joue, et elle s'arrête : ce
+qui traversait l'écran reprend sa course à « Reprendre », pas derrière le
+panneau.
 
-**Recommencer.** Passe par une confirmation explicite (« Cette action est
-définitive »), puis écrase la sauvegarde et recharge la page.
+**L'accueil ne se voit qu'une fois par partie.** Il paraît au chargement tant
+que la partie n'a laissé aucune trace — ni drapeau, ni objet, ni pièce quittée ;
+sinon on arrive directement en jeu, là où on l'avait laissé. On n'y revient
+qu'en recommençant. Le dialogue d'arrivée compte dans la partie : comme toute
+conversation, il n'atteint la sauvegarde qu'à sa dernière réplique, et un
+rechargement en plein milieu rouvre l'accueil plutôt qu'une pièce où la
+grenouille se tiendrait sans avoir rien dit.
+
+**« Recommencer l'aventure »**, un vrai bouton, sombre, plus petit que le
+principal et assez loin dessous pour ne pas en être la légende ; en pause
+seulement : une partie neuve n'a rien à effacer. Il passe par une confirmation
+explicite (« Cette action est définitive »), puis écrase la sauvegarde et
+recharge la page — qui s'ouvre donc sur l'accueil.
 
 Le rechargement complet est délibéré : l'état de jeu n'est pas le seul à devoir
 repartir de zéro. Le récit ink conserve ses variables dans son instance `Story`,
@@ -466,6 +484,41 @@ C'est aussi une nuance de la sauvegarde : elle est **réécrite** avec un état
 neuf, pas supprimée. Effacer la clé laisserait le gestionnaire `pagehide`
 réenregistrer l'état courant pendant le rechargement, et ressusciter la partie
 qu'on vient d'effacer.
+
+### Les options sont sur l'écran, en ligne
+
+Pas de fenêtre à ouvrir : deux rangées en bas de l'écran. En ligne et non en
+colonne, parce qu'en paysage sur téléphone c'est la hauteur qui manque.
+
+**Langue, sur sa propre ligne**, au-dessus des autres : mêlée aux réglages
+d'affichage, rien ne l'en séparait. Chaque langue s'y écrit dans sa propre
+langue — « English », « Français » —, puisque c'est sous ce nom que la cherche
+celui qui ne lit pas la langue en cours, et précédée d'un drapeau, qui se repère
+avant de se lire ; l'anglais prend celui du Royaume-Uni. Les drapeaux sont du
+domaine public, repris de Wikimedia Commons. Elles sont sous les yeux dès
+l'accueil, avant la première réplique, pour celui que le navigateur a mal
+deviné. La langue en cours est
+cochée. Toucher une autre langue l'applique aussitôt, sans confirmation : rien
+ne se perd, la page se recharge sur la même pièce. Sans choix, le jeu prend la
+langue du navigateur, et l'anglais s'il ne la parle pas.
+
+**Sur la seconde ligne**, les autres options ; la difficulté et les crédits
+viendront s'y ranger.
+
+**Plein écran.** Masqué automatiquement là où le navigateur ne le permet pas,
+plutôt que d'offrir un bouton inerte — c'est le cas de Safari sur iPhone, qui
+réserve encore l'API plein écran aux vidéos. Sur itch.io, le lecteur fournit de
+toute façon son propre bouton.
+
+**Points d'étape**, tant que la page itch.io est en Draft : les chapitres du
+build, puis leurs étapes. Un outil de testeur, pas une option du joueur.
+
+### Le flou a un prix
+
+Le même qui l'a fait retirer de la boîte de dialogue : le décor dessous bouge, et
+le navigateur recalcule le flou à chaque image. Ici il ne se paie que pendant que
+personne ne joue, et l'écran caché n'en coûte rien. Sans flou du tout, le voile
+sombre suffit à lire.
 
 ## Principe directeur
 

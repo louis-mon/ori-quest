@@ -162,7 +162,11 @@ export const etat = (page) =>
       enigme: !!document.querySelector('.puzzle'),
       tuto: !!document.querySelector('.tuto'),
       fin: !!document.querySelector('.fin'),
-      menu: !document.querySelector('.menu__panel')?.hidden,
+      // L'écran du menu, et lequel des deux : l'accueil d'une partie neuve, ou
+      // la pause.
+      ecran: document.querySelector('.ecran')?.hidden
+        ? null
+        : document.querySelector('.ecran')?.dataset.mode,
       inventaire: [...document.querySelectorAll('.inventory__item')].map((e) => e.dataset.objet),
       piece: sauve.room,
       // Ce qui est ÉCRIT sur le disque, et non ce que la partie en cours a en
@@ -249,6 +253,12 @@ export async function deroulerDialogue(page, max = 40) {
     await avancer(page);
   }
   return etat(page);
+}
+
+// Une partie neuve s'ouvre sur l'écran d'accueil : la grenouille n'entre en
+// scène, puis ne parle, qu'au « Commencer à plier ».
+export async function commencer(page) {
+  await taperSur(page, '.ecran [data-action="principal"]');
 }
 
 export async function choisir(page, motif) {

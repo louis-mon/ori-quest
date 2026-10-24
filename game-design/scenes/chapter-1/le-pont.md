@@ -4,6 +4,9 @@ Le personnage principal arrive devant un précipice. Le pont **a disparu** — i
 n'est pas cassé, il n'en reste rien. Comme le vieil arbre, dont le fils dit qu'il
 a disparu d'un coup.
 
+Il arrive pour de bon : derrière l'écran d'accueil, la scène est vide, et la
+grenouille entre par la gauche en sautant au « Commencer à plier ».
+
 <dialogue de constatation>
 
 Une feuille de papier déplié peut être examinée.

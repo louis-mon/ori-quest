@@ -277,9 +277,12 @@ l'objet au départ. Elle ne dit que le trajet — `deplacer()`
 plan ou une position, et c'est la scène qui décide de la vitesse. **Sortir de
 l'écran ne se dessine qu'à moitié** : le dernier sommet tiré hors cadre donne la
 direction, la distance est calculée (`sortie`) parce qu'elle dépend de la taille
-de l'objet à l'écran, que la carte ne connaît pas. Et **un déplacement ne bloque
-pas la scène** — le décor reste touchable pendant qu'un objet traverse, sauf
-`bloquant: true` pour ce qui doit être vu avant qu'on puisse agir.
+de l'objet à l'écran, que la carte ne connaît pas. L'entrée de la grenouille,
+elle, ne se dessine pas du tout : de juste hors du bord gauche jusqu'à sa place,
+à la même hauteur, le trajet est tout entier dérivé de `hs_heros`
+(`poserHorsCadre()`). Et **un déplacement ne bloque pas la scène** — le décor
+reste touchable pendant qu'un objet traverse, sauf `bloquant: true` pour ce qui
+doit être vu avant qu'on puisse agir.
 
 **Bloquant veut dire vraiment bloquant**, et l'état est **transitoire** : décor
 et inventaire cessent de répondre, et les marqueurs se retirent (ci-dessous).
@@ -305,6 +308,15 @@ drapeau, `auLeverDe()` (`PointClickScene`) joue le mouvement. Un drapeau **déj�
 levé en arrivant** pose l'objet à son arrivée sans rien rejouer, sinon le
 dinosaure s'écarte à chaque retour dans la pièce. Et le mouvement attend que la
 boîte de dialogue se referme : l'état, lui, n'attend pas.
+
+**L'écran d'accueil est un rideau** (`src/game/rideau.ts`). Il ne paraît au
+chargement que si la partie n'a laissé aucune trace (`gameState.commencee`), et
+la première pièce se monte derrière, vivante mais fermée : `PointClickScene`
+attend le lever pour jouer `entrerEnScene()` — la grenouille, par bonds —, puis
+son dialogue d'arrivée. C'est le même écran que la pause (`src/ui/menu.ts`), et
+on n'y revient qu'en recommençant. Un rechargement pendant l'arrivée rouvre
+l'accueil, et c'est juste : la transaction n'a rien écrit, la partie n'a pas
+commencé.
 
 **Le découpage des énigmes se dessine aussi, et ailleurs que dans le code.** Il
 vit dans `game-design/enigmes/<nom>.json`, se trace dans
@@ -424,20 +436,19 @@ plus rien à reprendre. D'où le fait que `.tuto`
 ne soit **pas positionné** : positionné, il ferait contexte d'empilement et ses
 enfants ne pourraient plus encadrer la boîte de dialogue.
 
-**Le menu passe au-dessus de tout ça** — voile à 6, bouton et panneau à 7,
-fenêtres à 8 — parce que plein écran et remise à zéro doivent rester atteignables
-énigme ouverte ; sans `z-index`, le bouton restait **dessiné mais inerte** sous le
-tas de pièces. Attention à l'ordre du DOM, qui départage à `z-index` égal :
-l'énigme est montée bien après le menu, donc un voile de menu à 4 passerait
-dessous.
+**Le menu passe au-dessus de tout ça** — bouton et écran à 7, fenêtres à 8 —
+parce que plein écran et remise à zéro doivent rester atteignables énigme
+ouverte ; sans `z-index`, le bouton restait **dessiné mais inerte** sous le tas
+de pièces. Attention à l'ordre du DOM, qui départage à `z-index` égal : l'énigme
+est montée bien après le menu, donc un écran de menu à 4 passerait dessous.
 
-Le tutoriel comme le menu ont leur **voile**, transparent et plein cadre, et pour
-la même raison : celui du tutoriel absorbe les taps destinés à l'énigme (il ne
-s'assombrit que pour la démonstration), celui du menu ceux qui le referment —
-sans quoi le même geste déclenche au passage le hotspot du décor.
+Le tutoriel a son **voile**, transparent et plein cadre : il absorbe les taps
+destinés à l'énigme (il ne s'assombrit que pour la démonstration) — sans quoi le
+même geste déclenche au passage le hotspot du décor.
 `input.windowEvents: false` garde Phaser sur le canvas, mais le tap y est traité
 **puis** remonte jusqu'à l'écouteur `window`, et `occupeLeJoueur` ne connaît que
-la boîte de dialogue et le menu de verbes.
+la boîte de dialogue et le menu de verbes. L'écran du menu tient ce rôle pour
+lui-même : il couvre le cadre, et un tap hors de ses boutons ne referme rien.
 
 **La flèche du tutoriel est un SVG, pas le pliage de l'artiste.** Le marqueur de
 sortie (`assets/ui/fleche.png`) fait partie du décor et attend qu'on le

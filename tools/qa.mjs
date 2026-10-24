@@ -31,6 +31,7 @@ import {
   reglerDelaiTap,
   avancer,
   choisir,
+  commencer,
   deroulerDialogue,
   etape,
   etat,
@@ -396,12 +397,27 @@ test('toucher', async (page, dire) => ({
     await pause(1000);
     dire('la boîte refermée au doigt ne se rouvre pas', !(await etat(page())).boite);
 
-    // Le voile du menu se retire lui aussi de sous le doigt qui le touche.
+    // L'écran de pause se retire lui aussi de sous le doigt qui le referme. La
+    // souris rejouée se guette sur le canvas lui-même plutôt que par un hotspot
+    // placé sous « Reprendre » : l'essai prouve encore quelque chose le jour où
+    // le bouton bouge.
     await page().locator('.menu__button').tap();
-    await toucherZone(page(), 'jardin', 'fontaine');
+    await pause(600);
+    await page().evaluate(() => {
+      window.sourisSurLeJeu = 0;
+      const canvas = document.querySelector('#game canvas');
+      for (const type of ['mousedown', 'mouseup']) {
+        canvas.addEventListener(type, () => window.sourisSurLeJeu++);
+      }
+    });
+    await page().locator('.ecran [data-action="principal"]').tap();
     await pause(1000);
     const e = await etat(page());
-    dire('le voile du menu ne laisse pas passer le doigt', !e.menu && !e.boite);
+    dire("l'écran de pause se referme au doigt", !e.ecran && !e.boite);
+    dire(
+      'la souris rejouée n’atteint pas le jeu',
+      (await page().evaluate(() => window.sourisSurLeJeu)) === 0,
+    );
   },
 }));
 
@@ -537,6 +553,7 @@ test(
   async (page, dire) => ({
     sauvegarde: AU_RAVIN,
     jouer: async () => {
+      await commencer(page());
       await attendreLaBoite(page());
       const l1 = (await etat(page())).texte;
       // Le tap qui achève l'écriture rouvre le délai : sinon le rebond
@@ -615,13 +632,16 @@ test(
     jouer: async () => {
       await page().locator('.menu__button').click();
       await pause(600);
-      const chapitres = await page().locator('.menu__panel [data-action="chapitre"]').count();
+      await page().locator('.ecran [data-action="etapes"]').click();
+      await pause(300);
+      const chapitres = await page().locator('.menu__liste-entrees button').count();
       dire(
         'le menu propose les trois chapitres embarqués',
         chapitres === 3,
         `${chapitres} chapitre(s)`,
       );
-      await page().locator('.menu__voile').click();
+      await page().locator('[data-action="fermer-liste"]').click();
+      await page().locator('.ecran [data-action="principal"]').click();
       await pause(600);
 
       await taperZone(page(), 'porte', 'porte');
@@ -783,6 +803,56 @@ test(
   { livre: true },
 );
 
+// Une partie neuve s'ouvre sur l'écran d'accueil, la grenouille encore hors
+// champ, et on n'y revient qu'en recommençant. Son dialogue d'arrivée est une
+// conversation comme une autre : interrompu par un rechargement, il n'a pas eu
+// lieu, et l'accueil revient avec lui.
+test('accueil', async (page, dire) => ({
+  sauvegarde: AU_RAVIN,
+  jouer: async () => {
+    let e = await etat(page());
+    dire("une partie neuve s'ouvre sur l'accueil", e.ecran === 'accueil', `écran : ${e.ecran}`);
+    dire("rien ne se dit derrière l'accueil", !e.boite);
+    dire(
+      "l'accueil n'a rien à recommencer",
+      await page().locator('.ecran [data-action="reset"]').isHidden(),
+    );
+
+    await commencer(page());
+    dire('la grenouille arrive et parle', await attendreLaBoite(page()));
+    dire("l'accueil s'est retiré", !(await etat(page())).ecran);
+
+    await page().reload({ waitUntil: 'networkidle' });
+    await pause(2000);
+    e = await etat(page());
+    dire(
+      "rechargé pendant l'arrivée, l'accueil revient",
+      e.ecran === 'accueil',
+      `écran : ${e.ecran}`,
+    );
+
+    await commencer(page());
+    await attendreLaBoite(page());
+    await deroulerDialogue(page());
+    await page().reload({ waitUntil: 'networkidle' });
+    await pause(2000);
+    dire("une partie commencée s'ouvre sur le jeu", !(await etat(page())).ecran);
+    await taperZone(page(), 'pont', 'heros');
+    dire('la grenouille est déjà là', (await etat(page())).boite);
+    await deroulerDialogue(page());
+
+    await taperSur(page(), '.menu__button');
+    e = await etat(page());
+    const titre = (await page().textContent('.ecran__titre')).trim();
+    dire('le menu ouvre la pause', e.ecran === 'pause' && titre === 'Pause', titre);
+    await taperSur(page(), '.ecran [data-action="reset"]');
+    await Promise.all([page().waitForEvent('load'), taperSur(page(), '[data-action="confirm"]')]);
+    await pause(2000);
+    e = await etat(page());
+    dire("recommencer ramène à l'accueil", e.ecran === 'accueil', `écran : ${e.ecran}`);
+  },
+}));
+
 // Un navigateur anglais trouve le jeu en anglais — récit, options et interface —,
 // et les options le rendent au français. La console fait le reste : un texte
 // affiché sans traduction s'y signale (src/langues/traduire.ts).
@@ -790,6 +860,11 @@ test('langue', async (page, dire) => ({
   sauvegarde: AU_RAVIN,
   langue: 'en-US',
   jouer: async () => {
+    dire(
+      "l'accueil se dit en anglais",
+      (await page().textContent('.ecran [data-action="principal"]')) === 'Start folding',
+    );
+    await commencer(page());
     dire("le dialogue d'arrivée se joue", await attendreLaBoite(page()));
     let e = await etat(page());
     dire('le navigateur anglais donne le récit anglais', /^Phew/.test(e.texte), e.texte);
@@ -815,14 +890,13 @@ test('langue', async (page, dire) => ({
     await deroulerDialogue(page());
 
     await taperSur(page(), '.menu__button');
-    await taperSur(page(), '[data-action="options"]');
     dire(
-      'les options montrent la langue en cours',
-      (await page().getAttribute('.menu__langue[data-langue="en"]', 'aria-pressed')) === 'true',
+      'la pause montre la langue en cours',
+      (await page().getAttribute('.ecran__langue[data-langue="en"]', 'aria-pressed')) === 'true',
     );
     await Promise.all([
       page().waitForEvent('load'),
-      taperSur(page(), '.menu__langue[data-langue="fr"]'),
+      taperSur(page(), '.ecran__langue[data-langue="fr"]'),
     ]);
     await pause(2500);
     dire(
@@ -844,6 +918,7 @@ test('traversee', async (page, dire) => ({
   sauvegarde: AU_RAVIN,
   jouer: async () => {
     const p = page;
+    await commencer(p());
     dire("le dialogue d'arrivée se joue", await attendreLaBoite(p()));
     await deroulerDialogue(p());
 

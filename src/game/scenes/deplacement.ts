@@ -48,6 +48,9 @@ export interface OptionsDeplacement {
   bloquant?: boolean;
   // Un objet qui traverse ne freine pas en arrivant.
   ease?: string;
+  // Avancer par bonds plutôt qu'en glissant : une grenouille saute. La longueur
+  // est arrondie pour que le dernier bond retombe pile à l'arrivée.
+  bonds?: { longueur: number; hauteur: number };
 }
 
 // L'endroit où l'objet se retrouve une fois le trajet joué : c'est là qu'on le
@@ -83,6 +86,10 @@ export function deplacer(
   if (total === 0) return Promise.resolve();
 
   const duree = options.duree ?? (total / (options.vitesse ?? VITESSE)) * 1000;
+  const bond = options.bonds && {
+    longueur: total / Math.max(1, Math.round(total / options.bonds.longueur)),
+    hauteur: options.bonds.hauteur,
+  };
 
   return new Promise((resolve) => {
     // Phaser tue les tweens de la scène en la quittant : sans cette sortie de
@@ -106,7 +113,12 @@ export function deplacer(
       p: 1,
       duration: duree,
       ease: options.ease ?? 'Linear',
-      onUpdate: () => poser(objet, etapes, longueurs, total * avance.p),
+      onUpdate: () => {
+        const parcouru = total * avance.p;
+        poser(objet, etapes, longueurs, parcouru);
+        if (bond)
+          objet.y -= bond.hauteur * Math.abs(Math.sin((Math.PI * parcouru) / bond.longueur));
+      },
       onComplete: terminer,
     });
   });
@@ -158,6 +170,17 @@ function prolongerHorsCadre(objet: Mobile, etapes: [number, number][]): void {
 
   const t = Math.max(Math.min(...sorties), 0) + MARGE_SORTIE / Math.hypot(dx, dy);
   etapes.push([bx + dx * t, by + dy * t]);
+}
+
+// Juste au-delà d'un bord, à la même hauteur : d'où un objet entre en scène.
+// La distance se calcule pour la même raison que celle de `sortie` — elle
+// dépend de la taille de l'objet à l'écran.
+export function poserHorsCadre(objet: Mobile, cote: 'gauche' | 'droite'): void {
+  const bornes = objet.getBounds();
+  objet.x =
+    cote === 'gauche'
+      ? objet.x - bornes.right - MARGE_SORTIE
+      : DESIGN_WIDTH + objet.x - bornes.x + MARGE_SORTIE;
 }
 
 function poser(

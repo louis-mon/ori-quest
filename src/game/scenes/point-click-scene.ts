@@ -19,6 +19,7 @@ import { createExitMarker, preloadFleche } from '../systems/exit-marker';
 import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
+import type { Rideau } from '../rideau';
 import { empriseDe } from './decor-sprite';
 import { signalerNonCables, type SceneLayout } from './layout';
 import {
@@ -31,6 +32,7 @@ import {
 export interface SceneServices {
   overlay: Overlay;
   dialogue: DialogueRunner;
+  rideau: Rideau;
   // Le même que le tag `# goto:`.
   goto: (room: string) => void;
 }
@@ -160,8 +162,29 @@ export abstract class PointClickScene extends Phaser.Scene {
       ]);
     }
 
+    // Derrière l'écran d'accueil, la pièce vit mais n'a pas commencé : le décor
+    // est fermé, rien ne s'y dit, et le héros n'entre en scène qu'au lever du
+    // rideau.
+    if (this.services.rideau.baisse) void this.enAttendant(this.leverDeRideau());
+    else this.programmerLArrivee();
+  }
+
+  private async leverDeRideau() {
+    await this.services.rideau.leve;
+    await this.entrerEnScene();
+    // Encore dans l'attente : le dialogue retient les marqueurs avant qu'elle
+    // ne se relève, sinon ils paraîtraient pour repartir aussitôt.
+    this.programmerLArrivee();
+  }
+
+  private programmerLArrivee() {
     const arrivee = this.arrivee;
     if (arrivee && !gameState.flag(arrivee.flag)) this.programmerDialogue(arrivee.knot);
+  }
+
+  // Ce que la pièce joue au lever du rideau, avant son dialogue d'arrivée.
+  protected entrerEnScene(): Promise<void> {
+    return Promise.resolve();
   }
 
   // Les marqueurs suivent l'état du récit. Une scène en pause — le menu ouvert —

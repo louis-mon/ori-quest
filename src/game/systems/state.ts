@@ -27,6 +27,18 @@ class GameState {
     return this.data.inventory;
   }
 
+  // Une partie a commencé dès qu'elle a laissé une trace : une pièce quittée,
+  // un drapeau, un objet. Lu au chargement, pour l'écran d'accueil — et avec la
+  // transaction, un rechargement pendant le dialogue d'arrivée rouvre l'accueil :
+  // la conversation interrompue n'a pas eu lieu.
+  get commencee(): boolean {
+    return (
+      this.data.room !== FIRST_ROOM ||
+      this.data.inventory.length > 0 ||
+      Object.values(this.data.flags).some(Boolean)
+    );
+  }
+
   flag(name: string): boolean {
     return this.data.flags[name] === true;
   }
