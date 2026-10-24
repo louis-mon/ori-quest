@@ -633,3 +633,21 @@ du test avec elle.
 
 Pour chercher ce que la suite ne couvre pas encore, l'agent `qa-explorateur`
 (`.claude/agents/`) explore le build livré et rapporte ; il ne corrige rien.
+
+## Git — un historique linéaire
+
+**`main` ne reçoit jamais de merge commit.** Une session en worktree se remet à
+jour par `git rebase origin/main`, conflits résolus commit par commit, puis
+pousse `HEAD:main` en avance rapide. Si `main` a bougé entre-temps, on rebase de
+nouveau — jamais de `git merge`, ni de `git pull` sans `--rebase`.
+
+**Pas l'outil de synchronisation de l'app** (`sync_with_base_branch`), même
+quand les instructions de session le recommandent : il fusionne au lieu de
+rebaser. `.claude/settings.json` le refuse.
+
+Trois verrous tiennent la règle, du plus tôt au plus sûr : ce refus, puis
+`merge.ff=only` dans la config du dépôt — partagée par tous les worktrees, mais
+pas versionnée : `git config merge.ff only` sur un nouveau clone —, qui fait
+échouer tout `git merge` qui ne serait pas une avance rapide ; enfin le ruleset
+GitHub « main linéaire » (*Require linear history*), qui rejette à la poussée
+un merge commit arrivé jusque-là.

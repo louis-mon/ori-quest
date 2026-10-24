@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "deny": ["mcp__ccd_host__sync_with_base_branch"]
+  }
+}
