@@ -10,6 +10,7 @@ import { PREFERENCE_GPU } from '../gpu';
 import { installHiddenPageRaf } from './hidden-page-raf';
 
 // Outil de réglage des torches de la salle du trône — développement seulement.
+// La cuisine a les mêmes torches et prend le même réglage.
 // Un vacillement ne se juge qu'en le regardant vaciller, sur le mur qu'il
 // éclaire : l'aperçu passe donc par `allumerLesTorches()`, comme la scène.
 

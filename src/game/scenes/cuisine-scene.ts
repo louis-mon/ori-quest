@@ -6,16 +6,16 @@ import { boxOf, cheminOf, exitsFrom, hotspotsFrom } from './layout';
 import { PointClickScene } from './point-click-scene';
 import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
-import { dessinerDecorProvisoire } from './decor-provisoire';
+import { dessinerFond, preloadFond } from './fond';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
+import { allumerLesTorches } from './torches';
 
 // La cuisine — à gauche de la salle du trône, chapitre 3.
 // Voir game-design/scenes/chapter-3/cuisine.md.
 //
-// Les chats n'y sont qu'entre l'invitation à manger et la fin du repas ; on leur
-// parle, et ils repartent vers la salle du trône.
-//
-// ⚠ Le fond n'est pas encore peint : `decor-provisoire.ts` tient la place.
+// Les chats n'y sont qu'entre l'invitation à manger et la fin du repas, chacun
+// sur une chaise de la table ; on leur parle, et ils repartent vers la salle du
+// trône.
 
 const PLAN = plan;
 
@@ -41,6 +41,7 @@ export class CuisineScene extends PointClickScene {
 
   protected preloadAssets() {
     preloadHeros(this);
+    preloadFond(this, PLAN.fond);
     preloadSprite(this, ELEPHANT, 'assets/decor/elephant_humain.png');
     preloadSprite(this, CHAT, 'assets/decor/chat.png');
     preloadLuneChat(this);
@@ -89,12 +90,9 @@ export class CuisineScene extends PointClickScene {
   // ------------------------------------------------------------------
 
   protected drawScenery() {
-    dessinerDecorProvisoire(this, {
-      sol: boxOf(PLAN, 'dec_sol'),
-      masses: [boxOf(PLAN, 'dec_mur')],
-      creux: [boxOf(PLAN, 'dec_porte_trone')],
-      meubles: [boxOf(PLAN, 'dec_fourneau')],
-    });
+    dessinerFond(this, PLAN.fond);
+    // Les mêmes torches que dans la salle du trône, et le même réglage.
+    allumerLesTorches(this, [boxOf(PLAN, 'dec_flamme_gauche'), boxOf(PLAN, 'dec_flamme_droite')]);
 
     this.caler('cheffe', empriseDe(placeSprite(this, ELEPHANT, boxOf(PLAN, 'hs_cheffe'))));
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));

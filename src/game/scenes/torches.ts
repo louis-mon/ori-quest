@@ -3,8 +3,8 @@ import { alea } from './hasard';
 import type { Box } from './layout';
 import { REGLAGES_TORCHES } from './torches-reglages';
 
-// Les torches de la salle du trône sont dans le fond de l'artiste : seule leur
-// lumière est ajoutée. Une lueur large, jetée sur le mur, et un halo serré
+// Les torches de la salle du trône et de la cuisine sont dans le fond de
+// l'artiste : seule leur lumière est ajoutée. Une lueur large, jetée sur le mur, et un halo serré
 // autour de la flamme, qui vacillent ensemble — c'est la même flamme.
 //
 // Le mur est presque blanc : de la lumière ajoutée n'y trouve plus de place, et

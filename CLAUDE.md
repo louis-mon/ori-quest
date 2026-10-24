@@ -233,13 +233,14 @@ configuration globale — sans eux, le papier vu en perspective scintille.
 Le calcul coûte un temps notable au premier passage sur téléphone : s'il gêne, le
 passer dans un Worker.
 
-**La lumière des torches de la salle du trône a été demandée aussi**
-(`torches.ts`) : les torches restent celles du fond, seule leur lueur est
-ajoutée, aux zones `flamme_*` du plan. Le mur étant presque blanc, une lumière
+**La lumière des torches a été demandée aussi** (`torches.ts`) : les torches
+restent celles du fond, seule leur lueur est ajoutée, aux zones `flamme_*` du
+plan — salle du trône et cuisine, qui ont les mêmes torches et partagent le
+réglage. Le mur étant presque blanc, une lumière
 **additive** n'y trouve plus de place et ne fait que le jaunir : c'est la couche
 **multipliée** qui le fait virer à l'ambre, et c'est ça qui se lit comme une
 torche. Le halo reste faible, sans quoi il délave la flamme de papier. Tout se
-règle dans `torches.html`, qui écrit `torches-reglages.ts`.
+règle dans `torches.html`, sur la salle du trône, qui écrit `torches-reglages.ts`.
 
 **La zone tactile suit le dessin, pas la boîte du plan.** Une boîte est une
 emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une

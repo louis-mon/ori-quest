@@ -47,8 +47,9 @@ de la racine autre qu'`index.html` y figure d'elle-même, sous son `<title>` :
   vagues, inclinaison du plan d'eau. Sa place, elle, se dessine dans Tiled
   (zone `eau` du plan du ravin).
 - `http://localhost:5173/torches.html` — la lumière des torches de la salle du
-  trône : teinte, portée, vacillement. Les flammes, elles, se dessinent dans
-  Tiled (`flamme_gauche` et `flamme_droite` du plan de la salle).
+  trône, et du même coup de la cuisine : teinte, portée, vacillement. Les
+  flammes, elles, se dessinent dans Tiled (`flamme_gauche` et `flamme_droite`
+  du plan de chaque pièce).
 - `http://localhost:5173/choix.html` — les menus de choix : les vrais menus
   d'ink dans la vraie boîte de dialogue, marque de réplique et en-tête réglés en
   direct.
@@ -163,6 +164,8 @@ cp assets-src/graphisme_origami/background/salle_trone.webp \
   public/assets/decor/fond-trone.webp
 cp assets-src/graphisme_origami/background/jardin.webp \
   public/assets/decor/fond-jardin.webp
+cp assets-src/graphisme_origami/background/Cuisine.webp \
+  public/assets/decor/fond-cuisine.webp
 ```
 
 Ils sont **renommés à l'intégration**, sur l'identifiant de la scène et non sur
