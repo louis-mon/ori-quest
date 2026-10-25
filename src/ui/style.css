@@ -1152,41 +1152,66 @@ body {
 
 /* Sous tout le menu — son voile (6), son bouton et son panneau (7), ses fenêtres
    (8) : plein écran et remise à zéro doivent rester atteignables énigme ouverte,
-   et le bouton qui y mène aussi, pas seulement la fenêtre au bout. */
+   et le bouton qui y mène aussi, pas seulement la fenêtre au bout.
+
+   Le bandeau en haut, le plateau et le bac dessous. Les pistes en `minmax(0, …)`
+   : le plateau se dimensionne en pourcentage de la hauteur du panneau, qui doit
+   donc venir de la grille et non de son contenu — sans quoi le `height: 100%`
+   du plateau se résout à zéro, plateau invisible.
+
+   Le haut est celui du bouton du menu, pour que le bandeau s'aligne dessus. */
 .puzzle {
   position: absolute;
   inset: 0;
   z-index: 4;
-  display: flex;
-  /* `stretch` et non `center` : le plateau se dimensionne en pourcentage de la
-     hauteur du panneau. Un panneau centré prend la hauteur de son contenu, et
-     le `height: 70%` du plateau se résout alors à zéro — plateau invisible. */
-  align-items: stretch;
-  gap: calc(16px * var(--ui-scale));
+  display: grid;
+  grid-template: auto minmax(0, 1fr) / minmax(0, 1fr) auto;
+  gap: calc(10px * var(--ui-scale)) calc(16px * var(--ui-scale));
   padding: calc(14px * var(--ui-scale));
+  padding-top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));
   padding-bottom: calc(14px * var(--ui-scale) + var(--safe-bottom));
   background: rgba(16, 14, 12, 0.92);
 }
 
-/* `position: relative` pour le bouton « ? » : posé dans le panneau, il reste à
-   gauche du bac quelle que soit la largeur que les pièces lui donnent. Calé sur
-   le cadre, il faudrait refaire à la main le calcul de `--tray-width`. */
-.puzzle__panel {
-  position: relative;
+/* Tout ce qui n'est pas une pièce tient dans cette seule bande : plateau et tas
+   ont ainsi toute la hauteur dessous, alors que la légende au-dessus de l'un et
+   les boutons sous l'autre leur en prenaient chacun une. La marge de droite est
+   la place du bouton du menu, posé par-dessus : son `right` plus sa largeur.
+
+   Les boutons s'alignent sur le menu, en haut ; l'entête se centre sur la
+   vignette, plus haute qu'eux. */
+.puzzle__barre {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: calc(10px * var(--ui-scale));
+  padding-right: calc(var(--ui-gap) + env(safe-area-inset-right, 0px) + 44px);
+}
+
+.puzzle__entete {
+  align-self: center;
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: calc(6px * var(--ui-scale));
+}
+
+.puzzle__panel {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(10px * var(--ui-scale));
 }
 
 .puzzle__title {
   margin: 0;
+  overflow: hidden;
   font-size: calc(17px * var(--ui-scale));
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   opacity: 0.75;
 }
 
@@ -1197,8 +1222,8 @@ body {
   position: relative;
   /* `--plateau` est le côté que le bac impose : ses pièces sont à la taille exacte
      des cellules, donc c'est la grille qui cède quand le tas n'a plus la place
-     de s'étaler. Les 70 % restent le plafond, sinon le plateau déborde. */
-  height: min(70%, var(--plateau, 100%));
+     de s'étaler. La hauteur du panneau reste le plafond. */
+  height: min(100%, var(--plateau, 100%));
   max-width: 100%;
   aspect-ratio: 1;
   border-radius: 6px;
@@ -1217,20 +1242,11 @@ body {
 }
 
 /* `--tray-width` est calculé au montage pour qu'une pièce large et plate reste
-   attrapable au doigt. Le plancher garde les deux boutons côte à côte et
-   lisibles quand les pièces sont petites.
-
-   Le haut de la colonne revient au bouton du menu — et à « Passer », à sa
-   gauche —, d'où le décalage, qui vaut son `top` plus sa hauteur : le vrac y
-   posait des pièces, qu'un tap dans ce coin ne pouvait plus attraper. */
+   attrapable au doigt. */
 .puzzle__side {
-  width: max(var(--tray-width, 96px), calc(230px * var(--ui-scale)));
-  padding-top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px) + 44px);
+  width: var(--tray-width, 96px);
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: calc(12px * var(--ui-scale));
 }
 
 /* Un tas, pas une liste : les positions sont calculées par eparpiller() et
@@ -1359,13 +1375,8 @@ body {
 
 /* ---- Le bouton « ? » : rejouer un tutoriel ---- */
 
-/* Dans le panneau, pas dans le cadre : voir la note sur `.puzzle__panel`. Le
-   bac est à droite du panneau, donc le bouton ne peut pas le recouvrir. */
 .puzzle__help {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 1;
+  flex: none;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -1395,10 +1406,7 @@ body {
    d'aplats très peu opaques, pensés pour du blanc. Sur le fond sombre de
    l'énigme, sans ce calque, il serait quasi invisible. */
 .puzzle__goal {
-  position: absolute;
-  top: calc(10px * var(--ui-scale));
-  left: calc(10px * var(--ui-scale));
-  z-index: 1;
+  flex: none;
   width: max(56px, calc(86px * var(--ui-scale)));
   aspect-ratio: 1;
   padding: calc(4px * var(--ui-scale));
@@ -1484,10 +1492,7 @@ body {
 }
 
 /* En ligne, l'abandon à gauche : empilés, les deux boutons se suivaient sous le
-   même pouce et l'abandon se prenait par erreur. Calés à droite, sur le seul
-   repère fixe de ce côté — centrés dans une colonne aussi large que le tas, ils
-   flottaient au milieu de rien. Ils ne s'étirent pas : un « Abandonner » large
-   de toute la colonne est la cible qu'on cherche à réduire.
+   même pouce et l'abandon se prenait par erreur.
 
    `flex-wrap` reste : mieux vaut qu'ils s'empilent que qu'ils passent sous le
    seuil tactile. */
@@ -1496,6 +1501,11 @@ body {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: calc(10px * var(--ui-scale));
+}
+
+/* « Passer » prend leur place : voir `lancer`, dans crease-puzzle.ts. */
+.puzzle.is-tutoriel .puzzle__actions {
+  visibility: hidden;
 }
 
 .puzzle__check,
@@ -1649,8 +1659,8 @@ body {
   display: none;
 }
 
-/* En haut à droite du cadre : le coin que l'énigme laisse libre — sa vignette
-   de but est en haut à gauche, son bouton « ? » contre le bac. */
+/* En haut à droite du cadre, à la place des boutons de l'énigme, qui s'effacent
+   le temps du tutoriel. */
 /* À gauche du bouton de menu, qu'il recouvrait exactement. Le décalage vaut la
    largeur du hamburger plus une gouttière, pour le suivre s'il change. */
 .tuto__passer {

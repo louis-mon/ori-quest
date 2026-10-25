@@ -29,13 +29,16 @@ fois, et chaque chapitre n'a plus qu'à fournir un motif et un découpage.
   partagent donc la largeur de l'écran **à la même échelle** ; quand un
   découpage encombrant ne laisse pas assez de place au tas, c'est le conteneur
   qui rétrécit — les deux ensemble.
-- **Deux boutons, en ligne, dans le coin bas-droit du cadre** : « Abandonner »
-  à gauche, « Vérifier la solution » à droite. C'est l'ordre des fenêtres de
-  confirmation du jeu, et celui de la plupart des interfaces. Ils ont longtemps
-  été **l'un sous l'autre**, à portée du même pouce : un tap qui glissait d'un
-  cran abandonnait l'énigme, et c'est arrivé. Ils sont calés sur le bord, et non
-  centrés sous le tas : la colonne du tas est aussi large que lui, donc deux
-  boutons centrés dedans flottaient au milieu de rien, alignés sur rien.
+- **Tout le reste tient dans un bandeau en haut** : le but, le titre et la
+  légende des plis à gauche ; le « ? » des tutoriels et les deux boutons à
+  droite, contre le menu. Conteneur et tas ont ainsi toute la hauteur dessous —
+  c'est elle qui fixe leur taille commune —, et aucune pièce du tas ne passe
+  sous le menu.
+- **Deux boutons, en ligne** : « Abandonner » à gauche, « Vérifier la
+  solution » à droite. C'est l'ordre des fenêtres de confirmation du jeu, et
+  celui de la plupart des interfaces. Ils ont longtemps été **l'un sous
+  l'autre**, à portée du même pouce : un tap qui glissait d'un cran abandonnait
+  l'énigme, et c'est arrivé. Pendant un tutoriel, « Passer » prend leur place.
 
 On glisse-dépose les pièces dans le conteneur. Les pièces **ne pivotent pas** :
 le découpage produit des morceaux distinguables un à un, et une rotation rendrait

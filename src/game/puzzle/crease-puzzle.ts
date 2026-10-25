@@ -119,26 +119,22 @@ export async function runCreasePuzzle(
   ].filter((entry) => entry !== null);
 
   el.innerHTML = `
-    <button class="puzzle__goal" type="button" aria-label="${t('Agrandir le pliage terminé')}">
-      <img class="puzzle__goal-image" alt="${t('Le pliage une fois terminé')}" />
-    </button>
-    <div class="puzzle__panel">
+    <div class="puzzle__barre">
+      <button class="puzzle__goal" type="button" aria-label="${t('Agrandir le pliage terminé')}">
+        <img class="puzzle__goal-image" alt="${t('Le pliage une fois terminé')}" />
+      </button>
+      <div class="puzzle__entete">
+        <h2 class="puzzle__title"></h2>
+        <ul class="puzzle__legend">
+          ${legend
+            .map(
+              (entry) =>
+                `<li><span class="puzzle__legend-line puzzle__legend-line--${entry.cls}"></span>${entry.label}</li>`,
+            )
+            .join('')}
+        </ul>
+      </div>
       <button class="puzzle__help" type="button" aria-label="${t('Revoir un tutoriel')}">?</button>
-      <h2 class="puzzle__title"></h2>
-      <!-- Au-dessus du plateau : sous lui, la légende tombe derrière la boîte
-           de dialogue, qui occupe le bas du cadre. -->
-      <ul class="puzzle__legend">
-        ${legend
-          .map(
-            (entry) =>
-              `<li><span class="puzzle__legend-line puzzle__legend-line--${entry.cls}"></span>${entry.label}</li>`,
-          )
-          .join('')}
-      </ul>
-      <div class="puzzle__board"></div>
-    </div>
-    <div class="puzzle__side">
-      <div class="puzzle__tray"></div>
       <!-- L'abandon à gauche, la vérification à droite : l'ordre des fenêtres
            de confirmation du jeu, et de la plupart des interfaces. Ces deux
            boutons étaient l'un sous l'autre, à portée du même pouce — un tap
@@ -147,6 +143,12 @@ export async function runCreasePuzzle(
         <button class="puzzle__quit" type="button">${t('Abandonner')}</button>
         <button class="puzzle__check" type="button">${t('Vérifier la solution')}</button>
       </div>
+    </div>
+    <div class="puzzle__panel">
+      <div class="puzzle__board"></div>
+    </div>
+    <div class="puzzle__side">
+      <div class="puzzle__tray"></div>
     </div>
     <div class="puzzle__zoom" hidden>
       <img class="puzzle__zoom-image" alt="${t('Le pliage une fois terminé, agrandi')}" />
@@ -440,13 +442,19 @@ export async function runCreasePuzzle(
 
     if (options.tutoriel) {
       const lanceur = options.tutoriel;
+      // « Passer » se pose là où sont les deux boutons, que le voile du tutoriel
+      // rend de toute façon inertes : ils lui cèdent la place.
+      const lancer = (auto: boolean) => {
+        el.classList.add('is-tutoriel');
+        void lanceur(controle, auto).finally(() => el.classList.remove('is-tutoriel'));
+      };
       help.addEventListener('pointerup', (e) => {
         e.stopPropagation();
-        void lanceur(controle, false);
+        lancer(false);
       });
       // Ne bloque pas la promesse de l'énigme : c'est le voile du tutoriel qui
       // interdit les taps entre-temps, pas une garde ici.
-      void lanceur(controle, true);
+      lancer(true);
     }
 
     const reussir = () => {
