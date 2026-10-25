@@ -2871,6 +2871,16 @@ msgstr "Louis Monestier, assisted by Claude Code"
 
 #. interface
 #: src/ui/credits-texte.ts
+msgid "Modèle traditionnel"
+msgstr "Traditional design"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Crease pattern"
+msgstr "Crease patterns"
+
+#. interface
+#: src/ui/credits-texte.ts
 msgid "Les modèles suivants ont été pliés par Pierre Monestier"
 msgstr "The following models were folded by Pierre Monestier"
 
@@ -2881,13 +2891,23 @@ msgstr "The following models were folded by Valérie"
 
 #. interface
 #: src/ui/credits-texte.ts
-msgid "Les modèles suivants ont été pliés par Louis"
-msgstr "The following models were folded by Louis"
+msgid "Les modèles suivants ont été pliés par Louis Monestier"
+msgstr "The following models were folded by Louis Monestier"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Origami Simulator, d’Amanda Ghassaei"
+msgstr "Origami Simulator, by Amanda Ghassaei"
 
 #. interface
 #: src/ui/credits-texte.ts
 msgid "Et le MFPP et ses adhérents."
 msgstr "And the MFPP and its members."
+
+#. interface
+#: src/ui/credits.ts
+msgid "Fait avec"
+msgstr "Made with"
 
 #. interface
 #: src/ui/credits.ts

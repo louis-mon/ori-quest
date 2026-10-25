@@ -869,9 +869,11 @@ test('credits', async (page, dire) => ({
       const f = document.querySelector('.credits__defilement').getBoundingClientRect();
       const merci = document.querySelector('.credits__merci').getBoundingClientRect();
       const visibles = [...document.querySelectorAll('.credits__defilement :is(h2, h3, p, span)')]
+        // Un pixel de marge : la hauteur du contenu est fractionnaire et la
+        // position de défilement, entière ; le reste tombe sous le fondu du bord.
         .filter((el) => {
           const r = el.getBoundingClientRect();
-          return r.bottom > f.top && r.top < f.bottom;
+          return r.bottom > f.top + 1 && r.top < f.bottom - 1;
         })
         .map((el) => el.textContent);
       return {

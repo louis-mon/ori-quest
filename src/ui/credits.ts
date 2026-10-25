@@ -1,5 +1,5 @@
 import { t } from '../langues/traduire';
-import { PLIEURS, REMERCIEMENTS, ROLES } from './credits-texte';
+import { CREASE_PATTERNS, FAIT_AVEC, PLIEURS, REMERCIEMENTS, ROLES } from './credits-texte';
 import { typographier } from './typographie';
 
 // Les crédits, qui closent l'histoire après la dernière réplique (`# fin:`). Ils
@@ -66,14 +66,18 @@ function construire(): { el: HTMLElement; fenetre: HTMLElement } {
   contenu.append(
     bloc('h2', 'credits__titre', t('Crédits')),
     section(ROLES.map(({ role, qui }) => ligne(role, qui))),
-    ...PLIEURS.map(({ intitule, modeles }) =>
+    ...[CREASE_PATTERNS, ...PLIEURS].map(({ intitule, modeles }) =>
       section(
         modeles.map(({ modele, auteur, livre }) => ligne(modele, auteur, livre)),
         intitule,
       ),
     ),
     section(
-      REMERCIEMENTS.map((texte) => bloc('p', 'credits__remerciement', texte)),
+      FAIT_AVEC.map((texte) => bloc('p', 'credits__texte', texte)),
+      t('Fait avec'),
+    ),
+    section(
+      REMERCIEMENTS.map((texte) => bloc('p', 'credits__texte', texte)),
       t('Remerciements'),
     ),
   );

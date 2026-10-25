@@ -17,7 +17,7 @@ export interface Modele {
   livre?: string;
 }
 
-export interface Plieur {
+export interface Section {
   intitule: string;
   modeles: Modele[];
 }
@@ -29,12 +29,34 @@ export const ROLES: Role[] = [
   { role: t('Développement'), qui: t('Louis Monestier, assisté par Claude Code') },
 ];
 
+const PIERRE = 'Pierre Monestier';
+const TRADITIONNEL = t('Modèle traditionnel');
 const FERNANDO = 'Fernando Gilgado Gomez';
 const MONTROLL = 'John Montroll';
 const PULIDO = 'Leonardo Pulido Martinez';
 const MOMOTANI = 'Yoshihide Momotani';
 
-export const PLIEURS: Plieur[] = [
+// Ceux que le jeu plie en 3D.
+export const CREASE_PATTERNS: Section = {
+  intitule: t('Crease pattern'),
+  modeles: [
+    { modele: 'Bridge', auteur: PIERRE },
+    { modele: 'Tree', auteur: PIERRE },
+    { modele: 'Axe', auteur: PIERRE },
+    { modele: 'Door', auteur: PIERRE },
+    { modele: 'Mountain', auteur: PIERRE },
+    { modele: 'Potty', auteur: TRADITIONNEL },
+    { modele: 'Grass', auteur: TRADITIONNEL },
+    { modele: 'Bone', auteur: 'Tao Jun' },
+    { modele: 'Dog', auteur: 'Sharvil Phartak' },
+    { modele: 'Fish', auteur: TRADITIONNEL },
+    { modele: 'Crown', auteur: PIERRE },
+    { modele: 'Heart', auteur: TRADITIONNEL },
+  ],
+};
+
+// Ceux que montrent les photographies du décor.
+export const PLIEURS: Section[] = [
   {
     intitule: t('Les modèles suivants ont été pliés par Pierre Monestier'),
     modeles: [
@@ -67,7 +89,7 @@ export const PLIEURS: Plieur[] = [
         auteur: MONTROLL,
         livre: 'Dragons and Other Fantastic Creatures',
       },
-      { modele: 'Shield (middle)', auteur: 'Pierre Monestier' },
+      { modele: 'Shield (middle)', auteur: PIERRE },
       { modele: 'Shield (right)', auteur: 'David Brill', livre: 'Brilliant Origami' },
       { modele: 'Torch', auteur: FERNANDO, livre: 'Create and Play with Origami Dinosaurs 1' },
       { modele: 'Caballo en el cuadro 2D V. 3.0', auteur: PULIDO, livre: 'Hiporigami 3' },
@@ -96,12 +118,20 @@ export const PLIEURS: Plieur[] = [
     ],
   },
   {
-    intitule: t('Les modèles suivants ont été pliés par Louis'),
+    intitule: t('Les modèles suivants ont été pliés par Louis Monestier'),
     modeles: [
       { modele: 'Koi carp', auteur: 'Meng Weining (212moving)', livre: 'Origami Moments' },
       { modele: 'Fox - Vixen', auteur: 'Roman Diaz', livre: 'Origami Essence' },
     ],
   },
+];
+
+export const FAIT_AVEC: string[] = [
+  'Phaser',
+  'ink',
+  'three.js',
+  t('Origami Simulator, d’Amanda Ghassaei'),
+  'Tiled',
 ];
 
 export const REMERCIEMENTS: string[] = [
