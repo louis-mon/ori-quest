@@ -2881,6 +2881,11 @@ msgstr "The following models were folded by Valérie"
 
 #. interface
 #: src/ui/credits-texte.ts
+msgid "Les modèles suivants ont été pliés par Louis"
+msgstr "The following models were folded by Louis"
+
+#. interface
+#: src/ui/credits-texte.ts
 msgid "Et le MFPP et ses adhérents."
 msgstr "And the MFPP and its members."
 

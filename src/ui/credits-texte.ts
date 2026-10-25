@@ -47,9 +47,7 @@ export const PLIEURS: Plieur[] = [
       { modele: 'Owl', auteur: FERNANDO, livre: 'Papirolandia 3' },
       { modele: 'Sun', auteur: 'Peter Engel', livre: 'Origami Odyssey' },
       { modele: 'Penguin', auteur: FERNANDO, livre: 'Tanteidan 17th convention' },
-      { modele: 'Fox - Vixen', auteur: 'Roman Diaz', livre: 'Origami Essence' },
       { modele: 'Cat', auteur: 'Martha Mitchen', livre: 'Origami USA Convention 1990' },
-      { modele: 'Koi carp', auteur: 'Meng Weining (212moving)', livre: 'Origami Moments' },
       { modele: 'Camelot Castle', auteur: 'Lew Rozelle', livre: "Origami in King Arthur's Court" },
       { modele: 'Arrow', auteur: 'Masamichi Noma', livre: 'NOA Magazine 218' },
       {
@@ -95,6 +93,13 @@ export const PLIEURS: Plieur[] = [
       { modele: 'Home', auteur: MOMOTANI, livre: 'Origami Architectures' },
       { modele: 'Stone wall', auteur: MOMOTANI, livre: 'Origami Architectures' },
       { modele: 'A big wooden framed house', auteur: MOMOTANI, livre: 'Origami Architectures' },
+    ],
+  },
+  {
+    intitule: t('Les modèles suivants ont été pliés par Louis'),
+    modeles: [
+      { modele: 'Koi carp', auteur: 'Meng Weining (212moving)', livre: 'Origami Moments' },
+      { modele: 'Fox - Vixen', auteur: 'Roman Diaz', livre: 'Origami Essence' },
     ],
   },
 ];
