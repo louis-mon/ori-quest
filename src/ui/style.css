@@ -856,7 +856,7 @@ body {
 /* Deux lignes : la langue seule sur la sienne, puis le reste. Mêlée aux autres,
    rien ne la séparait d'un réglage d'affichage. Les options elles-mêmes vont en
    ligne et non en colonne : en paysage sur téléphone, c'est la hauteur qui
-   manque. Celles à venir — les crédits — rejoindront la seconde. */
+   manque. */
 .ecran__options {
   display: flex;
   flex-direction: column;
@@ -1115,6 +1115,27 @@ body {
 
 .credits--visible {
   opacity: 1;
+}
+
+/* Ouverts depuis le menu : au-dessus de l'écran de pause (7), comme ses
+   fenêtres, et refermés là où était son bouton. L'écran s'efface dessous une
+   fois qu'ils sont posés — ses boutons, même floutés, se lisaient à travers le
+   texte — et revient dès qu'ils commencent à partir. */
+.credits--menu {
+  z-index: 8;
+}
+
+#ui:has(> .credits--menu.credits--visible) .ecran {
+  visibility: hidden;
+  transition:
+    opacity 320ms ease,
+    visibility 0s 600ms;
+}
+
+.credits__fermer {
+  position: absolute;
+  top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px));
+  right: calc(var(--ui-gap) + env(safe-area-inset-right, 0px));
 }
 
 /* Le texte s'efface aux deux bords plutôt que d'y être tranché. */

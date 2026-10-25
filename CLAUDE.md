@@ -446,8 +446,8 @@ que personne n'aurait lue. `npm run qa -- anti-tap` tient les deux.
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la
 confirmation à 7, le vol d'obtention et son bandeau à 8, l'écran « À suivre… »
 à 9 — au-dessus du menu, seul écran du jeu dans ce cas : la partie est finie, il
-n'y a plus rien à reprendre. Les crédits sont à 6, après la boîte dans le DOM et
-sous le menu, par où l'on recommence. D'où le fait que `.tuto`
+n'y a plus rien à reprendre. Les crédits de fin sont à 6, après la boîte dans le
+DOM et sous le menu, par où l'on recommence ; ouverts depuis le menu, à 8. D'où le fait que `.tuto`
 ne soit **pas positionné** : positionné, il ferait contexte d'empilement et ses
 enfants ne pourraient plus encadrer la boîte de dialogue.
 

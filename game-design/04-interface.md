@@ -502,7 +502,7 @@ cochée. Toucher une autre langue l'applique aussitôt, sans confirmation : rien
 ne se perd, la page se recharge sur la même pièce. Sans choix, le jeu prend la
 langue du navigateur, et l'anglais s'il ne la parle pas.
 
-**Sur la seconde ligne**, les autres options ; les crédits viendront s'y ranger.
+**Sur la seconde ligne**, les autres options.
 
 **Montrer les zones cliquables.** Les cocottes sont masquées par défaut (voir
 [03-langage-visuel.md](03-langage-visuel.md)), et cette case les rappelle. Une
@@ -517,8 +517,13 @@ lecteur y a son propre bouton, et lui lancer le nôtre par-dessus donnait deux
 plein écran empilés, que « Recommencer » faisait tomber ensemble. Celui du site,
 seul, survit à un nouveau départ ; le nôtre, ailleurs, revient au premier tap.
 
+**Crédits.** Ceux de la fin de l'histoire, ouverts par-dessus l'écran, qui
+s'efface sous eux une fois qu'ils sont posés : ses boutons, même floutés, se
+lisaient à travers le texte. « Fermer », à la place du bouton du menu, y ramène.
+
 **Points d'étape**, tant que la page itch.io est en Draft : les chapitres du
-build, puis leurs étapes. Un outil de testeur, pas une option du joueur.
+build, puis leurs étapes. Un outil de testeur, pas une option du joueur. Le
+dernier, « Crédits », rouvre la partie finie, sur eux.
 
 ### Le flou a un prix
 

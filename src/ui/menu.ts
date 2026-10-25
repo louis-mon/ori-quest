@@ -5,6 +5,7 @@ import type { Rideau } from '../game/rideau';
 import { listerOutils, ouvrirOutil } from '../dev/outils';
 import { choisirLaLangue, langue, LANGUES, nomDeLaLangue } from '../langues/langue';
 import { t } from '../langues/traduire';
+import { ouvrirLesCredits } from './credits';
 import {
   basculerLePleinEcran,
   enPleinEcran,
@@ -95,7 +96,7 @@ export class Menu {
   private fondu = 0;
 
   constructor(
-    root: HTMLElement,
+    private root: HTMLElement,
     private options: MenuOptions,
   ) {
     const el = document.createElement('div');
@@ -132,6 +133,7 @@ export class Menu {
             <button class="ecran__option ecran__bascule" data-action="cocottes"
               aria-pressed="${cocottesMontrees()}">${t('Montrer les zones cliquables')}</button>
             <button class="ecran__option" data-action="fullscreen">${t('Plein écran')}</button>
+            <button class="ecran__option" data-action="credits">${t('Crédits')}</button>
             ${etapesHtml()}
             ${outilsHtml()}
           </div>
@@ -215,6 +217,9 @@ export class Menu {
         break;
       case 'fullscreen':
         await basculerLePleinEcran();
+        break;
+      case 'credits':
+        ouvrirLesCredits(this.root);
         break;
       case 'reset':
         this.confirm.hidden = false;

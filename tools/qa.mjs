@@ -888,6 +888,42 @@ test('credits', async (page, dire) => ({
   },
 }));
 
+// En cours de partie, le menu ouvre les crédits par-dessus la pause, et « Fermer »
+// y ramène. Le point d'étape « Crédits » rouvre le jeu fini, sur eux.
+test('credits-menu', async (page, dire) => ({
+  sauvegarde: DEVANT_LA_PORTE,
+  jouer: async () => {
+    await taperSur(page(), '.menu__button');
+    await taperSur(page(), '.ecran [data-action="credits"]');
+    const devant = await page().evaluate(() => {
+      const r = document.querySelector('.credits').getBoundingClientRect();
+      return !!document
+        .elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+        ?.closest('.credits');
+    });
+    dire('le menu ouvre les crédits par-dessus la pause', devant);
+    dire('ils défilent', await attendreLeDefilement(page(), await hauteurDesCredits(page()), 5000));
+    await taperSur(page(), '.credits__fermer');
+    await pause(700);
+    const e = await etat(page());
+    dire('« Fermer » ramène à la pause', !e.credits && e.ecran === 'pause', `écran : ${e.ecran}`);
+
+    await taperSur(page(), '.ecran [data-action="etapes"]');
+    await taperSur(page(), '.menu__liste-entrees button:has-text("Chapitre 3")');
+    await Promise.all([
+      page().waitForEvent('load'),
+      taperSur(page(), '.menu__liste-entrees button:text-is("Crédits")'),
+    ]);
+    for (let i = 0; i < 50 && !(await etat(page())).credits; i++) await pause(100);
+    const fin = await etat(page());
+    dire(
+      'le point d’étape rouvre le jeu fini sur les crédits',
+      fin.credits && fin.piece === 'trone',
+      `pièce : ${fin.piece}`,
+    );
+  },
+}));
+
 // Une partie neuve s'ouvre sur l'écran d'accueil, la grenouille encore hors
 // champ, et on n'y revient qu'en recommençant. Son dialogue d'arrivée est une
 // conversation comme une autre : interrompu par un rechargement, il n'a pas eu

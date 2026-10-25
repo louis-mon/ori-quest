@@ -2375,7 +2375,7 @@ msgid "Quel tutoriel revoir ?"
 msgstr "Which tutorial do you want to replay?"
 
 #. interface
-#: src/game/puzzle/tutoriel.ts src/ui/menu.ts
+#: src/game/puzzle/tutoriel.ts src/ui/credits.ts src/ui/menu.ts
 msgid "Fermer"
 msgstr "Close"
 
@@ -2655,6 +2655,11 @@ msgid "Avant le cœur (fin)"
 msgstr "Before the heart (end)"
 
 #. interface
+#: src/game/systems/etapes.ts src/ui/credits.ts src/ui/menu.ts
+msgid "Crédits"
+msgstr "Credits"
+
+#. interface
 #: src/game/systems/objets.ts
 msgid "Idée : l'arbre"
 msgstr "Idea: the tree"
@@ -2876,13 +2881,8 @@ msgstr "The following models were folded by Valérie"
 
 #. interface
 #: src/ui/credits-texte.ts
-msgid "Le MFPP et ses adhérents."
-msgstr "The MFPP and its members."
-
-#. interface
-#: src/ui/credits.ts
-msgid "Crédits"
-msgstr "Credits"
+msgid "Et le MFPP et ses adhérents."
+msgstr "And the MFPP and its members."
 
 #. interface
 #: src/ui/credits.ts

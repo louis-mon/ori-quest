@@ -100,6 +100,6 @@ export const PLIEURS: Plieur[] = [
 ];
 
 export const REMERCIEMENTS: string[] = [
-  t('Le MFPP et ses adhérents.'),
-  'Matthieu, Jérôme, Béatrice, Younès, Noah, Paul, Valérie, Julien', // hors traduction
+  'Matthieu, Jérôme, Béatrice, Younès, Noah, Paul, Valérie, Julien, Aurélien, Antoine', // hors traduction
+  t('Et le MFPP et ses adhérents.'),
 ];

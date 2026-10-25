@@ -9,10 +9,14 @@ import { typographier } from './typographie';
 //
 // Sous le menu, contrairement à l'écran « À suivre… » : c'est par lui qu'on
 // recommence, rien d'autre ne devant partager l'écran avec le remerciement.
+// Ouverts depuis le menu, ils passent au contraire au-dessus de lui, et s'y
+// referment.
 
 // Le temps qu'une ligne met à traverser l'écran, quelle que soit sa taille.
 const SECONDES_PAR_ECRAN = 14;
 const REPRISE_MS = 5000;
+// Celui de `.credits`, dans style.css.
+const FONDU_MS = 600;
 
 let pose = false;
 let defilement: Defilement | null = null;
@@ -20,7 +24,36 @@ let defilement: Defilement | null = null;
 export function montrerLesCredits(root: HTMLElement): void {
   if (pose) return;
   pose = true;
+  const { el, fenetre } = construire();
+  root.appendChild(el);
+  defilement = new Defilement(fenetre);
+  apparaitre(el, fenetre);
+}
 
+// Depuis le menu : par-dessus l'écran de pause, depuis le début à chaque fois.
+export function ouvrirLesCredits(root: HTMLElement): void {
+  const { el, fenetre } = construire();
+  el.classList.add('credits--menu');
+  const fermer = bloc('button', 'ecran__option credits__fermer', t('Fermer'));
+  el.append(fermer);
+  root.appendChild(el);
+  const lui = new Defilement(fenetre);
+
+  fermer.addEventListener('pointerup', (e) => {
+    e.stopPropagation();
+    lui.couper();
+    el.classList.remove('credits--visible');
+    window.setTimeout(() => el.remove(), FONDU_MS);
+  });
+  apparaitre(el, fenetre);
+}
+
+// Le menu fige ce qu'on regardait : les crédits ne défilent pas derrière lui.
+export function figerLesCredits(gele: boolean): void {
+  defilement?.figer(gele);
+}
+
+function construire(): { el: HTMLElement; fenetre: HTMLElement } {
   const el = document.createElement('div');
   el.className = 'credits';
   el.setAttribute('role', 'dialog');
@@ -48,19 +81,14 @@ export function montrerLesCredits(root: HTMLElement): void {
   merci.append(bloc('p', 'credits__merci', typographier(t('Merci d’avoir joué !'))));
   fenetre.append(contenu, merci);
   el.append(fenetre);
-  root.appendChild(el);
+  return { el, fenetre };
+}
 
-  defilement = new Defilement(fenetre);
+function apparaitre(el: HTMLElement, fenetre: HTMLElement) {
   fenetre.focus({ preventScroll: true });
-
   // Une frame de retard, sans quoi l'élément naît à son état final et le flou
   // tomberait d'un coup sur la dernière réplique.
   requestAnimationFrame(() => el.classList.add('credits--visible'));
-}
-
-// Le menu fige ce qu'on regardait : les crédits ne défilent pas derrière lui.
-export function figerLesCredits(gele: boolean): void {
-  defilement?.figer(gele);
 }
 
 class Defilement {
@@ -102,6 +130,12 @@ class Defilement {
     this.fige = gele;
     if (gele) this.arreter();
     else if (!this.enMain) this.lancer();
+  }
+
+  // Pour de bon : l'élément s'en va, et la reprise ne doit plus rien relancer.
+  couper() {
+    clearTimeout(this.reprise);
+    this.figer(true);
   }
 
   private prendreLaMain = () => {
