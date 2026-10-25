@@ -164,7 +164,7 @@ cp assets-src/graphisme_origami/background/salle_trone.webp \
   public/assets/decor/fond-trone.webp
 cp assets-src/graphisme_origami/background/jardin.webp \
   public/assets/decor/fond-jardin.webp
-cp assets-src/graphisme_origami/background/Cuisine.webp \
+cp assets-src/graphisme_origami/background/cuisine.webp \
   public/assets/decor/fond-cuisine.webp
 ```
 

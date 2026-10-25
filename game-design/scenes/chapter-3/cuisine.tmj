@@ -140,8 +140,8 @@
                  "type":"decor",
                  "visible":true,
                  "width":56,
-                 "x":404,
-                 "y":48
+                 "x":393,
+                 "y":119
                 },
                 {
                  "height":36,
@@ -152,8 +152,8 @@
                  "type":"decor",
                  "visible":true,
                  "width":56,
-                 "x":812,
-                 "y":46
+                 "x":793,
+                 "y":113
                 }],
          "opacity":1,
          "type":"objectgroup",
