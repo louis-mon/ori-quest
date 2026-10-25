@@ -1218,9 +1218,14 @@ body {
 
 /* `--tray-width` est calculé au montage pour qu'une pièce large et plate reste
    attrapable au doigt. Le plancher garde les deux boutons côte à côte et
-   lisibles quand les pièces sont petites. */
+   lisibles quand les pièces sont petites.
+
+   Le haut de la colonne revient au bouton du menu — et à « Passer », à sa
+   gauche —, d'où le décalage, qui vaut son `top` plus sa hauteur : le vrac y
+   posait des pièces, qu'un tap dans ce coin ne pouvait plus attraper. */
 .puzzle__side {
   width: max(var(--tray-width, 96px), calc(230px * var(--ui-scale)));
+  padding-top: calc(var(--ui-gap) + env(safe-area-inset-top, 0px) + 44px);
   display: flex;
   flex-direction: column;
   align-items: stretch;
