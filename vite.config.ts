@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
+import { licencesTierces } from './tools/lib/licences-tierces.mjs';
 
 const FICHIER_POSES = 'src/origami/poses.ts';
 const FICHIER_EAU = 'src/game/scenes/eau-reglages.ts';
@@ -563,6 +564,7 @@ export default defineConfig({
     suivreLesPlans(),
     suivreLesDecoupages(),
     suivreLaNarration(),
+    licencesTierces(),
   ],
   // itch.io sert le jeu depuis un sous-dossier arbitraire : tous les chemins
   // doivent être relatifs, sinon rien ne charge une fois zippé.

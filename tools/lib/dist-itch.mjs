@@ -6,6 +6,7 @@
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { FICHIER_LICENCES } from './licences-tierces.mjs';
 
 /**
  * Les problèmes trouvés, un message par entrée — tableau vide si tout va bien.
@@ -14,7 +15,8 @@ import { join } from 'node:path';
  *  - `index.html` doit être à la RACINE de ce qu'on envoie, pas dans un
  *    sous-dossier ;
  *  - tous les chemins doivent être relatifs, itch.io servant le jeu depuis un
- *    sous-dossier arbitraire (assuré par `base: './'` côté Vite).
+ *    sous-dossier arbitraire (assuré par `base: './'` côté Vite) ;
+ *  - les licences des bibliothèques partent avec le jeu (`licences-tierces.mjs`).
  */
 export function verifierDist(dist) {
   if (!existsSync(join(dist, 'index.html'))) {
@@ -28,6 +30,12 @@ export function verifierDist(dist) {
       `Chemins absolus dans index.html : ${absolus.join(', ')}\n` +
         `  itch.io sert le jeu depuis un sous-dossier — ils ne résoudront pas.\n` +
         `  Vérifie que vite.config.ts contient bien \`base: './'\`.`,
+    ];
+  }
+
+  if (!existsSync(join(dist, FICHIER_LICENCES))) {
+    return [
+      `dist/${FICHIER_LICENCES} absent : le build doit l'écrire (tools/lib/licences-tierces.mjs).`,
     ];
   }
 

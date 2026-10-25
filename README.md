@@ -228,6 +228,12 @@ renverrait le joueur au ravin, les drapeaux du chapitre suivant levés.
 Tout est permissif. **Rabbit Ear a été volontairement écarté : il est en GPLv3**,
 et le lier dans le bundle obligerait à publier le jeu entier sous GPLv3.
 
+Permissif ne veut pas dire sans condition : MIT demande que la notice parte
+avec chaque copie. Le build l'écrit dans `dist/licences-tierces.txt`
+([`tools/lib/licences-tierces.mjs`](tools/lib/licences-tierces.mjs)), d'après ce
+que le bundle contient vraiment, et `npm run zip` comme `npm run itch` refusent un
+`dist/` qui ne l'a pas.
+
 ### Ce qui se charge, et quand
 
 Au démarrage : Phaser, l'application et sa CSS. **Le reste est différé.** `three`

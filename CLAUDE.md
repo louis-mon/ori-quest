@@ -53,6 +53,10 @@ Prettier impose `_italique_` là où le projet écrit `*italique*`.
 Phaser 4 · TypeScript · Vite · inkjs (narration) · three.js (origami) —
 **tout en MIT**.
 
+Les notices MIT partent avec le jeu : le build écrit `dist/licences-tierces.txt`
+d'après ce que le bundle contient (`tools/lib/licences-tierces.mjs`), et une
+dépendance sans fichier de licence l'arrête.
+
 **Ne pas introduire `rabbit-ear`** : la bibliothèque est excellente mais en
 **GPLv3**, et la lier dans le bundle obligerait à publier le jeu entier sous
 GPLv3. Si un besoin de maths origami apparaît, l'utiliser en outil de build
