@@ -16,3 +16,8 @@ Une fois la daurade amenée, elle prépare le repas.
 Une fois les chats invités à manger, ils sont dans la cuisine.
 
 Une fois dans la cuisine, on peut leur parler, is reviennent dans la salle du trône.
+
+## La table
+
+Une fois la daurade préparée par la Cheffe, elle attend sur la table, dans une assiette. Quand les chats ont fini
+de manger, il ne reste dans l'assiette que son squelette.

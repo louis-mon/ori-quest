@@ -8,6 +8,7 @@ import { placeHeros, preloadHeros } from './heros';
 import { empriseDe, placeSprite, preloadSprite } from './decor-sprite';
 import { dessinerFond, preloadFond } from './fond';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
+import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { allumerLesTorches } from './torches';
 
 // La cuisine — entre la salle du trône (à gauche) et le jardin (à droite),
@@ -17,11 +18,16 @@ import { allumerLesTorches } from './torches';
 // Les chats n'y sont qu'entre l'invitation à manger et la fin du repas, chacun
 // sur une chaise de la table ; on leur parle, et ils repartent vers la salle du
 // trône.
+//
+// La daurade cuisinée attend sur la table, et n'y laisse que son squelette une
+// fois les chats repus.
 
 const PLAN = plan;
 
 const ELEPHANT = 'elephant_humain';
 const CHAT = 'chat';
+const ASSIETTE = 'assiette';
+const SQUELETTE = 'squelette_poisson';
 
 // Des chats repus ne courent plus.
 const VITESSE_RETOUR = 170;
@@ -32,6 +38,9 @@ export class CuisineScene extends PointClickScene {
 
   private chat!: Phaser.GameObjects.Image;
   private luneChat!: LuneChat;
+  private assiette!: Phaser.GameObjects.Image;
+  private daurade!: OrigamiDecor;
+  private squelette!: Phaser.GameObjects.Image;
   // Même raison qu'à la salle du trône : la zone s'éteint au bout du trajet, pas
   // au drapeau que la narration lève avant lui.
   private chatsRepartis = false;
@@ -45,6 +54,8 @@ export class CuisineScene extends PointClickScene {
     preloadFond(this, PLAN.fond);
     preloadSprite(this, ELEPHANT, 'assets/decor/elephant_humain.png');
     preloadSprite(this, CHAT, 'assets/decor/chat.png');
+    preloadSprite(this, ASSIETTE, 'assets/decor/assiette.png');
+    preloadSprite(this, SQUELETTE, 'assets/decor/squelette_poisson.png');
     preloadLuneChat(this);
   }
 
@@ -87,6 +98,12 @@ export class CuisineScene extends PointClickScene {
     const aTable = this.chatsATable();
     this.chat?.setVisible(aTable);
     this.luneChat?.conteneur.setVisible(aTable);
+
+    const servie = gameState.flag('repas_pret');
+    const mangee = gameState.flag('chats_rassasies');
+    this.assiette?.setVisible(servie);
+    this.daurade?.montrer(servie && !mangee);
+    this.squelette?.setVisible(mangee);
   }
 
   // ------------------------------------------------------------------
@@ -97,6 +114,12 @@ export class CuisineScene extends PointClickScene {
     dessinerFond(this, PLAN.fond);
     // Les mêmes torches que dans la salle du trône, et le même réglage.
     allumerLesTorches(this, [boxOf(PLAN, 'dec_flamme_gauche'), boxOf(PLAN, 'dec_flamme_droite')]);
+
+    // Avant les chats : ils repartent devant la table.
+    this.assiette = placeSprite(this, ASSIETTE, boxOf(PLAN, 'dec_assiette'));
+    const repas = boxOf(PLAN, 'dec_repas');
+    this.daurade = poserOrigami(this, 'poisson', repas);
+    this.squelette = placeSprite(this, SQUELETTE, repas);
 
     this.caler('cheffe', empriseDe(placeSprite(this, ELEPHANT, boxOf(PLAN, 'hs_cheffe'))));
     this.chat = placeSprite(this, CHAT, boxOf(PLAN, 'hs_chat'));
