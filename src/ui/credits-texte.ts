@@ -48,8 +48,8 @@ export const PLIEURS: Plieur[] = [
       { modele: 'Sun', auteur: 'Peter Engel', livre: 'Origami Odyssey' },
       { modele: 'Penguin', auteur: FERNANDO, livre: 'Tanteidan 17th convention' },
       { modele: 'Fox - Vixen', auteur: 'Roman Diaz', livre: 'Origami Essence' },
-      { modele: 'Cat', auteur: 'Martha Mitchen', livre: 'usa Convention 1990' },
-      { modele: 'Koi carp', auteur: 'Meng Weining (212moving)', livre: 'Origami montents' },
+      { modele: 'Cat', auteur: 'Martha Mitchen', livre: 'Origami USA Convention 1990' },
+      { modele: 'Koi carp', auteur: 'Meng Weining (212moving)', livre: 'Origami Moments' },
       { modele: 'Camelot Castle', auteur: 'Lew Rozelle', livre: "Origami in King Arthur's Court" },
       { modele: 'Arrow', auteur: 'Masamichi Noma', livre: 'NOA Magazine 218' },
       {
@@ -65,11 +65,11 @@ export const PLIEURS: Plieur[] = [
       { modele: 'Table', auteur: 'Juan Lopez Figueroa', livre: 'Origami USA Convention 1997' },
       { modele: 'Sword', auteur: 'Lee in Seop', livre: 'Origami Skill Up-Advanced Level' },
       {
-        modele: 'Shield (Left)',
+        modele: 'Shield (left)',
         auteur: MONTROLL,
         livre: 'Dragons and Other Fantastic Creatures',
       },
-      { modele: 'Shield (right)', auteur: 'Pierre Monestier' },
+      { modele: 'Shield (middle)', auteur: 'Pierre Monestier' },
       { modele: 'Shield (right)', auteur: 'David Brill', livre: 'Brilliant Origami' },
       { modele: 'Torch', auteur: FERNANDO, livre: 'Create and Play with Origami Dinosaurs 1' },
       { modele: 'Caballo en el cuadro 2D V. 3.0', auteur: PULIDO, livre: 'Hiporigami 3' },
@@ -83,7 +83,7 @@ export const PLIEURS: Plieur[] = [
       {
         modele: 'Black Forest Cuckoo Clock',
         auteur: 'Robert J. Lang',
-        livre: 'Origami Design Secrets Mathematical Methods for an Ancient Art',
+        livre: 'Origami Design Secrets: Mathematical Methods for an Ancient Art',
       },
     ],
   },
