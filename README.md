@@ -491,7 +491,8 @@ connecté avec le compte qui le possède.
 
 Restent les réglages qui ne sont pas dans le fichier envoyé, à faire une fois
 dans le tableau de bord (`npm run itch` les rappelle après chaque envoi) :
-fenêtre 1280 × 720, bouton plein écran, « Mobile friendly » en paysage, et
+fenêtre 1280 × 720, bouton plein écran — le seul du jeu une fois en ligne, le
+menu s'effaçant devant lui —, « Mobile friendly » en paysage, et
 **SharedArrayBuffer décoché** — inutile ici, et son implémentation itch.io casse
 le chargement hors Chrome.
 

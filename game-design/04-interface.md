@@ -512,8 +512,10 @@ langue en cours, et vaut sans recharger la page.
 
 **Plein écran.** Masqué automatiquement là où le navigateur ne le permet pas,
 plutôt que d'offrir un bouton inerte — c'est le cas de Safari sur iPhone, qui
-réserve encore l'API plein écran aux vidéos. Sur itch.io, le lecteur fournit de
-toute façon son propre bouton.
+réserve encore l'API plein écran aux vidéos. Masqué aussi sur itch.io : le
+lecteur y a son propre bouton, et lui lancer le nôtre par-dessus donnait deux
+plein écran empilés, que « Recommencer » faisait tomber ensemble. Celui du site,
+seul, survit à un nouveau départ ; le nôtre, ailleurs, revient au premier tap.
 
 **Points d'étape**, tant que la page itch.io est en Draft : les chapitres du
 build, puis leurs étapes. Un outil de testeur, pas une option du joueur.

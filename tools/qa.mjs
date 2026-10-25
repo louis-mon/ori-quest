@@ -921,6 +921,45 @@ test('langue', async (page, dire) => ({
   },
 }));
 
+// Recommencer recharge la page, et un rechargement fait toujours sortir du plein
+// écran : le premier tap d'après doit l'y remettre. Dans une iframe, comme sur
+// itch.io, le plein écran est celui du site, et le menu n'en propose pas d'autre.
+test('plein-ecran', async (page, dire) => ({
+  sauvegarde: AU_RAVIN,
+  jouer: async () => {
+    const plein = () => page().evaluate(() => Boolean(document.fullscreenElement));
+    await commencer(page());
+    await attendreLaBoite(page());
+    await deroulerDialogue(page());
+    await taperSur(page(), '.menu__button');
+    await taperSur(page(), '.ecran [data-action="fullscreen"]');
+    dire('le menu passe en plein écran', await plein());
+
+    await taperSur(page(), '.ecran [data-action="reset"]');
+    await Promise.all([page().waitForEvent('load'), taperSur(page(), '[data-action="confirm"]')]);
+    await pause(2000);
+    dire("recommencer ramène à l'accueil", (await etat(page())).ecran === 'accueil');
+    await commencer(page());
+    dire('« Commencer à plier » remet le plein écran', await plein());
+
+    // L'iframe naît dans la page du jeu : encadré par une page sans adresse
+    // locale — `about:blank`, une réponse de `page.route()` —, `localhost` est
+    // refusé par Chromium (ERR_BLOCKED_BY_LOCAL_NETWORK_ACCESS_CHECKS).
+    await page().evaluate(() => {
+      const cadre = document.createElement('iframe');
+      cadre.src = location.href;
+      cadre.allow = 'fullscreen';
+      document.body.append(cadre);
+    });
+    const bouton = page().frameLocator('iframe').locator('[data-action="fullscreen"]');
+    await bouton.waitFor({ state: 'attached' });
+    dire(
+      'dans une iframe, le menu laisse le plein écran au site',
+      await bouton.evaluate((b) => b.hidden),
+    );
+  },
+}));
+
 // Les cocottes sont masquées par défaut, et une case des options les rappelle.
 // Réglage de l'appareil et non de la partie : il survit au rechargement.
 test('cocottes', async (page, dire) => ({

@@ -17,6 +17,7 @@ import { suivreLeCadre } from './ui/cadre';
 import { isolerLInterface } from './ui/isolation';
 import { Menu } from './ui/menu';
 import { Overlay } from './ui/overlay';
+import { garderLePleinEcranAuRechargement } from './ui/plein-ecran';
 
 // Rétablit requestAnimationFrame quand la page est masquée (volet de preview).
 // Doit s'installer avant que Phaser ne capture la fonction native.
@@ -65,6 +66,7 @@ game.events.once(Phaser.Core.Events.READY, () => {
 });
 
 sauverALaSortie();
+garderLePleinEcranAuRechargement();
 debloquerLAudioAuPremierGeste(game);
 
 if (import.meta.env.DEV) {

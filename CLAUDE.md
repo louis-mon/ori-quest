@@ -609,6 +609,17 @@ dans des éléments frères et disparaîtrait. Safari sur iPhone n'implémente
 toujours pas l'API pour un élément quelconque, d'où l'entrée de menu masquée
 quand `document.fullscreenEnabled` est faux.
 
+**Dans une iframe, le plein écran est celui du site**, et l'entrée de menu se
+masque aussi (`pleinEcranPossible()`, `src/ui/plein-ecran.ts`). itch.io met en
+plein écran son propre cadre, ce que la page du jeu ne voit pas — ni
+`fullscreenElement`, ni `fullscreenchange` : le menu proposait « Plein écran »
+sur un écran déjà plein, et l'accepter empilait le nôtre sur le sien. Or un
+rechargement fait tomber **les deux** quand ils sont empilés, alors que celui du
+site, seul, y survit — et tout ce qui repart à neuf recharge la page.
+Hors iframe, un rechargement fait toujours sortir du plein écran et rien n'y
+ramène sans geste : `garderLePleinEcranAuRechargement()` le note au `pagehide`,
+et le premier tap d'après l'y remet. `npm run qa -- plein-ecran` tient les deux.
+
 **La CSS des pages de développement passe par un `import` du module**, pas par un
 `<link>` dans le HTML : sur `<link href="/src/dev/*.css">`, le navigateur garde
 sa copie et une règle ajoutée n'arrive jamais à la page. L'éditeur de découpage

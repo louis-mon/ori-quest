@@ -52,6 +52,6 @@ export const SEUIL_ALERTE = 30 * 1024 * 1024;
 // tableau de bord itch.io, et une seule fois par projet.
 export const RAPPEL_ITCH = `Dans les options du fichier, côté itch.io :
   • cocher « This file will be played in the browser »
-  • régler la fenêtre sur 1280 × 720 et activer le bouton plein écran
+  • régler la fenêtre sur 1280 × 720 et activer le bouton plein écran (le menu du jeu n'en a pas dans une iframe)
   • cocher « Mobile friendly » (+ orientation paysage)
   • laisser « SharedArrayBuffer support » DÉCOCHÉ (casse Firefox/Safari, inutile ici)`;
