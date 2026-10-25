@@ -10,7 +10,8 @@ import { dessinerFond, preloadFond } from './fond';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 import { allumerLesTorches } from './torches';
 
-// La cuisine — à gauche de la salle du trône, chapitre 3.
+// La cuisine — entre la salle du trône (à gauche) et le jardin (à droite),
+// chapitre 3.
 // Voir game-design/scenes/chapter-3/cuisine.md.
 //
 // Les chats n'y sont qu'entre l'invitation à manger et la fin du repas, chacun
@@ -75,6 +76,9 @@ export class CuisineScene extends PointClickScene {
     return exitsFrom(PLAN, {
       trone: {
         room: 'trone',
+      },
+      jardin: {
+        room: 'jardin',
       },
     });
   }

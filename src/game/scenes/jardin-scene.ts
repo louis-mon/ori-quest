@@ -11,7 +11,7 @@ import { dessinerFond, preloadFond } from './fond';
 import { imprimerFeuille } from './feuille';
 import { IMAGES_RETOURNEMENT, poserRetournable } from './retournement';
 
-// Le jardin du château — à droite de la salle du trône, chapitre 3.
+// Le jardin du château — à droite de la cuisine, chapitre 3.
 // Voir game-design/scenes/chapter-3/jardin.md.
 //
 // Deux papiers à plier, la fontaine où l'on pêche la carpe, et la wyvern qui
@@ -80,8 +80,8 @@ export class JardinScene extends PointClickScene {
 
   protected exits(): ExitDef[] {
     return exitsFrom(PLAN, {
-      trone: {
-        room: 'trone',
+      cuisine: {
+        room: 'cuisine',
       },
     });
   }

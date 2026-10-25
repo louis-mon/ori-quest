@@ -30,20 +30,20 @@
                  "type":"hotspot",
                  "visible":true,
                  "width":155,
-                 "x":1000,
+                 "x":120,
                  "y":480
                 },
                 {
-                 "height":250,
+                 "height":230,
                  "id":2,
                  "name":"cheffe",
                  "opacity":1,
                  "rotation":0,
                  "type":"hotspot",
                  "visible":true,
-                 "width":180,
-                 "x":50,
-                 "y":420
+                 "width":160,
+                 "x":1000,
+                 "y":440
                 },
                 {
                  "height":160,
@@ -72,13 +72,25 @@
                 {
                  "height":190,
                  "id":5,
-                 "name":"trone",
+                 "name":"jardin",
                  "opacity":1,
                  "rotation":0,
                  "type":"exit",
                  "visible":true,
                  "width":96,
                  "x":1160,
+                 "y":400
+                },
+                {
+                 "height":190,
+                 "id":14,
+                 "name":"trone",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"exit",
+                 "visible":true,
+                 "width":96,
+                 "x":24,
                  "y":400
                 },
                 {
@@ -92,11 +104,11 @@
                         "y":0
                        },
                        {
-                        "x":75,
+                        "x":-65,
                         "y":110
                        },
                        {
-                        "x":905,
+                        "x":-425,
                         "y":110
                        }],
                  "rotation":0,
@@ -117,12 +129,12 @@
                         "y":0
                        },
                        {
-                        "x":125,
-                        "y":55
+                        "x":-75,
+                        "y":115
                        },
                        {
-                        "x":425,
-                        "y":55
+                        "x":-905,
+                        "y":115
                        }],
                  "rotation":0,
                  "type":"chemin",
@@ -162,7 +174,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":14,
+ "nextobjectid":15,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

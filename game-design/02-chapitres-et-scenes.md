@@ -48,13 +48,13 @@ jamais dans les coins supérieurs, hors d'atteinte sur un grand téléphone.
 **La topologie n'est pas une question tant qu'un chapitre a deux scènes** :
 A ↔ B, une flèche de chaque côté, rien à comprendre.
 
-**Tranché au chapitre 3, le premier à en avoir trois** : une ligne, cuisine ↔
-salle du trône ↔ jardin, la salle du trône au milieu. À trois scènes, c'est aussi
-une étoile dont elle serait le centre, et c'est le contenu qui la désigne : elle
-est le point d'entrée du chapitre, les deux quêtes y commencent — la couronne de
-la reine, la faim des chats — et le dénouement s'y joue. Chaque pièce garde la
-règle des bords : deux flèches dans la salle du trône, une de chaque côté, et une
-seule dans les deux autres, du côté par où l'on revient.
+**Tranché au chapitre 3, le premier à en avoir trois** : une ligne, salle du
+trône ↔ cuisine ↔ jardin, de gauche à droite. La salle du trône est le point
+d'entrée du chapitre — les deux quêtes y commencent, la couronne de la reine et
+la faim des chats, et le dénouement s'y joue —, et elle est au bout de la ligne :
+on avance vers la droite, comme d'une scène à l'autre aux chapitres précédents.
+Chaque pièce garde la règle des bords : deux flèches dans la cuisine, une de
+chaque côté, et une seule dans les deux autres, du côté par où l'on revient.
 
 ## Ce que ça implique techniquement
 

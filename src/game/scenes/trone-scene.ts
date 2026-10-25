@@ -18,8 +18,8 @@ import { finDuChemin } from './deplacement';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 import { allumerLesTorches } from './torches';
 
-// La salle du trône — point d'entrée du chapitre 3, entre la cuisine (à gauche)
-// et le jardin (à droite). Voir game-design/scenes/chapter-3/salle-du-trone.md.
+// La salle du trône — point d'entrée du chapitre 3, à gauche de la cuisine.
+// Voir game-design/scenes/chapter-3/salle-du-trone.md.
 //
 // Les chats en partent pour la cuisine quand on les invite à manger, et y
 // reviennent rassasiés ; le cœur plié, ils s'en approchent et se réconcilient.
@@ -99,9 +99,6 @@ export class TroneScene extends PointClickScene {
     return exitsFrom(PLAN, {
       cuisine: {
         room: 'cuisine',
-      },
-      jardin: {
-        room: 'jardin',
       },
     });
   }
