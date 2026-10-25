@@ -201,7 +201,7 @@ export class TroneScene extends PointClickScene {
       },
     });
 
-    // Seulement derrière l'écran de fin, rouvert au chargement (`Navigation.demarrer()`).
+    // Seulement derrière les crédits, rouverts au chargement (`Navigation.demarrer()`).
     if (gameState.flag('histoire_finie')) {
       const chat = finDuChemin(cheminOf(PLAN, 'rapprochement_chat'));
       const lune = finDuChemin(cheminOf(PLAN, 'rapprochement_lune_chat'));

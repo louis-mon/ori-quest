@@ -162,6 +162,7 @@ export const etat = (page) =>
       enigme: !!document.querySelector('.puzzle'),
       tuto: !!document.querySelector('.tuto'),
       fin: !!document.querySelector('.fin'),
+      credits: !!document.querySelector('.credits'),
       // L'écran du menu, et lequel des deux : l'accueil d'une partie neuve, ou
       // la pause.
       ecran: document.querySelector('.ecran')?.hidden

@@ -25,7 +25,7 @@ export interface DialogueEffects {
   // posé sur une ligne SANS texte : la ligne suivante ne doit être évaluée
   // qu'une fois le drapeau connu.
   puzzle(name: string): Promise<void>;
-  // La fin de l'histoire, pas d'un chapitre : l'écran de fin prend la suite de
+  // La fin de l'histoire, pas d'un chapitre : les crédits prennent la suite de
   // la dernière réplique.
   fin(): void;
 }

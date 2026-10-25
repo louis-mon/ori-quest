@@ -383,7 +383,9 @@ src/
     overlay.ts               dialogues, inventaire, menu de verbes (DOM)
     cadre.ts                 recale l'UI sur le canvas letterboxé (syncStage)
     isolation.ts             un tap né dans l'UI ne remonte pas jusqu'au jeu
-    fin.ts                   « Fin », ou « À suivre… » hors de la traversée livrée
+    fin.ts                   « À suivre… » hors de la traversée livrée
+    credits.ts               les crédits, après la dernière réplique de l'histoire
+    credits-texte.ts         ce qu'ils disent, rangé en sections
     vignettes.ts             image d'un objet d'inventaire
     style.css
   dev/

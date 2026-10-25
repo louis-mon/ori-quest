@@ -62,8 +62,8 @@ Le chapitre 1 a ses deux scènes, le ravin et la porte ; le chapitre 2, le villa
 et l'entrée du château ; le chapitre 3, la salle du trône, la cuisine et le
 jardin. La navigation fonctionne dans les deux sens à l'intérieur d'un chapitre,
 franchir la porte mène du premier au second, et l'entrée du château du second au
-troisième. La fin du troisième est celle de l'histoire : son dernier knot pose
-l'écran de fin (`# fin:`).
+troisième. La fin du troisième est celle de l'histoire : son dernier knot passe la
+main aux crédits (`# fin:`).
 
 **Les liaisons sont dans les plans**, pas dans un registre : une boîte `exit_<id>`
 dans le SVG, et la scène dit vers quelle pièce elle mène. Le registre de

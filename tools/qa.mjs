@@ -801,16 +801,92 @@ test(
       dire('puis les aveux', (await etat(page())).texte.includes(AVEUX));
 
       await deroulerDialogue(page(), 60);
-      for (let i = 0; i < 30 && !(await etat(page())).fin; i++) await pause(100);
-      const titre = await page().evaluate(
-        () => document.querySelector('.fin__titre')?.textContent ?? '',
-      );
-      dire("l'écran de fin clôt l'histoire", titre === 'Fin', titre);
-      dire('la fin est enregistrée', (await etat(page())).enregistres.histoire_finie === true);
+      for (let i = 0; i < 30 && !(await etat(page())).credits; i++) await pause(100);
+      const e = await etat(page());
+      dire("les crédits closent l'histoire", e.credits && !e.fin);
+      dire('la fin est enregistrée', e.enregistres.histoire_finie === true);
     },
   }),
   { livre: true },
 );
+
+// Les crédits défilent seuls, s'arrêtent sous le geste du joueur et ne
+// reprennent que cinq secondes après lui — la durée est ici ce qu'on vérifie.
+// Le menu reste au-dessus d'eux, et les fige : c'est par lui qu'on recommence.
+// Au bout, « Merci d'avoir joué ! » est seul à l'écran.
+const HISTOIRE_FINIE = etape('trone', [
+  ...Object.keys(COEUR_PLIE_CHATS_A_TABLE.flags),
+  'chats_rassasies',
+  'histoire_finie',
+]);
+const hauteurDesCredits = (page) =>
+  page.evaluate(() => document.querySelector('.credits__defilement').scrollTop);
+async function attendreLeDefilement(page, depuis, ms) {
+  const fin = Date.now() + ms;
+  while (Date.now() < fin) {
+    if ((await hauteurDesCredits(page)) > depuis + 5) return true;
+    await pause(100);
+  }
+  return false;
+}
+test('credits', async (page, dire) => ({
+  sauvegarde: HISTOIRE_FINIE,
+  jouer: async () => {
+    dire('une histoire finie rouvre sur les crédits', (await etat(page())).credits);
+    dire(
+      'ils défilent seuls',
+      await attendreLeDefilement(page(), await hauteurDesCredits(page()), 5000),
+    );
+
+    await taperSur(page(), '.menu__button');
+    dire('le menu passe au-dessus', (await etat(page())).ecran === 'pause');
+    dire(
+      'et permet de recommencer',
+      await page().locator('.ecran [data-action="reset"]').isVisible(),
+    );
+    let fige = await hauteurDesCredits(page());
+    dire('ils ne défilent pas sous le menu', !(await attendreLeDefilement(page(), fige, 1500)));
+    await taperSur(page(), '.ecran [data-action="principal"]');
+    dire('et repartent quand il se referme', await attendreLeDefilement(page(), fige, 3000));
+
+    const cadre = await page().locator('.credits').boundingBox();
+    await page().mouse.move(cadre.x + cadre.width / 2, cadre.y + cadre.height / 2);
+    await page().mouse.wheel(0, 400);
+    await pause(300);
+    fige = await hauteurDesCredits(page());
+    const geste = Date.now();
+    dire('le joueur les fait avancer', fige > 300, fige);
+    dire('puis repartent seuls', await attendreLeDefilement(page(), fige, 9000));
+    const reprise = Date.now() - geste;
+    dire('cinq secondes après son geste', reprise > 4500 && reprise < 7500, `${reprise} ms`);
+
+    await page().evaluate(() => {
+      const f = document.querySelector('.credits__defilement');
+      f.scrollTop = f.scrollHeight;
+    });
+    await pause(300);
+    const bout = await page().evaluate(() => {
+      const f = document.querySelector('.credits__defilement').getBoundingClientRect();
+      const merci = document.querySelector('.credits__merci').getBoundingClientRect();
+      const visibles = [...document.querySelectorAll('.credits__defilement :is(h2, h3, p, span)')]
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.bottom > f.top && r.top < f.bottom;
+        })
+        .map((el) => el.textContent);
+      return {
+        visibles,
+        ecart: Math.abs(merci.top + merci.bottom - f.top - f.bottom) / 2,
+      };
+    });
+    dire(
+      'au bout, le remerciement est seul à l’écran',
+      bout.visibles.length === 1 && /Merci/.test(bout.visibles[0]),
+      bout.visibles.join(' | '),
+    );
+    dire('et centré', bout.ecart < 2, `${bout.ecart} px`);
+  },
+}));
 
 // Une partie neuve s'ouvre sur l'écran d'accueil, la grenouille encore hors
 // champ, et on n'y revient qu'en recommençant. Son dialogue d'arrivée est une

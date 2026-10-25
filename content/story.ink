@@ -12,7 +12,7 @@
 //   # goto: <scène>              change de scène
 //   # puzzle: <nom>              ouvre une énigme et attend son verdict
 //   # then: <knot>               repart au knot, une fois les tags appliqués
-//   # fin: histoire              clôt l'histoire, l'écran de fin prend la suite
+//   # fin: histoire              clôt l'histoire, les crédits prennent la suite
 //
 // Qui parle : `# qui: <personnage>`, rémanent jusqu'au suivant ; sans lui,
 // c'est la narration (src/game/systems/personnages.ts). Un menu de choix est
@@ -1262,7 +1262,7 @@ Le cœur rouge incrusté d'or étincelant capte enfin l'attention des deux chats
 // Le dernier temps de la scène finale : voir `trone_retrouvailles`.
 //
 // ⚠ Le `# fin:` est SEUL sur sa ligne, comme le `# goto:` des fins de chapitre :
-// l'écran de fin ne vient qu'après la dernière réplique.
+// les crédits ne viennent qu'après la dernière réplique.
 === trone_reconciliation ===
 # qui: narrateur
 Les chats fixent le cœur en silence un petit moment. Ils n'osent pas encore se regarder en face.

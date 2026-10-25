@@ -1,44 +1,31 @@
 import { gameState } from '../game/systems/state';
 import { t } from '../langues/traduire';
 
-// L'écran de fin, pour deux raisons. La version : le build publié s'arrête au
-// dernier chapitre livré (src/game/chapitres.ts) et le dit, plutôt que
-// d'emmener le joueur dans une scène qui n'existe pas. L'histoire : le dernier
-// knot du dernier chapitre la referme (`# fin:`).
+// La fin de la version : le build publié s'arrête au dernier chapitre livré
+// (src/game/chapitres.ts) et le dit, plutôt que d'emmener le joueur dans une
+// scène qui n'existe pas. La fin de l'histoire, elle, passe aux crédits
+// (`credits.ts`).
 //
 // Ce texte n'est pas dans ink, comme celui des tutoriels d'énigme et pour une
 // raison voisine : il ne raconte rien, il clôt. La narration ne sait pas quels
 // chapitres ont été compilés — le chapitre se referme sur sa dernière réplique,
 // et cet écran prend la suite.
-export type RaisonDeFin = 'version' | 'histoire';
-
-const TEXTES: Record<RaisonDeFin, { titre: string; texte: string }> = {
-  version: {
-    titre: t('À suivre…'),
-    texte: t('La suite nécessite encore quelques plis...'),
-  },
-  histoire: {
-    titre: t('Fin'),
-    texte: t('La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir joué !'),
-  },
-};
 
 let pose = false;
 
-export function montrerFin(root: HTMLElement, raison: RaisonDeFin = 'version'): void {
+export function montrerFin(root: HTMLElement): void {
   // Une sortie peut être touchée deux fois pendant le fondu : le deuxième appel
   // ne doit pas reposer un écran par-dessus le premier.
   if (pose) return;
   pose = true;
 
-  const { titre, texte } = TEXTES[raison];
   const el = document.createElement('div');
   el.className = 'fin';
   el.setAttribute('role', 'dialog');
   el.setAttribute('aria-modal', 'true');
   el.innerHTML = `
-    <p class="fin__titre">${titre}</p>
-    <p class="fin__texte">${texte}</p>
+    <p class="fin__titre">${t('À suivre…')}</p>
+    <p class="fin__texte">${t('La suite nécessite encore quelques plis...')}</p>
     <button class="fin__bouton" type="button">${t('Recommencer')}</button>
   `;
   root.appendChild(el);

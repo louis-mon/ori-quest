@@ -527,6 +527,26 @@ le navigateur recalcule le flou à chaque image. Ici il ne se paie que pendant q
 personne ne joue, et l'écran caché n'en coûte rien. Sans flou du tout, le voile
 sombre suffit à lire.
 
+## Les crédits ferment l'histoire
+
+**Après la dernière réplique de la grenouille**, pas d'écran « Fin » : les
+crédits. La pièce se floute et s'assombrit comme sous la pause — plus sombre
+qu'elle, pour qu'un texte clair se lise jusque sur le mur presque blanc de la
+salle du trône —, et ils montent du bas de l'écran.
+
+**Ils défilent seuls, et le joueur peut les reprendre en main**, au doigt ou à
+la molette, en avant comme en arrière. Le défilement s'arrête alors, et ne
+reprend que cinq secondes après son dernier geste ; un doigt resté posé le
+retient. Rangés en sections, ils se lisent en deux colonnes de part et d'autre
+du milieu : le modèle à gauche, son auteur à droite, le livre dessous. Les
+titres des modèles et des livres restent ceux de leur publication, dans toutes
+les langues.
+
+**Ils finissent sur « Merci d'avoir joué ! », seul et centré.** Rien ne partage
+l'écran avec lui, pas même un bouton : on recommence par le menu, qui reste
+au-dessus des crédits et les fige le temps d'être ouvert, comme il fige la
+pièce. Une partie finie rouvre sur eux.
+
 ## Principe directeur
 
 **L'interface doit disparaître derrière le décor.** Un point & click contemplatif

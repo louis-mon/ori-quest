@@ -1090,6 +1090,136 @@ body {
   }
 }
 
+/* ---------- Crédits ---------- */
+
+/* Le flou de l'écran de pause, plus sombre : du texte clair et menu doit s'y
+   lire, jusque sur le mur presque blanc de la salle du trône. Sous le bouton du
+   menu (7), qui reste le seul moyen de recommencer, et après la boîte de
+   dialogue dans le DOM, qui partage son 6. */
+.credits {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: rgba(16, 14, 12, 0.6);
+  -webkit-backdrop-filter: blur(calc(7px * var(--ui-scale))) saturate(0.85);
+  backdrop-filter: blur(calc(7px * var(--ui-scale))) saturate(0.85);
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .credits {
+    background: rgba(16, 14, 12, 0.85);
+  }
+}
+
+.credits--visible {
+  opacity: 1;
+}
+
+/* Le texte s'efface aux deux bords plutôt que d'y être tranché. */
+.credits__defilement {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  outline: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+}
+
+.credits__defilement::-webkit-scrollbar {
+  display: none;
+}
+
+/* Une hauteur d'écran avant le premier titre — les crédits montent du bas —, et
+   une pour le remerciement : arrivé au bout, il est seul à l'écran. */
+.credits__defilement::before {
+  content: '';
+  display: block;
+  height: 100%;
+}
+
+.credits__contenu {
+  display: flex;
+  flex-direction: column;
+  gap: calc(64px * var(--ui-scale));
+  width: min(calc(820px * var(--ui-scale)), 100%);
+  margin: 0 auto;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.credits__titre,
+.credits__merci {
+  margin: 0;
+  font-size: calc(38px * var(--ui-scale));
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.credits__section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(18px * var(--ui-scale));
+}
+
+.credits__intitule {
+  margin: 0 0 calc(10px * var(--ui-scale));
+  font-size: calc(14px * var(--ui-scale));
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+.credits__ligne {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: calc(28px * var(--ui-scale));
+  font-size: calc(18px * var(--ui-scale));
+  line-height: 1.35;
+}
+
+.credits__quoi {
+  text-align: right;
+  font-weight: 700;
+}
+
+.credits__qui {
+  text-align: left;
+}
+
+.credits__livre {
+  grid-column: 2;
+  text-align: left;
+  font-size: calc(15px * var(--ui-scale));
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.credits__remerciement {
+  margin: 0;
+  font-size: calc(18px * var(--ui-scale));
+  line-height: 1.5;
+}
+
+.credits__fin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 16px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .credits {
+    transition-duration: 1ms;
+  }
+}
+
 /* ---------- Invite de rotation ---------- */
 
 #rotate-hint {

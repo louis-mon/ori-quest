@@ -161,11 +161,13 @@ les drapeaux du chapitre suivant levés.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la
-suite. C'est le seul texte du jeu hors d'ink avec ce qui se dit pendant une
-énigme, et pour une raison voisine : il clôt, il ne raconte pas. La fin de
-l'histoire passe par le même écran, dans sa variante « Fin » : c'est le tag
-`# fin:` du dernier knot qui la pose — la narration sait que l'histoire est finie, l'écran ne fait que le
-constater.
+suite. Avec les crédits et ce qui se dit pendant une énigme, c'est le seul texte
+du jeu hors d'ink, et pour une raison voisine : il clôt, il ne raconte pas. La
+fin de l'histoire passe aux crédits (`src/ui/credits.ts`) : c'est le tag `# fin:`
+du dernier knot qui les pose — la narration sait que l'histoire est finie,
+l'écran ne fait que le constater. Ils restent **sous le menu** : rien ne doit
+partager l'écran avec « Merci d'avoir joué ! », c'est donc par lui qu'on
+recommence, et il les fige comme il fige la scène.
 
 **Une idée est un objet d'inventaire comme un autre.** Même `# give:`, même
 condition `has_`, même liste ; seul l'affichage les distingue, à partir du
@@ -442,9 +444,10 @@ que personne n'aurait lue. `npm run qa -- anti-tap` tient les deux.
 
 **Des couches à ne pas intervertir** : l'énigme à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la
-confirmation à 7, le vol d'obtention et son bandeau à 8, l'écran de fin à 9 —
-au-dessus du menu, seul écran du jeu dans ce cas : la partie est finie, il n'y a
-plus rien à reprendre. D'où le fait que `.tuto`
+confirmation à 7, le vol d'obtention et son bandeau à 8, l'écran « À suivre… »
+à 9 — au-dessus du menu, seul écran du jeu dans ce cas : la partie est finie, il
+n'y a plus rien à reprendre. Les crédits sont à 6, après la boîte dans le DOM et
+sous le menu, par où l'on recommence. D'où le fait que `.tuto`
 ne soit **pas positionné** : positionné, il ferait contexte d'empilement et ses
 enfants ne pourraient plus encadrer la boîte de dialogue.
 

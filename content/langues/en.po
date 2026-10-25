@@ -2835,6 +2835,66 @@ msgid "Tourne ton téléphone"
 msgstr "Rotate your phone"
 
 #. interface
+#: src/ui/credits-texte.ts
+msgid "Game design, scénario"
+msgstr "Game design, story"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Pierre et Louis Monestier"
+msgstr "Pierre and Louis Monestier"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Photographie"
+msgstr "Photography"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Écriture"
+msgstr "Writing"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Développement"
+msgstr "Development"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Louis Monestier, assisté par Claude Code"
+msgstr "Louis Monestier, assisted by Claude Code"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Les modèles suivants ont été pliés par Pierre Monestier"
+msgstr "The following models were folded by Pierre Monestier"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Les modèles suivants ont été pliés par Valérie"
+msgstr "The following models were folded by Valérie"
+
+#. interface
+#: src/ui/credits-texte.ts
+msgid "Le MFPP et ses adhérents."
+msgstr "The MFPP and its members."
+
+#. interface
+#: src/ui/credits.ts
+msgid "Crédits"
+msgstr "Credits"
+
+#. interface
+#: src/ui/credits.ts
+msgid "Remerciements"
+msgstr "Special thanks"
+
+#. interface
+#: src/ui/credits.ts
+msgid "Merci d’avoir joué !"
+msgstr "Thank you for playing!"
+
+#. interface
 #: src/ui/fin.ts
 msgid "À suivre…"
 msgstr "To be continued…"
@@ -2843,16 +2903,6 @@ msgstr "To be continued…"
 #: src/ui/fin.ts
 msgid "La suite nécessite encore quelques plis..."
 msgstr "The rest still needs a few more folds..."
-
-#. interface
-#: src/ui/fin.ts
-msgid "Fin"
-msgstr "The End"
-
-#. interface
-#: src/ui/fin.ts
-msgid "La paix est revenue au Royaume Origami, grâce à vous ! Merci d’avoir joué !"
-msgstr "Peace has returned to the Origami Kingdom, thanks to you! Thank you for playing!"
 
 #. interface
 #: src/ui/fin.ts

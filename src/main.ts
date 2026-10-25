@@ -14,6 +14,7 @@ import { traduireLaPage } from './langues/page';
 import { recitDansLaLangue } from './langues/traduire';
 import { CoucheDuRecit } from './origami/couche-du-recit';
 import { suivreLeCadre } from './ui/cadre';
+import { figerLesCredits } from './ui/credits';
 import { isolerLInterface } from './ui/isolation';
 import { Menu } from './ui/menu';
 import { Overlay } from './ui/overlay';
@@ -56,7 +57,10 @@ const dialogue: DialogueRunner = new DialogueRunner(
 const menu = new Menu(uiRoot, {
   rideau,
   onLayoutChange: syncStage,
-  onGel: (gele) => figerLeJeu(game, gele),
+  onGel: (gele) => {
+    figerLeJeu(game, gele);
+    figerLesCredits(gele);
+  },
 });
 
 game.events.once(Phaser.Core.Events.READY, () => {

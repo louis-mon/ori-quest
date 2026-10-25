@@ -1,9 +1,12 @@
-import type Phaser from 'phaser';
-import { montrerFin, type RaisonDeFin } from '../ui/fin';
+import Phaser from 'phaser';
+import { montrerLesCredits } from '../ui/credits';
+import { montrerFin } from '../ui/fin';
 import { estLivree, scenesLivrees, sortDeLaTraversee } from './chapitres';
-import { figerLeJeu } from './gel';
+import { couvrirLeJeu, figerLeJeu } from './gel';
 import type { SceneServices } from './scenes/point-click-scene';
 import { FIRST_ROOM, gameState } from './systems/state';
+
+export type RaisonDeFin = 'version' | 'histoire';
 
 // Quelle pièce est à l'écran : celle de la sauvegarde au lancement, celle d'un
 // `# goto:` ou d'une flèche ensuite — ou l'écran de fin, quand la partie ne va
@@ -33,11 +36,19 @@ export class Navigation {
     this.lancer(piece);
 
     // Une histoire finie ne se rouvre pas au rechargement, seulement au
-    // « Recommencer » de l'écran de fin (`fin.ts`) : sans ce garde, une partie
-    // terminée reprenait comme si de rien n'était, château rendu jouable à
-    // volonté — la scène est démarrée d'abord pour lui servir de fond, comme au
-    // fondu de fin de chapitre.
-    if (gameState.flag('histoire_finie')) this.finir('histoire');
+    // « Recommencer » du menu, que les crédits laissent atteignable : sans ce
+    // garde, une partie terminée reprenait comme si de rien n'était, château
+    // rendu jouable à volonté. La scène sert de fond aux crédits, et le jeu ne
+    // s'arrête qu'une fois son fondu d'entrée dessiné : plus tôt, ils floutaient
+    // un cadre noir.
+    if (gameState.flag('histoire_finie')) {
+      const scene = this.game.scene.getScene(piece);
+      scene.events.once(Phaser.Scenes.Events.CREATE, () =>
+        scene.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () =>
+          this.game.events.once(Phaser.Core.Events.POST_RENDER, () => this.finir('histoire')),
+        ),
+      );
+    }
   }
 
   // Un seul chemin pour les deux façons de changer de scène — le tag `# goto:`
@@ -68,11 +79,20 @@ export class Navigation {
   // Fin de la version — le chapitre suivant n'est pas dans ce build —, ou de
   // l'histoire. La scène est gelée plutôt qu'arrêtée — une scène en pause reste
   // dessinée, et le décor qu'on vient de quitter fait un meilleur fond de fin
-  // qu'un cadre noir —, et l'écran couvre le menu : il n'y a plus rien à
-  // reprendre, seulement à recommencer.
+  // qu'un cadre noir.
+  //
+  // « À suivre… » couvre le menu : il n'y a plus rien à reprendre, seulement à
+  // recommencer. Les crédits le laissent au-dessus d'eux, et le menu dégèle en se
+  // refermant : ils tiennent donc Phaser arrêté pour leur compte (`couvrirLeJeu`),
+  // et pour toujours — seul un rechargement les retire.
   finir = (raison: RaisonDeFin = 'version') => {
     figerLeJeu(this.game, true);
-    montrerFin(this.uiRoot, raison);
+    if (raison === 'histoire') {
+      couvrirLeJeu(this.game);
+      montrerLesCredits(this.uiRoot);
+    } else {
+      montrerFin(this.uiRoot);
+    }
   };
 
   private lancer(piece: string) {
