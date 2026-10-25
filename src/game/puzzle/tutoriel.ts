@@ -440,9 +440,8 @@ function rangerFeuille(scene: Scene) {
   toileDemo?.remove();
 }
 
-// À gauche de la cible plutôt qu'à droite : les deux choses qu'on désigne ici —
-// une pièce du bac, le bouton « ? » — sont à droite du cadre, et la flèche y
-// sortirait de l'écran ou couvrirait « Passer ».
+// À gauche de la cible plutôt qu'à droite : une pièce du bac peut toucher le
+// bord droit du cadre, et la flèche en sortirait.
 function designer(scene: Scene, cible: HTMLElement) {
   const { fleche } = scene;
   fleche.toggleAttribute('hidden', false);

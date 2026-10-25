@@ -1159,8 +1159,11 @@ body {
    donc venir de la grille et non de son contenu — sans quoi le `height: 100%`
    du plateau se résout à zéro, plateau invisible.
 
-   Le haut est celui du bouton du menu, pour que le bandeau s'aligne dessus. */
+   Le haut est celui du bouton du menu, pour que le bandeau s'aligne dessus. Le
+   menu se pose par-dessus le bandeau, qui lui laisse `--place-du-menu` : son
+   `right` plus sa largeur. */
 .puzzle {
+  --place-du-menu: calc(var(--ui-gap) + env(safe-area-inset-right, 0px) + 44px);
   position: absolute;
   inset: 0;
   z-index: 4;
@@ -1175,8 +1178,7 @@ body {
 
 /* Tout ce qui n'est pas une pièce tient dans cette seule bande : plateau et tas
    ont ainsi toute la hauteur dessous, alors que la légende au-dessus de l'un et
-   les boutons sous l'autre leur en prenaient chacun une. La marge de droite est
-   la place du bouton du menu, posé par-dessus : son `right` plus sa largeur.
+   les boutons sous l'autre leur en prenaient chacun une.
 
    Les boutons s'alignent sur le menu, en haut ; l'entête se centre sur la
    vignette, plus haute qu'eux. */
@@ -1185,7 +1187,7 @@ body {
   display: flex;
   align-items: flex-start;
   gap: calc(10px * var(--ui-scale));
-  padding-right: calc(var(--ui-gap) + env(safe-area-inset-right, 0px) + 44px);
+  padding-right: var(--place-du-menu);
 }
 
 .puzzle__entete {
@@ -1494,13 +1496,21 @@ body {
 /* En ligne, l'abandon à gauche : empilés, les deux boutons se suivaient sous le
    même pouce et l'abandon se prenait par erreur.
 
-   `flex-wrap` reste : mieux vaut qu'ils s'empilent que qu'ils passent sous le
-   seuil tactile. */
+   Au-dessus du bac, centrés sur ce que le menu en laisse : calés contre lui, ils
+   laisseraient vide le milieu du bandeau. La largeur part du bord gauche du bac,
+   et ne compte pas dans la grille — la colonne du bac est celle des pièces.
+
+   `max-content` les garde sur une ligne, quitte à prendre la place du titre :
+   la hauteur du bandeau ne doit pas dépendre de `--tray-width`, qu'eparpiller()
+   efface le temps de mesurer le bac — le tas serait jeté dans une hauteur qui
+   n'est pas la sienne. */
 .puzzle__actions {
+  flex: none;
+  width: calc(var(--tray-width, 96px) - var(--place-du-menu));
+  min-width: max-content;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: calc(10px * var(--ui-scale));
+  justify-content: center;
+  gap: max(20px, calc(32px * var(--ui-scale)));
 }
 
 /* « Passer » prend leur place : voir `lancer`, dans crease-puzzle.ts. */
@@ -1510,15 +1520,15 @@ body {
 
 .puzzle__check,
 .puzzle__quit {
-  flex: 0 1 auto;
-  min-width: calc(104px * var(--ui-scale));
-  min-height: 44px;
-  padding: 0 calc(14px * var(--ui-scale));
+  flex: none;
+  min-width: calc(130px * var(--ui-scale));
+  min-height: max(48px, calc(52px * var(--ui-scale)));
+  padding: 0 calc(22px * var(--ui-scale));
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   font: inherit;
   font-weight: 600;
-  font-size: calc(14px * var(--ui-scale));
+  font-size: calc(16px * var(--ui-scale));
   cursor: pointer;
 }
 
@@ -1539,11 +1549,11 @@ body {
 
 /* Visible en développement seulement, et doit le rester à l'œil : pointillés. */
 .puzzle__resoudre {
-  flex: 0 1 auto;
-  min-height: 44px;
+  flex: none;
+  min-height: max(48px, calc(52px * var(--ui-scale)));
   padding: 0 calc(14px * var(--ui-scale));
   border: 1px dashed var(--paper);
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
   color: var(--paper);
   font: inherit;

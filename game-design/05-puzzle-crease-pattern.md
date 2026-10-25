@@ -29,11 +29,11 @@ fois, et chaque chapitre n'a plus qu'à fournir un motif et un découpage.
   partagent donc la largeur de l'écran **à la même échelle** ; quand un
   découpage encombrant ne laisse pas assez de place au tas, c'est le conteneur
   qui rétrécit — les deux ensemble.
-- **Tout le reste tient dans un bandeau en haut** : le but, le titre et la
-  légende des plis à gauche ; le « ? » des tutoriels et les deux boutons à
-  droite, contre le menu. Conteneur et tas ont ainsi toute la hauteur dessous —
-  c'est elle qui fixe leur taille commune —, et aucune pièce du tas ne passe
-  sous le menu.
+- **Tout le reste tient dans un bandeau en haut**, partagé comme l'écran : le
+  but, le titre, la légende des plis et le « ? » des tutoriels au-dessus du
+  conteneur ; les deux boutons au-dessus du tas, centrés sur ce que le menu en
+  laisse. Conteneur et tas ont ainsi toute la hauteur dessous — c'est elle qui
+  fixe leur taille commune —, et aucune pièce du tas ne passe sous le menu.
 - **Deux boutons, en ligne** : « Abandonner » à gauche, « Vérifier la
   solution » à droite. C'est l'ordre des fenêtres de confirmation du jeu, et
   celui de la plupart des interfaces. Ils ont longtemps été **l'un sous
