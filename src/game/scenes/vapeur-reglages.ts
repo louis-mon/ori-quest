@@ -5,13 +5,15 @@ import type { ReglagesVapeur } from './vapeur';
 // au réglage suivant. Ce commentaire-ci, lui, est conservé.
 // Le sens de chaque champ est dans `vapeur.ts`, à côté du type `ReglagesVapeur`.
 export const REGLAGES_VAPEUR: ReglagesVapeur = {
-  debit: 6,
-  duree: 2.8,
-  hauteur: 1,
-  taille: 0.18,
+  filets: 3,
+  duree: 3,
+  hauteur: 1.3,
+  epaisseur: 0.08,
   epanouissement: 3,
-  etirement: 1.6,
-  opacite: 0.75,
-  etalement: 0.8,
+  opacite: 0.9,
+  etalement: 0.6,
   ondulation: 0.16,
+  boucles: 0.7,
+  enroulement: 0.8,
+  intermittence: 0.6,
 };

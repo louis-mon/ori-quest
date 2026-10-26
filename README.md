@@ -51,8 +51,8 @@ de la racine autre qu'`index.html` y figure d'elle-même, sous son `<title>` :
   flammes, elles, se dessinent dans Tiled (`flamme_gauche` et `flamme_droite`
   du plan de chaque pièce).
 - `http://localhost:5173/vapeur.html` — la vapeur de la daurade servie dans la
-  cuisine : débit, taille, montée, ondulation. Le plat, lui, se dessine dans
-  Tiled (zone `repas` du plan de la cuisine).
+  cuisine : nombre et épaisseur des filets, volutes, intermittence. Le plat,
+  lui, se dessine dans Tiled (zone `repas` du plan de la cuisine).
 - `http://localhost:5173/choix.html` — les menus de choix : les vrais menus
   d'ink dans la vraie boîte de dialogue, marque de réplique et en-tête réglés en
   direct.

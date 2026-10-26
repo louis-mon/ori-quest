@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { alea } from './hasard';
+import { alea, bruit } from './hasard';
 import type { Box } from './layout';
 import { REGLAGES_TORCHES } from './torches-reglages';
 
@@ -139,18 +139,6 @@ export function allumerLesTorches(
       if (reteindre) teindre();
     },
   };
-}
-
-// Des valeurs tirées au hasard à intervalles réguliers, raccordées en douceur :
-// entre -1 et 1, sans rythme qui se répète. Le tirage dépend du seul rang de
-// l'intervalle, donc rien n'est à garder d'une image à l'autre.
-function bruit(graine: number, t: number): number {
-  const rang = Math.floor(t);
-  const f = t - rang;
-  const lisse = f * f * (3 - 2 * f);
-  const a = alea(graine + rang)();
-  const b = alea(graine + rang + 1)();
-  return (a + (b - a) * lisse) * 2 - 1;
 }
 
 // Blanche, et teintée à la pose : la teinte se règle sans repeindre. Peinte une

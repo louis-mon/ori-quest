@@ -89,7 +89,7 @@ function enregistrerVapeur(): Plugin {
     name: 'ori-quest:vapeur',
     apply: 'serve',
     configureServer(server) {
-      // Neuf nombres : au-delà, ce n'est pas l'outil qui parle.
+      // Onze nombres : au-delà, ce n'est pas l'outil qui parle.
       reecrire(server, '/__vapeur', 1_000, FICHIER_VAPEUR, rendreVapeur);
     },
   };
@@ -540,15 +540,17 @@ function rendreTorches(source: string, recu: unknown): string {
 
 // Alignées sur les curseurs de src/dev/vapeur.ts, et dans l'ordre du fichier.
 const LIMITES_VAPEUR = {
-  debit: [0.5, 20],
+  filets: [1, 5],
   duree: [0.5, 8],
   hauteur: [0.1, 3],
-  taille: [0.05, 1],
-  epanouissement: [1, 6],
-  etirement: [0.5, 4],
+  epaisseur: [0.01, 0.3],
+  epanouissement: [1, 8],
   opacite: [0, 1],
   etalement: [0, 1],
   ondulation: [0, 0.5],
+  boucles: [0, 3],
+  enroulement: [0, 2],
+  intermittence: [0, 1],
 } as const;
 
 function rendreVapeur(source: string, recu: unknown): string {
@@ -562,9 +564,14 @@ function rendreVapeur(source: string, recu: unknown): string {
     throw new Error(`${FICHIER_VAPEUR} : bloc REGLAGES_VAPEUR introuvable`);
   }
 
-  const lignes = Object.entries(LIMITES_VAPEUR).map(
-    ([cle, [min, max]]) => `  ${cle}: ${nombre(valeurs[cle], min, max, cle)},`,
-  );
+  // Un nombre de filets, pas une fraction.
+  const lignes = Object.entries(LIMITES_VAPEUR).map(([cle, bornes]) => {
+    const valeur =
+      cle === 'filets'
+        ? entierBorne(valeurs[cle], bornes, cle)
+        : nombre(valeurs[cle], ...bornes, cle);
+    return `  ${cle}: ${valeur},`;
+  });
 
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }

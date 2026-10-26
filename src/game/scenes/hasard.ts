@@ -10,3 +10,15 @@ export function alea(graine: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+// Des valeurs tirées au hasard à intervalles réguliers, raccordées en douceur :
+// entre -1 et 1, sans rythme qui se répète. Le tirage dépend du seul rang de
+// l'intervalle, donc rien n'est à garder d'une image à l'autre.
+export function bruit(graine: number, t: number): number {
+  const rang = Math.floor(t);
+  const f = t - rang;
+  const lisse = f * f * (3 - 2 * f);
+  const a = alea(graine + rang)();
+  const b = alea(graine + rang + 1)();
+  return (a + (b - a) * lisse) * 2 - 1;
+}

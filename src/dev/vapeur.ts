@@ -35,24 +35,26 @@ interface Champ {
 // Bornes alignées sur LIMITES_VAPEUR (vite.config.ts), qui refuse tout le reste.
 const GROUPES: { titre: string; note?: string; champs: Champ[] }[] = [
   {
-    titre: 'Bouffées',
-    note: 'Taille, hauteur, étalement et ondulation se comptent en largeurs de plat : un plat redessiné plus grand dans Tiled fume à proportion.',
+    titre: 'Filets',
+    note: 'Épaisseur, hauteur et ondulation se comptent en largeurs de plat : un plat redessiné plus grand dans Tiled fume à proportion. Étalement : à 0, tous les filets partent du milieu du plat ; à 1, de toute sa largeur.',
     champs: [
-      { cle: 'debit', nom: 'Débit', min: 0.5, max: 20, pas: 0.5, unite: '/ s' },
-      { cle: 'taille', nom: 'Taille', min: 0.05, max: 1, pas: 0.01, unite: '×' },
-      { cle: 'epanouissement', nom: 'Épanouissement', min: 1, max: 6, pas: 0.1, unite: '×' },
-      { cle: 'etirement', nom: 'Étirement', min: 0.5, max: 4, pas: 0.1, unite: '×' },
+      { cle: 'filets', nom: 'Nombre', min: 1, max: 5, pas: 1 },
+      { cle: 'etalement', nom: 'Étalement', min: 0, max: 1, pas: 0.01 },
+      { cle: 'epaisseur', nom: 'Épaisseur', min: 0.01, max: 0.3, pas: 0.005, unite: '×' },
+      { cle: 'epanouissement', nom: 'Épanouissement', min: 1, max: 8, pas: 0.1, unite: '×' },
       { cle: 'opacite', nom: 'Opacité', min: 0, max: 1, pas: 0.01 },
+      { cle: 'intermittence', nom: 'Intermittence', min: 0, max: 1, pas: 0.01 },
     ],
   },
   {
-    titre: 'Montée',
-    note: 'Étalement : à 0, tout part du milieu du plat ; à 1, de toute sa largeur. Le balancement grandit à mesure qu’elle monte.',
+    titre: 'Volutes',
+    note: 'Ondulation : l’écart d’une volute arrivée en haut — il grandit à mesure qu’elle monte. Enroulement : à 0 le filet serpente, plus fort il revient sur lui-même en boucles.',
     champs: [
-      { cle: 'duree', nom: 'Durée', min: 0.5, max: 8, pas: 0.1, unite: 's' },
+      { cle: 'duree', nom: 'Montée', min: 0.5, max: 8, pas: 0.1, unite: 's' },
       { cle: 'hauteur', nom: 'Hauteur', min: 0.1, max: 3, pas: 0.05, unite: '×' },
-      { cle: 'etalement', nom: 'Étalement', min: 0, max: 1, pas: 0.01 },
       { cle: 'ondulation', nom: 'Ondulation', min: 0, max: 0.5, pas: 0.01, unite: '×' },
+      { cle: 'boucles', nom: 'Boucles', min: 0, max: 3, pas: 0.05, unite: '/ s' },
+      { cle: 'enroulement', nom: 'Enroulement', min: 0, max: 2, pas: 0.05 },
     ],
   },
 ];
@@ -60,8 +62,7 @@ const GROUPES: { titre: string; note?: string; champs: Champ[] }[] = [
 const ASSIETTE = 'assiette';
 const REPAS = boxOf(plan, 'dec_repas');
 
-// Assez pour voir une bouffée se défaire, pas plus : la hauteur doit tenir dans
-// le cadre.
+// Assez pour suivre une volute, pas plus : la hauteur doit tenir dans le cadre.
 const GROS_PLAN = 2.5;
 
 // Enregistrer réécrit un fichier que cette page importe, et Vite la recharge :
