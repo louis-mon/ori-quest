@@ -246,6 +246,11 @@ réglage. Le mur étant presque blanc, une lumière
 torche. Le halo reste faible, sans quoi il délave la flamme de papier. Tout se
 règle dans `torches.html`, sur la salle du trône, qui écrit `torches-reglages.ts`.
 
+**La vapeur de la daurade servie aussi** (`vapeur.ts`) : rien ne s'y plie, donc
+rien n'est à photographier. Elle monte du modèle rendu, pas de la boîte du plan,
+et se règle dans `vapeur.html`, qui écrit `vapeur-reglages.ts`. Le mur derrière
+est presque blanc : une vapeur discrète n'y existe pas.
+
 **La zone tactile suit le dessin, pas la boîte du plan.** Une boîte est une
 emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une
 partie. `caler()` (`PointClickScene`) recale la zone sur ce qui est réellement à

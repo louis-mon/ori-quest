@@ -50,13 +50,17 @@ de la racine autre qu'`index.html` y figure d'elle-même, sous son `<title>` :
   trône, et du même coup de la cuisine : teinte, portée, vacillement. Les
   flammes, elles, se dessinent dans Tiled (`flamme_gauche` et `flamme_droite`
   du plan de chaque pièce).
+- `http://localhost:5173/vapeur.html` — la vapeur de la daurade servie dans la
+  cuisine : débit, taille, montée, ondulation. Le plat, lui, se dessine dans
+  Tiled (zone `repas` du plan de la cuisine).
 - `http://localhost:5173/choix.html` — les menus de choix : les vrais menus
   d'ink dans la vraie boîte de dialogue, marque de réplique et en-tête réglés en
   direct.
 
 Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 `game-design/enigmes/<nom>.json`, `src/game/scenes/eau-reglages.ts`,
-`src/game/scenes/torches-reglages.ts`, `src/ui/choix-reglages.ts`) par un point
+`src/game/scenes/torches-reglages.ts`, `src/game/scenes/vapeur-reglages.ts`,
+`src/ui/choix-reglages.ts`) par un point
 d'entrée du serveur de dev défini dans `vite.config.ts` — qui n'existe qu'en
 développement et ne garde que des nombres bornés.
 

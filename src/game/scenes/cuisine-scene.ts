@@ -10,6 +10,7 @@ import { dessinerFond, preloadFond } from './fond';
 import { placerLuneChat, preloadLuneChat, type LuneChat } from './lune-chat';
 import { poserOrigami, type OrigamiDecor } from './origami-decor';
 import { allumerLesTorches } from './torches';
+import { poserVapeur, type Vapeur } from './vapeur';
 
 // La cuisine — entre la salle du trône (à gauche) et le jardin (à droite),
 // chapitre 3.
@@ -19,8 +20,8 @@ import { allumerLesTorches } from './torches';
 // sur une chaise de la table ; on leur parle, et ils repartent vers la salle du
 // trône.
 //
-// La daurade cuisinée attend sur la table, et n'y laisse que son squelette une
-// fois les chats repus.
+// La daurade cuisinée attend sur la table, fumante, et n'y laisse que son
+// squelette une fois les chats repus.
 
 const PLAN = plan;
 
@@ -40,6 +41,7 @@ export class CuisineScene extends PointClickScene {
   private luneChat!: LuneChat;
   private assiette!: Phaser.GameObjects.Image;
   private daurade!: OrigamiDecor;
+  private vapeur!: Vapeur;
   private squelette!: Phaser.GameObjects.Image;
   // Même raison qu'à la salle du trône : la zone s'éteint au bout du trajet, pas
   // au drapeau que la narration lève avant lui.
@@ -103,6 +105,7 @@ export class CuisineScene extends PointClickScene {
     const mangee = gameState.flag('chats_rassasies');
     this.assiette?.setVisible(servie);
     this.daurade?.montrer(servie && !mangee);
+    this.vapeur?.fumer(servie && !mangee);
     this.squelette?.setVisible(mangee);
   }
 
@@ -118,7 +121,8 @@ export class CuisineScene extends PointClickScene {
     // Avant les chats : ils repartent devant la table.
     this.assiette = placeSprite(this, ASSIETTE, boxOf(PLAN, 'dec_assiette'));
     const repas = boxOf(PLAN, 'dec_repas');
-    this.daurade = poserOrigami(this, 'poisson', repas);
+    this.daurade = poserOrigami(this, 'poisson', repas, (emprise) => this.vapeur.poser(emprise));
+    this.vapeur = poserVapeur(this);
     this.squelette = placeSprite(this, SQUELETTE, repas);
 
     this.caler('cheffe', empriseDe(placeSprite(this, ELEPHANT, boxOf(PLAN, 'hs_cheffe'))));

@@ -9,6 +9,7 @@ const FICHIER_POSES = 'src/origami/poses.ts';
 const FICHIER_EAU = 'src/game/scenes/eau-reglages.ts';
 const FICHIER_CHOIX = 'src/ui/choix-reglages.ts';
 const FICHIER_TORCHES = 'src/game/scenes/torches-reglages.ts';
+const FICHIER_VAPEUR = 'src/game/scenes/vapeur-reglages.ts';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
@@ -78,6 +79,18 @@ function enregistrerTorches(): Plugin {
     configureServer(server) {
       // Huit valeurs : au-delà, ce n'est pas l'outil qui parle.
       reecrire(server, '/__torches', 1_000, FICHIER_TORCHES, rendreTorches);
+    },
+  };
+}
+
+// La vapeur de la daurade servie, depuis vapeur.html. Mêmes garde-fous.
+function enregistrerVapeur(): Plugin {
+  return {
+    name: 'ori-quest:vapeur',
+    apply: 'serve',
+    configureServer(server) {
+      // Neuf nombres : au-delà, ce n'est pas l'outil qui parle.
+      reecrire(server, '/__vapeur', 1_000, FICHIER_VAPEUR, rendreVapeur);
     },
   };
 }
@@ -525,6 +538,37 @@ function rendreTorches(source: string, recu: unknown): string {
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }
 
+// Alignées sur les curseurs de src/dev/vapeur.ts, et dans l'ordre du fichier.
+const LIMITES_VAPEUR = {
+  debit: [0.5, 20],
+  duree: [0.5, 8],
+  hauteur: [0.1, 3],
+  taille: [0.05, 1],
+  epanouissement: [1, 6],
+  etirement: [0.5, 4],
+  opacite: [0, 1],
+  etalement: [0, 1],
+  ondulation: [0, 0.5],
+} as const;
+
+function rendreVapeur(source: string, recu: unknown): string {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const valeurs = recu as Record<string, unknown>;
+
+  const debut = source.indexOf('export const REGLAGES_VAPEUR');
+  const accolade = source.indexOf('{', debut);
+  const fin = source.indexOf('\n};', accolade);
+  if (debut < 0 || fin < 0) {
+    throw new Error(`${FICHIER_VAPEUR} : bloc REGLAGES_VAPEUR introuvable`);
+  }
+
+  const lignes = Object.entries(LIMITES_VAPEUR).map(
+    ([cle, [min, max]]) => `  ${cle}: ${nombre(valeurs[cle], min, max, cle)},`,
+  );
+
+  return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
+}
+
 // Alignées sur `ReglagesChoix` (src/ui/overlay.ts) et sur src/dev/choix.ts, dans
 // l'ordre du fichier.
 const CHOIX_PERMIS = {
@@ -559,6 +603,7 @@ export default defineConfig({
     enregistrerEau(),
     enregistrerChoix(),
     enregistrerTorches(),
+    enregistrerVapeur(),
     enregistrerDecoupage(),
     listerLesOutils(),
     suivreLesPlans(),

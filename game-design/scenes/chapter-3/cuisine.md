@@ -19,5 +19,5 @@ Une fois dans la cuisine, on peut leur parler, is reviennent dans la salle du tr
 
 ## La table
 
-Une fois la daurade préparée par la Cheffe, elle attend sur la table, dans une assiette. Quand les chats ont fini
-de manger, il ne reste dans l'assiette que son squelette.
+Une fois la daurade préparée par la Cheffe, elle attend sur la table, dans une assiette, et elle fume : le plat
+est chaud. Quand les chats ont fini de manger, il ne reste dans l'assiette que son squelette, et plus de vapeur.
