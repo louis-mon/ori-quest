@@ -27,6 +27,7 @@ export const ROLES: Role[] = [
   { role: t('Photographie'), qui: 'Pierre Monestier' },
   { role: t('Écriture'), qui: 'Louis Monestier' },
   { role: t('Développement'), qui: t('Louis Monestier, assisté par Claude Code') },
+  { role: t('Bruitages, sons d’ambiance'), qui: 'pixabay.com' },
 ];
 
 const PIERRE = 'Pierre Monestier';

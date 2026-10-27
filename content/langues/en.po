@@ -2871,6 +2871,11 @@ msgstr "Louis Monestier, assisted by Claude Code"
 
 #. interface
 #: src/ui/credits-texte.ts
+msgid "Bruitages, sons d’ambiance"
+msgstr "Sound effects, ambient sounds"
+
+#. interface
+#: src/ui/credits-texte.ts
 msgid "Modèle traditionnel"
 msgstr "Traditional design"
 
