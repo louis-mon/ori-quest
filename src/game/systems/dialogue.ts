@@ -1,4 +1,6 @@
 import { Story } from 'inkjs';
+import { jouerBruitage } from '../../sons/bruitages';
+import { estUnBruitage } from '../../sons/catalogue';
 import type { Overlay } from '../../ui/overlay';
 import { personnage, type Personnage } from './personnages';
 import { gameState, type SaveData } from './state';
@@ -58,6 +60,12 @@ const handlers: Record<string, TagHandler> = {
   // `# fin: histoire` — la valeur ne sert qu'à faire un tag, qui exige ses
   // deux-points.
   fin: (_value, fx) => fx.fin(),
+  // Un bruit que fait le récit — la hache dans l'arbre. Les cris des animaux,
+  // eux, partent du tap sur leur zone (`cri`, dans `HotspotDef`).
+  son: (value) => {
+    if (estUnBruitage(value)) jouerBruitage(value);
+    else console.warn(`[ink] son inconnu : ${value} (voir src/sons/catalogue.ts)`);
+  },
   // Traité en amont par `readSpeaker`. Listé ici pour ne pas ressortir en « tag
   // inconnu ».
   qui: () => {},

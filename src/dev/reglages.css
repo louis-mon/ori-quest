@@ -1,6 +1,6 @@
 /* Outils de réglage à curseurs — l'eau du ravin, les torches de la salle du
-   trône (développement seulement). Mêmes teintes que l'outil d'orientation :
-   les pages se passent le relais. */
+   trône, les sons (développement seulement). Mêmes teintes que l'outil
+   d'orientation : les pages se passent le relais. */
 
 :root {
   color-scheme: dark;
@@ -203,4 +203,24 @@ pre {
 button.principal {
   border-color: var(--accent);
   background: rgba(196, 85, 61, 0.18);
+}
+
+/* ---------- Sons ---------- */
+
+.sons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.son-tete {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.son-tete:first-of-type {
+  margin-top: 4px;
 }

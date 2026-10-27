@@ -186,6 +186,49 @@ classe `fond`, qui pointe le fichier de `public/`. C'est la carte qui dit au jeu
 quel fond charger et où le poser — voir
 [game-design/06-plans-de-scene.md](game-design/06-plans-de-scene.md).
 
+### Intégrer les sons
+
+Les sons sont livrés dans `son/` : les ambiances dans `son_ambiance/`, les cris
+et bruits dans `bruitage /` — une espace à la fin de son nom, d'où les
+guillemets.
+
+**Les ambiances sont réencodées.** Telles que livrées, elles dépassaient à elles
+seules le budget du jeu : elles durent plusieurs minutes.
+[`tools/alleger-ambiance.mjs`](tools/alleger-ambiance.mjs) les ramène au débit du
+jeu ; il décode par `afconvert`, donc sur macOS.
+
+```bash
+for nom in chapitre_1 chapitre_1_riviere chapitre_2 chapitre_3_chateau; do
+  node tools/alleger-ambiance.mjs "assets-src/son/son_ambiance/son_ambiance_$nom.mp3" \
+    "public/assets/sons/ambiance/$nom.mp3"
+done
+```
+
+Celle du jardin n'y est pas : `son_ambiance_chapitre_3_jardin.mp3` est le même
+fichier, octet pour octet, que `son_ambiance_chapitre_1.mp3`, et le jardin joue
+celui-ci. La rivière, elle, coule au ravin par-dessus `chapitre_1` : une pièce
+peut superposer plusieurs ambiances. Quelle pièce joue quelle ambiance se dit dans la scène (`ambiance`) ; le
+catalogue des fichiers est [`src/sons/catalogue.ts`](src/sons/catalogue.ts).
+
+**Les bruitages sont copiés tels quels**, renommés sur l'identifiant du
+personnage qui les pousse (`personnages.ts`) — c'est lui que la zone de l'animal
+reprend dans son `cri`. Le coup de hache, lui, est un tag du récit :
+`# son: arbre_coupe`.
+
+```bash
+B="assets-src/son/bruitage "
+cp "$B/bruitage_grenouille.mp3" public/assets/sons/bruitage/grenouille.mp3
+cp "$B/hibou_des_bois_joli.mp3" public/assets/sons/bruitage/hibou.mp3
+cp "$B/Bruitage_le_petit_chat.mp3" public/assets/sons/bruitage/chat.mp3
+cp "$B/bruitage_chat_mal_lune.mp3" public/assets/sons/bruitage/lune_chat.mp3
+cp "$B/bruitage_arbre_coupe.mp3" public/assets/sons/bruitage/arbre_coupe.mp3
+```
+
+Le mélange — le volume de chaque son, la durée d'un cri trop long — se règle à
+l'oreille dans `http://localhost:5173/sons.html`, qui écrit
+`src/sons/sons-reglages.ts`. Un son neuf entre par le catalogue, et `tsc`
+réclame alors son réglage.
+
 ### Reprendre à un point précis du chapitre
 
 Le menu du jeu porte une liste « Reprendre à… » qui reconstitue un moment de la
@@ -227,10 +270,12 @@ renverrait le joueur au ravin, les drapeaux du chapitre suivant levés.
 | Narration | inkjs (langage ink d'inkle) | MIT |
 | Origami 3D | three.js | MIT |
 | Bake origami | Origami Simulator (A. Ghassaei) + Playwright | MIT |
+| Réencodage des ambiances | lamejs | LGPL-3.0 |
 | Build | Vite + TypeScript | MIT |
 
-Tout est permissif. **Rabbit Ear a été volontairement écarté : il est en GPLv3**,
-et le lier dans le bundle obligerait à publier le jeu entier sous GPLv3.
+Tout ce qui part avec le jeu est permissif ; lamejs ne sert qu'à l'intégration
+des sons, hors bundle. **Rabbit Ear a été volontairement écarté : il est en
+GPLv3**, et le lier dans le bundle obligerait à publier le jeu entier sous GPLv3.
 
 Permissif ne veut pas dire sans condition : MIT demande que la notice parte
 avec chaque copie. Le build l'écrit dans `dist/licences-tierces.txt`
@@ -262,6 +307,10 @@ performance.getEntriesByType('resource').map((e) => e.name).filter((n) => /three
 
 Les textures de papier, elles, sont **peintes au canvas** et ne pèsent rien au
 téléchargement.
+
+Les ambiances se lisent **en flux**, à l'entrée dans une pièce qui les joue : un
+joueur n'en télécharge que ce qu'il en écoute. Les cris, courts, sont tirés et
+décodés au premier geste.
 
 ## Les animations d'origami
 
@@ -360,7 +409,12 @@ src/
     traduire.ts              `t('…')` pour l'interface, et le récit traduit
     catalogues.ts            les langues compilées par `npm run ink`
     page.ts                  `lang` et textes d'index.html
-  audio.ts                   déblocage de l'audio au premier geste (iOS)
+  sons/
+    catalogue.ts             les fichiers son, ambiances et bruitages
+    contexte.ts              l'AudioContext, né au premier geste (iOS, Chromium)
+    ambiance.ts              l'ambiance de la pièce, en flux et en fondu enchaîné
+    bruitages.ts             les cris et bruits, décodés une fois
+    sons-reglages.ts         le mélange, écrit par sons.html
   game/
     config.ts                résolution logique, seuil tactile, palette
     chapitres.ts             quelles scènes cette version embarque, où elle s'arrête
@@ -400,10 +454,12 @@ src/
     style.css
   dev/
     orientation.ts           page de réglage des poses (hors build)
+    sons.ts                  page de réglage du mélange (hors build)
     console.ts               raccourcis de console en développement
     decoupage.ts             éditeur de découpage des énigmes (hors build)
     couper.ts                fendre une pièce le long d'un trait
 tools/
+  alleger-ambiance.mjs       ambiance de l'artiste -> MP3 au débit du jeu
   bake-origami.mjs           CP -> .origami
   compile-ink.mjs            .ink -> .json, pour chaque langue
   langues.mjs                tient et vérifie les catalogues de traduction

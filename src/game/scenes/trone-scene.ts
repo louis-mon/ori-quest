@@ -38,6 +38,7 @@ const DELAI_DENOUEMENT = 400;
 
 export class TroneScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = 'chapitre_3_chateau';
   protected arrivee = { knot: 'trone_arrivee', flag: 'trone_vu' };
 
   private chat!: Phaser.GameObjects.Image;
@@ -72,16 +73,20 @@ export class TroneScene extends PointClickScene {
     return hotspotsFrom(PLAN, {
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       libou: {
         knot: 'trone_libou',
+        cri: 'hibou',
       },
       chat: {
         knot: 'trone_chat',
+        cri: 'chat',
         visibleIf: () => !this.chatsSortis,
       },
       lune_chat: {
         knot: 'trone_lune_chat',
+        cri: 'lune_chat',
         visibleIf: () => !this.chatsSortis,
       },
       // Les quatre feuilles de la reine, puis le cœur que la rouge devient :

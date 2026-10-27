@@ -33,6 +33,7 @@ const SOL = boxOf(PLAN, 'dec_sol');
 
 export class VillageScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = 'chapitre_2';
   protected arrivee = { knot: 'village_arrivee', flag: 'village_vu' };
 
   private feuilleMontagne!: Phaser.GameObjects.Image;
@@ -67,6 +68,7 @@ export class VillageScene extends PointClickScene {
     return hotspotsFrom(PLAN, {
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       pingouin: {
         knot: 'village_pingouin',

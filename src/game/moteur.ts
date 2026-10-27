@@ -32,6 +32,9 @@ export function creerLeMoteur(): Phaser.Game {
       // du cadre.
       windowEvents: false,
     },
+    // Le son du jeu a son propre contexte (`src/sons/`). Celui de Phaser,
+    // inutilisé, tournerait quand même dès le premier tap.
+    audio: { noAudio: true },
     // Volontairement vide : listée ici, Phaser lancerait la première scène de
     // lui-même, sans les services que `Navigation` injecte — elle était créée
     // deux fois, et chaque création laissait un abonné `gameState` de plus.

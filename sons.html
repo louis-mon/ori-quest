@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+  Outil de réglage des sons : « Enregistrer » réécrit le bloc `REGLAGES_SONS` de
+  src/sons/sons-reglages.ts par le serveur de dev. Uniquement en développement :
+  `vite build` ne connaît que index.html, donc cette page ne part pas sur itch.io.
+
+      npm run dev  puis  http://localhost:5173/sons.html
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ori-Quest — les sons</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Les sons</h1>
+        <p class="aide">
+          Le son passe par le même code que le jeu&nbsp;: ce qui sonne ici sonne dans la partie. Les
+          curseurs agissent en direct — une ambiance qui joue change de volume sous l'oreille, un
+          cri prend le sien au ▶ suivant. Les ambiances se superposent comme dans le jeu — au ravin,
+          <code>chapitre_1</code> et la rivière —, et un cri lancé par-dessus donne le mélange
+          qu'entend le joueur. Quelle pièce joue quelle ambiance, et quel animal pousse quel cri, ne
+          se règle pas ici mais dans les scènes&nbsp;: <code>ambiance</code> et <code>cri</code>.
+        </p>
+      </header>
+
+      <div class="sons">
+        <fieldset id="ambiances">
+          <legend>Ambiances</legend>
+        </fieldset>
+        <fieldset id="bruitages">
+          <legend>Cris et bruits</legend>
+        </fieldset>
+      </div>
+
+      <div class="actions">
+        <button id="revenir" type="button">Revenir à l'enregistré</button>
+      </div>
+
+      <footer>
+        <div class="footer-tete">
+          <h2><code>src/sons/sons-reglages.ts</code></h2>
+          <div class="actions">
+            <span id="statut" class="statut"></span>
+            <button id="enregistrer" type="button" class="principal">Enregistrer</button>
+          </div>
+        </div>
+        <pre id="sortie"></pre>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/dev/sons.ts"></script>
+  </body>
+</html>

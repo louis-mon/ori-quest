@@ -1,3 +1,4 @@
+import type { Bruitage } from '../../sons/catalogue';
 import { MIN_TOUCH_SIZE } from '../config';
 
 // En coordonnées logiques, tel que le plan Tiled le donne.
@@ -25,6 +26,10 @@ export interface HotspotDef extends Box {
   // Le knot ink que le tap joue. Une zone ne fait que ça : analyser est le seul
   // verbe du jeu (game-design/04-interface.md).
   knot: string;
+  // Le cri de l'animal qu'on touche, au tap même. Ici et pas dans un tag ink :
+  // à la cuisine, les deux chats répondent par le même knot, et chacun a sa
+  // voix.
+  cri?: Bruitage;
   // Le hotspot n'existe que si ce prédicat est vrai.
   visibleIf?: () => boolean;
 }

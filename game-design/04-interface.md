@@ -552,6 +552,26 @@ l'écran avec lui, pas même un bouton : on recommence par le menu, qui reste
 au-dessus des crédits et les fige le temps d'être ouvert, comme il fige la
 pièce. Une partie finie rouvre sur eux.
 
+## Le son
+
+**Chaque pièce a son ambiance**, en boucle, et passe à celle de la suivante en
+fondu enchaîné. Une ambiance vaut pour un lieu plus que pour une pièce : celle
+du chapitre 1 joue au ravin comme à la porte, celle du château dans la salle du
+trône comme dans la cuisine, et changer de pièce ne la coupe pas. Ce qui est
+propre à une pièce s'y superpose — au ravin, la rivière, plus bas que le reste,
+et c'est elle seule qui s'éteint quand on passe à la porte. Revenir dans une
+pièce reprend son ambiance où on l'avait laissée, et un tour s'enchaîne au
+suivant sans blanc.
+
+**Toucher un animal le fait crier**, au tap même, avant sa première réplique :
+c'est la réponse immédiate du décor, et elle dit *qui* on a touché — à la
+cuisine, les deux chats répondent ensemble, chacun de sa voix. La grenouille
+aussi, quand on la touche. Retoucher un animal relance son cri au lieu de le
+doubler.
+
+**Le récit a ses propres bruits** : la hache dans le vieil arbre sonne avec la
+réplique qui le raconte, pas au tap qui l'a demandé.
+
 ## Principe directeur
 
 **L'interface doit disparaître derrière le décor.** Un point & click contemplatif

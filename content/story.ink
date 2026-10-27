@@ -331,7 +331,7 @@ Je suis un peu ému à l'idée de transformer en planches ce respectable voisin 
 // pendant qu'on lit qu'il est abattu.
 + [découper le vieil arbre]
     # qui: narrateur
-    La hache travaille vaillamment et je me retrouve épuisé. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête ! # give: bois # drop: hache # flag: vieil_arbre_decoupe
+    La hache travaille vaillamment et je me retrouve épuisé. Une bonne odeur de sciure embaume l'air, et une pile de belles planches est prête ! # give: bois # drop: hache # flag: vieil_arbre_decoupe # son: arbre_coupe
 + [le laisser debout]
     Je n'ai pas le coeur à faire ça pour l'instant...
 - -> DONE

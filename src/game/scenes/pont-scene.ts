@@ -40,6 +40,7 @@ const VITESSE_DU_HEROS = 210;
 
 export class PontScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = ['chapitre_1', 'chapitre_1_riviere'] as const;
   protected arrivee = { knot: 'pont_arrivee', flag: 'pont_vu' };
 
   private folded!: OrigamiDecor;
@@ -93,6 +94,7 @@ export class PontScene extends PointClickScene {
       },
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       arbre: {
         knot: 'pont_arbre',

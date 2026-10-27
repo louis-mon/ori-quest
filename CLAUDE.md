@@ -251,6 +251,29 @@ rien n'est à photographier. Elle monte du modèle rendu, pas de la boîte du pl
 et se règle dans `vapeur.html`, qui écrit `vapeur-reglages.ts`. Le mur derrière
 est presque blanc : une vapeur discrète n'y existe pas.
 
+**Le son suit la pièce et le tap** (`src/sons/`). Chaque scène déclare son
+`ambiance` — une ou plusieurs, superposées : au ravin, la rivière coule sur celle
+du chapitre —, chaque zone animale son `cri` — dans les données de la zone et pas
+dans un tag ink : à la cuisine, les deux chats partagent leur knot et chacun a sa
+voix. Ce que le récit fait sonner passe, lui, par `# son:` (la hache). Le mélange
+se règle dans `sons.html`, qui écrit `sons-reglages.ts`.
+
+Quatre pièges. **L'AudioContext naît dans le premier geste**, écouté à la capture
+sur `window` : créé plus tôt, Chromium le signale en console et `npm run qa`
+échoue ; en bouillonnement, il ne verrait pas le bouton de l'accueil, que
+l'interface isole. Seule exception, une page qui hérite d'un geste
+(`navigator.userActivation.hasBeenActive`) : Chrome garde celui du tap qui a
+rechargé — point d'étape, langue, « Recommencer » —, et le son reprend sans
+attendre ; Safari en veut un nouveau. **Une ambiance se lit en flux**
+(`<audio>`), jamais par `decodeAudioData` : dix minutes décodées pèsent plus de
+200 Mo. **Et son volume passe par un GainNode**, Safari sur iPhone ignorant `volume` ; ses lecteurs sont
+touchés pendant ce premier geste, sans source, faute de quoi Safari refuse de les
+démarrer plus tard. **Pas de `loop` non plus** : deux lecteurs par ambiance se
+relaient, le tour suivant entrant en fondu pendant que le précédent finit
+(`RACCORD_S`) — bouclé tel quel, le château s'éteignait trois secondes à chaque
+tour, ses bords étant des fondus. Phaser n'a pas d'audio (`noAudio`) : son
+contexte, inutilisé, tournait quand même.
+
 **La zone tactile suit le dessin, pas la boîte du plan.** Une boîte est une
 emprise ; le graphisme y est ajusté sans déformation et n'en occupe qu'une
 partie. `caler()` (`PointClickScene`) recale la zone sur ce qui est réellement à
@@ -647,7 +670,8 @@ chargement hors Chrome.
 - Cibles tactiles à 44 px **réels** minimum, même quand le décor rétrécit.
 - Le jeu est **verrouillé en paysage** (1280×720) ; une invite CSS couvre le
   portrait.
-- Audio débloqué au premier `pointerdown` (obligatoire sur iOS).
+- Son démarré au premier geste — `pointerup` ou `touchend`, pas `pointerdown`, qui
+  ne vaut pas geste au doigt (obligatoire sur iOS).
 - Viser < 30 Mo au total. `npm run build` donne le détail par chunk, en gzip.
 
 ## Vérifier son travail

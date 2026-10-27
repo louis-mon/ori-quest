@@ -25,6 +25,7 @@ const SOL = boxOf(PLAN, 'dec_sol');
 
 export class PorteScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = 'chapitre_1';
   protected arrivee = { knot: 'porte_arrivee', flag: 'porte_vue' };
 
   private battant!: OrigamiDecor;
@@ -48,6 +49,7 @@ export class PorteScene extends PointClickScene {
     return hotspotsFrom(PLAN, {
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       renard: {
         knot: 'porte_renard',

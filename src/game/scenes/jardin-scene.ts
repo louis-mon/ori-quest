@@ -36,6 +36,7 @@ const DUREE_RETOURNEMENT = 1400;
 
 export class JardinScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = 'chapitre_1';
   protected arrivee = { knot: 'jardin_arrivee', flag: 'jardin_vu' };
 
   private papierCouronne!: Phaser.GameObjects.Image;
@@ -58,6 +59,7 @@ export class JardinScene extends PointClickScene {
     return hotspotsFrom(PLAN, {
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       fontaine: {
         knot: 'jardin_fontaine',

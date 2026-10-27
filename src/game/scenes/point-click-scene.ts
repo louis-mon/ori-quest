@@ -21,6 +21,9 @@ import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
 import type { Rideau } from '../rideau';
+import { jouerLAmbiance } from '../../sons/ambiance';
+import { jouerBruitage } from '../../sons/bruitages';
+import type { Ambiance } from '../../sons/catalogue';
 import { empriseDe } from './decor-sprite';
 import { signalerNonCables, type SceneLayout } from './layout';
 import {
@@ -63,6 +66,10 @@ export abstract class PointClickScene extends Phaser.Scene {
 
   // Importé de `src/generated/scenes/`.
   protected abstract readonly plan: SceneLayout;
+
+  // Ce qu'on entend dans la pièce, en boucle — plusieurs ambiances s'y
+  // superposent.
+  protected abstract readonly ambiance: Ambiance | readonly Ambiance[];
 
   // Le drapeau est levé par la narration elle-même (`# flag:`), pas ici : c'est
   // elle qui sait à quel moment de la tirade la scène est « vue ».
@@ -166,14 +173,19 @@ export abstract class PointClickScene extends Phaser.Scene {
     }
 
     // Derrière l'écran d'accueil, la pièce vit mais n'a pas commencé : le décor
-    // est fermé, rien ne s'y dit, et le héros n'entre en scène qu'au lever du
-    // rideau.
-    if (this.services.rideau.baisse) void this.enAttendant(this.leverDeRideau());
-    else this.programmerLArrivee();
+    // est fermé, rien ne s'y dit ni ne s'y entend, et le héros n'entre en scène
+    // qu'au lever du rideau.
+    if (this.services.rideau.baisse) {
+      void this.enAttendant(this.leverDeRideau());
+      return;
+    }
+    jouerLAmbiance(this.ambiance);
+    this.programmerLArrivee();
   }
 
   private async leverDeRideau() {
     await this.services.rideau.leve;
+    jouerLAmbiance(this.ambiance);
     await this.entrerEnScene();
     // Encore dans l'attente : le dialogue retient les marqueurs avant qu'elle
     // ne se relève, sinon ils paraîtraient pour repartir aussitôt.
@@ -520,6 +532,7 @@ export abstract class PointClickScene extends Phaser.Scene {
 
   private onHotspot(def: HotspotDef) {
     if (!this.repondAuTap(def)) return;
+    if (def.cri) jouerBruitage(def.cri);
     void this.services.dialogue.run(def.knot);
   }
 

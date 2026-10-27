@@ -35,6 +35,7 @@ const VITESSE_RETOUR = 170;
 
 export class CuisineScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = 'chapitre_3_chateau';
   protected arrivee = { knot: 'cuisine_arrivee', flag: 'cuisine_vue' };
 
   private chat!: Phaser.GameObjects.Image;
@@ -69,6 +70,7 @@ export class CuisineScene extends PointClickScene {
     return hotspotsFrom(PLAN, {
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       cheffe: {
         knot: 'cuisine_cheffe',
@@ -76,10 +78,12 @@ export class CuisineScene extends PointClickScene {
       // Les deux chats mangent ensemble et répondent ensemble.
       chat: {
         knot: 'cuisine_chats',
+        cri: 'chat',
         visibleIf: () => this.chatsATable(),
       },
       lune_chat: {
         knot: 'cuisine_chats',
+        cri: 'lune_chat',
         visibleIf: () => this.chatsATable(),
       },
     });

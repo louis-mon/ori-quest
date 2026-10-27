@@ -39,6 +39,7 @@ const DUREE_SAUT = 1550;
 
 export class EntreeScene extends PointClickScene {
   protected readonly plan = PLAN;
+  protected readonly ambiance = 'chapitre_2';
   protected arrivee = { knot: 'entree_arrivee', flag: 'entree_vue' };
 
   private chat!: Phaser.GameObjects.Image;
@@ -68,9 +69,11 @@ export class EntreeScene extends PointClickScene {
     return hotspotsFrom(PLAN, {
       heros: {
         knot: 'heros',
+        cri: 'grenouille',
       },
       chat: {
         knot: 'entree_chat',
+        cri: 'chat',
       },
       diplo: {
         knot: 'entree_diplo',

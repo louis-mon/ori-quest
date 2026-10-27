@@ -10,6 +10,7 @@ const FICHIER_EAU = 'src/game/scenes/eau-reglages.ts';
 const FICHIER_CHOIX = 'src/ui/choix-reglages.ts';
 const FICHIER_TORCHES = 'src/game/scenes/torches-reglages.ts';
 const FICHIER_VAPEUR = 'src/game/scenes/vapeur-reglages.ts';
+const FICHIER_SONS = 'src/sons/sons-reglages.ts';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
@@ -91,6 +92,19 @@ function enregistrerVapeur(): Plugin {
     configureServer(server) {
       // Onze nombres : au-delà, ce n'est pas l'outil qui parle.
       reecrire(server, '/__vapeur', 1_000, FICHIER_VAPEUR, rendreVapeur);
+    },
+  };
+}
+
+// Le mélange des sons, depuis sons.html. Mêmes garde-fous.
+function enregistrerSons(): Plugin {
+  return {
+    name: 'ori-quest:sons',
+    apply: 'serve',
+    configureServer(server) {
+      // Neuf sons de deux nombres au plus : au-delà, ce n'est pas l'outil qui
+      // parle.
+      reecrire(server, '/__sons', 2_000, FICHIER_SONS, rendreSons);
     },
   };
 }
@@ -576,6 +590,62 @@ function rendreVapeur(source: string, recu: unknown): string {
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }
 
+// Alignées sur les curseurs de src/dev/sons.ts.
+const LIMITES_SONS = {
+  volume: [0, 2],
+  duree: [0.1, 30],
+} as const;
+
+// L'outil règle les sons que le fichier connaît déjà, il n'en ajoute ni n'en
+// retire : un son neuf entre par le catalogue (src/sons/catalogue.ts), et `tsc`
+// exige alors son réglage ici.
+function rendreSons(source: string, recu: unknown): string {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const { ambiances, bruitages } = recu as Record<string, unknown>;
+
+  const debut = source.indexOf('export const REGLAGES_SONS');
+  const accolade = source.indexOf('{', debut);
+  const fin = source.indexOf('\n};', accolade);
+  if (debut < 0 || fin < 0) throw new Error(`${FICHIER_SONS} : bloc REGLAGES_SONS introuvable`);
+  const bloc = source.slice(accolade, fin);
+
+  const groupe = (
+    nom: string,
+    valeurs: unknown,
+    rendre: (son: string, valeur: unknown) => string,
+  ): string[] => {
+    const ouvert = bloc.indexOf(`\n  ${nom}: {`);
+    const ferme = bloc.indexOf('\n  },', ouvert);
+    if (ouvert < 0 || ferme < 0) throw new Error(`${FICHIER_SONS} : groupe ${nom} introuvable`);
+    const connus = [...bloc.slice(ouvert, ferme).matchAll(/^ {4}(\w+):/gm)].map((m) => m[1]);
+
+    if (typeof valeurs !== 'object' || valeurs === null) throw new Error(`${nom} invalide`);
+    const recus = Object.keys(valeurs);
+    if (recus.length !== connus.length || !recus.every((son) => connus.includes(son))) {
+      throw new Error(`${nom} : attendu ${connus.join(', ')}, reçu ${recus.join(', ')}`);
+    }
+    const lus = valeurs as Record<string, unknown>;
+    return [`  ${nom}: {`, ...connus.map((son) => `    ${son}: ${rendre(son, lus[son])},`), '  },'];
+  };
+
+  const lignes = [
+    ...groupe('ambiances', ambiances, (son, valeur) =>
+      String(nombre(valeur, ...LIMITES_SONS.volume, son)),
+    ),
+    ...groupe('bruitages', bruitages, (son, valeur) => {
+      if (typeof valeur !== 'object' || valeur === null) throw new Error(`${son} invalide`);
+      const { volume, duree } = valeur as Record<string, unknown>;
+      const champs = [`volume: ${nombre(volume, ...LIMITES_SONS.volume, `${son}.volume`)}`];
+      if (duree !== undefined) {
+        champs.push(`duree: ${nombre(duree, ...LIMITES_SONS.duree, `${son}.duree`)}`);
+      }
+      return `{ ${champs.join(', ')} }`;
+    }),
+  ];
+
+  return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
+}
+
 // Alignées sur `ReglagesChoix` (src/ui/overlay.ts) et sur src/dev/choix.ts, dans
 // l'ordre du fichier.
 const CHOIX_PERMIS = {
@@ -611,6 +681,7 @@ export default defineConfig({
     enregistrerChoix(),
     enregistrerTorches(),
     enregistrerVapeur(),
+    enregistrerSons(),
     enregistrerDecoupage(),
     listerLesOutils(),
     suivreLesPlans(),

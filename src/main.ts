@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import './ui/style.css';
 
-import { debloquerLAudioAuPremierGeste } from './audio';
 import { donner, effetsDuRecit } from './game/effets-du-recit';
 import { couvrirLeJeu, figerLeJeu } from './game/gel';
 import { creerLeMoteur } from './game/moteur';
@@ -13,6 +12,7 @@ import { gameState } from './game/systems/state';
 import { traduireLaPage } from './langues/page';
 import { recitDansLaLangue } from './langues/traduire';
 import { CoucheDuRecit } from './origami/couche-du-recit';
+import { demarrerLeSonAuPremierGeste } from './sons/contexte';
 import { suivreLeCadre } from './ui/cadre';
 import { figerLesCredits } from './ui/credits';
 import { isolerLInterface } from './ui/isolation';
@@ -71,7 +71,7 @@ game.events.once(Phaser.Core.Events.READY, () => {
 
 sauverALaSortie();
 garderLePleinEcranAuRechargement();
-debloquerLAudioAuPremierGeste(game);
+demarrerLeSonAuPremierGeste();
 
 if (import.meta.env.DEV) {
   const { exposerALaConsole } = await import('./dev/console');
