@@ -35,11 +35,16 @@ const TYPES = {
 };
 
 // Un seul bundle : un module inline ne peut rien importer, ni `three` à la
-// demande, ni `phaser` à côté.
+// demande, ni `phaser` à côté. Vite conseillerait de le redécouper.
 await build({
   root: ROOT,
   logLevel: 'warn',
-  build: { outDir: TRAVAIL, emptyOutDir: true, modulePreload: false },
+  build: {
+    outDir: TRAVAIL,
+    emptyOutDir: true,
+    modulePreload: false,
+    chunkSizeWarningLimit: Infinity,
+  },
   plugins: [
     {
       name: 'ori-quest:un-seul-bundle',
