@@ -22,6 +22,7 @@
  */
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { createServer } from 'node:net';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -1298,6 +1299,20 @@ const repond = async (url) => {
   }
 };
 
+// Demandé au système, et non fixé : sur le 4173, le `vite preview` d'une autre
+// session répondait avant que le nôtre ne meure sur `--strictPort`, et la suite
+// jouait en silence le build d'un autre worktree.
+function portLibre() {
+  return new Promise((ok, ko) => {
+    const sonde = createServer();
+    sonde.once('error', ko);
+    sonde.listen(0, 'localhost', () => {
+      const { port } = sonde.address();
+      sonde.close(() => ok(port));
+    });
+  });
+}
+
 async function servir() {
   // Une cible déjà servie : le serveur de dev, quand on met un test au point.
   // Son délai anti-tap est nul, et les tests qui parlent du build s'y sautent.
@@ -1327,8 +1342,9 @@ async function servir() {
     console.log('· build de production…');
     await commande('npm', ['run', 'build']);
   }
-  const url = 'http://localhost:4173/';
-  const serveur = spawn('npx', ['vite', 'preview', '--port', '4173', '--strictPort'], {
+  const port = await portLibre();
+  const url = `http://localhost:${port}/`;
+  const serveur = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], {
     cwd: RACINE,
     stdio: ['ignore', 'inherit', 'inherit'],
   });
