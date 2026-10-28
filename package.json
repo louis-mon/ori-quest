@@ -21,6 +21,7 @@
     "assets:pull": "node tools/pull-assets.mjs",
     "zip": "node tools/pack-itch.mjs",
     "itch": "node tools/publier-itch.mjs",
+    "portable": "npm run build && node tools/paquet-portable.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

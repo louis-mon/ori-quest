@@ -37,6 +37,7 @@ npm run qa-local                 # la même, sur le `npm run dev` déjà lancé
 npm run bake -- <cp.svg> --name <nom>   # crease pattern -> animation .origami
 npm run zip                      # dist/ -> zip vérifié pour itch.io
 npm run itch                     # dist/ -> itch.io par butler (page laissée en Draft)
+npm run portable                 # le jeu en un seul HTML, qui s'ouvre depuis le disque
 npm run format                   # Prettier sur le code
 ```
 

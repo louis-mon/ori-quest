@@ -15,12 +15,15 @@
  * `qa-local` (`--local`) vise le `npm run dev` d'à côté : pas de build, des
  * piles d'appels lisibles, et le délai anti-tap y est nul. Les tests marqués
  * `livre` s'y sautent au lieu d'échouer — ils parlent de ce que le build
- * embarque, pas du jeu. `BASE_URL` vise n'importe quelle autre cible servie.
+ * embarque, pas du jeu. `BASE_URL` vise n'importe quelle autre cible servie,
+ * ou le fichier de `npm run portable` en `file://`.
  *
  * Playwright est en dépendance optionnelle (il sert déjà à `npm run bake`).
  */
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   attendreLaBoite,
   attendreLaFinDuPliage,
@@ -1288,6 +1291,14 @@ async function servir() {
   // `qa-local` viserait le 5173 pendant qu'un second serveur tourne ailleurs.
   const exterieure =
     process.env.BASE_URL ?? (local ? `http://localhost:${process.env.PORT || 5173}/` : null);
+  // Un fichier ouvert depuis le disque ne peut être qu'un build : celui de
+  // `npm run portable`, qui a le délai anti-tap réel.
+  if (exterieure?.startsWith('file:')) {
+    if (!existsSync(fileURLToPath(exterieure))) {
+      throw new Error(`${exterieure} n'existe pas — « npm run portable » d'abord ?`);
+    }
+    return { url: exterieure, livre: true, delai: DELAI_LIVRE, arreter: () => {} };
+  }
   if (exterieure) {
     if (!(await repond(exterieure))) {
       // Sans ce mot, Playwright échoue sur un `net::ERR_CONNECTION_REFUSED` qui

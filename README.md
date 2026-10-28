@@ -32,6 +32,7 @@ le seul moyen fiable de valider l'ergonomie tactile et la mémoire iOS.
 | `npm run bake -- <cp.svg>` | crease pattern -> animation `.origami` |
 | `npm run zip` | prépare `ori-quest-itch.zip` pour itch.io |
 | `npm run itch` | téléverse `dist/` sur itch.io avec butler |
+| `npm run portable` | le jeu en un seul fichier HTML, à envoyer à qui n'a qu'un navigateur |
 
 Pages de réglage, en développement uniquement (hors build) — le menu du jeu les
 ouvre aussi, chacune dans son onglet, par « Outils de réglage ». Toute page HTML
@@ -468,6 +469,7 @@ tools/
   lib/dist-itch.mjs          ce que dist/ doit respecter pour itch.io (partagé)
   pack-itch.mjs              dist/ -> zip vérifié pour itch.io
   publier-itch.mjs           dist/ -> itch.io par butler, page laissée en Draft
+  paquet-portable.mjs        le jeu en un seul HTML, qui s'ouvre depuis le disque
   pull-assets.mjs            dossier partagé de l'artiste -> assets-src/
 ```
 
@@ -567,6 +569,27 @@ le chargement hors Chrome.
 deux routes envoient le même `dist/` et le vérifient de la même façon
 (`tools/lib/dist-itch.mjs`) : `index.html` à la racine, aucun chemin absolu —
 itch.io sert le jeu depuis un sous-dossier arbitraire.
+
+### Envoyer le jeu à quelqu'un, hors itch.io
+
+```bash
+npm run portable
+```
+
+écrit `build/Orifable.html` (le nom suit le `<title>`) : un seul fichier, qui
+s'ouvre d'un double-clic dans le navigateur, sans serveur ni installation. Le zip
+d'itch.io ne le peut pas — ouvert depuis le disque, Chrome refuse ses modules
+JS, ses `fetch` et ses textures, et la page reste vide.
+
+Le JS y est fondu en un seul bundle, et chaque fichier de `public/` y voyage en
+base64 ; un petit chargeur, posé avant le jeu, répond aux demandes `assets/…`
+par des blobs (`chargeurEmbarque()`, dans `tools/paquet-portable.mjs`). Le jeu
+n'en sait rien : un fichier chargé par une voie que le chargeur ne couvre pas le
+dit en console. `npm run qa` se joue sur ce fichier aussi :
+
+```bash
+BASE_URL="file://$PWD/build/Orifable.html" npm run qa
+```
 
 ### Voir le build avant de l'envoyer
 
