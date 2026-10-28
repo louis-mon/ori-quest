@@ -590,7 +590,7 @@ itch.io sert le jeu depuis un sous-dossier arbitraire.
 npm run portable
 ```
 
-écrit `build/Orifable.html` (le nom suit le `<title>`) : un seul fichier, qui
+écrit `build/OriFable.html` (le nom suit le `<title>`) : un seul fichier, qui
 s'ouvre d'un double-clic dans le navigateur, sans serveur ni installation. Le zip
 d'itch.io ne le peut pas — ouvert depuis le disque, Chrome refuse ses modules
 JS, ses `fetch` et ses textures, et la page reste vide.
@@ -602,7 +602,7 @@ n'en sait rien : un fichier chargé par une voie que le chargeur ne couvre pas l
 dit en console. `npm run qa` se joue sur ce fichier aussi :
 
 ```bash
-BASE_URL="file://$PWD/build/Orifable.html" npm run qa
+BASE_URL="file://$PWD/build/OriFable.html" npm run qa
 ```
 
 ### Voir le build avant de l'envoyer

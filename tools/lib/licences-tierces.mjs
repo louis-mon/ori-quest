@@ -77,7 +77,7 @@ const lirePaquet = (dossier) => JSON.parse(readFileSync(join(dossier, 'package.j
 
 const TRAIT = '='.repeat(72);
 
-const ENTETE = `Orifable — licences tierces / third-party licenses
+const ENTETE = `OriFable — licences tierces / third-party licenses
 
 Le jeu embarque les bibliothèques suivantes, chacune sous sa propre licence.
 The game bundles the following libraries, each under its own license.

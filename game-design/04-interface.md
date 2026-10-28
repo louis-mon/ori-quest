@@ -482,9 +482,10 @@ répond maintenant, en un seul endroit (`occupeLeJoueur` dans
 ## L'écran d'accueil, qui est aussi la pause
 
 **Un seul écran pour deux moments.** Une partie neuve s'ouvre dessus : le titre,
-« Orifable », courbé en arche, et au milieu, en gros, « Commencer à plier ».
-Pendant la partie, le bouton du coin haut-droit — à l'opposé de l'inventaire,
-pour qu'aucun des deux ne recouvre l'autre — rouvre le même écran, sous
+« OriFable », courbé en arche — la capitale coupe le mot, qui tout attaché se lit
+en adjectif en *-able* et perd sa fable —, et au milieu, en gros, « Commencer à
+plier ». Pendant la partie, le bouton du coin haut-droit — à l'opposé de
+l'inventaire, pour qu'aucun des deux ne recouvre l'autre — rouvre le même écran, sous
 « Pause » et avec « Reprendre ». Même disposition, mêmes options : le joueur
 n'apprend qu'un écran.
 
