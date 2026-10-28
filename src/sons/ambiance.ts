@@ -1,6 +1,7 @@
 import { AMBIANCES, type Ambiance } from './catalogue';
 import { aChaqueGeste } from './contexte';
 import { reglagesSons } from './reglages';
+import { sonCoupe, suivreLeSonCoupe } from './son-coupe';
 
 // L'ambiance de la pièce à l'écran, en boucle, enchaînée en fondu d'une pièce à
 // l'autre. Plusieurs peuvent se superposer : au ravin, la rivière coule sur
@@ -58,9 +59,14 @@ export function jouerLAmbiance(ambiance: Ambiance | readonly Ambiance[]) {
 export function ajusterLAmbiance() {
   if (!lecteurs) return;
   for (const [nom, lecteur] of lecteurs) {
-    fondre(nom, lecteur, voulues.includes(nom) ? reglagesSons().ambiances[nom] : 0);
+    const joue = voulues.includes(nom) && !sonCoupe();
+    fondre(nom, lecteur, joue ? reglagesSons().ambiances[nom] : 0);
   }
 }
+
+// Coupé, le son ne baisse pas seulement à zéro : au bout du fondu, les lecteurs
+// s'arrêtent, un flux muet coûtant au téléphone autant qu'un autre.
+suivreLeSonCoupe(ajusterLAmbiance);
 
 // Avant le premier geste, rien ne peut jouer : la pièce a seulement dit ce
 // qu'elle voulait, et c'est ce geste qui le lance.

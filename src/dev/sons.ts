@@ -4,6 +4,7 @@ import { jouerBruitage } from '../sons/bruitages';
 import { AMBIANCES, BRUITAGES, type Ambiance, type Bruitage } from '../sons/catalogue';
 import { demarrerLeSonAuPremierGeste } from '../sons/contexte';
 import { reglerLesSons, type ReglagesSons } from '../sons/reglages';
+import { couperLeSon } from '../sons/son-coupe';
 import { REGLAGES_SONS } from '../sons/sons-reglages';
 
 // Outil de réglage des sons — développement seulement. Un mélange ne se juge
@@ -19,6 +20,9 @@ const MEMOIRE = 'sons-enregistres';
 
 const reglages: ReglagesSons = structuredClone(REGLAGES_SONS);
 reglerLesSons(reglages);
+// Le réglage du joueur vaut ici aussi, la page partageant le stockage du jeu :
+// coupé depuis le menu, l'outil resterait muet.
+couperLeSon(false);
 demarrerLeSonAuPremierGeste();
 
 // Indépendantes, comme dans le jeu : la rivière se juge par-dessus `chapitre_1`.

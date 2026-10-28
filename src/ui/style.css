@@ -971,6 +971,34 @@ body {
   color: var(--ink);
 }
 
+/* Carré, à la taille du bouton du menu : 44 px réels quelle que soit l'échelle,
+   le pictogramme suivant celle du texte sans passer sous 18 px. */
+.ecran__son {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  padding: 0;
+}
+
+.ecran__son svg {
+  width: max(18px, calc(24px * var(--ui-scale)));
+  height: max(18px, calc(24px * var(--ui-scale)));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ecran__son-corps {
+  fill: currentColor;
+}
+
+.ecran__son[aria-pressed='true'] .ecran__son-croix,
+.ecran__son[aria-pressed='false'] .ecran__son-ondes {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ecran {
     transition-duration: 1ms;

@@ -6,6 +6,7 @@ import type { Rideau } from '../game/rideau';
 import { listerOutils, ouvrirOutil } from '../dev/outils';
 import { choisirLaLangue, langue, LANGUES, nomDeLaLangue } from '../langues/langue';
 import { t } from '../langues/traduire';
+import { couperLeSon, sonCoupe } from '../sons/son-coupe';
 import { ouvrirLesCredits } from './credits';
 import { suivreLeBoutonDuMenu } from './geste-du-menu';
 import {
@@ -52,6 +53,16 @@ function languesHtml(): string {
   ).join('');
 }
 
+// Un pictogramme et pas un libellé : le haut-parleur se lit dans toutes les
+// langues, et la ligne des options n'a pas de largeur à perdre. Ses ondes ou sa
+// croix suivent `aria-pressed` (style.css).
+const HAUT_PARLEUR = `
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path class="ecran__son-corps" d="M3.5 9.5h3.5l4.5-4v13l-4.5-4H3.5z" />
+    <path class="ecran__son-ondes" d="M15 9a4.2 4.2 0 0 1 0 6M18 6.2a8 8 0 0 1 0 11.6" />
+    <path class="ecran__son-croix" d="M15.5 9.5l5 5M20.5 9.5l-5 5" />
+  </svg>`;
+
 // Sur `import.meta.env.DEV` seul, le mode dev n'y change rien : hors
 // développement les pages de réglage n'existent pas, `vite build` ne
 // connaissant qu'index.html.
@@ -85,6 +96,7 @@ export class Menu {
   private recommencer: HTMLButtonElement;
   private pleinEcran: HTMLButtonElement;
   private cocottes: HTMLButtonElement;
+  private son: HTMLButtonElement;
   private etapes: HTMLButtonElement;
   private confirm: HTMLElement;
   // Les points d'étape, ou les outils de développement.
@@ -127,6 +139,8 @@ export class Menu {
             ${languesHtml()}
           </div>
           <div class="ecran__ligne">
+            <button class="ecran__option ecran__son" data-action="son" aria-label="${t('Son')}"
+              aria-pressed="${!sonCoupe()}">${HAUT_PARLEUR}</button>
             <button class="ecran__option ecran__bascule" data-action="cocottes"
               aria-pressed="${cocottesMontrees()}">${t('Montrer les zones cliquables')}</button>
             <button class="ecran__option" data-action="fullscreen">${t('Plein écran')}</button>
@@ -169,6 +183,7 @@ export class Menu {
     this.recommencer = el.querySelector('[data-action="reset"]')!;
     this.pleinEcran = el.querySelector('[data-action="fullscreen"]')!;
     this.cocottes = el.querySelector('[data-action="cocottes"]')!;
+    this.son = el.querySelector('[data-action="son"]')!;
     this.etapes = el.querySelector('[data-action="etapes"]')!;
     this.confirm = el.querySelector('.menu__confirm')!;
     this.liste = el.querySelector('.menu__liste')!;
@@ -219,6 +234,10 @@ export class Menu {
       case 'cocottes':
         montrerLesCocottes(!cocottesMontrees());
         this.cocottes.setAttribute('aria-pressed', String(cocottesMontrees()));
+        break;
+      case 'son':
+        couperLeSon(!sonCoupe());
+        this.son.setAttribute('aria-pressed', String(!sonCoupe()));
         break;
       case 'fullscreen':
         await basculerLePleinEcran();

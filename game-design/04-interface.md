@@ -504,6 +504,14 @@ langue du navigateur, et l'anglais s'il ne la parle pas.
 
 **Sur la seconde ligne**, les autres options.
 
+**Le son**, en tête : un haut-parleur, sans libellé. Le pictogramme se lit dans
+toutes les langues et ne prend que la place d'un doigt, sur une ligne qui n'en a
+pas à perdre. Ses ondes disent que le son joue, une croix qu'il est coupé.
+Coupé, il l'est tout entier — ambiances, cris, bruits du récit —, et le reste
+d'un rechargement ou d'un nouveau départ : c'est un réglage de l'appareil, comme
+la langue, pas de la partie. Il est là dès l'accueil, pour qui ouvre le jeu dans
+un lieu où il ne doit pas sonner.
+
 **Montrer les zones cliquables.** Les cocottes sont masquées par défaut (voir
 [03-langage-visuel.md](03-langage-visuel.md)), et cette case les rappelle. Une
 case et pas un simple bouton : à côté de « Plein écran », un libellé à

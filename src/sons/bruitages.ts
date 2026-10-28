@@ -1,6 +1,7 @@
 import { BRUITAGES, type Bruitage } from './catalogue';
 import { aChaqueGeste, contexteAudio } from './contexte';
 import { reglagesSons } from './reglages';
+import { sonCoupe } from './son-coupe';
 
 // Le cri d'un animal qu'on touche, le coup de hache : des sons courts, décodés
 // une fois et rejoués sans attendre.
@@ -25,7 +26,7 @@ aChaqueGeste((ctx) => {
 export function jouerBruitage(nom: Bruitage) {
   const ctx = contexteAudio();
   // Sans contexte, aucun geste n'a encore eu lieu : rien ne pourrait jouer.
-  if (!ctx) return;
+  if (!ctx || sonCoupe()) return;
   void tampon(ctx, nom).then((decode) => {
     if (!decode) return;
     const { volume, duree } = reglagesSons().bruitages[nom];

@@ -2941,11 +2941,6 @@ msgstr "Start over"
 
 #. interface
 #: src/ui/menu.ts
-msgid "Points d’étape"
-msgstr "Checkpoints"
-
-#. interface
-#: src/ui/menu.ts
 msgid "Menu"
 msgstr "Menu"
 
@@ -2961,6 +2956,11 @@ msgstr "Language"
 
 #. interface
 #: src/ui/menu.ts
+msgid "Son"
+msgstr "Sound"
+
+#. interface
+#: src/ui/menu.ts
 msgid "Montrer les zones cliquables"
 msgstr "Show clickable areas"
 
@@ -2968,6 +2968,11 @@ msgstr "Show clickable areas"
 #: src/ui/menu.ts
 msgid "Plein écran"
 msgstr "Fullscreen"
+
+#. interface
+#: src/ui/menu.ts
+msgid "Points d’étape"
+msgstr "Checkpoints"
 
 #. interface
 #: src/ui/menu.ts

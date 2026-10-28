@@ -1134,6 +1134,21 @@ test('cocottes', async (page, dire) => ({
   },
 }));
 
+// Le haut-parleur du menu coupe le son : réglage de l'appareil lui aussi.
+test('son', async (page, dire) => ({
+  sauvegarde: AU_RAVIN,
+  jouer: async () => {
+    const bouton = '.ecran [data-action="son"]';
+    const allume = async () => (await page().getAttribute(bouton, 'aria-pressed')) === 'true';
+    dire('le son est allumé par défaut', await allume());
+    await taperSur(page(), bouton);
+    dire('le haut-parleur le coupe', !(await allume()));
+    await page().reload({ waitUntil: 'networkidle' });
+    await pause(2000);
+    dire('le choix survit au rechargement', !(await allume()));
+  },
+}));
+
 // La traversée complète : le seul test qui éprouve les quatre énigmes, le
 // tutoriel joué en entier, les pliages, l'inventaire et les deux scènes.
 test('traversee', async (page, dire) => ({
