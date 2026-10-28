@@ -319,8 +319,11 @@ doigt. Le délai se décide sur la réplique qui *s'ouvre* : le rebond d'un tap
 vers une réplique inédite reste avalé. **Les choix gardent leur délai, lus ou
 non** — un choix pris par un rebond emmène le récit ailleurs.
 
-**2. ⏩ enchaîne le déjà-lu.** Il paraît au-dessus de la boîte, dans le coin
-droit, sur une réplique lue et sur elle seule. Touché, il fait défiler les
+**2. ⏩ enchaîne le déjà-lu.** Il paraît à droite de la boîte, calé sur son
+bas, à côté de ▶, sur une réplique lue et sur elle seule. Pas au-dessus : la
+boîte grandit vers le haut, et il montait et descendait d'une réplique à
+l'autre. Sur téléphone, la boîte lui cède donc sa place en largeur, et c'est
+l'ensemble des deux qui est centré. Touché, il fait défiler les
 répliques lues sans tap, le temps de voir passer les locuteurs, et s'arrête de
 lui-même :
 

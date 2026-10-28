@@ -114,11 +114,16 @@ body {
 /* ---------- Boîte de dialogue ---------- */
 
 .dialogue {
+  /* ⏩ se pose à droite de la boîte (`.dialogue__passer`) : elle lui laisse sa
+     place, et c'est l'ensemble des deux qui est centré. Sur téléphone, la boîte
+     prend toute la largeur et rien ne tiendrait à côté. */
+  --place-passer: 64px;
+  --centrage: translateX(calc(-50% - var(--place-passer) / 2));
   position: absolute;
   left: 50%;
   bottom: calc(30px * var(--ui-scale) + var(--safe-bottom));
-  transform: translateX(-50%);
-  width: min(680px, calc(100% - 32px));
+  transform: var(--centrage);
+  width: min(680px, calc(100% - 32px - var(--place-passer)));
   padding: calc(18px * var(--ui-scale)) calc(20px * var(--ui-scale));
   border-radius: 16px;
   background: var(--dialogue-fond);
@@ -326,13 +331,15 @@ body {
   display: none;
 }
 
-/* ⏩, sur une réplique déjà lue seulement. Au-dessus de la boîte et hors de son
-   flux : dedans, elle la ferait grandir d'une réplique lue à une inédite. Le
-   coin droit, celui où la flèche dit déjà « la suite est par ici ». */
+/* ⏩, sur une réplique déjà lue seulement. À droite de la boîte, calé sur son
+   bas, à côté de ▶ : la boîte grandit vers le haut, et posé au-dessus il
+   montait et descendait d'une réplique à l'autre. Hors du flux, sans quoi il
+   la ferait changer de largeur d'une réplique lue à une inédite. Sa largeur
+   et l'écart font `--place-passer`. */
 .dialogue__passer {
   position: absolute;
-  right: 0;
-  bottom: calc(100% + 8px);
+  left: calc(100% + 8px);
+  bottom: 0;
   display: grid;
   place-items: center;
   width: 56px;
@@ -386,8 +393,8 @@ body {
    inaperçu — c'est la surface qui se voit, pas la ligne.
    Un seul temps, franc : montée vive, tenue, retour lent. Deux battements sur
    toute la surface se liraient comme un défaut d'affichage.
-   Le `translateX` du centrage est répété à chaque étape, sinon l'animation le
-   perd et la boîte saute d'une demi-largeur. */
+   Le centrage est répété à chaque étape, sinon l'animation le perd et la boîte
+   saute d'une demi-largeur. */
 .dialogue--appel {
   animation: dialogue-appel 1s ease-out;
 }
@@ -395,13 +402,13 @@ body {
 @keyframes dialogue-appel {
   0%,
   100% {
-    transform: translateX(-50%) scale(1);
+    transform: var(--centrage) scale(1);
     background: var(--dialogue-fond);
     box-shadow: 0 10px 30px var(--shadow);
   }
   12%,
   50% {
-    transform: translateX(-50%) scale(1.03);
+    transform: var(--centrage) scale(1.03);
     background: var(--or-fond);
     box-shadow:
       0 10px 30px var(--shadow),
