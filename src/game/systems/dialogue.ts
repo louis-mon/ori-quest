@@ -3,6 +3,7 @@ import { jouerBruitage } from '../../sons/bruitages';
 import { estUnBruitage } from '../../sons/catalogue';
 import type { Overlay } from '../../ui/overlay';
 import { personnage, type Personnage } from './personnages';
+import { estLue, marquerLue } from './repliques-lues';
 import { gameState, type SaveData } from './state';
 
 // Les effets de jeu passent par des tags ink :
@@ -35,6 +36,10 @@ export interface DialogueEffects {
 // Un handler peut renvoyer le nom d'un knot : le récit y repart aussitôt le tag
 // appliqué. Voir `puzzle` pour la raison de ce détour.
 type TagHandler = (value: string, fx: DialogueEffects) => void | string | Promise<void | string>;
+
+// Ce que le récit montre, et que l'avance rapide ne doit pas passer : elle
+// s'arrête sur la réplique qui l'accompagne.
+const SE_REGARDE = new Set(['origami', 'puzzle', 'goto', 'fin']);
 
 // Identifiants qui rendent la parole à la narration.
 const NARRATION = new Set(['narrateur', '-', 'aucun']);
@@ -94,6 +99,8 @@ export class DialogueRunner {
   private running = false;
   // Rémanent d'une ligne à l'autre. `null` = narration.
   private speaker: Personnage | null = null;
+  // Celui que `run()` a reçu : il fait partie de la clé d'une réplique lue.
+  private knot = '';
 
   // Message d'ink pour le knot en cours, `null` s'il s'est bien passé. Voir
   // `remettreDebout()`.
@@ -172,6 +179,7 @@ export class DialogueRunner {
     // Chaque dialogue s'ouvre sur la narration : un `# qui:` laissé par le
     // précédent ferait parler un personnage absent de la scène.
     this.speaker = null;
+    this.knot = knot;
     this.panne = null;
     try {
       this.story.ChoosePathString(knot);
@@ -207,6 +215,9 @@ export class DialogueRunner {
         // le DOM dès l'appel, `applyTags` est asynchrone. Passer `# qui:` par les
         // handlers afficherait la ligne sous le nom du personnage précédent.
         this.readSpeaker(tags);
+        if (tags.some((tag) => SE_REGARDE.has(parseTag(tag)?.key ?? ''))) {
+          this.overlay.arreterLAvanceRapide();
+        }
         // Les tags s'appliquent avant l'affichage : un `# origami:` doit pouvoir
         // jouer pendant que la ligne est lue.
         let effetFini = false;
@@ -219,7 +230,8 @@ export class DialogueRunner {
           continue;
         }
 
-        await this.overlay.say(line, this.speaker);
+        await this.overlay.say(line, this.speaker, estLue(this.knot, line));
+        marquerLue(this.knot, line);
         // Tapé AVANT la fin de l'effet, le tap a payé la lecture de la ligne et
         // non le passage à la suivante : sans cette question, la réplique d'après
         // prend la place à la seconde où le pliage se termine. Tapé après, il n'y
@@ -243,7 +255,8 @@ export class DialogueRunner {
       const { texte, qui } = options[picked];
       if (qui) {
         this.speaker = qui;
-        await this.overlay.redire(texte, qui);
+        await this.overlay.redire(texte, qui, estLue(this.knot, texte));
+        marquerLue(this.knot, texte);
       }
       this.story.ChooseChoiceIndex(picked);
     }

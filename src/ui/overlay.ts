@@ -42,6 +42,10 @@ const DEPART_MS = 220;
 // n'attend jamais plus que le geste qu'il ferait de toute façon.
 const CARACTERES_PAR_SECONDE = 20;
 
+// Le temps d'une réplique lue pendant l'avance rapide : de quoi voir le récit
+// défiler et les locuteurs se succéder, pas de quoi lire — c'est déjà fait.
+const AVANCE_RAPIDE_MS = 80;
+
 const BANDEAU_MS = 2000;
 
 // Retirée, style recalculé, remise : sans le recalcul entre les deux,
@@ -100,6 +104,7 @@ export class Overlay {
   private dialogueReste: HTMLElement;
   private dialogueChoices: HTMLElement;
   private dialogueNext: HTMLButtonElement;
+  private dialoguePasser: HTMLButtonElement;
   private inventory: HTMLElement;
   private obtenu: HTMLElement;
   private obtenuTimer = 0;
@@ -118,6 +123,13 @@ export class Overlay {
   // l'image en attente tant qu'elle s'écrit. Voir `defiler()`.
   private texteEnCours = '';
   private imageDefilement = 0;
+
+  // La réplique à l'écran a déjà été lue. Voir `poserReplique()`.
+  private repliqueLue = false;
+  // Lancée par ⏩ : les répliques lues passent seules, jusqu'à la première
+  // inédite, un choix, ou ce que le récit montre. Voir `attendre()`.
+  private avanceRapide = false;
+  private avanceDepuis = 0;
 
   // De quoi résoudre la réplique en attente sans tap. Voir `interrompre()`.
   private terminerLigne: (() => void) | null = null;
@@ -146,6 +158,9 @@ export class Overlay {
           <div class="dialogue__choices"></div>
         </div>
         <button class="dialogue__next" aria-label="${t('Continuer')}" hidden>▶</button>
+        <button class="dialogue__passer" aria-label="${t('Passer ce qui est déjà lu')}" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5l10 7-10 7zM12 5l10 7-10 7z"/></svg>
+        </button>
       </div>
     `;
     this.dialogue = root.querySelector('.dialogue')!;
@@ -155,6 +170,7 @@ export class Overlay {
     this.dialogueReste = root.querySelector('.dialogue__reste')!;
     this.dialogueChoices = root.querySelector('.dialogue__choices')!;
     this.dialogueNext = root.querySelector('.dialogue__next')!;
+    this.dialoguePasser = root.querySelector('.dialogue__passer')!;
     this.inventory = root.querySelector('.inventory')!;
     this.obtenu = root.querySelector('.obtenu')!;
     this.reglerLesChoix(REGLAGES_CHOIX);
@@ -174,32 +190,39 @@ export class Overlay {
 
   // ---------- Dialogue ----------
 
-  // `qui` à null, c'est la narration.
-  say(text: string, qui: Personnage | null = null): Promise<void> {
-    return this.poserReplique(text, qui, true);
+  // `qui` à null, c'est la narration. Une réplique `lue` se pose d'un coup et
+  // répond au premier tap : les protections du texte inédit n'y gardent rien.
+  say(text: string, qui: Personnage | null = null, lue = false): Promise<void> {
+    return this.poserReplique(text, qui, true, lue);
   }
 
   // L'option qu'on vient de toucher, dite par celui qui la prononce. Posée d'un
   // coup : elle vient d'être lue sur le bouton, la réécrire lettre à lettre
   // ferait attendre le joueur sur ses propres mots.
-  redire(text: string, qui: Personnage): Promise<void> {
-    return this.poserReplique(text, qui, false);
+  redire(text: string, qui: Personnage, lue = false): Promise<void> {
+    return this.poserReplique(text, qui, false, lue);
   }
 
-  private poserReplique(text: string, qui: Personnage | null, ecrire: boolean) {
+  private poserReplique(text: string, qui: Personnage | null, ecrire: boolean, lue: boolean) {
     // Écrit dans le DOM avant de rendre la promesse, et non dans son exécuteur :
     // `DialogueRunner` compte là-dessus pour que le locuteur soit posé au moment
     // de l'appel, pas un tick plus tard.
     this.dialogue.hidden = false;
     this.showSpeaker(qui);
-    if (ecrire) {
+    // L'avance rapide s'arrête là où il y a quelque chose à lire.
+    if (!lue) this.arreterLAvanceRapide();
+    this.repliqueLue = lue;
+    if (ecrire && !lue) {
       this.defiler(typographier(text));
     } else {
       this.texteEnCours = typographier(text);
       this.toutMontrer();
     }
     this.viderLesChoix();
-    return this.attendreUnTap();
+    // Le délai protège la réplique qui s'ouvre, et une réplique lue n'a rien à
+    // y perdre : le rebond qui la passe ne fait manquer à personne ce qu'il sait
+    // déjà.
+    return this.attendre(lue ? 0 : DELAI_ANTI_TAP);
   }
 
   // Attend un tap sans changer la réplique, pour ce qui se joue pendant qu'elle
@@ -214,30 +237,66 @@ export class Overlay {
   // Boîte fermée, il n'y a rien à taper : attendre bloquerait la partie faute de
   // cible où poser le doigt.
   attendreUnTap(): Promise<void> {
+    // Un effet vient de se jouer : il y avait quelque chose à regarder.
+    this.arreterLAvanceRapide();
+    return this.attendre(DELAI_ANTI_TAP);
+  }
+
+  // ⏩ n'est là que sur une réplique déjà lue, et lance l'avance rapide : chaque
+  // réplique lue tient alors `AVANCE_RAPIDE_MS` puis laisse la place, sans tap.
+  // C'est la seule avance qui ne coûte pas un tap par réplique, et elle ne
+  // passe que du déjà-lu — c'est `poserReplique()` qui l'arrête sur l'inédit.
+  private attendre(delaiAntiTap: number): Promise<void> {
     if (this.dialogue.hidden) return Promise.resolve();
-    this.dialogueNext.hidden = false;
+    this.dialogueNext.hidden = this.avanceRapide;
+    this.dialoguePasser.hidden = !this.repliqueLue;
+    let delai = delaiAntiTap;
     // Rouvert quand un tap achève le défilement : ce tap-là compte pour un
     // contact neuf, le rebond qui le suit ne doit pas emporter la réplique.
     let ouvert = performance.now();
     return new Promise((resolve) => {
       this.lignesEnCours++;
       let fait = false;
+      let minuteur = 0;
       const rendreLesTaps = this.surveillerAilleurs(() => ouvert);
       const finir = () => {
         if (fait) return;
         fait = true;
+        clearTimeout(minuteur);
         this.dialogueNext.hidden = true;
+        this.dialoguePasser.hidden = true;
         this.dialogue.removeEventListener('pointerup', advance);
+        this.dialoguePasser.removeEventListener('pointerup', passer);
         rendreLesTaps();
         if (this.terminerLigne === finir) this.terminerLigne = null;
         this.lignesEnCours--;
         resolve();
       };
+      // Un tap pendant l'avance l'arrête sur la réplique à l'écran, qui attend
+      // alors comme une autre — mais pas le rebond du tap qui l'a lancée.
+      const arreter = () => {
+        if (performance.now() - this.avanceDepuis < DELAI_ANTI_TAP) return;
+        clearTimeout(minuteur);
+        this.arreterLAvanceRapide();
+        this.dialogueNext.hidden = false;
+        delai = DELAI_ANTI_TAP;
+        ouvert = performance.now();
+      };
+      const passer = (e: Event) => {
+        e.stopPropagation();
+        if (this.avanceRapide) return arreter();
+        if (performance.now() - ouvert < delai) return;
+        this.avanceRapide = true;
+        this.avanceDepuis = performance.now();
+        this.dialoguePasser.classList.add('dialogue__passer--actif');
+        finir();
+      };
       const advance = (e: Event) => {
         // Propagation arrêtée même quand le tap est ignoré : avalé ici, il ne
         // doit pas repartir déclencher ce qui se trouve derrière la boîte.
         e.stopPropagation();
-        if (performance.now() - ouvert < DELAI_ANTI_TAP) return;
+        if (this.avanceRapide) return arreter();
+        if (performance.now() - ouvert < delai) return;
         // Sur un texte qui s'écrit, le tap l'achève au lieu d'avancer : le
         // joueur pressé lit d'un coup, et personne ne saute une réplique pour
         // avoir voulu la lire plus vite.
@@ -249,8 +308,17 @@ export class Overlay {
         finir();
       };
       this.dialogue.addEventListener('pointerup', advance);
+      this.dialoguePasser.addEventListener('pointerup', passer);
+      if (this.avanceRapide) minuteur = window.setTimeout(finir, AVANCE_RAPIDE_MS);
       this.terminerLigne = finir;
     });
+  }
+
+  // Pour `DialogueRunner`, qui l'arrête sur ce que le récit montre : un pliage,
+  // une énigme, un changement de pièce.
+  arreterLAvanceRapide() {
+    this.avanceRapide = false;
+    this.dialoguePasser.classList.remove('dialogue__passer--actif');
   }
 
   // Pour le bouton « Passer » du tutoriel. Sans ça, la ligne interrompue garde
@@ -291,6 +359,9 @@ export class Overlay {
     return new Promise((resolve) => {
       this.dialogue.hidden = false;
       this.dialogueNext.hidden = true;
+      // Lu ou non, un choix arrête l'avance : il engage le récit.
+      this.arreterLAvanceRapide();
+      this.dialoguePasser.hidden = true;
       this.viderLesChoix();
       // Le menu s'ouvre sur une réplique déjà payée d'un tap : ce qu'il en
       // reste à écrire s'écrirait sous les options, pendant qu'on les lit.
@@ -362,6 +433,9 @@ export class Overlay {
 
   hideDialogue() {
     this.dialogue.hidden = true;
+    this.arreterLAvanceRapide();
+    this.dialoguePasser.hidden = true;
+    this.repliqueLue = false;
     this.viderLesChoix();
     this.dialogue.classList.remove('dialogue--appel');
     // Le texte part avec le reste : un knot qui ouvre directement des choix

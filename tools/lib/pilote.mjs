@@ -157,6 +157,9 @@ export const etat = (page) =>
       fleche:
         !document.querySelector('.dialogue')?.hidden &&
         !document.querySelector('.dialogue__next')?.hidden,
+      passer:
+        !document.querySelector('.dialogue')?.hidden &&
+        document.querySelector('.dialogue__passer')?.hidden === false,
       qui: document.querySelector('.dialogue__nom')?.textContent ?? '',
       choix: [...document.querySelectorAll('.dialogue__choices button')].map((b) => b.textContent),
       enigme: !!document.querySelector('.puzzle'),

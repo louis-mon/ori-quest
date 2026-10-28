@@ -521,6 +521,48 @@ test('interruption', async (page, dire) => ({
   },
 }));
 
+// Ce qui a déjà été lu se passe vite : posé d'un coup, et ⏩ enchaîne jusqu'à
+// l'inédit. Le cas qui compte le plus est celui-ci — une conversation rejouée
+// en entier après un rechargement, transaction oblige : la sauvegarde n'en a
+// rien gardé, la mémoire des répliques lues doit en avoir tout gardé.
+test('deja-lu', async (page, dire) => ({
+  sauvegarde: DEVANT_LA_PORTE,
+  jouer: async () => {
+    await taperZone(page(), 'porte', 'renard');
+    await choisir(page(), 'Parle-moi de la porte');
+    let e = await avancer(page());
+    dire('une réplique inédite s’écrit, sans ⏩', e.defile && !e.passer, e.texte);
+    e = await deroulerDialogue(page());
+    dire(
+      'le renard a tout dit',
+      e.choix.some((c) => /du bois/.test(c)),
+      e.choix.join(' | '),
+    );
+
+    await page().reload({ waitUntil: 'networkidle' });
+    await pause(2500);
+    await taperZone(page(), 'porte', 'renard');
+    await choisir(page(), 'Parle-moi de la porte');
+    e = await etat(page());
+    dire('relue, la réplique se pose d’un coup et propose ⏩', !e.defile && e.passer, e.texte);
+
+    await taperSur(page(), '.dialogue__passer');
+    for (let i = 0; i < 30 && !e.choix.length; i++) {
+      await pause(100);
+      e = await etat(page());
+    }
+    dire(
+      '⏩ passe tout le déjà-lu et s’arrête au menu',
+      e.choix.some((c) => /du bois/.test(c)),
+      e.texte,
+    );
+
+    await choisir(page(), 'du bois');
+    e = await avancer(page());
+    dire('l’inédit d’après s’écrit de nouveau, sans ⏩', e.defile && !e.passer, e.texte);
+  },
+}));
+
 // Le jeu est verrouillé en paysage, et l'UI est calée sur le canvas à la main.
 test('rotation', async (page, dire) => ({
   sauvegarde: DEVANT_LA_PORTE,

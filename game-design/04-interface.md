@@ -302,6 +302,48 @@ Le mouvement réduit (`prefers-reduced-motion`) reprend le clignotement, pose le
 texte d'un coup et laisse le doré posé, sans battement : les trois signes se
 dégradent, aucun ne disparaît.
 
+## Ce qu'on a déjà lu se passe vite
+
+Le jeu fait relire beaucoup : un hotspot qu'on retouche, les mauvaises options
+de la feuille, la conversation rejouée en entier après un rechargement — c'est
+le prix de la transaction —, et les testeurs qui repartent d'un point d'étape.
+
+Les trois protections de la boîte — le texte qui s'écrit, le délai anti-tap, un
+tap par réplique — gardent toutes la même chose : une réplique **inédite**, qui
+ne se rejoue pas si on la saute. Sur une réplique déjà lue, elles coûtent des
+taps et ne gardent rien. D'où deux niveaux.
+
+**1. Une réplique lue se pose d'un coup et répond au premier tap.** Pas
+d'écriture, pas de délai : un tap par réplique au lieu de deux, au rythme du
+doigt. Le délai se décide sur la réplique qui *s'ouvre* : le rebond d'un tap
+vers une réplique inédite reste avalé. **Les choix gardent leur délai, lus ou
+non** — un choix pris par un rebond emmène le récit ailleurs.
+
+**2. ⏩ enchaîne le déjà-lu.** Il paraît au-dessus de la boîte, dans le coin
+droit, sur une réplique lue et sur elle seule. Touché, il fait défiler les
+répliques lues sans tap, le temps de voir passer les locuteurs, et s'arrête de
+lui-même :
+
+- à la première réplique inédite ;
+- à un choix ;
+- à ce que le récit montre — un pliage, une énigme, un changement de pièce.
+
+Un tap pendant le défilement l'arrête sur la réplique à l'écran. C'est la seule
+avance du jeu qui ne coûte pas un tap par réplique, et elle ne passe que ce que
+le joueur a déjà lu.
+
+**Ce qu'on retient n'est pas la partie.** La mémoire des répliques lues est un
+réglage de l'appareil, comme les cocottes : recommencer l'aventure repasse vite
+sur ce qu'on connaît. Elle s'écrit tout de suite, hors de la transaction — rien
+n'y est un état de jeu, et c'est elle qui rend rapide la conversation rejouée
+après un rechargement. Une réplique réécrite redevient inédite : l'erreur
+possible va toujours dans le sens de relire, jamais de passer de l'inédit.
+
+**Ce qui a été écarté : maintenir enfoncé pour avancer.** Personne ne le
+trouverait — c'est le problème que la boîte avait déjà au playtest —, le doigt
+cache le texte qu'on survole, et sur iPhone un appui long ouvre la loupe et la
+sélection.
+
 ## Qui parle : nom + vignette
 
 Les dialogues avec les PNJ demandent de savoir qui parle sans avoir à le
@@ -396,7 +438,7 @@ sans répondant.
 
 | Élément | Statut |
 | --- | --- |
-| Boîte de dialogue + choix | ✅ le texte s'écrit, un tap à côté la rallume, les choix sont au héros |
+| Boîte de dialogue + choix | ✅ le texte s'écrit, un tap à côté la rallume, les choix sont au héros, le déjà-lu se passe vite (⏩) |
 | En-tête de locuteur (nom + vignette) | ✅ implémenté |
 | Marqueur cocotte sur les hotspots | ✅ masqué par défaut, rappelé par une case des options |
 | Légende fugace (nom de l'élément) | ✅ gardée avec le menu de verbes, retirée des sorties |

@@ -3023,3 +3023,8 @@ msgstr "New {nom}"
 #: src/ui/overlay.ts
 msgid "Obtenu : {nom}"
 msgstr "Obtained: {nom}"
+
+#. interface
+#: src/ui/overlay.ts
+msgid "Passer ce qui est déjà lu"
+msgstr "Skip what you've already read"

@@ -326,6 +326,42 @@ body {
   display: none;
 }
 
+/* ⏩, sur une réplique déjà lue seulement. Au-dessus de la boîte et hors de son
+   flux : dedans, elle la ferait grandir d'une réplique lue à une inédite. Le
+   coin droit, celui où la flèche dit déjà « la suite est par ici ». */
+.dialogue__passer {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(242, 236, 225, 0.25);
+  border-radius: 12px;
+  background: var(--dialogue-fond);
+  box-shadow: 0 6px 18px var(--shadow);
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.dialogue__passer[hidden] {
+  display: none;
+}
+
+.dialogue__passer svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+/* En cours : l'accent de ▶, et un tap l'arrête. */
+.dialogue__passer--actif {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
 /* Le clignotement d'avant disait « je suis là » ; la translation dit « ça
    continue par ici ». Vers la DROITE, jamais vers le texte : la flèche est le
    dernier élément de la boîte, elle glisse dans la marge et ne recouvre rien.
