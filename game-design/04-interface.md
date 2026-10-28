@@ -625,7 +625,9 @@ aussi, quand on la touche. Retoucher un animal relance son cri au lieu de le
 doubler.
 
 **Le récit a ses propres bruits** : la hache dans le vieil arbre sonne avec la
-réplique qui le raconte, pas au tap qui l'a demandé.
+réplique qui le raconte, pas au tap qui l'a demandé. **Et un pliage s'entend** :
+le papier froisse au moment où il commence à bouger, et se tait quand il
+s'arrête, à chaque modèle plié.
 
 ## Principe directeur
 

@@ -1,10 +1,12 @@
+import { jouerBruitage } from '../sons/bruitages';
 import type { ApercuOrigami } from '../ui/overlay';
 import { cadrerCommeLApercu } from './apercu';
 import { OrigamiLayer } from './origami-layer';
 import { pliageDe } from './vue';
 
-// Durée du pliage joué par `# origami:`, du papier à plat à la pose du modèle.
-const PLIAGE_MS = 2600;
+// Durée du pliage joué par `# origami:`, du papier à plat à la pose du modèle —
+// la même pour tous, et le froissement s'arrête avec elle.
+export const PLIAGE_MS = 2600;
 
 // La couche 3D du récit, partagée entre le pliage d'un `# origami:` et l'aperçu
 // d'un objet qu'on examine.
@@ -60,6 +62,9 @@ export class CoucheDuRecit {
       await layer.load(nom);
       layer.setFold(0);
       layer.show();
+      // Avec le papier qui bouge, pas au tag : le premier pliage attend encore
+      // three.js et son modèle.
+      jouerBruitage('pliage', PLIAGE_MS / 1000);
       // Au pliage de ce modèle-là, pas à 1 : c'est la pose que le décor et
       // l'inventaire montreront ensuite, et la pose finale du solveur est
       // souvent tout à fait plate.

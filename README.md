@@ -225,6 +225,18 @@ cp "$B/bruitage_chat_mal_lune.mp3" public/assets/sons/bruitage/lune_chat.mp3
 cp "$B/bruitage_arbre_coupe.mp3" public/assets/sons/bruitage/arbre_coupe.mp3
 ```
 
+**Le pliage est coupé**, lui : il arrive avec le silence de sa prise autour, et
+partirait en retard sur le papier qui bouge.
+[`tools/couper-son.mjs`](tools/couper-son.mjs) n'en garde que ce qui se passe
+entre deux instants, en secondes, lus sur la forme du son — à refaire si
+l'artiste le remplace. Il se joue avec chaque `# origami:` et s'arrête avec le
+pliage, quelle que soit sa longueur.
+
+```bash
+node tools/couper-son.mjs "assets-src/son/bruitage /pliage.mp3" \
+  public/assets/sons/bruitage/pliage.mp3 1.6 5.7
+```
+
 Le mélange — le volume de chaque son, la durée d'un cri trop long — se règle à
 l'oreille dans `http://localhost:5173/sons.html`, qui écrit
 `src/sons/sons-reglages.ts`. Un son neuf entre par le catalogue, et `tsc`
@@ -460,6 +472,8 @@ src/
     couper.ts                fendre une pièce le long d'un trait
 tools/
   alleger-ambiance.mjs       ambiance de l'artiste -> MP3 au débit du jeu
+  couper-son.mjs             bruitage de l'artiste -> sa partie utile, en MP3
+  lib/mp3.mjs                lire un son en échantillons, les réécrire en MP3 (partagé)
   bake-origami.mjs           CP -> .origami
   compile-ink.mjs            .ink -> .json, pour chaque langue
   langues.mjs                tient et vérifie les catalogues de traduction

@@ -1,4 +1,5 @@
 import './reglages.css';
+import { PLIAGE_MS } from '../origami/couche-du-recit';
 import { ajusterLAmbiance, jouerLAmbiance } from '../sons/ambiance';
 import { jouerBruitage } from '../sons/bruitages';
 import { AMBIANCES, BRUITAGES, type Ambiance, type Bruitage } from '../sons/catalogue';
@@ -29,6 +30,8 @@ demarrerLeSonAuPremierGeste();
 const jouees = new Set<Ambiance>();
 // La durée de chaque fichier, qui borne le curseur : au bout, le cri est entier.
 const durees = new Map<Bruitage, number>();
+// Ce que le jeu coupe de lui-même : le froissement s'arrête avec le pliage.
+const FINS: Partial<Record<Bruitage, number>> = { pliage: PLIAGE_MS / 1000 };
 
 const sortie = document.getElementById('sortie')!;
 const statut = document.getElementById('statut')!;
@@ -120,7 +123,7 @@ for (const nom of Object.keys(BRUITAGES) as Bruitage[]) {
     return duree === undefined ? undefined : Math.ceil(duree * 10) / 10;
   };
   bruitages.append(
-    tete(nom, () => jouerBruitage(nom)),
+    tete(nom, () => jouerBruitage(nom, FINS[nom])),
     curseur(
       'Volume',
       () => VOLUME,

@@ -17,5 +17,6 @@ export const REGLAGES_SONS: ReglagesSons = {
     chat: { volume: 1 },
     lune_chat: { volume: 1 },
     arbre_coupe: { volume: 1 },
+    pliage: { volume: 1 },
   },
 };

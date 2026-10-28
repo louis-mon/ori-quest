@@ -23,13 +23,16 @@ aChaqueGeste((ctx) => {
   for (const nom of Object.keys(BRUITAGES) as Bruitage[]) void tampon(ctx, nom);
 });
 
-export function jouerBruitage(nom: Bruitage) {
+// `finit`, en secondes : le son est éteint à cet instant au plus tard. C'est ainsi
+// que le froissement s'arrête avec le papier, le pliage passant sa propre durée.
+export function jouerBruitage(nom: Bruitage, finit = Infinity) {
   const ctx = contexteAudio();
   // Sans contexte, aucun geste n'a encore eu lieu : rien ne pourrait jouer.
   if (!ctx || sonCoupe()) return;
   void tampon(ctx, nom).then((decode) => {
     if (!decode) return;
-    const { volume, duree } = reglagesSons().bruitages[nom];
+    const { volume, duree = Infinity } = reglagesSons().bruitages[nom];
+    const coupe = Math.max(0, Math.min(duree, finit - EXTINCTION_S));
     enCours.get(nom)?.stop();
 
     const source = ctx.createBufferSource();
@@ -40,10 +43,10 @@ export function jouerBruitage(nom: Bruitage) {
 
     const debut = ctx.currentTime;
     source.start(debut);
-    if (duree !== undefined && duree < decode.duration) {
-      gain.gain.setValueAtTime(volume, debut + duree);
-      gain.gain.linearRampToValueAtTime(0, debut + duree + EXTINCTION_S);
-      source.stop(debut + duree + EXTINCTION_S);
+    if (coupe < decode.duration) {
+      gain.gain.setValueAtTime(volume, debut + coupe);
+      gain.gain.linearRampToValueAtTime(0, debut + coupe + EXTINCTION_S);
+      source.stop(debut + coupe + EXTINCTION_S);
     }
 
     enCours.set(nom, source);

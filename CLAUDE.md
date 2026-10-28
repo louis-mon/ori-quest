@@ -261,8 +261,11 @@ est presque blanc : une vapeur discrète n'y existe pas.
 `ambiance` — une ou plusieurs, superposées : au ravin, la rivière coule sur celle
 du chapitre —, chaque zone animale son `cri` — dans les données de la zone et pas
 dans un tag ink : à la cuisine, les deux chats partagent leur knot et chacun a sa
-voix. Ce que le récit fait sonner passe, lui, par `# son:` (la hache). Le mélange
-se règle dans `sons.html`, qui écrit `sons-reglages.ts`.
+voix. Ce que le récit fait sonner passe, lui, par `# son:` (la hache), et un
+pliage sonne avec son animation (`CoucheDuRecit.plier`) — au moment où le papier
+bouge, pas au tag, le premier attendant encore three.js — et se tait avec elle,
+`PLIAGE_MS` valant pour tous les modèles. Le mélange se règle
+dans `sons.html`, qui écrit `sons-reglages.ts`.
 
 Quatre pièges. **L'AudioContext naît dans le premier geste**, écouté à la capture
 sur `window` : créé plus tôt, Chromium le signale en console et `npm run qa`

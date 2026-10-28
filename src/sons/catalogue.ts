@@ -12,6 +12,7 @@ export const BRUITAGES = {
   chat: 'assets/sons/bruitage/chat.mp3',
   lune_chat: 'assets/sons/bruitage/lune_chat.mp3',
   arbre_coupe: 'assets/sons/bruitage/arbre_coupe.mp3',
+  pliage: 'assets/sons/bruitage/pliage.mp3',
 } as const;
 
 export type Bruitage = keyof typeof BRUITAGES;
