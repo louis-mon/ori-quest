@@ -558,7 +558,7 @@ quels chapitres ont été compilés.
 npm run build && npm run itch
 ```
 
-La cible est écrite dans `publier-itch.mjs` (`louis-mon/ori-quest`, l'adresse du
+La cible est écrite dans `publier-itch.mjs` (`louis-mon/ori-fable`, l'adresse du
 projet dans son URL) ; un argument ou `ITCH_CIBLE` la remplacent, pour un compte
 de test.
 

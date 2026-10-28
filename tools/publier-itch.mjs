@@ -31,10 +31,10 @@ const DIST = join(ROOT, 'dist');
 const CANAL = 'html5';
 
 // Le projet itch.io de ce dépôt, tel qu'il apparaît dans son URL
-// (https://louis-mon.itch.io/ori-quest). Il n'y en a qu'un : le demander à
+// (https://louis-mon.itch.io/ori-fable). Il n'y en a qu'un : le demander à
 // chaque envoi ne servirait qu'à le taper de travers. Un argument ou `ITCH_CIBLE`
 // le remplacent, pour un compte de test.
-const CIBLE = 'louis-mon/ori-quest';
+const CIBLE = 'louis-mon/ori-fable';
 
 const cible = process.argv[2] ?? process.env.ITCH_CIBLE ?? CIBLE;
 
