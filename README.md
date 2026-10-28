@@ -236,11 +236,15 @@ partie — pont posé, hache en main, bois en poche… Rejouer tout le chapitre 
 vérifier une correction de fin coûte plusieurs minutes et une énigme ; ces
 entrées suppriment ce coût.
 
-Elle est **dans le build publié tant que la page itch.io est en Draft** : ce
-qu'on y montre est un jeu qu'on fait essayer, et un testeur ne retraversera pas
-le chapitre entier pour en atteindre la fin. `ETAPES_LIVREES`
-([`src/game/systems/etapes.ts`](src/game/systems/etapes.ts)) est la ligne à
-repasser à `import.meta.env.DEV` le jour de la publication.
+Elle est toujours là sous `npm run dev`. Le build publié l'embarque aussi, car
+un testeur ne retraversera pas le chapitre entier pour en atteindre la fin, mais
+la **cache au joueur** : elle ne paraît qu'en mode dev. Pour l'ouvrir, enfoncer
+le bouton du menu, glisser sans lâcher jusqu'au coin opposé de l'écran, et lever
+le doigt là ; la pause s'ouvre, « Points d'étape » compris. Le même geste la
+retire. Le mode tient d'un rechargement à l'autre et survit à « Recommencer » :
+c'est la clé `ori-quest.devMode` du `localStorage`, à `true`
+([`src/game/systems/mode-dev.ts`](src/game/systems/mode-dev.ts)). Les outils de
+réglage n'en font pas partie : leurs pages n'existent que sur le serveur de dev.
 
 Le menu ne porte **qu'une entrée par chapitre** ; elle ouvre une fenêtre avec
 les étapes de ce chapitre. Tout mettre à plat noyait les deux entrées qui
@@ -252,11 +256,6 @@ l'état **complet** attendu (scène, drapeaux, inventaire), pas un écart par
 rapport à la précédente. Elles rechargent la page, comme « Recommencer » — le
 récit ink garde ses propres variables dans son instance `Story`, que l'état de
 jeu ne touche pas.
-
-`ETAPES_LIVREES` étant lu à la compilation, ce menu et son module disparaissent
-entièrement du bundle dès qu'il est faux — d'où le test répété dans le
-gestionnaire de clic, sans lequel `etapes` reste référencé et ne peut plus être
-élagué.
 
 Seuls les chapitres que le build embarque sont proposés
 (`chapitresAtteignables()`) : un point d'étape posé dans une scène absente

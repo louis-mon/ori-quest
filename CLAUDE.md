@@ -157,11 +157,16 @@ seule destination : dans un chapitre hors traversée, revenir à sa première pi
 depuis la deuxième est un déplacement interne, et finir la partie là-dessus
 enfermerait le testeur.
 
-**Le menu des points d'étape est livré lui aussi**, tant que la page itch.io est
-en Draft (`ETAPES_LIVREES`, dans `src/game/systems/etapes.ts`) : un testeur ne
-retraverse pas le chapitre pour en atteindre la fin. Il ne propose que les
-chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin avec
-les drapeaux du chapitre suivant levés.
+**Le menu des points d'étape est livré, mais pas au joueur** : un testeur ne
+retraverse pas le chapitre pour en atteindre la fin, et le joueur n'a pas à voir
+un outil de test. Sur le build livré, il ne paraît qu'en **mode dev** — enfoncer
+le bouton du menu, glisser jusqu'au coin opposé du cadre, lâcher
+(`src/ui/geste-du-menu.ts`) ; le même geste le retire. C'est un réglage de
+l'appareil (`ori-quest.devMode`, `src/game/systems/mode-dev.ts`), pas de la
+sauvegarde : recommencer ne le referme pas. Les outils de réglage n'en font pas
+partie — leurs pages n'existent que sur le serveur de dev. Le menu ne propose que
+les chapitres que le build embarque — ailleurs, il déposerait le joueur au ravin
+avec les drapeaux du chapitre suivant levés.
 
 **La narration, elle, ignore quels chapitres ont été compilés** : le knot de fin
 de chapitre se joue en entier, sa dernière réplique comprise, et l'écran prend la

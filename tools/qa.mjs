@@ -35,6 +35,7 @@ import {
   deroulerDialogue,
   etape,
   etat,
+  glisserDepuisLeMenu,
   ouvrir,
   pause,
   pointDe,
@@ -630,6 +631,46 @@ test(
   { livre: true },
 );
 
+// Sur le build livré, les points d'étape n'existent que pour qui a fait le
+// geste du testeur, et le même geste les retire. Le réglage est celui de
+// l'appareil : il survit au rechargement.
+test(
+  'mode-dev',
+  async (page, dire) => ({
+    sauvegarde: DEVANT_LA_PORTE,
+    jouer: async () => {
+      const etapes = page().locator('.ecran [data-action="etapes"]');
+      const drapeau = () => page().evaluate(() => localStorage.getItem('ori-quest.devMode'));
+
+      await taperSur(page(), '.menu__button');
+      dire('le joueur ne voit pas les points d’étape', !(await etapes.isVisible()));
+      await taperSur(page(), '.ecran [data-action="principal"]');
+      await pause(600);
+
+      // Lâché en route, le glisser n'est ni le geste ni un tap.
+      await glisserDepuisLeMenu(page(), [0.5, 0.5]);
+      dire('un glisser lâché au milieu n’ouvre rien', (await etat(page())).ecran === null);
+
+      await glisserDepuisLeMenu(page());
+      dire('le geste ouvre la pause', (await etat(page())).ecran === 'pause');
+      dire('les points d’étape y sont', await etapes.isVisible());
+      dire('le drapeau est enregistré', (await drapeau()) === 'true');
+
+      await page().reload({ waitUntil: 'networkidle' });
+      await pause(2000);
+      await taperSur(page(), '.menu__button');
+      dire('ils restent après un rechargement', await etapes.isVisible());
+      await taperSur(page(), '.ecran [data-action="principal"]');
+      await pause(600);
+
+      await glisserDepuisLeMenu(page());
+      dire('refait, le geste les retire', !(await etapes.isVisible()));
+      dire('et efface le drapeau', (await drapeau()) === null);
+    },
+  }),
+  { livre: true },
+);
+
 // Ce que le build embarque, et jusqu'où il laisse aller : les trois chapitres
 // sont dans le bundle, le menu mène à chacun, et la porte du premier doit ouvrir
 // le village — celle du deuxième, la salle du trône (essai `chapitre-2`).
@@ -638,8 +679,7 @@ test(
   async (page, dire) => ({
     sauvegarde: BOIS_EN_POCHE,
     jouer: async () => {
-      await page().locator('.menu__button').click();
-      await pause(600);
+      await glisserDepuisLeMenu(page());
       await page().locator('.ecran [data-action="etapes"]').click();
       await pause(300);
       const chapitres = await page().locator('.menu__liste-entrees button').count();
@@ -891,11 +931,12 @@ test('credits', async (page, dire) => ({
 }));
 
 // En cours de partie, le menu ouvre les crédits par-dessus la pause, et « Fermer »
-// y ramène. Le point d'étape « Crédits » rouvre le jeu fini, sur eux.
+// y ramène. Le point d'étape « Crédits » rouvre le jeu fini, sur eux — d'où la
+// pause ouverte par le geste du testeur, sans lequel le build livré n'en a pas.
 test('credits-menu', async (page, dire) => ({
   sauvegarde: DEVANT_LA_PORTE,
   jouer: async () => {
-    await taperSur(page(), '.menu__button');
+    await glisserDepuisLeMenu(page());
     await taperSur(page(), '.ecran [data-action="credits"]');
     const devant = await page().evaluate(() => {
       const r = document.querySelector('.credits').getBoundingClientRect();

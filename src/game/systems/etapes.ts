@@ -1,4 +1,5 @@
 import { estLivree } from '../chapitres';
+import { modeDevActif } from './mode-dev';
 import { gameState } from './state';
 import { t } from '../../langues/traduire';
 
@@ -20,12 +21,13 @@ export interface Chapitre {
   etapes: Etape[];
 }
 
-// Livrés tant que la page itch.io est en Draft : ce qu'on y montre est un jeu
-// qu'on fait essayer, et personne ne retraverse une heure de récit pour vérifier
-// la fin. **Une ligne à repasser à `import.meta.env.DEV` le jour de la
-// publication** — la valeur étant lue à la compilation, le menu et cette liste
-// sortent alors entièrement du bundle.
-export const ETAPES_LIVREES = true;
+// Toujours en développement ; sur le build livré, en mode dev seulement :
+// personne ne retraverse une heure de récit pour vérifier la fin, mais le joueur
+// n'a pas à voir un outil de test. Le test se fait donc à l'exécution, et le
+// module reste dans le bundle.
+export function etapesProposees(): boolean {
+  return import.meta.env.DEV || modeDevActif();
+}
 
 // Un chapitre par entrée de menu, ses étapes dans une fenêtre à part : à huit
 // étapes, le menu principal devenait une liste à faire défiler où plein écran et

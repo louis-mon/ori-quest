@@ -1,11 +1,13 @@
 import { gameState } from '../game/systems/state';
-import { allerA, chapitresAtteignables, ETAPES_LIVREES } from '../game/systems/etapes';
+import { allerA, chapitresAtteignables, etapesProposees } from '../game/systems/etapes';
 import { cocottesMontrees, montrerLesCocottes } from '../game/systems/cocottes-montrees';
+import { basculerLeModeDev } from '../game/systems/mode-dev';
 import type { Rideau } from '../game/rideau';
 import { listerOutils, ouvrirOutil } from '../dev/outils';
 import { choisirLaLangue, langue, LANGUES, nomDeLaLangue } from '../langues/langue';
 import { t } from '../langues/traduire';
 import { ouvrirLesCredits } from './credits';
+import { suivreLeBoutonDuMenu } from './geste-du-menu';
 import {
   basculerLePleinEcran,
   enPleinEcran,
@@ -50,15 +52,9 @@ function languesHtml(): string {
   ).join('');
 }
 
-// `ETAPES_LIVREES` est une constante lue à la compilation : à `false`, le bouton
-// et avec lui le module `etapes` disparaissent du bundle.
-function etapesHtml(): string {
-  if (!ETAPES_LIVREES) return '';
-  return `<button class="ecran__option" data-action="etapes">${t('Points d’étape')}</button>`;
-}
-
-// Même élagage, sur `import.meta.env.DEV` : hors développement les pages de
-// réglage n'existent pas, `vite build` ne connaissant qu'index.html.
+// Sur `import.meta.env.DEV` seul, le mode dev n'y change rien : hors
+// développement les pages de réglage n'existent pas, `vite build` ne
+// connaissant qu'index.html.
 function outilsHtml(): string {
   if (!import.meta.env.DEV) return '';
   return `<button class="ecran__option" data-action="outils">Outils de réglage</button>`;
@@ -89,6 +85,7 @@ export class Menu {
   private recommencer: HTMLButtonElement;
   private pleinEcran: HTMLButtonElement;
   private cocottes: HTMLButtonElement;
+  private etapes: HTMLButtonElement;
   private confirm: HTMLElement;
   // Les points d'étape, ou les outils de développement.
   private liste: HTMLElement;
@@ -102,7 +99,7 @@ export class Menu {
     const el = document.createElement('div');
     el.className = 'menu';
     el.innerHTML = `
-      <button class="menu__button" data-action="pause" aria-label="${t('Menu')}" aria-haspopup="dialog">
+      <button class="menu__button" aria-label="${t('Menu')}" aria-haspopup="dialog">
         <span></span><span></span><span></span>
       </button>
       <div class="ecran" hidden role="dialog" aria-modal="true" aria-labelledby="ecran-titre">
@@ -134,7 +131,7 @@ export class Menu {
               aria-pressed="${cocottesMontrees()}">${t('Montrer les zones cliquables')}</button>
             <button class="ecran__option" data-action="fullscreen">${t('Plein écran')}</button>
             <button class="ecran__option" data-action="credits">${t('Crédits')}</button>
-            ${etapesHtml()}
+            <button class="ecran__option" data-action="etapes" hidden>${t('Points d’étape')}</button>
             ${outilsHtml()}
           </div>
         </div>
@@ -172,10 +169,21 @@ export class Menu {
     this.recommencer = el.querySelector('[data-action="reset"]')!;
     this.pleinEcran = el.querySelector('[data-action="fullscreen"]')!;
     this.cocottes = el.querySelector('[data-action="cocottes"]')!;
+    this.etapes = el.querySelector('[data-action="etapes"]')!;
     this.confirm = el.querySelector('.menu__confirm')!;
     this.liste = el.querySelector('.menu__liste')!;
 
     if (!pleinEcranPossible()) this.pleinEcran.hidden = true;
+
+    // Le geste du testeur ouvre la pause lui aussi : les points d'étape y
+    // paraissent ou en partent, et c'est ce qui dit qu'il a été reconnu.
+    suivreLeBoutonDuMenu(this.bouton, root, {
+      tap: () => this.ouvrir('pause'),
+      testeur: () => {
+        basculerLeModeDev();
+        this.ouvrir('pause');
+      },
+    });
 
     // L'écran couvre tout le cadre : un tap qui ne tombe sur aucun bouton n'a
     // rien d'autre à atteindre, et ne referme rien.
@@ -204,9 +212,6 @@ export class Menu {
 
   private async onAction(action?: string) {
     switch (action) {
-      case 'pause':
-        this.ouvrir('pause');
-        break;
       case 'principal':
         this.fermer();
         if (this.mode === 'accueil') this.options.rideau.lever();
@@ -234,13 +239,12 @@ export class Menu {
         this.liste.hidden = true;
         break;
       case 'etapes':
-        // Le test ici AUSSI, et pas seulement autour du HTML : sans lui,
-        // `etapes` reste référencé depuis ce gestionnaire et part dans le bundle
-        // même quand `ETAPES_LIVREES` est faux.
-        if (ETAPES_LIVREES) this.ouvrirChapitres();
+        this.ouvrirChapitres();
         break;
       case 'outils':
-        // La même chose pour les pages de réglage.
+        // Le test ici AUSSI, et pas seulement autour du HTML : sans lui, les
+        // pages de réglage restent référencées depuis ce gestionnaire et partent
+        // dans le bundle.
         if (import.meta.env.DEV) {
           const outils = await listerOutils().catch((err) => {
             console.warn('[menu] pages de réglage introuvables', err);
@@ -263,6 +267,7 @@ export class Menu {
     this.principal.textContent = mode === 'accueil' ? t('Commencer à plier') : t('Reprendre');
     // Une partie neuve n'a rien à effacer.
     this.recommencer.hidden = mode === 'accueil';
+    this.etapes.hidden = !etapesProposees();
     this.bouton.hidden = true;
     this.ecran.hidden = false;
     // L'accueil est là d'emblée : en fondu, il laisserait voir la pièce nette
@@ -281,7 +286,6 @@ export class Menu {
   }
 
   private ouvrirChapitres() {
-    if (!ETAPES_LIVREES) return;
     this.ouvrirListe(
       t('Points d’étape'),
       chapitresAtteignables().map((chapitre) => ({

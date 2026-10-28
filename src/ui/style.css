@@ -668,6 +668,9 @@ body {
   border-radius: 10px;
   background: rgba(26, 23, 20, 0.7);
   cursor: pointer;
+  /* Le geste du testeur part d'ici en glissant : sans ça le navigateur le prend
+     pour un défilement et l'annule (`pointercancel`). */
+  touch-action: none;
 }
 
 .menu__button span {

@@ -202,6 +202,21 @@ export async function taperSur(page, selecteur) {
   await pause(250);
 }
 
+// Enfoncer le bouton du menu et glisser jusqu'à `[fx, fy]`, en part du cadre de
+// l'interface. Par défaut le coin opposé : le geste du testeur, qui bascule le
+// mode dev et ouvre la pause.
+export async function glisserDepuisLeMenu(page, [fx, fy] = [0.1, 0.9]) {
+  const bouton = await page.locator('.menu__button').boundingBox();
+  const cadre = await page.locator('#ui').boundingBox();
+  await pause(delaiTap);
+  compteur.taps++;
+  await page.mouse.move(bouton.x + bouton.width / 2, bouton.y + bouton.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(cadre.x + fx * cadre.width, cadre.y + fy * cadre.height, { steps: 12 });
+  await page.mouse.up();
+  await pause(600);
+}
+
 // Au doigt plutôt qu'à la souris : le navigateur rejoue alors le tap en souris,
 // après coup, sur ce qui se trouve sous le doigt — et c'est ce qu'un clic ne
 // fait jamais. Demande un contexte ouvert avec `tactile`.

@@ -521,9 +521,11 @@ seul, survit à un nouveau départ ; le nôtre, ailleurs, revient au premier tap
 s'efface sous eux une fois qu'ils sont posés : ses boutons, même floutés, se
 lisaient à travers le texte. « Fermer », à la place du bouton du menu, y ramène.
 
-**Points d'étape**, tant que la page itch.io est en Draft : les chapitres du
-build, puis leurs étapes. Un outil de testeur, pas une option du joueur. Le
-dernier, « Crédits », rouvre la partie finie, sur eux.
+**Points d'étape** : les chapitres du build, puis leurs étapes. Un outil de
+testeur, pas une option du joueur — sur le build livré, il ne paraît qu'en mode
+dev, qu'ouvre et referme un geste que personne ne fait par hasard : enfoncer le
+bouton du menu, glisser jusqu'au coin opposé, lâcher. Le dernier, « Crédits »,
+rouvre la partie finie, sur eux.
 
 ### Le flou a un prix
 
