@@ -313,14 +313,38 @@ const dansLePolygone = (points, x, y) => {
 
 // Un point réellement sur le papier : le détourage rend le vide de la boîte
 // traversant, donc le centre de la boîte n'attrape pas toujours la pièce.
+//
+// Une grille, et pas une suite de points : celle d'avant tirait `k·0,618` et
+// `k·0,382`, dont la somme vaut toujours 1 — les 400 essais tombaient sur une
+// même diagonale de la boîte, et manquaient l'éclat en biais de l'os. Le point
+// retenu est le plus éloigné des arêtes : le doigt ne tombe pas sur une voisine.
 function prise(points) {
   const b = boiteDe(points);
-  for (let k = 0; k < 400; k++) {
-    const x = b.x + b.w * (0.15 + 0.7 * ((k * 0.618) % 1));
-    const y = b.y + b.h * (0.15 + 0.7 * ((k * 0.382) % 1));
-    if (dansLePolygone(points, x, y)) return [x, y];
+  const N = 24;
+  let meilleur = [b.x + b.w / 2, b.y + b.h / 2];
+  let marge = -1;
+  for (let i = 1; i < N; i++) {
+    for (let j = 1; j < N; j++) {
+      const x = b.x + (b.w * i) / N;
+      const y = b.y + (b.h * j) / N;
+      if (!dansLePolygone(points, x, y)) continue;
+      const d = distanceAuBord(points, x, y);
+      if (d > marge) [meilleur, marge] = [[x, y], d];
+    }
   }
-  return [b.x + b.w / 2, b.y + b.h / 2];
+  return meilleur;
+}
+
+function distanceAuBord(points, x, y) {
+  let min = Infinity;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const [ax, ay] = points[j];
+    const [bx, by] = points[i];
+    const l2 = (bx - ax) ** 2 + (by - ay) ** 2;
+    const t = l2 ? Math.max(0, Math.min(1, ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / l2)) : 0;
+    min = Math.min(min, Math.hypot(x - (ax + t * (bx - ax)), y - (ay + t * (by - ay))));
+  }
+  return min;
 }
 
 // Résout l'énigme au vrai glisser-déposer, comme un joueur : c'est le seul
