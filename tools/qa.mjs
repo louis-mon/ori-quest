@@ -675,6 +675,25 @@ test('martelage', async (page, dire) => ({
   },
 }));
 
+// La pièce est quittée dès le tap sur la flèche, pas à la fin du fondu : le
+// renard touché pendant ces 260 ms ouvrait son menu, qui se jouait au ravin.
+// Les deux points sont calculés d'avance — mesurer le cadre entre les deux
+// clics suffit à laisser le fondu finir, et le second tap tombe alors dans la
+// pièce suivante.
+test('fondu', async (page, dire) => ({
+  sauvegarde: DEVANT_LA_PORTE,
+  jouer: async () => {
+    const sortie = await coin(page(), pointDe('porte', 'pont'));
+    const renard = await coin(page(), pointDe('porte', 'renard'));
+    await page().mouse.click(...sortie);
+    await page().mouse.click(...renard);
+    await pause(1500);
+    const e = await etat(page());
+    dire('le fondu de sortie ne laisse rien ouvrir', !e.boite, e.choix.join(' / '));
+    dire('et la sortie a eu lieu', e.piece === 'pont', `room=${e.piece}`);
+  },
+}));
+
 // Une sauvegarde née d'un build de développement nomme une pièce que celui-ci
 // n'embarque pas : elle doit retomber sur une scène jouable, pas sur du noir.
 test(

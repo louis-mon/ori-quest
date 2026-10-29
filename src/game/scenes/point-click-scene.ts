@@ -109,6 +109,11 @@ export abstract class PointClickScene extends Phaser.Scene {
   private retires = true;
   private retenue = 0;
 
+  // Levé au tap sur une flèche, le temps du fondu : la pièce est déjà quittée.
+  // Un tap sur un personnage pendant ces 260 ms ouvrait son dialogue, qui se
+  // jouait ensuite par-dessus la pièce suivante — le menu du renard au ravin.
+  private sortie = false;
+
   // Ce que la narration déclenche une fois : voir `auLeverDe()`.
   private declencheurs: { flag: string; jouer: () => void; fait: boolean }[] = [];
 
@@ -141,6 +146,7 @@ export abstract class PointClickScene extends Phaser.Scene {
     // étaient déjà en plein battement.
     this.retires = true;
     this.retenue = FONDU;
+    this.sortie = false;
     this.drawScenery();
     this.monterZones();
 
@@ -548,6 +554,7 @@ export abstract class PointClickScene extends Phaser.Scene {
     // où le moteur de narration travaille boîte fermée — une animation de
     // pliage, un changement de scène — sans qu'aucune réplique n'attende de tap.
     if (dialogue.isRunning || overlay.occupeLeJoueur) return false;
+    if (this.sortie) return false;
     // Un déplacement ordinaire laisse la scène jouable ; seul celui qui a
     // demandé le silence compte ici.
     if (this.attentes.size > 0) return false;
@@ -559,6 +566,7 @@ export abstract class PointClickScene extends Phaser.Scene {
   // marqueurs déjà en plein battement, et le joueur ne sait pas s'il a changé de
   // pièce ou si la sienne a changé.
   protected quitter(room: string) {
+    this.sortie = true;
     const cam = this.cameras.main;
     cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.services.goto(room));
     cam.fadeOut(FONDU, 0, 0, 0);
