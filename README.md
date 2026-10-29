@@ -69,8 +69,7 @@ Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 d'entrée du serveur de dev défini dans `vite.config.ts` — qui n'existe qu'en
 développement et ne garde que des nombres bornés. La couverture écrit aussi son
 image, `itch/couverture.png`, refusée si ce n'est pas un PNG aux dimensions
-d'itch.io — hors dépôt : seuls ses réglages sont versionnés, l'image s'en
-refait en enregistrant la page.
+d'itch.io.
 
 ### Traduire
 
