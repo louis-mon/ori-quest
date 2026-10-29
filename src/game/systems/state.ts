@@ -2,6 +2,8 @@
 // ce qui a été lu. C'est tout ce dont un point & click a besoin, et ça tient en
 // une ligne de localStorage.
 
+import { OBJETS } from './objets';
+
 const SAVE_KEY = 'ori-quest.save.v1';
 
 // Scène de départ, et point de retour après une remise à zéro.
@@ -159,13 +161,17 @@ class GameState {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return false;
-      const parsed = JSON.parse(raw) as SaveData;
+      const parsed = JSON.parse(raw) as Partial<Record<keyof SaveData, unknown>> | null;
       if (!parsed || typeof parsed.room !== 'string') return false;
+      // Rien n'est pris tel quel. Une mise à jour publiée sur itch.io trouvera
+      // des sauvegardes de la version d'avant : un objet renommé y deviendrait
+      // une case sans image ni nom, et un inventaire qui n'est pas une liste se
+      // lisait lettre par lettre — une case « h », une « a »…
       this.data = {
         room: parsed.room,
-        flags: parsed.flags ?? {},
-        inventory: parsed.inventory ?? [],
-        lues: Array.isArray(parsed.lues) ? parsed.lues : [],
+        flags: drapeauxDe(parsed.flags),
+        inventory: listeDe(parsed.inventory).filter((id) => id in OBJETS),
+        lues: listeDe(parsed.lues),
       };
       this.emit();
       return true;
@@ -185,6 +191,17 @@ class GameState {
     this.save();
     this.emit();
   }
+}
+
+function drapeauxDe(valeur: unknown): Record<string, boolean> {
+  const drapeaux: Record<string, boolean> = {};
+  if (!valeur || typeof valeur !== 'object' || Array.isArray(valeur)) return drapeaux;
+  for (const [nom, leve] of Object.entries(valeur)) if (leve === true) drapeaux[nom] = true;
+  return drapeaux;
+}
+
+function listeDe(valeur: unknown): string[] {
+  return Array.isArray(valeur) ? valeur.filter((x): x is string => typeof x === 'string') : [];
 }
 
 export const gameState = new GameState();
