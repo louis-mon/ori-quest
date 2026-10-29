@@ -517,6 +517,9 @@ export async function runCreasePuzzle(
     // par erreur : sûr à gauche, irréversible à droite.
     quit.addEventListener('pointerup', (e) => {
       e.stopPropagation();
+      // Résolue, l'énigme attend encore 600 ms de se refermer : un abandon
+      // confirmé dans l'intervalle passait avant la victoire.
+      if (check.disabled) return;
       confirm.hidden = false;
     });
     confirm.addEventListener('pointerup', (e) => {
