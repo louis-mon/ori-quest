@@ -1,3 +1,4 @@
+import { signalerUnEchec } from '../chargement/telecharger';
 import { jouerBruitage } from '../sons/bruitages';
 import type { ApercuOrigami } from '../ui/overlay';
 import { cadrerCommeLApercu } from './apercu';
@@ -70,8 +71,10 @@ export class CoucheDuRecit {
       // souvent tout à fait plate.
       await layer.playTo(pliageDe(nom), PLIAGE_MS);
     } catch (err) {
-      // Une animation manquante ne doit jamais bloquer la progression.
-      console.error(`[origami] lecture de "${nom}" impossible`, err);
+      // Une animation manquante ne doit jamais bloquer la progression. Mais le
+      // joueur n'a pas vu ce que la réplique raconte : il se voit proposer de
+      // recharger.
+      signalerUnEchec(new Error(`lecture de "${nom}" impossible : ${String(err)}`));
       this.ranger();
     }
   };

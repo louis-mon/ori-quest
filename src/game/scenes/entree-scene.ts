@@ -57,12 +57,12 @@ export class EntreeScene extends PointClickScene {
     super({ key: 'entree', active: false });
   }
 
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadCiel(this);
-    preloadFond(this, PLAN.fond);
-    preloadSprite(this, CHAT, 'assets/decor/chat.png');
-    preloadSprite(this, DIPLO, 'assets/decor/diplodocus.png');
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadCiel(cible);
+    preloadFond(cible, PLAN.fond);
+    preloadSprite(cible, CHAT, 'assets/decor/chat.png');
+    preloadSprite(cible, DIPLO, 'assets/decor/diplodocus.png');
   }
 
   protected hotspots(): HotspotDef[] {

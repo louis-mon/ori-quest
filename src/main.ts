@@ -16,9 +16,12 @@ import { demarrerLeSonAuPremierGeste } from './sons/contexte';
 import { suivreLeCadre } from './ui/cadre';
 import { figerLesCredits } from './ui/credits';
 import { isolerLInterface } from './ui/isolation';
+import { EcranDeChargement } from './ui/chargement';
 import { Menu } from './ui/menu';
 import { Overlay } from './ui/overlay';
 import { garderLePleinEcranAuRechargement } from './ui/plein-ecran';
+import { retirerLePrechargement } from './ui/prechargement';
+import { direQueWebGLManque, webglDisponible } from './ui/sans-webgl';
 
 // Rétablit requestAnimationFrame quand la page est masquée (volet de preview).
 // Doit s'installer avant que Phaser ne capture la fonction native.
@@ -32,6 +35,8 @@ traduireLaPage();
 const uiRoot = document.getElementById('ui')!;
 isolerLInterface(uiRoot);
 const overlay = new Overlay(uiRoot);
+const chargement = new EcranDeChargement(uiRoot);
+if (!webglDisponible()) direQueWebGLManque(uiRoot);
 
 const game = creerLeMoteur();
 const syncStage = suivreLeCadre(game, document.getElementById('stage')!);
@@ -47,15 +52,17 @@ const navigation: Navigation = new Navigation(game, uiRoot, () => ({
   overlay,
   dialogue,
   rideau,
+  chargement,
 }));
 const dialogue: DialogueRunner = new DialogueRunner(
   recitDansLaLangue(),
   overlay,
-  effetsDuRecit(uiRoot, overlay, couche, navigation, () => couvrirLeJeu(game)),
+  effetsDuRecit(uiRoot, overlay, chargement, couche, navigation, () => couvrirLeJeu(game)),
 );
 
 const menu = new Menu(uiRoot, {
   rideau,
+  chargement,
   onLayoutChange: syncStage,
   onGel: (gele) => {
     figerLeJeu(game, gele);
@@ -64,6 +71,7 @@ const menu = new Menu(uiRoot, {
 });
 
 game.events.once(Phaser.Core.Events.READY, () => {
+  retirerLePrechargement();
   gameState.load();
   if (!gameState.commencee) menu.accueillir();
   navigation.demarrer();

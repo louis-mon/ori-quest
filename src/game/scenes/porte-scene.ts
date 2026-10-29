@@ -38,11 +38,11 @@ export class PorteScene extends PointClickScene {
     super({ key: 'porte', active: false });
   }
 
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadSprite(this, RENARD, 'assets/decor/renard.png');
-    preloadCiel(this);
-    preloadFond(this, PLAN.fond);
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadSprite(cible, RENARD, 'assets/decor/renard.png');
+    preloadCiel(cible);
+    preloadFond(cible, PLAN.fond);
   }
 
   protected hotspots(): HotspotDef[] {

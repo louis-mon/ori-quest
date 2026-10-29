@@ -3,6 +3,7 @@ import { allerA, chapitresAtteignables, etapesProposees } from '../game/systems/
 import { cocottesMontrees, montrerLesCocottes } from '../game/systems/cocottes-montrees';
 import { basculerLeModeDev } from '../game/systems/mode-dev';
 import type { Rideau } from '../game/rideau';
+import type { EcranDeChargement } from './chargement';
 import { listerOutils, ouvrirOutil } from '../dev/outils';
 import { choisirLaLangue, langue, LANGUES, nomDeLaLangue } from '../langues/langue';
 import { t } from '../langues/traduire';
@@ -79,6 +80,8 @@ interface Entree {
 export interface MenuOptions {
   // Baissé par `accueillir()`, levé par « Commencer à plier ».
   rideau: Rideau;
+  // L'accueil couvre l'écran de chargement : son bouton en reprend la jauge.
+  chargement: EcranDeChargement;
   // Appelé après une entrée ou une sortie de plein écran.
   onLayoutChange: () => void;
   // Appelé quand la pause commence et quand elle finit. Le menu reste
@@ -228,6 +231,9 @@ export class Menu {
   private async onAction(action?: string) {
     switch (action) {
       case 'principal':
+        // L'accueil attend sa pièce : levé plus tôt, le rideau découvrait un
+        // écran noir, vingt secondes durant sur un téléphone en 3G.
+        if (this.principal.disabled) return;
         this.fermer();
         if (this.mode === 'accueil') this.options.rideau.lever();
         break;
@@ -284,6 +290,7 @@ export class Menu {
     this.ecran.dataset.mode = mode;
     this.nom.textContent = mode === 'accueil' ? NOM_DU_JEU : t('Pause');
     this.principal.textContent = mode === 'accueil' ? t('Commencer à plier') : t('Reprendre');
+    if (mode === 'accueil' && !this.options.rideau.piecePrete) this.attendreLaPiece();
     // Une partie neuve n'a rien à effacer.
     this.recommencer.hidden = mode === 'accueil';
     this.etapes.hidden = !etapesProposees();
@@ -295,6 +302,21 @@ export class Menu {
     this.ecran.classList.add('ecran--visible');
     // À l'accueil, la pièce vit derrière l'écran ; en pause, elle s'arrête.
     if (mode === 'pause') this.options.onGel(true);
+  }
+
+  private attendreLaPiece() {
+    this.principal.disabled = true;
+    const libelle = (progression: number) => {
+      if (this.options.rideau.piecePrete) return;
+      this.principal.textContent = t('Chargement… {pourcent} %', {
+        pourcent: String(Math.round(progression * 100)),
+      });
+    };
+    this.options.chargement.suivre(libelle);
+    void this.options.rideau.pret.then(() => {
+      this.principal.disabled = false;
+      if (this.mode === 'accueil') this.principal.textContent = t('Commencer à plier');
+    });
   }
 
   private fermer() {

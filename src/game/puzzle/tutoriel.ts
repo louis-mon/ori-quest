@@ -18,6 +18,7 @@
 import type { Overlay } from '../../ui/overlay';
 import { OrigamiLayer } from '../../origami/origami-layer';
 import { papierTrace, type PapierTrace, type TracePli } from '../../origami/papier';
+import { chargerThree } from '../../origami/three';
 import { pliageDe } from '../../origami/vue';
 import { t } from '../../langues/traduire';
 import { personnage } from '../systems/personnages';
@@ -376,7 +377,7 @@ const EFFETS: {
     // Une démonstration qui ne charge pas ne doit pas emporter le tutoriel avec
     // elle : les répliques, elles, restent lisibles.
     try {
-      const THREE = await scene.jusqua(import('three'));
+      const THREE = await scene.jusqua(chargerThree());
       const { canvas, couche } = await scene.jusqua(coucheDemo());
       scene.el.appendChild(canvas);
       // La toile vient de rentrer dans le document : hors de lui elle se mesure

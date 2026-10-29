@@ -52,14 +52,14 @@ export class CuisineScene extends PointClickScene {
     super({ key: 'cuisine', active: false });
   }
 
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadFond(this, PLAN.fond);
-    preloadSprite(this, ELEPHANT, 'assets/decor/elephant_humain.png');
-    preloadSprite(this, CHAT, 'assets/decor/chat.png');
-    preloadSprite(this, ASSIETTE, 'assets/decor/assiette.png');
-    preloadSprite(this, SQUELETTE, 'assets/decor/squelette_poisson.png');
-    preloadLuneChat(this);
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadFond(cible, PLAN.fond);
+    preloadSprite(cible, ELEPHANT, 'assets/decor/elephant_humain.png');
+    preloadSprite(cible, CHAT, 'assets/decor/chat.png');
+    preloadSprite(cible, ASSIETTE, 'assets/decor/assiette.png');
+    preloadSprite(cible, SQUELETTE, 'assets/decor/squelette_poisson.png');
+    preloadLuneChat(cible);
   }
 
   private chatsATable(): boolean {

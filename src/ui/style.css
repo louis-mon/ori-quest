@@ -875,6 +875,15 @@ body {
   color: var(--paper);
 }
 
+/* La première pièce charge encore : le bouton en dit l'avancée, et sa largeur
+   ne saute pas d'un pourcentage à l'autre. */
+.ecran__principal:disabled {
+  background: rgba(242, 236, 225, 0.7);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  cursor: progress;
+}
+
 /* Un bouton à part entière, en retrait du principal : sombre, plus petit, et
    assez loin dessous pour ne pas en être la légende. */
 .ecran__recommencer {
@@ -1161,6 +1170,146 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .fin {
     transition-duration: 1ms;
+  }
+}
+
+/* ---------- Chargement d'une pièce ---------- */
+
+/* Sous l'énigme (4) et tout ce qui parle : le chargement couvre le canvas, rien
+   d'autre. Le bouton du menu (7) reste au-dessus, et l'inventaire dessous,
+   l'écran étant opaque — c'est le noir du canvas, qui n'a encore rien peint. */
+.chargement {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(18px * var(--ui-scale));
+  padding: 16px;
+  background: #100e0c;
+  text-align: center;
+}
+
+.chargement[hidden],
+.chargement__bouton[hidden] {
+  display: none;
+}
+
+/* Un échec en pleine partie : la pièce reste visible et jouable. Au-dessus de
+   la boîte de dialogue, puisqu'il arrive pendant un pliage du récit. */
+.chargement--bandeau {
+  inset: calc(12px * var(--ui-scale)) 0 auto;
+  z-index: 8;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: calc(12px * var(--ui-scale));
+  width: fit-content;
+  max-width: calc(100% - 140px);
+  margin: 0 auto;
+  padding: calc(8px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border-radius: 12px;
+  background: var(--dialogue-fond);
+}
+
+/* Un échec pendant le chargement couvre aussi l'accueil, qui attend la même
+   pièce : son bouton ne dirait que « Chargement… » pour toujours. */
+.chargement--echec {
+  z-index: 9;
+}
+
+/* Plus rien ne charge : une feuille qui se plie encore laisserait attendre. */
+.chargement--sans-jauge .chargement__jauge,
+.chargement--echec .chargement__feuille,
+.chargement--echec .chargement__jauge,
+.chargement--bandeau .chargement__feuille,
+.chargement--bandeau .chargement__jauge {
+  display: none;
+}
+
+/* Une feuille dont un coin se replie et se rouvre : ce qui bouge dit que le jeu
+   travaille, et c'est du papier. */
+.chargement__feuille {
+  position: relative;
+  width: calc(44px * var(--ui-scale));
+  height: calc(44px * var(--ui-scale));
+  background: var(--paper);
+  perspective: 200px;
+}
+
+.chargement__feuille span {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-clair);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  transform-origin: 50% 50%;
+  animation: chargement-pli 1.6s ease-in-out infinite;
+}
+
+@keyframes chargement-pli {
+  0%,
+  15% {
+    transform: rotate3d(1, -1, 0, 0deg);
+  }
+  50%,
+  65% {
+    transform: rotate3d(1, -1, 0, 180deg);
+  }
+  100% {
+    transform: rotate3d(1, -1, 0, 360deg);
+  }
+}
+
+.chargement__jauge {
+  width: calc(180px * var(--ui-scale));
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(242, 236, 225, 0.15);
+  overflow: hidden;
+}
+
+.chargement__barre {
+  height: 100%;
+  background: var(--paper);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+
+.chargement__message {
+  max-width: calc(420px * var(--ui-scale));
+  margin: 0;
+  font-size: calc(15px * var(--ui-scale));
+  line-height: 1.5;
+}
+
+.chargement__message:empty {
+  display: none;
+}
+
+.chargement__bouton {
+  min-height: 44px;
+  min-width: 140px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: calc(15px * var(--ui-scale));
+  cursor: pointer;
+}
+
+.chargement__bouton:active {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chargement__feuille span {
+    animation: none;
   }
 }
 

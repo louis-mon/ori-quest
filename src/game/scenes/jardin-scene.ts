@@ -47,12 +47,12 @@ export class JardinScene extends PointClickScene {
     super({ key: 'jardin', active: false });
   }
 
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadCiel(this);
-    preloadFond(this, PLAN.fond);
-    preloadSprite(this, WYVERN, 'assets/decor/hydre.png');
-    preloadSprite(this, CARPE, 'assets/decor/carpe.png');
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadCiel(cible);
+    preloadFond(cible, PLAN.fond);
+    preloadSprite(cible, WYVERN, 'assets/decor/hydre.png');
+    preloadSprite(cible, CARPE, 'assets/decor/carpe.png');
   }
 
   protected hotspots(): HotspotDef[] {

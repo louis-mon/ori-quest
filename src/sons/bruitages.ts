@@ -1,3 +1,4 @@
+import { telecharger } from '../chargement/telecharger';
 import { BRUITAGES, type Bruitage } from './catalogue';
 import { aChaqueGeste, contexteAudio } from './contexte';
 import { reglagesSons } from './reglages';
@@ -61,14 +62,15 @@ export function jouerBruitage(nom: Bruitage, finit = Infinity) {
 function tampon(ctx: AudioContext, nom: Bruitage): Promise<AudioBuffer | null> {
   let promesse = tampons.get(nom);
   if (!promesse) {
-    promesse = fetch(BRUITAGES[nom])
-      .then((reponse) => {
-        if (!reponse.ok) throw new Error(`${reponse.status}`);
-        return reponse.arrayBuffer();
-      })
+    // Le premier tap tombe souvent pendant que la première pièce charge : les
+    // cris, 600 ko, passaient devant elle.
+    promesse = telecharger(BRUITAGES[nom], 'low')
+      .then((reponse) => reponse.arrayBuffer())
       .then((octets) => ctx.decodeAudioData(octets))
       .catch((erreur) => {
         console.error(`[son] ${BRUITAGES[nom]} : ${String(erreur)}`);
+        // Le prochain cri réessaiera.
+        tampons.delete(nom);
         return null;
       });
     tampons.set(nom, promesse);

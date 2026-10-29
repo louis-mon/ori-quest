@@ -61,12 +61,12 @@ export class TroneScene extends PointClickScene {
     super({ key: 'trone', active: false });
   }
 
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadFond(this, PLAN.fond);
-    preloadSprite(this, HIBOU, 'assets/decor/hibou.png');
-    preloadSprite(this, CHAT, 'assets/decor/chat.png');
-    preloadLuneChat(this);
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadFond(cible, PLAN.fond);
+    preloadSprite(cible, HIBOU, 'assets/decor/hibou.png');
+    preloadSprite(cible, CHAT, 'assets/decor/chat.png');
+    preloadLuneChat(cible);
   }
 
   protected hotspots(): HotspotDef[] {

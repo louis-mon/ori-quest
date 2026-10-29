@@ -373,6 +373,29 @@ on n'y revient qu'en recommençant. Un rechargement pendant l'arrivée rouvre
 l'accueil, et c'est juste : la transaction n'a rien écrit, la partie n'a pas
 commencé.
 
+**Une pièce ne se montre qu'entière.** Sur itch.io tout arrive par le réseau,
+et en 3G les images d'une pièce prenaient dix secondes, ses pliages — three.js
+d'abord — vingt : écran noir sans signe de vie, puis un ravin sans le pont que
+la partie savait posé. `PointClickScene` tient donc sa caméra éteinte jusqu'à
+ses images **et** les pliages de son décor (`pliagesEnAttente()`, dans
+`origami-decor.ts`), derrière l'écran de chargement (`src/ui/chargement.ts`) ;
+d'ici là rien n'y répond, ni arrivée ni mouvement ne se jouent (`presenter()`).
+L'accueil attend la même chose : son bouton dit « Chargement… » jusqu'à
+`rideau.pret`. Avant tout script, `index.html` a sa propre feuille qui se plie.
+
+**Un échec réseau se rattrape, puis se dit.** `telecharger()`
+(`src/chargement/telecharger.ts`) réessaie en espaçant ; une image refusée par
+Phaser fait remonter la pièce (`redemander()`) ; et **aucun cache ne garde un
+échec** — un `.origami` perdu une fois retirait le pont pour toute la session.
+Au bout, `signalerUnEchec()` : l'écran propose « Réessayer », qui recharge la
+page — le seul remède pour three.js, dont Chrome garde en cache l'échec de
+l'`import()` (d'où `chargerThree()`, un seul import pour tout le jeu). Un cri
+d'animal perdu, une vignette, ne valent pas d'alerter le joueur. Une fois
+dévoilée, la pièce prépare la suite (`preparerLaSuite()`) : images des pièces
+voisines, par le cache HTTP et non par le chargeur de Phaser — chargées par lui,
+elles arrivaient après qu'on avait quitté la pièce, et la suivante se voyait
+refuser la clé.
+
 **Le découpage des énigmes se dessine aussi, et ailleurs que dans le code.** Il
 vit dans `game-design/enigmes/<nom>.json`, se trace dans
 `http://localhost:5173/decoupage.html` (page de développement, hors build) et
@@ -495,7 +518,9 @@ le bas. Et **achever l'écriture d'un tap rouvre le délai anti-tap**, sinon le
 rebond de ce tap emporte la réplique qu'il vient tout juste d'afficher — la seule
 que personne n'aurait lue. `npm run qa -- anti-tap` tient les deux.
 
-**Des couches à ne pas intervertir** : l'énigme à `z-index: 4`, le voile du
+**Des couches à ne pas intervertir** : l'écran de chargement à 3, sous tout ce
+qui parle — à 9 s'il échoue en couvrant l'accueil, à 8 en bandeau en pleine
+partie —, l'énigme à `z-index: 4`, le voile du
 tutoriel à 5, la boîte de dialogue à 6 (`Overlay.mettreDevant()`), la
 confirmation à 7, le vol d'obtention et son bandeau à 8, l'écran « À suivre… »
 à 9 — au-dessus du menu, seul écran du jeu dans ce cas : la partie est finie, il
@@ -598,7 +623,12 @@ d'images**, sinon les images vides y resteraient.
 await créer()` laisse passer deux appels rapprochés — l'`await` rend la main
 avant l'affectation — et chacun fabrique son contexte WebGL, dont l'un reste
 orphelin. Mémoriser la **promesse**, posée avant le premier `await`, règle le
-cas ; `fold-file.ts` fait déjà ça pour les `.origami`.
+cas ; `fold-file.ts` fait déjà ça pour les `.origami`. Et la promesse d'un
+échec se **retire** du cache, sinon le singleton reste mort pour la session.
+
+**Intercepter les requêtes coupe le cache HTTP de Chromium** (`page.route`,
+Playwright). Une mesure de préchargement faite sous interception ne mesure
+rien : le second téléchargement repart de zéro.
 
 **`hidden` est une propriété de `HTMLElement`, pas de `SVGElement`.**
 `svg.hidden = false` pose une propriété JavaScript sans rien retirer du DOM : la

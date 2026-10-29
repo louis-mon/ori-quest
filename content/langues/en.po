@@ -2840,6 +2840,21 @@ msgid "Tourne ton téléphone"
 msgstr "Rotate your phone"
 
 #. interface
+#: src/ui/chargement.ts
+msgid "Réessayer"
+msgstr "Retry"
+
+#. interface
+#: src/ui/chargement.ts
+msgid "La connexion est lente, encore un instant…"
+msgstr "The connection is slow, just a moment…"
+
+#. interface
+#: src/ui/chargement.ts
+msgid "Une partie du jeu n’a pas pu se charger. Vérifie ta connexion."
+msgstr "Part of the game couldn’t load. Check your connection."
+
+#. interface
 #: src/ui/credits-texte.ts
 msgid "Game design, scénario"
 msgstr "Game design, story"
@@ -3011,6 +3026,11 @@ msgstr "Resume"
 
 #. interface
 #: src/ui/menu.ts
+msgid "Chargement… {pourcent} %"
+msgstr "Loading… {pourcent}%"
+
+#. interface
+#: src/ui/menu.ts
 msgid "Quitter le plein écran"
 msgstr "Exit fullscreen"
 
@@ -3028,3 +3048,13 @@ msgstr "Obtained: {nom}"
 #: src/ui/overlay.ts
 msgid "Passer ce qui est déjà lu"
 msgstr "Skip what you've already read"
+
+#. interface
+#: src/ui/sans-webgl.ts
+msgid "Ce jeu a besoin de WebGL"
+msgstr "This game needs WebGL"
+
+#. interface
+#: src/ui/sans-webgl.ts
+msgid "Ton navigateur ne le propose pas en ce moment. Active l’accélération matérielle dans ses réglages, ou essaie un autre navigateur."
+msgstr "Your browser isn’t offering it right now. Turn on hardware acceleration in its settings, or try another browser."

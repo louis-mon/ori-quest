@@ -56,12 +56,12 @@ export class VillageScene extends PointClickScene {
     super({ key: 'village', active: false });
   }
 
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadCiel(this);
-    preloadFond(this, PLAN.fond);
-    preloadSprite(this, PINGOUIN, 'assets/decor/pingouin.png');
-    preloadSprite(this, VACHE, 'assets/decor/vache.png');
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadCiel(cible);
+    preloadFond(cible, PLAN.fond);
+    preloadSprite(cible, PINGOUIN, 'assets/decor/pingouin.png');
+    preloadSprite(cible, VACHE, 'assets/decor/vache.png');
   }
 
   protected hotspots(): HotspotDef[] {

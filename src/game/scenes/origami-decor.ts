@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { Box } from './layout';
+import { signalerUnEchec } from '../../chargement/telecharger';
 import { apercuOrigami } from '../../origami/apercu';
 
 // Le modèle lui-même, rendu depuis le `.origami` que le joueur vient de voir se
@@ -10,6 +11,16 @@ import { apercuOrigami } from '../../origami/apercu';
 // scène feraient télécharger three.js avant le premier écran.
 
 const cle = (nom: string) => `origami:${nom}`;
+
+// Ce que la pièce rend pendant qu'elle se monte : elle ne se montre qu'une fois
+// ces pliages posés. Voir `PointClickScene.presenter()`.
+const attentes = new WeakMap<Phaser.Scene, Promise<void>[]>();
+
+export function pliagesEnAttente(scene: Phaser.Scene): Promise<void>[] {
+  const liste = attentes.get(scene) ?? [];
+  attentes.delete(scene);
+  return liste;
+}
 
 export interface OptionsOrigamiDecor {
   // `bas` par défaut, comme les sprites : une boîte de plan est une emprise au
@@ -47,7 +58,7 @@ export function poserOrigami(
 
   const rendre = () => {
     demande = true;
-    apercuOrigami(nom)
+    const rendu = apercuOrigami(nom)
       .then((canvas) => {
         // La scène a pu être quittée pendant le rendu : Phaser met `scene` à
         // `undefined` en détruisant l'objet, et toucher à sa texture planterait.
@@ -72,10 +83,20 @@ export function poserOrigami(
         });
       })
       .catch((err) => {
-        // Un modèle manquant laisse un trou dans le décor, jamais une scène
-        // cassée : la progression ne dépend que des drapeaux.
-        console.error(`[origami] rendu de "${nom}" impossible`, err);
+        // La progression ne dépend que des drapeaux, mais un trou dans le décor
+        // est un mensonge — le ravin sans le pont qu'on vient de poser. Le
+        // joueur se voit proposer de recharger, et le prochain `montrer()`
+        // réessaie.
+        demande = false;
+        signalerUnEchec(new Error(`rendu de "${nom}" impossible : ${String(err)}`));
+        throw err;
       });
+    // Déjà signalé : sans ce `catch`, un rendu demandé en pleine partie, que
+    // personne n'attend, finirait en rejet non traité.
+    rendu.catch(() => {});
+    const liste = attentes.get(scene) ?? [];
+    liste.push(rendu);
+    attentes.set(scene, liste);
   };
 
   return {

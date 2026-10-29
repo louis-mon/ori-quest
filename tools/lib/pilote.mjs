@@ -89,10 +89,16 @@ const BRUIT = /GL Driver Message|GPU stall|Phaser v/;
 // `langue` est celle du navigateur, dont le jeu tire la sienne. Le français par
 // défaut, et pas celui de la machine : les essais choisissent les options par
 // leur texte, et Chromium sans consigne se dit anglais.
+//
+// `reseau(chemin, n)` dégrade la n-ième requête d'un fichier : `{ delai }` la
+// retarde, `{ echec: true }` la fait échouer. La page rend alors la main dès son
+// chargement, sans attendre que le réseau se taise : c'est justement ce qui se
+// passe pendant l'attente qu'on veut voir. Intercepter coupe le cache HTTP de
+// Chromium — sans importance ici, chaque essai ouvre une page neuve.
 export async function ouvrir(
   navigateur,
   url,
-  { sauvegarde = null, tactile = false, langue = 'fr-FR' } = {},
+  { sauvegarde = null, tactile = false, langue = 'fr-FR', reseau = null } = {},
 ) {
   const contexte = await navigateur.newContext({
     viewport: { width: 1280, height: 720 },
@@ -126,8 +132,19 @@ export async function ouvrir(
       [SAUVEGARDE, sauvegarde],
     );
   }
-  await page.goto(url, { waitUntil: 'networkidle' });
-  await pause(2000);
+  if (reseau) {
+    const vues = new Map();
+    await page.route('**/*', async (route) => {
+      const chemin = route.request().url().replace(url, '');
+      const n = (vues.get(chemin) ?? 0) + 1;
+      vues.set(chemin, n);
+      const { delai = 0, echec = false } = reseau(chemin, n) ?? {};
+      if (delai) await pause(delai);
+      return echec ? route.abort('failed') : route.continue();
+    });
+  }
+  await page.goto(url, { waitUntil: reseau ? 'load' : 'networkidle' });
+  await pause(reseau ? 500 : 2000);
   return { page, contexte, journal };
 }
 

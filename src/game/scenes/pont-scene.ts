@@ -65,12 +65,12 @@ export class PontScene extends PointClickScene {
   }
 
   // Libellé, knot, condition d'apparition. Les coordonnées viennent du plan.
-  protected preloadAssets() {
-    preloadHeros(this);
-    preloadCiel(this);
-    preloadFond(this, PLAN.fond);
-    preloadSprite(this, JEUNE_ARBRE, 'assets/decor/jeune-arbre.png');
-    preloadSprite(this, SOUCHE, 'assets/decor/souche.png');
+  protected preloadAssets(cible: Phaser.Scene) {
+    preloadHeros(cible);
+    preloadCiel(cible);
+    preloadFond(cible, PLAN.fond);
+    preloadSprite(cible, JEUNE_ARBRE, 'assets/decor/jeune-arbre.png');
+    preloadSprite(cible, SOUCHE, 'assets/decor/souche.png');
   }
 
   protected hotspots(): HotspotDef[] {

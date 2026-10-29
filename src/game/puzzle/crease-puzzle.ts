@@ -13,6 +13,7 @@
 // Les pièces ne pivotent pas : une rotation rendrait ambigus des motifs souvent
 // symétriques.
 
+import { telecharger } from '../../chargement/telecharger';
 import { urlApercuOrigami } from '../../origami/apercu';
 import { t } from '../../langues/traduire';
 import type { NomTutoriel } from './tutoriels';
@@ -80,6 +81,8 @@ export interface OptionsPuzzle {
   tutoriel?: LanceurTutoriel;
   // L'énigme reste sourde tant que la promesse court.
   signalerErreur?: () => Promise<void>;
+  // Le plateau est à l'écran : son motif a fini d'arriver.
+  montee?: () => void;
 }
 
 // Lent pour un déplacement : c'est une démonstration, le joueur doit avoir le
@@ -242,6 +245,7 @@ export async function runCreasePuzzle(
 
   for (const { el: piece } of pieces) tray.appendChild(piece);
   root.appendChild(el);
+  options.montee?.();
 
   let trayLayout = eparpiller(el, tray, board, pieces, grille, graine(def.svg));
 
@@ -736,8 +740,7 @@ function clamp(v: number, lo: number, hi: number) {
 // sont pas encapsulés, il s'appliquerait au document entier et serait dupliqué à
 // chaque pièce. Les classes mo/va/bo sont restylées dans style.css.
 async function loadPattern(url: string) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`crease pattern introuvable : ${url}`);
+  const res = await telecharger(url);
 
   const doc = new DOMParser().parseFromString(await res.text(), 'image/svg+xml');
   const svg = doc.documentElement;

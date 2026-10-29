@@ -694,6 +694,105 @@ test('fondu', async (page, dire) => ({
   },
 }));
 
+// Sur itch.io tout arrive par le réseau. Une pièce ne se montre qu'entière : en
+// 3G le pont posé arrivait vingt secondes après le ravin, qui paraissait sans
+// lui. Ici il met six secondes, et la pièce ne doit ni paraître ni répondre
+// avant.
+const PONT_POSE = etape('pont', ['pont_vu', 'pont_resolu', 'pont_plie']);
+const visible = (page, selecteur) => page.locator(selecteur).isVisible();
+test('reseau-lent', async (page, dire) => ({
+  sauvegarde: PONT_POSE,
+  reseau: (chemin) => (/pont\.origami$/.test(chemin) ? { delai: 6000 } : null),
+  jouer: async () => {
+    await pause(1500);
+    dire("l'écran de chargement couvre la pièce", await visible(page(), '.chargement'));
+    await taperZone(page(), 'pont', 'heros');
+    dire('la pièce ne répond pas avant d’être entière', !(await etat(page())).boite);
+    await page().locator('.chargement').waitFor({ state: 'hidden', timeout: 20_000 });
+    await taperZone(page(), 'pont', 'heros');
+    dire('puis répond, une fois le pont posé', (await etat(page())).boite);
+  },
+}));
+
+// Une requête perdue de temps en temps, comme en 4G : le fond refusé trois fois
+// de suite épuise les nouveaux essais de Phaser, et la pièce se remonte pour le
+// redemander ; le pont refusé une fois est redemandé par `telecharger()`. Avant,
+// la texture manquante de Phaser — un carré noir cerclé de vert — remplaçait le
+// fond, et le pont manquait au ravin jusqu'au rechargement.
+test(
+  'reseau-coupe',
+  async (page, dire) => ({
+    sauvegarde: PONT_POSE,
+    reseau: (chemin, n) =>
+      (/fond-pont/.test(chemin) && n <= 3) || (/pont\.origami$/.test(chemin) && n === 1)
+        ? { echec: true }
+        : null,
+    jouer: async () => {
+      await page().locator('.chargement').waitFor({ state: 'hidden', timeout: 20_000 });
+      dire("aucun message d'échec", !(await visible(page(), '.chargement__bouton')));
+      await taperZone(page(), 'pont', 'heros');
+      dire('la pièce répond', (await etat(page())).boite);
+    },
+  }),
+  { attendu: /Failed to load resource/ },
+);
+
+// Le module three.js perdu : le navigateur garde en cache l'échec d'un
+// `import()`, aucun nouvel essai ne le refera. Le joueur doit l'apprendre, avec
+// de quoi recharger — pas regarder une feuille qui se plie pour toujours.
+test(
+  'reseau-perdu',
+  async (page, dire) => ({
+    sauvegarde: PONT_POSE,
+    reseau: (chemin) => (/three-.*\.js$/.test(chemin) ? { echec: true } : null),
+    jouer: async () => {
+      const bouton = page().locator('.chargement__bouton');
+      await bouton.waitFor({ state: 'visible', timeout: 20_000 }).catch(() => {});
+      dire('le joueur se voit proposer de réessayer', await bouton.isVisible());
+      await taperZone(page(), 'pont', 'heros');
+      dire('la pièce incomplète ne se montre pas', !(await etat(page())).boite);
+    },
+  }),
+  { attendu: /Failed to load resource|\[chargement\]/ },
+);
+
+// Une partie neuve en 3G : l'accueil paraissait avant la première pièce, et
+// « Commencer à plier » découvrait vingt secondes d'écran noir. Le bouton attend
+// la pièce et dit où il en est.
+test('accueil-attend', async (page, dire) => ({
+  sauvegarde: AU_RAVIN,
+  reseau: (chemin) => (/fond-pont/.test(chemin) ? { delai: 5000 } : null),
+  jouer: async () => {
+    const bouton = page().locator('.ecran [data-action="principal"]');
+    await bouton.waitFor({ timeout: 10_000 });
+    dire('le bouton attend la pièce', await bouton.isDisabled(), await bouton.textContent());
+    await page().waitForFunction(
+      () => !document.querySelector('.ecran [data-action="principal"]').disabled,
+      null,
+      { timeout: 20_000 },
+    );
+    await commencer(page());
+    dire("puis l'arrivée se joue", await attendreLaBoite(page()));
+  },
+}));
+
+// Une mise à jour publiée trouvera les sauvegardes de la précédente : un objet
+// renommé y devenait une case sans nom, et un inventaire qui n'est pas une liste
+// se lisait lettre par lettre.
+test('sauvegarde-abimee', async (page, dire) => ({
+  sauvegarde: {
+    ...etape('porte', ['pont_vu', 'pont_resolu', 'pont_plie', 'porte_vue']),
+    inventory: ['hache', 'objet_disparu', 42],
+    flags: { pont_vu: true, pont_resolu: true, pont_plie: true, porte_vue: true, vieux: 'oui' },
+  },
+  jouer: async () => {
+    const e = await etat(page());
+    dire('seuls les objets connus restent', e.inventaire.join() === 'hache', e.inventaire.join());
+    await taperZone(page(), 'porte', 'heros');
+    dire('la partie reprend', (await etat(page())).boite);
+  },
+}));
+
 // Une sauvegarde née d'un build de développement nomme une pièce que celui-ci
 // n'embarque pas : elle doit retomber sur une scène jouable, pas sur du noir.
 test(
@@ -1484,11 +1583,12 @@ for (const { nom, fn, livre, attendu } of tests) {
     console.log(`   ${ok ? '✓' : '✗'} ${quoi}${detail ? ` — ${detail}` : ''}`);
   };
 
-  const { sauvegarde, tactile, langue, jouer } = await fn(() => courante, dire);
+  const { sauvegarde, tactile, langue, reseau, jouer } = await fn(() => courante, dire);
   const { page, contexte, journal } = await ouvrir(navigateur, cible.url, {
     sauvegarde,
     tactile,
     langue,
+    reseau,
   });
   courante = page;
   try {

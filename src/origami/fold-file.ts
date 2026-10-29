@@ -1,3 +1,5 @@
+import { telecharger } from '../chargement/telecharger';
+
 // Format binaire `.origami`, produit par `tools/bake-origami.mjs`.
 //
 // Tous les frames partagent la même topologie, seules les positions bougent :
@@ -60,8 +62,7 @@ export function parseFoldAnimation(buffer: ArrayBuffer): FoldAnimation {
 }
 
 export async function loadFoldAnimation(url: string): Promise<FoldAnimation> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Chargement de ${url} : HTTP ${res.status}`);
+  const res = await telecharger(url);
   return parseFoldAnimation(await res.arrayBuffer());
 }
 
@@ -76,6 +77,9 @@ export function animationOrigami(nom: string): Promise<FoldAnimation> {
   if (!promesse) {
     promesse = loadFoldAnimation(`assets/origami/${nom}.origami`);
     chargees.set(nom, promesse);
+    // Un échec ne se garde pas : le pont aurait manqué au ravin jusqu'au
+    // rechargement.
+    promesse.catch(() => chargees.delete(nom));
   }
   return promesse;
 }

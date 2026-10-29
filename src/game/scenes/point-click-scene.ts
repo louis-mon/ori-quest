@@ -21,6 +21,10 @@ import { gameState } from '../systems/state';
 import type { Overlay } from '../../ui/overlay';
 import type { DialogueRunner } from '../systems/dialogue';
 import type { Rideau } from '../rideau';
+import type { EcranDeChargement } from '../../ui/chargement';
+import { signalerUnEchec } from '../../chargement/telecharger';
+import { pliagesEnAttente } from './origami-decor';
+import { prechargerLesPliages } from '../../origami/prechargement';
 import { jouerLAmbiance } from '../../sons/ambiance';
 import { jouerBruitage } from '../../sons/bruitages';
 import type { Ambiance } from '../../sons/catalogue';
@@ -37,6 +41,7 @@ export interface SceneServices {
   overlay: Overlay;
   dialogue: DialogueRunner;
   rideau: Rideau;
+  chargement: EcranDeChargement;
   // Le même que le tag `# goto:`.
   goto: (room: string) => void;
 }
@@ -57,6 +62,19 @@ const DELAI_DIALOGUE = 400;
 // guette la fin du précédent (`programmerDialogue`).
 const RETOUR_MS = 250;
 const RELANCE_MS = 120;
+
+// La part des images dans la jauge de chargement ; les pliages du décor font le
+// reste.
+const PART_DES_IMAGES = 0.7;
+
+// Une image refusée malgré les nouveaux essais de Phaser : la pièce se remonte
+// pour la redemander, à intervalles qui s'allongent (1, 2, 4, 8 s), avant de
+// dire au joueur que ça ne passe pas.
+const REMONTAGES = 4;
+
+// Le temps de laisser la pièce dévoilée commencer — ambiance, arrivée — avant
+// de charger la suite par-dessus.
+const PREPARATION_MS = 1500;
 
 // Une scène concrète ne décrit que son plan, le sens de chaque zone et son
 // décor. Zones tactiles, marqueurs, profondeurs, réactions à l'état et
@@ -109,6 +127,18 @@ export abstract class PointClickScene extends Phaser.Scene {
   private retires = true;
   private retenue = 0;
 
+  // Une pièce ne se montre qu'entière : ses images, puis les pliages de son
+  // décor. Jusque-là sa caméra est éteinte, l'écran de chargement la couvre et
+  // rien n'y répond. Voir `presenter()`.
+  private prete = false;
+  // Change à chaque montage : une attente née d'un montage précédent ne doit
+  // rien dévoiler.
+  private montage = 0;
+  // Ce que le dernier `preload()` n'a pas obtenu, et combien de fois la pièce
+  // s'est remontée pour le redemander.
+  private manquants: string[] = [];
+  private remontages = 0;
+
   // Levé au tap sur une flèche, le temps du fondu : la pièce est déjà quittée.
   // Un tap sur un personnage pendant ces 260 ms ouvrait son dialogue, qui se
   // jouait ensuite par-dessus la pièce suivante — le menu du renard au ravin.
@@ -127,16 +157,48 @@ export abstract class PointClickScene extends Phaser.Scene {
   }
 
   preload() {
-    preloadCocotte(this);
-    preloadFleche(this);
-    this.preloadAssets();
+    this.manquants = [];
+    this.services.chargement.commencer(!this.services.rideau.baisse);
+    this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, this.surManque);
+    this.load.on(Phaser.Loader.Events.PROGRESS, this.surProgres);
+    this.chargerDans(this);
   }
 
-  // Textures propres à la scène. Appelé par `preload()`, à surcharger.
-  protected preloadAssets() {}
+  private surManque = (fichier: Phaser.Loader.File) => {
+    this.manquants.push(String(fichier.url));
+  };
+
+  private surProgres = (progression: number) => {
+    this.services.chargement.progresser(progression * PART_DES_IMAGES);
+  };
+
+  // Ce dont la pièce a besoin, mis à charger par `cible` : elle-même dans son
+  // `preload()`, la pièce voisine quand elle prépare la suite.
+  chargerDans(cible: Phaser.Scene) {
+    preloadCocotte(cible);
+    preloadFleche(cible);
+    this.preloadAssets(cible);
+  }
+
+  // Textures propres à la scène, à surcharger.
+  protected preloadAssets(_cible: Phaser.Scene) {}
 
   create() {
-    this.cameras.main.fadeIn(FONDU, 0, 0, 0);
+    // Retirés ici et non à la fin du chargement : une pièce sans rien à charger
+    // n'en voit pas la fin.
+    this.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, this.surManque);
+    this.load.off(Phaser.Loader.Events.PROGRESS, this.surProgres);
+    if (this.manquants.length > 0) {
+      this.redemander();
+      return;
+    }
+    this.remontages = 0;
+    this.prete = false;
+    const montage = ++this.montage;
+    // Ceux d'un passage précédent n'ont rien à retenir.
+    pliagesEnAttente(this);
+    this.cameras.main.setVisible(false);
+
     // Phaser réutilise l'instance d'un passage à l'autre : les déclencheurs du
     // passage précédent parleraient d'objets détruits.
     this.declencheurs = [];
@@ -157,6 +219,8 @@ export abstract class PointClickScene extends Phaser.Scene {
     const unsubscribe = gameState.subscribe(() => this.refresh());
     const neSuivrePlus = suivreLesCocottes(() => this.appliquerVisibilite());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.montage++;
+      this.prete = false;
       unsubscribe();
       neSuivrePlus();
       // Une scène quittée ne doit rien retenir.
@@ -178,15 +242,82 @@ export abstract class PointClickScene extends Phaser.Scene {
       ]);
     }
 
+    void this.presenter(montage);
+  }
+
+  // Les pliages du décor se rendent en différé, three.js d'abord : montrée tout
+  // de suite, la pièce paraissait sans eux — le ravin sans le pont que la partie
+  // savait posé. Elle attend donc, et ne commence qu'une fois dévoilée.
+  private async presenter(montage: number) {
+    const { chargement, rideau } = this.services;
+    const pliages = pliagesEnAttente(this);
+    let poses = 0;
+    chargement.progresser(PART_DES_IMAGES);
+    const issues = await Promise.allSettled(
+      pliages.map((pliage) =>
+        pliage.then(() =>
+          chargement.progresser(
+            PART_DES_IMAGES + ((1 - PART_DES_IMAGES) * ++poses) / pliages.length,
+          ),
+        ),
+      ),
+    );
+    if (montage !== this.montage) return;
+    // Déjà signalé par `poserOrigami()` : l'écran propose de recharger.
+    if (issues.some((issue) => issue.status === 'rejected')) return;
+
+    this.prete = true;
+    chargement.terminer();
+    this.cameras.main.setVisible(true).fadeIn(FONDU, 0, 0, 0);
+    this.retenue = FONDU;
+    rideau.pieceChargee();
+    this.time.delayedCall(PREPARATION_MS, () => this.preparerLaSuite());
+
     // Derrière l'écran d'accueil, la pièce vit mais n'a pas commencé : le décor
     // est fermé, rien ne s'y dit ni ne s'y entend, et le héros n'entre en scène
     // qu'au lever du rideau.
-    if (this.services.rideau.baisse) {
+    if (rideau.baisse) {
       void this.enAttendant(this.leverDeRideau());
       return;
     }
     jouerLAmbiance(this.ambiance);
     this.programmerLArrivee();
+  }
+
+  // Les images des pièces où mènent les flèches, et les pliages. Sur un
+  // téléphone lent, franchir une porte faisait attendre dix secondes : le joueur
+  // passe d'abord du temps ici, autant que la suite charge pendant ce temps.
+  //
+  // Le chargeur de cette pièce ne sert qu'à dresser la liste, le cache HTTP
+  // fait le reste. Chargées par lui, les images d'à côté arrivaient encore après
+  // qu'on l'avait quittée, et la pièce suivante, qui les redemandait, se voyait
+  // refuser la clé : « Texture key already in use ».
+  private preparerLaSuite() {
+    for (const def of this.exits()) {
+      const voisine = def.room ? this.scene.get(def.room) : null;
+      if (voisine instanceof PointClickScene) voisine.chargerDans(this);
+    }
+    const adresses = [...this.load.list].map((fichier) => String(fichier.url));
+    this.load.reset();
+    for (const adresse of adresses) {
+      fetch(adresse, { priority: 'low' })
+        .then((reponse) => reponse.arrayBuffer())
+        .catch(() => {});
+    }
+    prechargerLesPliages();
+  }
+
+  // La scène tourne, sans décor : un minuteur de scène la remonte, ce qui rejoue
+  // `preload()` sur ce qui manque — Phaser n'enregistre pas une image refusée.
+  private redemander() {
+    this.remontages++;
+    if (this.remontages > REMONTAGES) {
+      signalerUnEchec(new Error(`${this.scene.key} : ${this.manquants.join(', ')}`));
+      return;
+    }
+    this.time.delayedCall(1000 * 2 ** (this.remontages - 1), () =>
+      this.scene.restart(this.services),
+    );
   }
 
   private async leverDeRideau() {
@@ -211,6 +342,7 @@ export abstract class PointClickScene extends Phaser.Scene {
   // Les marqueurs suivent l'état du récit. Une scène en pause — le menu ouvert —
   // ne passe pas ici : ils restent comme ils étaient.
   update(_time: number, delta: number) {
+    if (!this.prete) return;
     const { dialogue, overlay } = this.services;
     const occupe = dialogue.isRunning || overlay.occupeLeJoueur || this.attentes.size > 0;
     this.retenue = occupe ? Math.max(this.retenue, RETOUR_MS) : Math.max(0, this.retenue - delta);
@@ -230,7 +362,7 @@ export abstract class PointClickScene extends Phaser.Scene {
     // Les marqueurs n'ont pas à paraître pour repartir aussitôt.
     this.retenue = Math.max(this.retenue, DELAI_DIALOGUE + RETOUR_MS);
     const lancer = () => {
-      if (this.services.dialogue.isRunning || this.services.overlay.occupeLeJoueur) {
+      if (!this.prete || this.services.dialogue.isRunning || this.services.overlay.occupeLeJoueur) {
         this.time.delayedCall(RELANCE_MS, lancer);
         return;
       }
@@ -283,7 +415,9 @@ export abstract class PointClickScene extends Phaser.Scene {
   protected async quandLeRecitSeTait(delai = 0): Promise<void> {
     if (delai > 0) await this.attendre(delai);
     const { dialogue, overlay } = this.services;
-    while (dialogue.isRunning || overlay.occupeLeJoueur) await this.attendre(RELANCE_MS);
+    while (!this.prete || dialogue.isRunning || overlay.occupeLeJoueur) {
+      await this.attendre(RELANCE_MS);
+    }
   }
 
   // Le décor cesse de répondre le temps de la promesse. Toujours relevé : à la
@@ -507,7 +641,7 @@ export abstract class PointClickScene extends Phaser.Scene {
   // jeu, et meurt avec la scène plutôt que de réveiller la pièce qu'on a
   // quittée.
   private quandLaBoiteEstFermee(jouer: () => void) {
-    if (!this.services.dialogue.isRunning) {
+    if (this.prete && !this.services.dialogue.isRunning) {
       jouer();
       return;
     }
@@ -554,7 +688,7 @@ export abstract class PointClickScene extends Phaser.Scene {
     // où le moteur de narration travaille boîte fermée — une animation de
     // pliage, un changement de scène — sans qu'aucune réplique n'attende de tap.
     if (dialogue.isRunning || overlay.occupeLeJoueur) return false;
-    if (this.sortie) return false;
+    if (!this.prete || this.sortie) return false;
     // Un déplacement ordinaire laisse la scène jouable ; seul celui qui a
     // demandé le silence compte ici.
     if (this.attentes.size > 0) return false;

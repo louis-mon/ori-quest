@@ -10,8 +10,112 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#1a1714" />
     <title>OriFable</title>
+    <!-- Le seul style servi avec la page : le reste arrive avec le script, et
+         sur un téléphone en 3G, Phaser et le jeu prennent dix secondes, pendant
+         lesquelles l'écran restait vide. Retiré par le jeu dès qu'il démarre
+         (src/ui/prechargement.ts). -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #100e0c;
+      }
+      #prechargement {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: #100e0c;
+        color: #f2ece1;
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        text-align: center;
+      }
+      #prechargement .feuille {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        background: #f2ece1;
+        perspective: 200px;
+      }
+      #prechargement .feuille span {
+        position: absolute;
+        inset: 0;
+        background: #d68b7a;
+        clip-path: polygon(0 0, 100% 0, 0 100%);
+        animation: prechargement-pli 1.6s ease-in-out infinite;
+      }
+      @keyframes prechargement-pli {
+        0%,
+        15% {
+          transform: rotate3d(1, -1, 0, 0deg);
+        }
+        50%,
+        65% {
+          transform: rotate3d(1, -1, 0, 180deg);
+        }
+        100% {
+          transform: rotate3d(1, -1, 0, 360deg);
+        }
+      }
+      #prechargement p {
+        max-width: 420px;
+        margin: 0 16px;
+      }
+      #prechargement button {
+        min-height: 44px;
+        min-width: 140px;
+        border: 0;
+        border-radius: 10px;
+        background: #f2ece1;
+        color: #1a1714;
+        font: inherit;
+        font-weight: 600;
+      }
+      #prechargement [hidden] {
+        display: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #prechargement .feuille span {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="prechargement">
+      <div class="feuille" aria-hidden="true"><span></span></div>
+      <p hidden></p>
+      <button type="button" hidden></button>
+    </div>
+    <!-- Avant tout module, donc sans les catalogues : la langue du navigateur
+         décide, comme `deviner()` (src/langues/langue.ts) à défaut de choix.
+         Un script qui n'arrive jamais laisserait sinon la feuille se plier
+         indéfiniment. -->
+    <script>
+      setTimeout(function () {
+        var ecran = document.getElementById('prechargement');
+        if (!ecran) return;
+        var fr = /^fr/i.test(navigator.language || '');
+        var texte = ecran.querySelector('p');
+        var bouton = ecran.querySelector('button');
+        texte.textContent = fr
+          ? 'Le chargement prend plus de temps que prévu. Vérifie ta connexion.'
+          : 'Loading is taking longer than expected. Check your connection.';
+        bouton.textContent = fr ? 'Recharger' : 'Reload';
+        bouton.onclick = function () {
+          location.reload();
+        };
+        texte.hidden = false;
+        bouton.hidden = false;
+      }, 25000);
+    </script>
     <div id="app">
       <div id="game"></div>
       <!-- #stage est recalé en JS sur les dimensions exactes du canvas Phaser,

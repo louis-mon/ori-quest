@@ -30,6 +30,8 @@ async function resoudre(id: string): Promise<string | null> {
       // Une vignette manquante laisse la case au seul nom de l'objet, ce qui
       // reste parfaitement jouable.
       console.error(`[objet] vignette de "${id}" impossible`, err);
+      // La prochaine demande réessaiera.
+      vignettes.delete(id);
       return null;
     }
   }

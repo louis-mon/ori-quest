@@ -1,6 +1,7 @@
 import type * as THREE_NS from 'three';
 import { PREFERENCE_GPU } from '../gpu';
 import { animationOrigami, sampleFold } from './fold-file';
+import { chargerThree } from './three';
 import { creerMeshOrigami, libererMateriaux } from './papier';
 import { eclairer, pliageDe, quaternionDegres, quaternionModele, repereVue } from './vue';
 
@@ -79,6 +80,8 @@ export function apercuOrigami(
   if (!promesse) {
     promesse = rendreOrigami(nom, options);
     images.set(cle, promesse);
+    // Un échec ne se garde pas : la demande suivante réessaie.
+    promesse.catch(() => images.delete(cle));
   }
   return promesse;
 }
@@ -109,7 +112,7 @@ export async function rendreOrigami(
   const pliage = options.pliage ?? pliageDe(nom);
   const taille = options.taille ?? TAILLE_DEFAUT;
 
-  const THREE = await import('three');
+  const THREE = await chargerThree();
   const anim = await animationOrigami(nom);
 
   const scene = new THREE.Scene();

@@ -1,4 +1,5 @@
 import type { CoucheDuRecit } from '../origami/couche-du-recit';
+import type { EcranDeChargement } from '../ui/chargement';
 import type { Overlay } from '../ui/overlay';
 import type { Navigation } from './navigation';
 import { jouerEnigme } from './puzzle/jouer-enigme';
@@ -11,6 +12,7 @@ import { gameState } from './systems/state';
 export function effetsDuRecit(
   uiRoot: HTMLElement,
   overlay: Overlay,
+  chargement: EcranDeChargement,
   couche: CoucheDuRecit,
   navigation: Navigation,
   couvrir: () => () => void,
@@ -18,7 +20,7 @@ export function effetsDuRecit(
   return {
     origami: couche.plier,
     rangerLePliage: couche.ranger,
-    puzzle: (nom) => jouerEnigme(uiRoot, overlay, nom, couvrir),
+    puzzle: (nom) => jouerEnigme(uiRoot, overlay, chargement, nom, couvrir),
     goto: navigation.goto,
     donner: (item) => {
       const { modele } = objet(item);

@@ -3,6 +3,7 @@ import { PREFERENCE_GPU } from '../gpu';
 import { EtoilesPliage } from './etoiles-pliage';
 import { animationOrigami, sampleFold, type FoldAnimation } from './fold-file';
 import { creerMeshOrigami, eclatDe, finitRetourne, libererMateriaux } from './papier';
+import { chargerThree } from './three';
 import {
   DIRECTION_VUE,
   HAUT_VUE,
@@ -73,7 +74,7 @@ export class OrigamiLayer {
   }
 
   private async init() {
-    const THREE = await import('three');
+    const THREE = await chargerThree();
     this.THREE = THREE;
 
     this.renderer = new THREE.WebGLRenderer({
