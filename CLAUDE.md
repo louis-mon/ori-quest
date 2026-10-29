@@ -465,10 +465,10 @@ réplique gardent une réplique *inédite* ; une réplique lue se pose d'un coup
 répond au premier tap, et ⏩ enchaîne les suivantes jusqu'à la première inédite,
 un choix ou ce que le récit montre (`SE_REGARDE`, dans `dialogue.ts`). C'est la
 seule avance sans tap du jeu, et elle ne passe que du déjà-lu. **Les choix
-gardent leur délai, lus ou non.** La mémoire est un réglage de l'appareil, écrite
-**hors transaction** : ce n'est pas un état de jeu, et c'est elle qui rend rapide
-la conversation rejouée après un rechargement. En développement, tout ce qu'on
-retraverse devient lu — `localStorage.removeItem('ori-quest.lues')` rend
+gardent leur délai, lus ou non.** Ce qui a été lu est dans la sauvegarde
+(`lues`), transaction comprise : une conversation interrompue n'a pas eu lieu,
+ses répliques n'ont pas été lues non plus, et une partie neuve repart inédite.
+En développement, tout ce qu'on retraverse devient lu — un point d'étape rend
 l'écriture.
 
 **La boîte se signale, parce qu'on ne la voyait pas.** Au playtest, des joueurs

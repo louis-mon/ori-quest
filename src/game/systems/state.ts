@@ -1,6 +1,6 @@
-// Volontairement minimal : des drapeaux booléens et un inventaire de chaînes.
-// C'est tout ce dont un point & click a besoin, et ça tient en une ligne de
-// localStorage.
+// Volontairement minimal : des drapeaux booléens, un inventaire de chaînes, et
+// ce qui a été lu. C'est tout ce dont un point & click a besoin, et ça tient en
+// une ligne de localStorage.
 
 const SAVE_KEY = 'ori-quest.save.v1';
 
@@ -11,12 +11,14 @@ export interface SaveData {
   room: string;
   flags: Record<string, boolean>;
   inventory: string[];
+  // Les empreintes des répliques lues : voir `repliques-lues.ts`.
+  lues: string[];
 }
 
 type Listener = (state: SaveData) => void;
 
 class GameState {
-  private data: SaveData = { room: FIRST_ROOM, flags: {}, inventory: [] };
+  private data: SaveData = { room: FIRST_ROOM, flags: {}, inventory: [], lues: [] };
   private listeners = new Set<Listener>();
 
   get room() {
@@ -50,6 +52,18 @@ class GameState {
 
   has(item: string): boolean {
     return this.data.inventory.includes(item);
+  }
+
+  aLu(empreinte: string): boolean {
+    return this.data.lues.includes(empreinte);
+  }
+
+  // Sans prévenir les abonnés : rien de ce qu'ils montrent ne dépend de ce qui a
+  // été lu, et chaque réplique redessinerait l'inventaire.
+  marquerLu(empreinte: string) {
+    if (this.aLu(empreinte)) return;
+    this.data.lues.push(empreinte);
+    this.autosave();
   }
 
   give(item: string) {
@@ -151,6 +165,7 @@ class GameState {
         room: parsed.room,
         flags: parsed.flags ?? {},
         inventory: parsed.inventory ?? [],
+        lues: Array.isArray(parsed.lues) ? parsed.lues : [],
       };
       this.emit();
       return true;
@@ -166,7 +181,7 @@ class GameState {
     // Une remise à zéro emporte la conversation en cours avec le reste, sinon
     // le `save()` ci-dessous se heurterait à sa transaction ouverte.
     this.transactions.clear();
-    this.data = { room: FIRST_ROOM, flags: {}, inventory: [] };
+    this.data = { room: FIRST_ROOM, flags: {}, inventory: [], lues: [] };
     this.save();
     this.emit();
   }

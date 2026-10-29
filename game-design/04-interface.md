@@ -305,8 +305,7 @@ dégradent, aucun ne disparaît.
 ## Ce qu'on a déjà lu se passe vite
 
 Le jeu fait relire beaucoup : un hotspot qu'on retouche, les mauvaises options
-de la feuille, la conversation rejouée en entier après un rechargement — c'est
-le prix de la transaction —, et les testeurs qui repartent d'un point d'étape.
+de la feuille, un personnage qu'on revient voir.
 
 Les trois protections de la boîte — le texte qui s'écrit, le délai anti-tap, un
 tap par réplique — gardent toutes la même chose : une réplique **inédite**, qui
@@ -335,12 +334,13 @@ Un tap pendant le défilement l'arrête sur la réplique à l'écran. C'est la s
 avance du jeu qui ne coûte pas un tap par réplique, et elle ne passe que ce que
 le joueur a déjà lu.
 
-**Ce qu'on retient n'est pas la partie.** La mémoire des répliques lues est un
-réglage de l'appareil, comme les cocottes : recommencer l'aventure repasse vite
-sur ce qu'on connaît. Elle s'écrit tout de suite, hors de la transaction — rien
-n'y est un état de jeu, et c'est elle qui rend rapide la conversation rejouée
-après un rechargement. Une réplique réécrite redevient inédite : l'erreur
-possible va toujours dans le sens de relire, jamais de passer de l'inédit.
+**Ce qui a été lu appartient à la partie**, et vit dans sa sauvegarde :
+recommencer l'aventure, ou repartir d'un point d'étape, rend tout inédit. Il
+suit la transaction comme le reste — une conversation interrompue n'a pas eu
+lieu, ses répliques n'ont pas été lues non plus, et elle se relit après un
+rechargement au rythme d'une première fois. Une réplique réécrite redevient
+inédite : l'erreur possible va toujours dans le sens de relire, jamais de
+passer de l'inédit.
 
 **Ce qui a été écarté : maintenir enfoncé pour avancer.** Personne ne le
 trouverait — c'est le problème que la boîte avait déjà au playtest —, le doigt
