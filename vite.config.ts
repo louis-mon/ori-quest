@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 import { licencesTierces } from './tools/lib/licences-tierces.mjs';
@@ -11,6 +11,8 @@ const FICHIER_CHOIX = 'src/ui/choix-reglages.ts';
 const FICHIER_TORCHES = 'src/game/scenes/torches-reglages.ts';
 const FICHIER_VAPEUR = 'src/game/scenes/vapeur-reglages.ts';
 const FICHIER_SONS = 'src/sons/sons-reglages.ts';
+const FICHIER_COUVERTURE = 'src/dev/couverture-reglages.ts';
+const IMAGE_COUVERTURE = 'itch/couverture.png';
 const CARTES = 'game-design/scenes';
 const DECOUPAGES = 'game-design/enigmes';
 const HISTOIRE = 'content';
@@ -105,6 +107,47 @@ function enregistrerSons(): Plugin {
       // Neuf sons de deux nombres au plus : au-delà, ce n'est pas l'outil qui
       // parle.
       reecrire(server, '/__sons', 2_000, FICHIER_SONS, rendreSons);
+    },
+  };
+}
+
+// La couverture d'itch.io, depuis couverture.html : ses réglages, mêmes
+// garde-fous, et l'image elle-même, qui n'est acceptée qu'en PNG aux
+// dimensions de la couverture.
+function enregistrerCouverture(): Plugin {
+  return {
+    name: 'ori-quest:couverture',
+    apply: 'serve',
+    configureServer(server) {
+      // Neuf pliages de cinq valeurs, le titre et la retouche : au-delà, ce
+      // n'est pas l'outil qui parle.
+      reecrire(server, '/__couverture-reglages', 4_000, FICHIER_COUVERTURE, rendreCouverture);
+
+      server.middlewares.use('/__couverture-image', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        const bouts: Buffer[] = [];
+        let taille = 0;
+        req.on('data', (bout: Buffer) => {
+          taille += bout.length;
+          // Une photo composée à 1260 × 1000 pèse quelques Mo.
+          if (taille > 20_000_000) req.destroy();
+          else bouts.push(bout);
+        });
+        req.on('end', () => {
+          try {
+            const png = Buffer.concat(bouts);
+            verifierCouverture(png);
+            mkdirSync(dirname(IMAGE_COUVERTURE), { recursive: true });
+            writeFileSync(IMAGE_COUVERTURE, png);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: false, erreur: String(err) }));
+          }
+        });
+      });
     },
   };
 }
@@ -646,6 +689,99 @@ function rendreSons(source: string, recu: unknown): string {
   return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
 }
 
+// Alignées sur les curseurs de src/dev/couverture.ts. Positions et tailles en
+// fractions de la couverture, rotation en degrés.
+const LIMITES_COUVERTURE = { horizon: [0, 1.5] } as const;
+// Les deux photos du château, dans l'ordre de PHOTOS_DU_CHATEAU.
+const VUES_COUVERTURE = ['face', 'trois_quarts'];
+const LIMITES_RETOUCHE_COUVERTURE = {
+  luminosite: [0.5, 2],
+  contraste: [0.5, 2],
+  saturation: [0, 2],
+} as const;
+const LIMITES_TITRE_COUVERTURE = { y: [-0.2, 0.6], largeur: [0.2, 1.2] } as const;
+const LIMITES_PLIAGE_COUVERTURE = {
+  x: [-0.5, 1.5],
+  y: [-0.5, 1.5],
+  zoom: [0.02, 1.5],
+  rotation: [-180, 180],
+} as const;
+
+// Le double des 630 × 500 d'itch.io, comme dans src/dev/couverture.ts.
+const TAILLE_COUVERTURE = { largeur: 1260, hauteur: 1000 };
+
+// Les pliages sont ceux que le fichier connaît déjà, dans son ordre, qui est
+// celui du dessin : l'outil les place, il n'en ajoute ni n'en retire.
+function rendreCouverture(source: string, recu: unknown): string {
+  if (typeof recu !== 'object' || recu === null) throw new Error('corps invalide');
+  const valeurs = recu as Record<string, unknown>;
+
+  const debut = source.indexOf('export const REGLAGES_COUVERTURE');
+  const accolade = source.indexOf('{', debut);
+  const fin = source.indexOf('\n};', accolade);
+  if (debut < 0 || fin < 0) {
+    throw new Error(`${FICHIER_COUVERTURE} : bloc REGLAGES_COUVERTURE introuvable`);
+  }
+  const bloc = source.slice(accolade, fin);
+
+  const lignes = Object.entries(LIMITES_COUVERTURE).map(
+    ([cle, bornes]) => `  ${cle}: ${nombre(valeurs[cle], ...bornes, cle)},`,
+  );
+
+  if (!VUES_COUVERTURE.includes(valeurs.vue as string)) {
+    throw new Error(`vue invalide : ${String(valeurs.vue)}`);
+  }
+  lignes.push(`  vue: '${valeurs.vue}',`, '  retouches: {');
+  const retouches = valeurs.retouches as Record<string, unknown> | undefined;
+  if (typeof retouches !== 'object' || retouches === null) throw new Error('retouches invalides');
+  for (const vue of VUES_COUVERTURE) {
+    const retouche = retouches[vue] as Record<string, unknown> | undefined;
+    if (typeof retouche !== 'object' || retouche === null) {
+      throw new Error(`retouches.${vue} invalide`);
+    }
+    const champs = Object.entries(LIMITES_RETOUCHE_COUVERTURE).map(
+      ([cle, bornes]) => `${cle}: ${nombre(retouche[cle], ...bornes, `retouches.${vue}.${cle}`)}`,
+    );
+    lignes.push(`    ${vue}: { ${champs.join(', ')} },`);
+  }
+  lignes.push('  },');
+
+  const titre = valeurs.titre as Record<string, unknown> | undefined;
+  if (typeof titre !== 'object' || titre === null) throw new Error('titre invalide');
+  const { y, largeur } = LIMITES_TITRE_COUVERTURE;
+  lignes.push(
+    `  titre: { y: ${nombre(titre.y, ...y, 'titre.y')}, largeur: ${nombre(titre.largeur, ...largeur, 'titre.largeur')} },`,
+  );
+
+  const pliages = [...bloc.matchAll(/^ {2}(\w+): \{ x:/gm)].map((m) => m[1]);
+  for (const nom of pliages) {
+    const pliage = valeurs[nom] as Record<string, unknown> | undefined;
+    if (typeof pliage !== 'object' || pliage === null) throw new Error(`${nom} invalide`);
+    if (typeof pliage.miroir !== 'boolean') throw new Error(`${nom}.miroir invalide`);
+    const champs = Object.entries(LIMITES_PLIAGE_COUVERTURE).map(
+      ([cle, bornes]) => `${cle}: ${nombre(pliage[cle], ...bornes, `${nom}.${cle}`)}`,
+    );
+    lignes.push(`  ${nom}: { ${champs.join(', ')}, miroir: ${pliage.miroir} },`);
+  }
+
+  return `${source.slice(0, accolade + 1)}\n${lignes.join('\n')}${source.slice(fin)}`;
+}
+
+// La signature, puis l'en-tête IHDR, qui suit toujours immédiatement : largeur
+// et hauteur y sont aux octets 16 et 20.
+function verifierCouverture(png: Buffer) {
+  const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (png.length < 24 || !png.subarray(0, 8).equals(signature)) throw new Error('pas un PNG');
+  if (png.toString('latin1', 12, 16) !== 'IHDR') throw new Error('PNG sans IHDR en tête');
+  const largeur = png.readUInt32BE(16);
+  const hauteur = png.readUInt32BE(20);
+  if (largeur !== TAILLE_COUVERTURE.largeur || hauteur !== TAILLE_COUVERTURE.hauteur) {
+    throw new Error(
+      `attendu ${TAILLE_COUVERTURE.largeur} × ${TAILLE_COUVERTURE.hauteur}, reçu ${largeur} × ${hauteur}`,
+    );
+  }
+}
+
 // Alignées sur `ReglagesChoix` (src/ui/overlay.ts) et sur src/dev/choix.ts, dans
 // l'ordre du fichier.
 const CHOIX_PERMIS = {
@@ -682,6 +818,7 @@ export default defineConfig({
     enregistrerTorches(),
     enregistrerVapeur(),
     enregistrerSons(),
+    enregistrerCouverture(),
     enregistrerDecoupage(),
     listerLesOutils(),
     suivreLesPlans(),

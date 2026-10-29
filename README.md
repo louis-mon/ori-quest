@@ -57,13 +57,19 @@ de la racine autre qu'`index.html` y figure d'elle-même, sous son `<title>` :
 - `http://localhost:5173/choix.html` — les menus de choix : les vrais menus
   d'ink dans la vraie boîte de dialogue, marque de réplique et en-tête réglés en
   direct.
+- `http://localhost:5173/couverture.html` — la couverture d'itch.io, composée
+  des photos de l'artiste en pleine définition — il faut donc
+  `npm run assets:pull` d'abord —, sous le ciel du jeu et le titre de l'écran
+  d'accueil. Un pliage se place en le glissant sur l'aperçu.
 
 Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 `game-design/enigmes/<nom>.json`, `src/game/scenes/eau-reglages.ts`,
 `src/game/scenes/torches-reglages.ts`, `src/game/scenes/vapeur-reglages.ts`,
-`src/ui/choix-reglages.ts`) par un point
+`src/ui/choix-reglages.ts`, `src/dev/couverture-reglages.ts`) par un point
 d'entrée du serveur de dev défini dans `vite.config.ts` — qui n'existe qu'en
-développement et ne garde que des nombres bornés.
+développement et ne garde que des nombres bornés. La couverture écrit aussi son
+image, `itch/couverture.png`, refusée si ce n'est pas un PNG aux dimensions
+d'itch.io.
 
 ### Traduire
 
@@ -413,6 +419,7 @@ content/langues/*.po         traductions, une langue par fichier (clé : le fran
 content/origami/*.svg        crease patterns sources
 game-design/scenes/*.tmj     géométrie des scènes (Tiled) — fait foi
 game-design/enigmes/*.json   découpage des énigmes (decoupage.html) — fait foi
+itch/couverture.png          la couverture de la page itch.io (couverture.html)
 public/assets/origami/*.origami  animations bakées
 src/
   main.ts                    assemble les modules ci-dessous, sans logique propre
@@ -467,6 +474,7 @@ src/
   dev/
     orientation.ts           page de réglage des poses (hors build)
     sons.ts                  page de réglage du mélange (hors build)
+    couverture.ts            composition de la couverture d'itch.io (hors build)
     console.ts               raccourcis de console en développement
     decoupage.ts             éditeur de découpage des énigmes (hors build)
     couper.ts                fendre une pièce le long d'un trait
@@ -550,7 +558,8 @@ quels chapitres ont été compilés.
    depuis le PATH.
 2. `butler login` — ouvre le navigateur, garde la clé pour les fois d'après.
 3. Créer le projet sur itch.io — butler envoie des builds, il ne crée pas la
-   page.
+   page. Sa couverture (*Cover image*) est `itch/couverture.png`, composée dans
+   `couverture.html`.
 
 ### À chaque version
 

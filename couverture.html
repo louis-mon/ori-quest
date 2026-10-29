@@ -1,0 +1,60 @@
+<!doctype html>
+<!--
+  Composition de la couverture d'itch.io : « Enregistrer » écrit l'image dans
+  itch/couverture.png et réécrit le bloc `REGLAGES_COUVERTURE` de
+  src/dev/couverture-reglages.ts, par le serveur de dev. Uniquement en
+  développement : `vite build` ne connaît que index.html, donc cette page ne
+  part pas sur itch.io. Les photos viennent d'assets-src/ (npm run assets:pull).
+
+      npm run dev  puis  http://localhost:5173/couverture.html
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ori-Quest — la couverture d'itch.io</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>La couverture d'itch.io</h1>
+        <p class="aide">
+          L'image qui représente le jeu dans les listes du site, les recherches et les liens
+          partagés&nbsp;; elle se dépose dans <em>Edit game → Cover image</em>. Glisser un pliage
+          sur l'aperçu le déplace, les curseurs finissent le travail. Les photos sont celles
+          d'<code>assets-src/</code>, en pleine définition.
+        </p>
+      </header>
+
+      <div class="scene">
+        <div class="apercu apercu--couverture"><canvas id="toile"></canvas></div>
+
+        <div class="reglages">
+          <div class="actions">
+            <button id="revenir" type="button">Revenir à l'enregistré</button>
+          </div>
+          <div id="curseurs"></div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-tete">
+          <details class="fichier">
+            <summary>
+              <h2>
+                <code>itch/couverture.png</code> · <code>src/dev/couverture-reglages.ts</code>
+              </h2>
+            </summary>
+          </details>
+          <div class="actions">
+            <span id="statut" class="statut"></span>
+            <button id="enregistrer" type="button" class="principal">Enregistrer</button>
+          </div>
+        </div>
+        <pre id="sortie"></pre>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/dev/couverture.ts"></script>
+  </body>
+</html>

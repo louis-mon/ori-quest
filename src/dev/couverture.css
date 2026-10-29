@@ -1,0 +1,26 @@
+/* La couverture d'itch.io : son cadre est aux proportions d'itch.io, pas à
+   celles du jeu. */
+
+.apercu--couverture {
+  --proportions: 630 / 500;
+}
+
+/* `touch-action` : sans lui, glisser un pliage au doigt fait défiler la page. */
+.apercu--couverture canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.apercu--couverture canvas.is-saisi {
+  cursor: grabbing;
+}
+
+.case {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0 0;
+}

@@ -93,21 +93,36 @@ function peindreCiel(scene: Phaser.Scene, cle: string, horizon: number, soleil: 
   const texture = scene.textures.createCanvas(cle, TEXTURE_LARGEUR, TEXTURE_HAUTEUR);
   if (!texture) return;
 
-  const ctx = texture.getContext();
   const e = TEXTURE_LARGEUR / DESIGN_WIDTH;
+  peindreLeCiel(texture.getContext(), TEXTURE_LARGEUR, TEXTURE_HAUTEUR, e, horizon * e, {
+    x: (soleil.x + soleil.w / 2) * e,
+    y: (soleil.y + soleil.h / 2) * e,
+  });
+  texture.refresh();
+}
 
+// Sur n'importe quel canvas, pour que la couverture d'itch.io
+// (src/dev/couverture.ts) ait le ciel du jeu. `horizon` et `soleil` sont en
+// pixels du canvas ; `echelle` y ramène les pixels du jeu.
+export function peindreLeCiel(
+  ctx: CanvasRenderingContext2D,
+  largeur: number,
+  hauteur: number,
+  echelle: number,
+  horizon: number,
+  soleil: { x: number; y: number },
+): void {
   // En dessous de l'horizon, `createLinearGradient` prolonge sa dernière
   // teinte : ce bas est recouvert par le sol, mais il ne doit pas laisser de
   // bande noire si une scène décale le sien.
-  const fond = ctx.createLinearGradient(0, 0, 0, horizon * e);
+  const fond = ctx.createLinearGradient(0, 0, 0, horizon);
   fond.addColorStop(0, CIEL_ZENITH);
   fond.addColorStop(0.55, CIEL_MEDIAN);
   fond.addColorStop(1, CIEL_HORIZON);
   ctx.fillStyle = fond;
-  ctx.fillRect(0, 0, TEXTURE_LARGEUR, TEXTURE_HAUTEUR);
+  ctx.fillRect(0, 0, largeur, hauteur);
 
-  const sx = (soleil.x + soleil.w / 2) * e;
-  const sy = (soleil.y + soleil.h / 2) * e;
+  const { x: sx, y: sy } = soleil;
 
   // On écrase le repère autour du soleil avant de tracer un halo circulaire :
   // `createRadialGradient` ne connaît que des cercles.
@@ -116,15 +131,13 @@ function peindreCiel(scene: Phaser.Scene, cle: string, horizon: number, soleil: 
   ctx.scale(1, HALO_APLATISSEMENT);
   ctx.translate(-sx, -sy);
 
-  const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, HALO_RAYON * e);
+  const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, HALO_RAYON * echelle);
   for (const [position, teinte] of HALO) halo.addColorStop(position, teinte);
   ctx.fillStyle = halo;
-  // Exprimé dans le repère écrasé, où la texture couvre plus de hauteur qu'elle
+  // Exprimé dans le repère écrasé, où le canvas couvre plus de hauteur qu'il
   // n'en a : on déborde largement plutôt que de calculer.
-  ctx.fillRect(-TEXTURE_LARGEUR, -TEXTURE_HAUTEUR, TEXTURE_LARGEUR * 3, TEXTURE_HAUTEUR * 3);
+  ctx.fillRect(-largeur, -hauteur, largeur * 3, hauteur * 3);
   ctx.restore();
-
-  texture.refresh();
 }
 
 // Le semis est tiré au hasard mais toujours le même, d'une graine fixe propre à
