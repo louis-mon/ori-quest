@@ -37,7 +37,7 @@ body {
      défile d'un bloc, faire descendre la liste emmenait l'éditeur avec elle :
      on cherchait un modèle et on perdait de vue celui qu'on est en train de
      régler. */
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   margin: 0;
   padding: 20px;
@@ -104,13 +104,19 @@ nav button.is-actif {
 
 /* ---------- Colonne principale ---------- */
 
+/* La colonne ne défile pas non plus : l'aperçu et « Enregistrer » restent à
+   l'écran, et seul le panneau des réglages défile. */
 main {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+main > * {
+  flex: none;
 }
 
 h1 {
@@ -133,11 +139,19 @@ code {
   font-size: 0.92em;
 }
 
+/* `container-type` en fait la mesure de l'aperçu, qui doit tenir dans sa
+   hauteur autant que dans sa largeur. */
 .scene {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(320px, 480px) 1fr;
+  /* Le plancher du panneau passe avant l'aperçu : dans une fenêtre étroite,
+     c'est l'aperçu qui rétrécit, et les boutons ne s'écrasent plus. */
+  grid-template-columns: minmax(320px, 480px) minmax(280px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+  container-type: size;
 }
 
 /* Le damier dit où est le transparent, et le curseur « prise » annonce que la
@@ -145,6 +159,7 @@ code {
 .apercu {
   display: grid;
   place-items: center;
+  width: min(100%, 100cqh);
   aspect-ratio: 1;
   border: 1px solid var(--trait);
   border-radius: 10px;
@@ -174,10 +189,17 @@ code {
 
 /* ---------- Réglages ---------- */
 
+/* `max-height` et non la hauteur de la rangée : un panneau court ne doit pas
+   s'étirer jusqu'au pied. La marge de droite écarte la barre de défilement des
+   cadres. */
 .reglages {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
 }
 
 fieldset {
@@ -221,7 +243,26 @@ legend {
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+/* Les boutons du panneau restent à l'écran pendant que les curseurs défilent
+   dessous : « Gros plan » et « Revenir à l'enregistré » servent justement en
+   cours de réglage. */
+.reglages > .actions {
+  position: sticky;
+  z-index: 1;
+  padding: 6px 0;
+  background: var(--fond);
+}
+
+.reglages > .actions:first-child {
+  top: 0;
+}
+
+.reglages > .actions:last-child {
+  bottom: 0;
 }
 
 button {
@@ -252,15 +293,45 @@ footer {
 }
 
 footer h2 {
-  margin: 0 0 8px;
+  margin: 0;
   font-family: Georgia, serif;
   font-size: 17px;
 }
 
+/* Le bloc du fichier ne paraît qu'à la demande, d'un clic sur son nom — même
+   pied que les outils à curseurs (reglages.css), pour la même raison. */
+.fichier summary {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  list-style: none;
+  cursor: pointer;
+}
+
+.fichier summary::-webkit-details-marker {
+  display: none;
+}
+
+.fichier summary::before {
+  content: '▶';
+  font-size: 10px;
+  opacity: 0.6;
+  transition: transform 120ms;
+}
+
+.fichier[open] summary::before {
+  transform: rotate(90deg);
+}
+
+footer:not(:has(.fichier[open])) pre {
+  display: none;
+}
+
 pre {
-  margin: 0;
+  max-height: 30vh;
+  margin: 8px 0 0;
   padding: 12px;
-  overflow-x: auto;
+  overflow: auto;
   border: 1px solid var(--trait);
   border-radius: 8px;
   background: var(--carte);

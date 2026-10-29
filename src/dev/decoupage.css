@@ -30,7 +30,7 @@ body {
      défile d'un bloc, faire descendre la liste emmenait l'éditeur avec elle :
      on cherchait un modèle et on perdait de vue celui qu'on est en train de
      régler. */
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   margin: 0;
   padding: 20px;
@@ -120,16 +120,22 @@ h2 {
   gap: 20px;
   align-items: flex-start;
   flex-wrap: wrap;
-  /* Elle prend la hauteur qui reste. Le repli sur un défilement ne sert que
-     dans une fenêtre trop étroite, où les réglages passent sous le plan. */
+  /* Elle prend la hauteur qui reste, et `container-type` en fait la mesure du
+     plan. Le repli sur un défilement ne sert que dans une fenêtre trop étroite,
+     où les réglages passent sous le plan. */
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  container-type: size;
 }
 
+/* Borné par la hauteur qui reste, pas par celle de la fenêtre : `70vh` ne
+   savait rien de l'en-tête ni du pied, et sur une fenêtre basse le bas du plan
+   passait sous le défilement. Les 300px de large sont ceux du panneau, plancher
+   et écart compris. */
 #plan {
   flex: none;
-  width: min(640px, 60vw, 70vh);
+  width: min(640px, max(240px, 100cqw - 300px), 100cqh);
   aspect-ratio: 1;
   border: 1px solid var(--trait);
   border-radius: 10px;

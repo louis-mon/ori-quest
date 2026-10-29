@@ -14,12 +14,9 @@
   --trait: rgba(242, 236, 225, 0.14);
 }
 
-html,
-body {
-  height: auto;
-  overflow: auto;
-}
-
+/* La hauteur fixe et le `overflow: hidden` du jeu, eux, sont gardés : l'écran
+   ne défile pas, comme dans les autres outils. Ce sont le cadre et le panneau
+   des réglages qui défilent, chacun pour lui. */
 body {
   padding: 20px;
   background: var(--fond);
@@ -32,8 +29,13 @@ main {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
   max-width: 1700px;
   margin: 0 auto;
+}
+
+main > * {
+  flex: none;
 }
 
 h1 {
@@ -57,20 +59,33 @@ code {
 }
 
 .scene {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
 
 @media (max-width: 900px) {
   .scene {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
-.cadre {
+/* Le cadre est aux pixels du format choisi, sans réduction : en « Ordinateur »,
+   c'est lui qui défile dans sa case plutôt que la page. */
+.cadre,
+.reglages {
+  max-height: 100%;
   overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.reglages {
+  padding-right: 6px;
 }
 
 /* Le cadre du jeu, aux dimensions que `cadrer()` lui donne. Le fond de la
@@ -121,6 +136,24 @@ legend {
   gap: 8px;
 }
 
+/* Les boutons du panneau restent à l'écran pendant que les curseurs défilent
+   dessous : « Gros plan » et « Revenir à l'enregistré » servent justement en
+   cours de réglage. */
+.reglages > .actions {
+  position: sticky;
+  z-index: 1;
+  padding: 6px 0;
+  background: var(--fond);
+}
+
+.reglages > .actions:first-child {
+  top: 0;
+}
+
+.reglages > .actions:last-child {
+  bottom: 0;
+}
+
 .actions button {
   padding: 7px 13px;
   border: 1px solid rgba(242, 236, 225, 0.25);
@@ -154,15 +187,45 @@ legend {
 }
 
 footer h2 {
-  margin: 0 0 8px;
+  margin: 0;
   font-family: Georgia, serif;
   font-size: 17px;
 }
 
+/* Le bloc du fichier ne paraît qu'à la demande, d'un clic sur son nom — même
+   pied que les outils à curseurs (reglages.css), pour la même raison. */
+.fichier summary {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  list-style: none;
+  cursor: pointer;
+}
+
+.fichier summary::-webkit-details-marker {
+  display: none;
+}
+
+.fichier summary::before {
+  content: '▶';
+  font-size: 10px;
+  opacity: 0.6;
+  transition: transform 120ms;
+}
+
+.fichier[open] summary::before {
+  transform: rotate(90deg);
+}
+
+footer:not(:has(.fichier[open])) pre {
+  display: none;
+}
+
 pre {
-  margin: 0;
+  max-height: 30vh;
+  margin: 8px 0 0;
   padding: 12px;
-  overflow-x: auto;
+  overflow: auto;
   border: 1px solid var(--trait);
   border-radius: 8px;
   background: var(--carte);

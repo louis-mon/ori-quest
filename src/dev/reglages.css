@@ -15,7 +15,13 @@
   box-sizing: border-box;
 }
 
+/* L'écran ne défile pas : en-tête, aperçu et pied restent où ils sont, et seul
+   le panneau des curseurs défile. Sur une page qui défilait d'un bloc,
+   l'aperçu finissait par partir avec elle, et « Enregistrer » attendait tout en
+   bas, sous le bloc du fichier. */
 body {
+  height: 100dvh;
+  overflow: hidden;
   margin: 0;
   padding: 20px;
   background: var(--fond);
@@ -29,8 +35,13 @@ main {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
   max-width: 1500px;
   margin: 0 auto;
+}
+
+main > * {
+  flex: none;
 }
 
 h1 {
@@ -53,30 +64,46 @@ code {
   font-size: 0.92em;
 }
 
+/* Elle prend la hauteur que laissent en-tête et pied. `container-type` en fait
+   la mesure de l'aperçu, qui doit tenir dans sa hauteur autant que dans sa
+   largeur. */
 .scene {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+  container-type: size;
 }
 
+/* Fenêtre étroite : l'aperçu passe au-dessus, sur la moitié de la hauteur au
+   plus, et les curseurs défilent dessous. */
 @media (max-width: 900px) {
   .scene {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 }
 
 /* Phaser (Scale.FIT) prend la taille de ce cadre : sans hauteur explicite, il
-   n'aurait rien à remplir. Collé en haut de l'écran, il reste sous les yeux
-   pendant qu'on descend dans les curseurs. */
+   n'aurait rien à remplir. La largeur est bornée par la hauteur disponible —
+   `aspect-ratio` seul laisserait le bas de l'aperçu sous le pied de page. */
 .apercu {
-  position: sticky;
-  top: 20px;
-  aspect-ratio: 16 / 9;
+  --proportions: 16 / 9;
+  width: min(100%, 100cqh * var(--proportions));
+  aspect-ratio: var(--proportions);
   overflow: hidden;
   border: 1px solid var(--trait);
   border-radius: 10px;
   background: #100e0c;
+}
+
+@media (max-width: 900px) {
+  .apercu {
+    width: min(100%, 50cqh * var(--proportions));
+  }
 }
 
 /* ---------- Réglages ---------- */
@@ -86,6 +113,22 @@ code {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* `max-height` et non la hauteur de la rangée : un panneau court ne doit pas
+   s'étirer jusqu'au pied. La marge de droite écarte la barre de défilement des
+   cadres. */
+.reglages,
+.sons {
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+}
+
+.sons {
+  flex: 1;
+  min-height: 0;
 }
 
 fieldset {
@@ -142,6 +185,24 @@ legend {
   gap: 8px;
 }
 
+/* Les boutons du panneau restent à l'écran pendant que les curseurs défilent
+   dessous : « Gros plan » et « Revenir à l'enregistré » servent justement en
+   cours de réglage. */
+.reglages > .actions {
+  position: sticky;
+  z-index: 1;
+  padding: 6px 0;
+  background: var(--fond);
+}
+
+.reglages > .actions:first-child {
+  top: 0;
+}
+
+.reglages > .actions:last-child {
+  bottom: 0;
+}
+
 button {
   padding: 7px 13px;
   border: 1px solid rgba(242, 236, 225, 0.25);
@@ -175,15 +236,47 @@ button[aria-pressed='true'] {
 }
 
 footer h2 {
-  margin: 0 0 8px;
+  margin: 0;
   font-family: Georgia, serif;
   font-size: 17px;
 }
 
+/* Le bloc du fichier ne paraît qu'à la demande, d'un clic sur son nom : il ne
+   sert qu'à recopier à la main le jour où le serveur de dev ne répond pas, et
+   ouvert en permanence il prenait sa hauteur à l'aperçu. Le `details` ne tient
+   que l'état ouvert : le bloc reste un frère, sur toute la largeur du pied. */
+.fichier summary {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  list-style: none;
+  cursor: pointer;
+}
+
+.fichier summary::-webkit-details-marker {
+  display: none;
+}
+
+.fichier summary::before {
+  content: '▶';
+  font-size: 10px;
+  opacity: 0.6;
+  transition: transform 120ms;
+}
+
+.fichier[open] summary::before {
+  transform: rotate(90deg);
+}
+
+footer:not(:has(.fichier[open])) pre {
+  display: none;
+}
+
 pre {
-  margin: 0;
+  max-height: 30vh;
+  margin: 8px 0 0;
   padding: 12px;
-  overflow-x: auto;
+  overflow: auto;
   border: 1px solid var(--trait);
   border-radius: 8px;
   background: var(--carte);
