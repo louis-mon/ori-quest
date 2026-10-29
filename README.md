@@ -69,7 +69,8 @@ Leur bouton « Enregistrer » écrit dans le dépôt (`src/origami/poses.ts`,
 d'entrée du serveur de dev défini dans `vite.config.ts` — qui n'existe qu'en
 développement et ne garde que des nombres bornés. La couverture écrit aussi son
 image, `itch/couverture.png`, refusée si ce n'est pas un PNG aux dimensions
-d'itch.io.
+d'itch.io — hors dépôt : seuls ses réglages sont versionnés, l'image s'en
+refait en enregistrant la page.
 
 ### Traduire
 
@@ -419,7 +420,6 @@ content/langues/*.po         traductions, une langue par fichier (clé : le fran
 content/origami/*.svg        crease patterns sources
 game-design/scenes/*.tmj     géométrie des scènes (Tiled) — fait foi
 game-design/enigmes/*.json   découpage des énigmes (decoupage.html) — fait foi
-itch/couverture.png          la couverture de la page itch.io (couverture.html)
 public/assets/origami/*.origami  animations bakées
 src/
   main.ts                    assemble les modules ci-dessous, sans logique propre
@@ -558,7 +558,7 @@ quels chapitres ont été compilés.
    depuis le PATH.
 2. `butler login` — ouvre le navigateur, garde la clé pour les fois d'après.
 3. Créer le projet sur itch.io — butler envoie des builds, il ne crée pas la
-   page. Sa couverture (*Cover image*) est `itch/couverture.png`, composée dans
+   page. Sa couverture (*Cover image*) est `itch/couverture.png`, qu'écrit
    `couverture.html`.
 
 ### À chaque version
